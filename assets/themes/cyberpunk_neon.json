@@ -1,0 +1,25 @@
+{
+  "id": "cyberpunk_neon",
+  "name": "Neon Syndicate",
+  "author": "Hook Core Team",
+  "version": "1.0.0",
+  "isDark": true,
+  "colors": {
+    "background": "#07070A",
+    "surface": "#120E1C",
+    "surfaceGlass": "#33120E1C",
+    "primary": "#FF007F",
+    "secondary": "#00F0FF",
+    "accent": "#FFE600",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#9D95B3",
+    "border": "#312347"
+  },
+  "styling": {
+    "borderRadius": 8.0,
+    "cardBlur": 16.0,
+    "shaderMeshEnabled": true,
+    "shaderNoiseIntensity": 0.08,
+    "fontFamily": "JetBrains Mono"
+  }
+}

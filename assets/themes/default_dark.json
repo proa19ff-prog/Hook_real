@@ -1,0 +1,25 @@
+{
+  "id": "default_dark",
+  "name": "Hook Obsidian",
+  "author": "Hook Core Team",
+  "version": "1.0.0",
+  "isDark": true,
+  "colors": {
+    "background": "#0D0E12",
+    "surface": "#16181F",
+    "surfaceGlass": "#2416181F",
+    "primary": "#6C5CE7",
+    "secondary": "#A29BFE",
+    "accent": "#00CEC9",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#8E92A4",
+    "border": "#282B37"
+  },
+  "styling": {
+    "borderRadius": 16.0,
+    "cardBlur": 24.0,
+    "shaderMeshEnabled": true,
+    "shaderNoiseIntensity": 0.04,
+    "fontFamily": "Inter"
+  }
+}

@@ -1,0 +1,58 @@
+name: hook
+description: "Hook — Cross-platform local-first music player with ultra-customization and live GLSL shaders"
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Audio Engine & Background Service
+  just_audio: ^0.9.40
+  just_audio_background: ^0.0.1-beta.13
+  audio_session: ^0.1.21
+
+  # Zero-Backend Stream Extraction & Network
+  youtube_explode_dart: ^2.3.0
+  dio: ^5.7.0
+  http: ^1.2.2
+
+  # Theming, Shaders & Dynamic UI
+  palette_generator: ^0.3.3+4
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.2
+
+  # Storage & System
+  path_provider: ^2.1.4
+  shared_preferences: ^2.3.3
+  intl: ^0.19.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.2
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icons/app_logo.png"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/
+    - assets/themes/
+
+  shaders:
+    - assets/shaders/mesh_gradient.frag
+    - assets/shaders/vinyl_noise.frag

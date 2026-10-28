@@ -1,0 +1,25 @@
+{
+  "id": "minimal_oled",
+  "name": "OLED Monolith",
+  "author": "Hook Core Team",
+  "version": "1.0.0",
+  "isDark": true,
+  "colors": {
+    "background": "#000000",
+    "surface": "#0A0A0A",
+    "surfaceGlass": "#440A0A0A",
+    "primary": "#E2E8F0",
+    "secondary": "#94A3B8",
+    "accent": "#F59E0B",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#64748B",
+    "border": "#1E293B"
+  },
+  "styling": {
+    "borderRadius": 20.0,
+    "cardBlur": 0.0,
+    "shaderMeshEnabled": false,
+    "shaderNoiseIntensity": 0.0,
+    "fontFamily": "Inter"
+  }
+}
