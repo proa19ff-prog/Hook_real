@@ -1,12 +1,15 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import '../domain/hook_theme.dart';
 
 /// Shared surface used by the main app chrome and content cards.
 /// Keeping this in one place makes the visual language consistent across
-/// screens and lets themes control the amount of blur and rounding.
+/// screens and lets themes control the rounding.
+///
+/// This used to wrap its content in a `BackdropFilter`. Real-time blur over
+/// an animated background re-blurs the whole region every frame and was the
+/// main cause of jank on phones, so the "glass" look is now a translucent
+/// tinted fill, which costs a single draw call.
 class HookGlassCard extends StatelessWidget {
   final HookTheme theme;
   final Widget child;
@@ -32,47 +35,30 @@ class HookGlassCard extends StatelessWidget {
     final radius = borderRadius ??
         BorderRadius.circular(theme.styling.borderRadius.clamp(14, 24));
 
-    final card = ClipRRect(
-      borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: theme.styling.cardBlur,
-          sigmaY: theme.styling.cardBlur,
+    // Theme glass colours are tuned for a blurred backdrop and are nearly
+    // transparent. Without blur they need more opacity to stay readable.
+    final fill = color ??
+        Color.alphaBlend(
+          theme.colors.surfaceGlass,
+          theme.colors.surface.withValues(alpha: 0.86),
+        );
+
+    return Padding(
+      padding: margin ?? EdgeInsets.zero,
+      child: Material(
+        color: fill,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: theme.colors.border.withValues(alpha: 0.6)),
         ),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: color ?? theme.colors.surfaceGlass,
-            borderRadius: radius,
-            border: Border.all(
-              color: theme.colors.border.withValues(alpha: 0.72),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.14),
-                blurRadius: 24,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: child,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: padding == null
+              ? child
+              : Padding(padding: padding!, child: child),
         ),
       ),
     );
-
-    final interactive = onTap == null
-        ? card
-        : Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: radius,
-              onTap: onTap,
-              child: card,
-            ),
-          );
-
-    return margin == null
-        ? interactive
-        : Padding(padding: margin!, child: interactive);
   }
 }

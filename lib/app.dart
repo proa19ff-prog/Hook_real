@@ -5,6 +5,7 @@ import 'features/audio_player/presentation/mini_player.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
 import 'features/library/presentation/library_screen.dart';
 import 'features/search/presentation/search_screen.dart';
+import 'features/theme_engine/domain/hook_theme.dart';
 import 'features/theme_engine/presentation/dynamic_shader_background.dart';
 import 'features/theme_engine/presentation/glass_card.dart';
 import 'features/theme_engine/presentation/theme_settings_screen.dart';
@@ -46,12 +47,19 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       final error = next.valueOrNull;
       if (error == null || !context.mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${error.message}: ${error.track.title}'),
-          duration: const Duration(seconds: 4),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('${error.message}: ${error.track.title}'),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Повторить',
+              onPressed: () =>
+                  ref.read(audioPlayerServiceProvider).playTrack(error.track),
+            ),
+          ),
+        );
     });
 
     final screens = [
@@ -93,12 +101,13 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     );
   }
 
-  Widget _buildGlassNavigationBar(dynamic theme) {
+  Widget _buildGlassNavigationBar(HookTheme theme) {
     return HookGlassCard(
       theme: theme,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      margin: EdgeInsets.fromLTRB(
+          12, 0, 12, 8 + MediaQuery.paddingOf(context).bottom),
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(22),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -110,7 +119,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     );
   }
 
-  Widget _navItem(int index, IconData icon, String label, dynamic theme) {
+  Widget _navItem(int index, IconData icon, String label, HookTheme theme) {
     final isSelected = _currentIndex == index;
     final color =
         isSelected ? theme.colors.textPrimary : theme.colors.textSecondary;

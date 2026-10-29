@@ -29,6 +29,14 @@ class AudioPlayerService {
   final List<MediaTrack> _queue = [];
   final StreamController<AudioPlaybackError?> _errorController =
       StreamController<AudioPlaybackError?>.broadcast();
+  final StreamController<MediaTrack?> _trackController =
+      StreamController<MediaTrack?>.broadcast();
+
+  /// Resolved stream URLs keyed by cache key. YouTube URLs stay valid for
+  /// about six hours, so reusing them makes replays and "previous" instant.
+  final Map<String, ({String url, DateTime resolvedAt})> _urlCache = {};
+  final Map<String, Future<String?>> _pendingResolves = {};
+  static const _urlTtl = Duration(hours: 2);
   StreamSubscription<void>? _noisySubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
   int _currentIndex = -1;
@@ -60,6 +68,51 @@ class AudioPlayerService {
   Stream<Duration?> get durationStream => _player.durationStream;
   Stream<Duration> get bufferedPositionStream => _player.bufferedPositionStream;
   Stream<AudioPlaybackError?> get errorStream => _errorController.stream;
+
+  /// Emits whenever the selected track changes, before its stream is ready,
+  /// so the UI can react to a tap immediately.
+  Stream<MediaTrack?> get currentTrackStream => _trackController.stream;
+
+  void _setCurrentTrack(MediaTrack? track) {
+    _currentTrack = track;
+    if (!_trackController.isClosed) _trackController.add(track);
+  }
+
+  String _cacheKey(MediaTrack track) => '${track.source.name}_${track.id}';
+
+  /// Resolves a playable URL, reusing recent results and sharing in-flight
+  /// requests so a prefetch and a tap never resolve the same track twice.
+  Future<String?> _resolveUrl(MediaTrack track) {
+    final key = _cacheKey(track);
+    final cached = _urlCache[key];
+    if (cached != null &&
+        DateTime.now().difference(cached.resolvedAt) < _urlTtl) {
+      return Future.value(cached.url);
+    }
+
+    return _pendingResolves[key] ??= () async {
+      try {
+        final local = await _cacheManager.getLocalCachedUrl(key);
+        if (local != null) return local;
+
+        final url = await _resolver
+            .resolveStreamUrl(track)
+            .timeout(const Duration(seconds: 25));
+        if (url != null && url.isNotEmpty) {
+          _urlCache[key] = (url: url, resolvedAt: DateTime.now());
+        }
+        return url;
+      } finally {
+        _pendingResolves.remove(key);
+      }
+    }();
+  }
+
+  /// Resolves the next queue item in the background so skipping is instant.
+  void _prefetchNext() {
+    if (_isShuffle || _currentIndex + 1 >= _queue.length) return;
+    _resolveUrl(_queue[_currentIndex + 1]).ignore();
+  }
 
   /// Initializes audio session for background focus & headset unplug handling
   Future<void> initialize() async {
@@ -95,7 +148,7 @@ class AudioPlayerService {
     if (_queue.isNotEmpty) {
       await playTrack(_queue[_currentIndex]);
     } else {
-      _currentTrack = null;
+      _setCurrentTrack(null);
       await stop();
     }
   }
@@ -116,7 +169,7 @@ class AudioPlayerService {
       playTrack(_queue[_currentIndex]);
     } else if (_queue.isEmpty) {
       _currentIndex = -1;
-      _currentTrack = null;
+      _setCurrentTrack(null);
       unawaited(stop());
     }
   }
@@ -146,19 +199,19 @@ class AudioPlayerService {
     final requestId = ++_playRequestId;
     if (!_errorController.isClosed) _errorController.add(null);
 
+    // Show the tapped track right away; the stream resolves in the background.
+    _setCurrentTrack(track);
+
     try {
       // The provider starts initialization eagerly, but awaiting it here also
       // makes direct service usage safe and prevents a race with AudioSession.
       await initialize();
 
-      // 1. Check if track is cached locally on disk
-      final cacheKey = '${track.source.name}_${track.id}';
-      String? playUrl = await _cacheManager.getLocalCachedUrl(cacheKey);
+      // Stop the previous track so it does not keep playing while the new
+      // one is resolving.
+      if (_player.playing) unawaited(_player.pause());
 
-      // 2. If not cached, resolve online stream URL
-      playUrl ??= await _resolver
-          .resolveStreamUrl(track)
-          .timeout(const Duration(seconds: 20));
+      final playUrl = await _resolveUrl(track);
 
       if (playUrl == null || playUrl.isEmpty) {
         throw Exception(
@@ -167,10 +220,7 @@ class AudioPlayerService {
 
       if (requestId != _playRequestId) return;
 
-      // Record in local playback history
-      await _storageService?.addToHistory(track);
-
-      // 3. Set AudioSource with MediaItem for Android lockscreen and notifications
+      // Set AudioSource with MediaItem for Android lockscreen and notifications
       final mediaItem = MediaItem(
         id: track.id,
         album: track.album ?? track.artist,
@@ -189,14 +239,18 @@ class AudioPlayerService {
 
       await _player
           .setAudioSource(audioSource)
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 20));
       if (requestId != _playRequestId) return;
 
-      // Do not publish a track until its source was accepted. This keeps a
-      // slower, stale request from replacing the currently playing track.
-      _currentTrack = track;
-      await _player.play().timeout(const Duration(seconds: 10));
+      // just_audio's play() future completes only when playback pauses or
+      // ends, so it must not be awaited with a timeout: that used to report
+      // "playback failed" for tracks that were actually playing.
+      unawaited(_player.play());
+      unawaited(_storageService?.addToHistory(track));
+      _prefetchNext();
     } catch (e) {
+      // A cached URL may have expired; drop it so a retry resolves afresh.
+      _urlCache.remove(_cacheKey(track));
       if (requestId == _playRequestId && !_errorController.isClosed) {
         _errorController.add(AudioPlaybackError(
           track: track,
@@ -211,8 +265,9 @@ class AudioPlayerService {
     MediaTrack track, {
     void Function(double progress)? onProgress,
   }) async {
-    final streamUrl = await _resolver.resolveStreamUrl(track);
+    final streamUrl = await _resolveUrl(track);
     if (streamUrl == null || streamUrl.isEmpty) return null;
+    if (streamUrl.startsWith('file:')) return File(Uri.parse(streamUrl).toFilePath());
     return _cacheManager.downloadTrack(
       track,
       streamUrl,
@@ -309,6 +364,7 @@ class AudioPlayerService {
     await _noisySubscription?.cancel();
     await _playerStateSubscription?.cancel();
     await _errorController.close();
+    await _trackController.close();
     await _player.dispose();
     _resolver.dispose();
   }

@@ -233,8 +233,18 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                     ],
                                     image: track.artworkUrl.isNotEmpty
                                         ? DecorationImage(
-                                            image:
-                                                NetworkImage(track.artworkUrl),
+                                            // Decode at display size, not
+                                            // the source's full resolution.
+                                            image: ResizeImage(
+                                              NetworkImage(track.artworkUrl),
+                                              width: (340 *
+                                                      MediaQuery
+                                                          .devicePixelRatioOf(
+                                                              context))
+                                                  .round(),
+                                              policy:
+                                                  ResizeImagePolicy.fit,
+                                            ),
                                             fit: BoxFit.cover,
                                           )
                                         : null,

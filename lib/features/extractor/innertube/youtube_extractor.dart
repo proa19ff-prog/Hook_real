@@ -6,6 +6,15 @@ class YouTubeExtractor {
 
   YouTubeExtractor({YoutubeExplode? yt}) : _yt = yt ?? YoutubeExplode();
 
+  /// Clients whose stream URLs play in ExoPlayer/AVPlayer without extra
+  /// headers or signature deciphering. Asking a single client at a time and
+  /// skipping the watch page keeps resolving to one or two HTTP requests.
+  static final List<List<YoutubeApiClient>> _clientChain = [
+    [YoutubeApiClient.androidVr],
+    [YoutubeApiClient.ios],
+    [YoutubeApiClient.tv],
+  ];
+
   /// Cleans track title by stripping common junk like "(Official Video)", "[4K]", etc.
   /// This ensures optimal matching with LRCLIB for lyrics and clean UI display.
   static String cleanTrackTitle(String rawTitle) {
@@ -32,19 +41,22 @@ class YouTubeExtractor {
   Future<List<MediaTrack>> searchTracks(String query, {int limit = 20}) async {
     try {
       final searchList = await _yt.search.search(query).timeout(
-            const Duration(seconds: 15),
+            const Duration(seconds: 10),
           );
       final tracks = <MediaTrack>[];
 
-      for (final video in searchList.take(limit)) {
-        final cleanTitle = cleanTrackTitle(video.title);
+      for (final video in searchList) {
+        if (tracks.length >= limit) break;
+        // Live streams and premieres have no fixed duration and cannot be
+        // played as a regular audio file.
+        if (video.isLive || video.duration == null) continue;
 
         tracks.add(
           MediaTrack(
             id: video.id.value,
-            title: cleanTitle,
+            title: cleanTrackTitle(video.title),
             artist: video.author,
-            duration: video.duration ?? Duration.zero,
+            duration: video.duration!,
             // Search rows display a 48px tile.  Avoid downloading the
             // high-resolution thumbnail for every result.
             artworkUrl: video.thumbnails.mediumResUrl,
@@ -59,38 +71,32 @@ class YouTubeExtractor {
     }
   }
 
-  /// Resolves direct streamable audio URL (Opus or AAC/M4A) with highest bitrate.
+  /// Resolves a direct audio URL. AAC/M4A is preferred because it plays on
+  /// every platform and matches the `.m4a` extension used by the disk cache.
   Future<String?> resolveAudioStreamUrl(String videoId) async {
     Object? lastError;
-    for (var attempt = 0; attempt < 2; attempt++) {
+    for (final clients in _clientChain) {
       try {
         final manifest = await _yt.videos.streamsClient
-            .getManifest(videoId)
-            .timeout(const Duration(seconds: 20));
+            .getManifest(videoId, ytClients: clients, requireWatchPage: false)
+            .timeout(const Duration(seconds: 10));
 
-        // Prefer highest bitrate audio-only stream (Opus/WebM or M4A)
-        final audioStreams = manifest.audioOnly.sortByBitrate();
-        if (audioStreams.isNotEmpty) {
-          return audioStreams.last.url.toString();
+        final audio = manifest.audioOnly.toList();
+        if (audio.isNotEmpty) {
+          final mp4 =
+              audio.where((s) => s.container == StreamContainer.mp4).toList();
+          // sortByBitrate() sorts in descending order.
+          final best = (mp4.isNotEmpty ? mp4 : audio).sortByBitrate().first;
+          return best.url.toString();
         }
 
-        // Fallback to muxed stream if no audio-only stream exists
-        final muxedStreams = manifest.muxed.sortByBitrate();
-        if (muxedStreams.isNotEmpty) {
-          return muxedStreams.last.url.toString();
-        }
-
-        return null;
+        final muxed = manifest.muxed.sortByBitrate();
+        if (muxed.isNotEmpty) return muxed.first.url.toString();
       } catch (e) {
         lastError = e;
-        if (attempt == 0) {
-          await Future<void>.delayed(const Duration(milliseconds: 250));
-        }
       }
     }
 
-    // Keep the UI message generic, but preserve the concrete resolver
-    // failure for the playback error snackbar/logging.
     Error.throwWithStackTrace(
       StateError('YouTube stream resolve failed for $videoId: $lastError'),
       StackTrace.current,

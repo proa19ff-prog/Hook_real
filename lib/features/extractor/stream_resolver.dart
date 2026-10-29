@@ -23,6 +23,9 @@ class StreamResolver {
     final cacheKey = '$normalizedQuery|$includeYouTube|$includeSoundCloud';
     final cached = _searchCache[cacheKey];
     if (cached != null) return List.unmodifiable(cached);
+    if (_searchCache.length >= 50) {
+      _searchCache.remove(_searchCache.keys.first);
+    }
 
     final results = <MediaTrack>[];
 
@@ -41,7 +44,7 @@ class StreamResolver {
     final responses = await Future.wait(
       futures.map(
         (future) => future.timeout(
-          const Duration(seconds: 15),
+          const Duration(seconds: 10),
           onTimeout: () => <MediaTrack>[],
         ),
       ),
@@ -55,7 +58,9 @@ class StreamResolver {
       unique['${track.source.name}:${track.id}'] = track;
     }
     final output = unique.values.take(30).toList(growable: false);
-    _searchCache[cacheKey] = output;
+    // Do not cache an empty result: it is usually a network hiccup, and
+    // caching it would make the same query fail until the app restarts.
+    if (output.isNotEmpty) _searchCache[cacheKey] = output;
     return output;
   }
 

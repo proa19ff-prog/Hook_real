@@ -112,12 +112,35 @@ final queueProvider =
   return QueueNotifier(service);
 });
 
-// Current Playing Track Provider
-final currentTrackProvider = Provider<MediaTrack?>((ref) {
-  ref.watch(queueProvider);
-  ref.watch(playerStateStreamProvider);
+final _currentTrackStreamProvider = StreamProvider<MediaTrack?>((ref) {
   final service = ref.watch(audioPlayerServiceProvider);
-  return service.currentTrack;
+  return service.currentTrackStream;
+});
+
+// Current Playing Track Provider. Only rebuilds dependants when the track
+// itself changes, not on every buffering/playing state event.
+final currentTrackProvider = Provider<MediaTrack?>((ref) {
+  final service = ref.watch(audioPlayerServiceProvider);
+  return ref.watch(_currentTrackStreamProvider).valueOrNull ??
+      service.currentTrack;
+});
+
+/// True while the selected track is being resolved or buffered.
+final isTrackLoadingProvider = Provider<bool>((ref) {
+  final state = ref.watch(playerStateStreamProvider).valueOrNull;
+  final track = ref.watch(currentTrackProvider);
+  if (track == null) return false;
+  final error = ref.watch(playbackErrorProvider).valueOrNull;
+  if (error != null && error.track == track) return false;
+  final processing = state?.processingState;
+  return processing == null ||
+      processing == ProcessingState.idle ||
+      processing == ProcessingState.loading ||
+      processing == ProcessingState.buffering;
+});
+
+final isPlayingProvider = Provider<bool>((ref) {
+  return ref.watch(playerStateStreamProvider).valueOrNull?.playing ?? false;
 });
 
 // Synchronized Lyrics Provider (reactively fetches when current track changes)

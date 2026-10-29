@@ -113,64 +113,13 @@ class PlaybackControls extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final playerService = ref.watch(audioPlayerServiceProvider);
-    final playerStateAsync = ref.watch(playerStateStreamProvider);
-    final positionAsync = ref.watch(positionStreamProvider);
-    final durationAsync = ref.watch(durationStreamProvider);
-
-    final isPlaying = playerStateAsync.value?.playing ?? false;
-    final position = positionAsync.value ?? Duration.zero;
-    final duration = durationAsync.value ?? Duration.zero;
-
-    final posMs = position.inMilliseconds.toDouble();
-    final totalMs = duration.inMilliseconds.toDouble();
-    final sliderVal = totalMs > 0 ? posMs.clamp(0.0, totalMs) : 0.0;
+    final isPlaying = ref.watch(isPlayingProvider);
+    final isLoading = ref.watch(isTrackLoadingProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Timeline Slider
-        SliderTheme(
-          data: SliderThemeData(
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-            activeTrackColor: theme.colors.primary,
-            inactiveTrackColor: theme.colors.border,
-            thumbColor: theme.colors.textPrimary,
-          ),
-          child: Slider(
-            value: sliderVal,
-            min: 0.0,
-            max: totalMs > 0 ? totalMs : 1.0,
-            onChanged: (val) {
-              playerService.seek(Duration(milliseconds: val.toInt()));
-            },
-          ),
-        ),
-
-        // Position & Duration labels
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _formatDuration(position),
-                style: TextStyle(
-                  color: theme.colors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-              Text(
-                _formatDuration(duration),
-                style: TextStyle(
-                  color: theme.colors.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
+        _SeekBar(theme: theme, formatDuration: _formatDuration),
 
         const SizedBox(height: 8),
 
@@ -197,68 +146,157 @@ class PlaybackControls extends ConsumerWidget {
 
             // Previous
             IconButton(
+              tooltip: 'Предыдущий',
               icon: Icon(Icons.skip_previous_rounded,
-                  color: theme.colors.textPrimary, size: 36),
-              onPressed: () => playerService.previous(),
+                  color: theme.colors.textPrimary, size: 38),
+              onPressed: playerService.previous,
             ),
 
-            // Play / Pause FAB
+            // Play / Pause
             Container(
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [theme.colors.primary, theme.colors.secondary],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colors.primary.withValues(alpha: 0.4),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: theme.colors.textPrimary,
               ),
-              child: IconButton(
-                iconSize: 42,
-                icon: Icon(
-                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  if (isPlaying) {
-                    playerService.pause();
-                  } else {
-                    playerService.play();
-                  }
-                },
-              ),
+              child: isLoading
+                  ? Padding(
+                      padding: const EdgeInsets.all(22),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: theme.colors.background,
+                      ),
+                    )
+                  : IconButton(
+                      tooltip: isPlaying ? 'Пауза' : 'Играть',
+                      iconSize: 40,
+                      icon: Icon(
+                        isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        color: theme.colors.background,
+                      ),
+                      onPressed: playerService.togglePlayPause,
+                    ),
             ),
 
             // Next
             IconButton(
+              tooltip: 'Следующий',
               icon: Icon(Icons.skip_next_rounded,
-                  color: theme.colors.textPrimary, size: 36),
-              onPressed: () => playerService.next(),
+                  color: theme.colors.textPrimary, size: 38),
+              onPressed: playerService.next,
             ),
 
-            // Loop Toggle
-            IconButton(
-              icon: Icon(
-                playerService.loopMode == PlayerLoopMode.one
-                    ? Icons.repeat_one_rounded
-                    : (playerService.loopMode == PlayerLoopMode.all
-                        ? Icons.repeat_rounded
-                        : Icons.repeat_rounded),
-                color: playerService.loopMode != PlayerLoopMode.off
-                    ? theme.colors.primary
-                    : theme.colors.textSecondary,
-              ),
-              onPressed: () {
-                playerService.toggleLoopMode();
+            // Loop Toggle. Loop mode lives in the service and has no stream,
+            // so this button keeps its own rebuild trigger.
+            StatefulBuilder(
+              builder: (context, setLocalState) {
+                final mode = playerService.loopMode;
+                return IconButton(
+                  tooltip: 'Повтор',
+                  icon: Icon(
+                    mode == PlayerLoopMode.one
+                        ? Icons.repeat_one_rounded
+                        : Icons.repeat_rounded,
+                    color: mode != PlayerLoopMode.off
+                        ? theme.colors.primary
+                        : theme.colors.textSecondary,
+                  ),
+                  onPressed: () =>
+                      setLocalState(playerService.toggleLoopMode),
+                );
               },
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Timeline slider. Kept separate so position updates rebuild only the
+/// slider and labels. While dragging, the thumb follows the finger locally
+/// and a single seek is sent on release instead of one per pixel.
+class _SeekBar extends ConsumerStatefulWidget {
+  final HookTheme theme;
+  final String Function(Duration?) formatDuration;
+
+  const _SeekBar({required this.theme, required this.formatDuration});
+
+  @override
+  ConsumerState<_SeekBar> createState() => _SeekBarState();
+}
+
+class _SeekBarState extends ConsumerState<_SeekBar> {
+  double? _dragValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = widget.theme;
+    final position =
+        ref.watch(positionStreamProvider).valueOrNull ?? Duration.zero;
+    final duration =
+        ref.watch(durationStreamProvider).valueOrNull ?? Duration.zero;
+
+    final totalMs = duration.inMilliseconds.toDouble();
+    final sliderVal = _dragValue ??
+        (totalMs > 0
+            ? position.inMilliseconds.toDouble().clamp(0.0, totalMs)
+            : 0.0);
+    final shownPosition = Duration(milliseconds: sliderVal.toInt());
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SliderTheme(
+          data: SliderThemeData(
+            trackHeight: 4,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            activeTrackColor: theme.colors.textPrimary,
+            inactiveTrackColor: theme.colors.border,
+            thumbColor: theme.colors.textPrimary,
+          ),
+          child: Slider(
+            value: sliderVal,
+            min: 0.0,
+            max: totalMs > 0 ? totalMs : 1.0,
+            onChanged: totalMs > 0
+                ? (val) => setState(() => _dragValue = val)
+                : null,
+            onChangeEnd: (val) {
+              ref
+                  .read(audioPlayerServiceProvider)
+                  .seek(Duration(milliseconds: val.toInt()));
+              setState(() => _dragValue = null);
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.formatDuration(shownPosition),
+                style: TextStyle(
+                  color: theme.colors.textSecondary,
+                  fontSize: 12,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              Text(
+                widget.formatDuration(duration),
+                style: TextStyle(
+                  color: theme.colors.textSecondary,
+                  fontSize: 12,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
