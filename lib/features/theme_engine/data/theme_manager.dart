@@ -42,8 +42,8 @@ class ThemeManager {
     ),
   );
 
-  /// Preloads built-in JSON themes from assets
-  Future<void> initialize() async {
+  /// Preloads built-in JSON themes from assets, restoring saved theme if available
+  Future<void> initialize({String? savedThemeId, String? savedCustomJson}) async {
     _loadedThemes[_fallbackTheme.id] = _fallbackTheme;
 
     for (final path in builtinThemePaths) {
@@ -55,6 +55,13 @@ class ThemeManager {
       } catch (e) {
         // Fallback already exists
       }
+    }
+
+    if (savedCustomJson != null && savedCustomJson.isNotEmpty) {
+      importThemeFromJson(savedCustomJson);
+    }
+    if (savedThemeId != null && _loadedThemes.containsKey(savedThemeId)) {
+      _activeThemeId = savedThemeId;
     }
   }
 

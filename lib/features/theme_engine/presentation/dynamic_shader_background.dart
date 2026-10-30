@@ -1,8 +1,45 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../domain/hook_theme.dart';
+
+/// Ambient theme data exposed to children inside [DynamicShaderBackground].
+/// When dominant album art is white or light, automatically provides high-contrast dark text
+/// and controls so content is never invisible on white backgrounds.
+class AmbientThemeScope extends InheritedWidget {
+  final bool isLight;
+  final Color dominantColor;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color iconColor;
+  final Color cardBackground;
+  final Color cardBorder;
+
+  const AmbientThemeScope({
+    super.key,
+    required this.isLight,
+    required this.dominantColor,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.iconColor,
+    required this.cardBackground,
+    required this.cardBorder,
+    required super.child,
+  });
+
+  static AmbientThemeScope? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AmbientThemeScope>();
+  }
+
+  @override
+  bool updateShouldNotify(AmbientThemeScope oldWidget) {
+    return isLight != oldWidget.isLight ||
+        dominantColor != oldWidget.dominantColor ||
+        textPrimary != oldWidget.textPrimary;
+  }
+}
 
 class DynamicShaderBackground extends StatefulWidget {
   final HookTheme theme;
@@ -23,9 +60,7 @@ class DynamicShaderBackground extends StatefulWidget {
 
 class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     with SingleTickerProviderStateMixin {
-  /// The gradient moves slowly, so 20 fps looks the same as 60/120 fps
-  /// while costing the GPU a fraction of the work.
-  static const _frameInterval = Duration(milliseconds: 50);
+  static const _frameInterval = Duration(milliseconds: 33); // ~30 fps for smooth, battery-friendly ambient flow
 
   late final Ticker _ticker;
   final ValueNotifier<double> _time = ValueNotifier(0);
@@ -33,6 +68,7 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
   ui.FragmentProgram? _program;
   bool _shaderLoadFailed = false;
   String? _paletteUrl;
+  bool _isLightBackground = false;
 
   Color _c1 = const Color(0xFF6C5CE7);
   Color _c2 = const Color(0xFFA29BFE);
@@ -45,6 +81,8 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     _ticker = createTicker(_onTick);
     _loadShader();
     _updatePalette();
+    // Always start ticker for ambient background motion
+    _ticker.start();
   }
 
   void _onTick(Duration elapsed) {
@@ -60,7 +98,6 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
         oldWidget.theme.id != widget.theme.id) {
       _updatePalette();
     }
-    _syncTicker();
   }
 
   bool get _shaderActive =>
@@ -68,25 +105,16 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
       !_shaderLoadFailed &&
       _program != null;
 
-  void _syncTicker() {
-    if (_shaderActive && !_ticker.isActive) {
-      _ticker.start();
-    } else if (!_shaderActive && _ticker.isActive) {
-      _ticker.stop();
-    }
-  }
-
   Future<void> _loadShader() async {
     try {
       final program = await ui.FragmentProgram.fromAsset(
           'assets/shaders/mesh_gradient.frag');
       if (!mounted) return;
       setState(() => _program = program);
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
       setState(() => _shaderLoadFailed = true);
     }
-    _syncTicker();
   }
 
   void _useThemeColors() {
@@ -95,6 +123,7 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
       _c2 = widget.theme.colors.secondary;
       _c3 = widget.theme.colors.accent;
       _c4 = widget.theme.colors.background;
+      _isLightBackground = widget.theme.colors.background.computeLuminance() > 0.58;
     });
   }
 
@@ -107,23 +136,27 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     }
 
     try {
-      // A 48px thumbnail is plenty for picking four colours and keeps the
-      // quantization work on the UI thread to a few milliseconds.
       final palette = await PaletteGenerator.fromImageProvider(
         ResizeImage(NetworkImage(artUrl), width: 48, height: 48),
         maximumColorCount: 6,
       );
 
-      // Ignore results for a track the user has already skipped past.
       if (!mounted || _paletteUrl != artUrl) return;
+
+      final dominant = palette.dominantColor?.color ?? widget.theme.colors.primary;
+      final vibrant = palette.vibrantColor?.color ?? widget.theme.colors.secondary;
+      final muted = palette.mutedColor?.color ?? widget.theme.colors.accent;
+      final darkMuted = palette.darkMutedColor?.color ?? widget.theme.colors.background;
+      final isLight = dominant.computeLuminance() > 0.58;
+
       setState(() {
-        _c1 = palette.dominantColor?.color ?? widget.theme.colors.primary;
-        _c2 = palette.vibrantColor?.color ?? widget.theme.colors.secondary;
-        _c3 = palette.mutedColor?.color ?? widget.theme.colors.accent;
-        _c4 = palette.darkMutedColor?.color ?? widget.theme.colors.background;
+        _c1 = dominant;
+        _c2 = vibrant;
+        _c3 = muted;
+        _c4 = darkMuted;
+        _isLightBackground = isLight;
       });
     } catch (_) {
-      // Fallback to theme colors if network fails
       if (mounted && _paletteUrl == artUrl) _useThemeColors();
     }
   }
@@ -138,23 +171,7 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
   @override
   Widget build(BuildContext context) {
     final Widget background;
-    if (!_shaderActive) {
-      background = AnimatedContainer(
-        duration: const Duration(milliseconds: 600),
-        decoration: BoxDecoration(
-          color: widget.theme.colors.background,
-          gradient: RadialGradient(
-            center: const Alignment(0.0, -0.4),
-            radius: 1.2,
-            colors: [
-              _c1.withValues(alpha: 0.35),
-              _c2.withValues(alpha: 0.15),
-              widget.theme.colors.background,
-            ],
-          ),
-        ),
-      );
-    } else {
+    if (_shaderActive) {
       background = CustomPaint(
         painter: _MeshShaderPainter(
           program: _program!,
@@ -165,18 +182,140 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
           c4: _c4,
         ),
       );
+    } else {
+      background = CustomPaint(
+        painter: _AuroraFlowPainter(
+          time: _time,
+          c1: _c1,
+          c2: _c2,
+          c3: _c3,
+          bg: widget.theme.colors.background,
+        ),
+      );
     }
 
-    // Separate repaint boundaries keep the animated background from forcing
-    // the whole UI on top of it to repaint on every shader frame.
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        RepaintBoundary(child: background),
-        RepaintBoundary(child: widget.child),
-      ],
+    final isLight = _isLightBackground;
+    final textPrimary = isLight
+        ? const Color(0xFF141419)
+        : widget.theme.colors.textPrimary;
+    final textSecondary = isLight
+        ? const Color(0xFF4A4A5A)
+        : widget.theme.colors.textSecondary;
+    final iconColor = isLight
+        ? const Color(0xFF1A1A22)
+        : widget.theme.colors.textPrimary;
+    final cardBg = isLight
+        ? Colors.white.withValues(alpha: 0.65)
+        : widget.theme.colors.surfaceGlass.withValues(alpha: 0.4);
+    final cardBorder = isLight
+        ? Colors.black.withValues(alpha: 0.18)
+        : widget.theme.colors.border.withValues(alpha: 0.35);
+
+    return AmbientThemeScope(
+      isLight: isLight,
+      dominantColor: _c1,
+      textPrimary: textPrimary,
+      textSecondary: textSecondary,
+      iconColor: iconColor,
+      cardBackground: cardBg,
+      cardBorder: cardBorder,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          RepaintBoundary(child: background),
+          RepaintBoundary(child: widget.child),
+        ],
+      ),
     );
   }
+}
+
+/// Fallback luxury Aurora Glow painter with smooth drifting radial gradients
+class _AuroraFlowPainter extends CustomPainter {
+  final ValueNotifier<double> time;
+  final Color c1;
+  final Color c2;
+  final Color c3;
+  final Color bg;
+
+  _AuroraFlowPainter({
+    required this.time,
+    required this.c1,
+    required this.c2,
+    required this.c3,
+    required this.bg,
+  }) : super(repaint: time);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 1. Base dark canvas
+    final basePaint = Paint()..color = bg;
+    canvas.drawRect(Offset.zero & size, basePaint);
+
+    final t = time.value * 0.45;
+    final w = size.width;
+    final h = size.height;
+
+    // 2. First drifting glowing orb (Primary color)
+    final o1X = w * (0.35 + 0.25 * math.sin(t));
+    final o1Y = h * (0.25 + 0.15 * math.cos(t * 0.8));
+    final r1 = math.max(w, h) * 0.75;
+    final paint1 = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          c1.withValues(alpha: 0.42),
+          c1.withValues(alpha: 0.15),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.45, 1.0],
+      ).createShader(Rect.fromCircle(center: Offset(o1X, o1Y), radius: r1));
+    canvas.drawCircle(Offset(o1X, o1Y), r1, paint1);
+
+    // 3. Second drifting glowing orb (Vibrant / Secondary color)
+    final o2X = w * (0.68 + 0.22 * math.cos(t * 0.7));
+    final o2Y = h * (0.55 + 0.20 * math.sin(t * 0.9));
+    final r2 = math.max(w, h) * 0.65;
+    final paint2 = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          c2.withValues(alpha: 0.32),
+          c2.withValues(alpha: 0.10),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.48, 1.0],
+      ).createShader(Rect.fromCircle(center: Offset(o2X, o2Y), radius: r2));
+    canvas.drawCircle(Offset(o2X, o2Y), r2, paint2);
+
+    // 4. Third subtle accent orb (Bottom ambient bounce)
+    final o3X = w * (0.50 + 0.30 * math.sin(t * 0.6 + 1.5));
+    final o3Y = h * (0.80 + 0.15 * math.cos(t * 0.5));
+    final r3 = math.max(w, h) * 0.55;
+    final paint3 = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          c3.withValues(alpha: 0.25),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 1.0],
+      ).createShader(Rect.fromCircle(center: Offset(o3X, o3Y), radius: r3));
+    canvas.drawCircle(Offset(o3X, o3Y), r3, paint3);
+
+    // 5. Very subtle vignette overlay for contrast and focus
+    final vignettePaint = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 1.15,
+        colors: [
+          Colors.transparent,
+          bg.withValues(alpha: 0.5),
+        ],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, vignettePaint);
+  }
+
+  @override
+  bool shouldRepaint(_AuroraFlowPainter oldDelegate) =>
+      oldDelegate.c1 != c1 || oldDelegate.c2 != c2 || oldDelegate.bg != bg;
 }
 
 class _MeshShaderPainter extends CustomPainter {
@@ -200,39 +339,36 @@ class _MeshShaderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final shader = _shader;
+    _shader.setFloat(0, size.width);
+    _shader.setFloat(1, size.height);
+    _shader.setFloat(2, time.value);
 
-    // Uniform index 0, 1: resolution
-    shader.setFloat(0, size.width);
-    shader.setFloat(1, size.height);
+    // c1
+    _shader.setFloat(3, c1.r);
+    _shader.setFloat(4, c1.g);
+    _shader.setFloat(5, c1.b);
 
-    // Uniform index 2: time
-    shader.setFloat(2, time.value);
+    // c2
+    _shader.setFloat(6, c2.r);
+    _shader.setFloat(7, c2.g);
+    _shader.setFloat(8, c2.b);
 
-    // Helper to set vec4 color
-    void setColorUniform(int startIndex, Color c) {
-      shader.setFloat(startIndex + 0, c.r);
-      shader.setFloat(startIndex + 1, c.g);
-      shader.setFloat(startIndex + 2, c.b);
-      shader.setFloat(startIndex + 3, c.a);
-    }
+    // c3
+    _shader.setFloat(9, c3.r);
+    _shader.setFloat(10, c3.g);
+    _shader.setFloat(11, c3.b);
 
-    // Color 1: index 3-6
-    setColorUniform(3, c1);
-    // Color 2: index 7-10
-    setColorUniform(7, c2);
-    // Color 3: index 11-14
-    setColorUniform(11, c3);
-    // Color 4: index 15-18
-    setColorUniform(15, c4);
+    // c4
+    _shader.setFloat(12, c4.r);
+    _shader.setFloat(13, c4.g);
+    _shader.setFloat(14, c4.b);
 
-    final paint = Paint()..shader = shader;
+    final paint = Paint()..shader = _shader;
     canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override
-  bool shouldRepaint(covariant _MeshShaderPainter oldDelegate) =>
-      oldDelegate.program != program ||
+  bool shouldRepaint(_MeshShaderPainter oldDelegate) =>
       oldDelegate.c1 != c1 ||
       oldDelegate.c2 != c2 ||
       oldDelegate.c3 != c3 ||

@@ -102,16 +102,114 @@ class LrcParser {
     for (int i = 0; i < parsedLines.length; i++) {
       final current = parsedLines[i];
       final next = i + 1 < parsedLines.length ? parsedLines[i + 1] : null;
+      final endTime = next?.startTime ??
+          (current.startTime + const Duration(seconds: 5));
+
+      var words = current.words;
+      // If line lacks word-level tokens, synthesize word timings
+      // so word-by-word karaoke animations work for every song!
+      if (words.isEmpty && current.text.isNotEmpty) {
+        words = _synthesizeWords(current.text, current.startTime, endTime);
+      }
 
       result.add(
         LyricLine(
           startTime: current.startTime,
-          endTime: next?.startTime ??
-              (current.startTime + const Duration(seconds: 5)),
+          endTime: endTime,
           text: current.text,
-          words: current.words,
+          words: words,
         ),
       );
+    }
+
+    return result;
+  }
+
+  /// Synthesizes progressive word-level timings across a line's duration.
+  static List<LyricWord> _synthesizeWords(
+    String text,
+    Duration start,
+    Duration end,
+  ) {
+    final tokens =
+        text.split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
+    if (tokens.isEmpty) return const [];
+
+    final totalLineMs = (end - start).inMilliseconds;
+    if (totalLineMs <= 0) return const [];
+
+    final totalChars = tokens.fold<int>(0, (sum, word) => sum + word.length);
+    if (totalChars <= 0) return const [];
+
+    final words = <LyricWord>[];
+    var currentStartMs = start.inMilliseconds;
+
+    for (int i = 0; i < tokens.length; i++) {
+      final token = tokens[i];
+      final isLast = i == tokens.length - 1;
+
+      final wordMs = isLast
+          ? (end.inMilliseconds - currentStartMs).clamp(50, totalLineMs)
+          : ((token.length / totalChars) * totalLineMs)
+              .round()
+              .clamp(80, totalLineMs);
+
+      final wEndMs = isLast ? end.inMilliseconds : (currentStartMs + wordMs);
+
+      words.add(
+        LyricWord(
+          text: i < tokens.length - 1 ? '$token ' : token,
+          startTime: Duration(milliseconds: currentStartMs),
+          endTime: Duration(milliseconds: wEndMs),
+        ),
+      );
+
+      currentStartMs = wEndMs;
+    }
+
+    return words;
+  }
+
+  /// Synthesizes progressive synchronized lines from plain unsynchronized lyrics.
+  static List<LyricLine> synthesizeFromPlainText(
+    String plainText,
+    Duration totalDuration,
+  ) {
+    final rawLines = plainText
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty && !l.startsWith('[') && !l.startsWith('('))
+        .toList();
+
+    if (rawLines.isEmpty) return const [];
+
+    final startOffsetMs = 6000;
+    final totalMs = totalDuration.inMilliseconds > 25000
+        ? totalDuration.inMilliseconds - 15000
+        : totalDuration.inMilliseconds;
+
+    final lineIntervalMs =
+        (totalMs / rawLines.length).round().clamp(2000, 6000);
+    final result = <LyricLine>[];
+
+    var currentLineStart = startOffsetMs;
+    for (int i = 0; i < rawLines.length; i++) {
+      final text = rawLines[i];
+      final lineStart = Duration(milliseconds: currentLineStart);
+      final lineEnd =
+          Duration(milliseconds: currentLineStart + lineIntervalMs);
+
+      final words = _synthesizeWords(text, lineStart, lineEnd);
+      result.add(
+        LyricLine(
+          startTime: lineStart,
+          endTime: lineEnd,
+          text: text,
+          words: words,
+        ),
+      );
+
+      currentLineStart += lineIntervalMs;
     }
 
     return result;

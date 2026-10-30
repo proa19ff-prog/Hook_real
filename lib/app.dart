@@ -51,10 +51,30 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text('${error.message}: ${error.track.title}'),
-            duration: const Duration(seconds: 4),
+            content: Row(
+              children: [
+                Icon(Icons.error_outline_rounded,
+                    color: Colors.white, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '${error.message}: ${error.track.title}',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.redAccent.shade700.withValues(alpha: 0.9),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'Повторить',
+              textColor: Colors.white,
               onPressed: () =>
                   ref.read(audioPlayerServiceProvider).playTrack(error.track),
             ),
@@ -104,10 +124,11 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
   Widget _buildGlassNavigationBar(HookTheme theme) {
     return HookGlassCard(
       theme: theme,
+      elevation: 1.0,
       margin: EdgeInsets.fromLTRB(
-          12, 0, 12, 8 + MediaQuery.paddingOf(context).bottom),
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-      borderRadius: BorderRadius.circular(22),
+          16, 0, 16, 10 + MediaQuery.paddingOf(context).bottom),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      borderRadius: BorderRadius.circular(24),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -121,34 +142,62 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
 
   Widget _navItem(int index, IconData icon, String label, HookTheme theme) {
     final isSelected = _currentIndex == index;
-    final color =
-        isSelected ? theme.colors.textPrimary : theme.colors.textSecondary;
 
     return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+      child: GestureDetector(
         onTap: () => setState(() => _currentIndex = index),
+        behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
+          duration: const Duration(milliseconds: 280),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colors.primary.withValues(alpha: 0.9)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(18),
+            gradient: isSelected
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.colors.primary.withValues(alpha: 0.85),
+                      theme.colors.primary.withValues(alpha: 0.6),
+                    ],
+                  )
+                : null,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: theme.colors.primary.withValues(alpha: 0.35),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 21),
-              const SizedBox(height: 3),
+              AnimatedScale(
+                scale: isSelected ? 1.15 : 1.0,
+                duration: const Duration(milliseconds: 220),
+                child: Icon(
+                  icon,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colors.textSecondary.withValues(alpha: 0.75),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  color: color,
-                  fontSize: 10,
+                  color: isSelected
+                      ? Colors.white
+                      : theme.colors.textSecondary.withValues(alpha: 0.75),
+                  fontSize: 10.5,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: isSelected ? 0.5 : 0.0,
                 ),
               ),
             ],

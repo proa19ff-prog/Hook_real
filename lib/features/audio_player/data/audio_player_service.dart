@@ -203,13 +203,10 @@ class AudioPlayerService {
     _setCurrentTrack(track);
 
     try {
-      // The provider starts initialization eagerly, but awaiting it here also
-      // makes direct service usage safe and prevents a race with AudioSession.
       await initialize();
 
-      // Stop the previous track so it does not keep playing while the new
-      // one is resolving.
-      if (_player.playing) unawaited(_player.pause());
+      // Stop previous track completely to unload its audio source and reset position
+      await _player.stop();
 
       final playUrl = await _resolveUrl(track);
 
@@ -230,8 +227,15 @@ class AudioPlayerService {
             track.artworkUrl.isNotEmpty ? Uri.tryParse(track.artworkUrl) : null,
         duration: track.duration,
       );
-      final audioSource = playUrl.startsWith('file:')
-          ? AudioSource.file(Uri.parse(playUrl).toFilePath(), tag: mediaItem)
+
+      final isLocal = playUrl.startsWith('file:') || File(playUrl).existsSync();
+      final audioSource = isLocal
+          ? AudioSource.file(
+              playUrl.startsWith('file:')
+                  ? Uri.parse(playUrl).toFilePath()
+                  : playUrl,
+              tag: mediaItem,
+            )
           : AudioSource.uri(
               Uri.parse(playUrl),
               tag: mediaItem,
@@ -251,12 +255,17 @@ class AudioPlayerService {
     } catch (e) {
       // A cached URL may have expired; drop it so a retry resolves afresh.
       _urlCache.remove(_cacheKey(track));
-      if (requestId == _playRequestId && !_errorController.isClosed) {
-        _errorController.add(AudioPlaybackError(
-          track: track,
-          message: 'Не удалось воспроизвести трек',
-          cause: e,
-        ));
+      if (requestId == _playRequestId) {
+        // Completely stop playback and reset current track so old audio doesn't linger
+        unawaited(_player.stop());
+        _setCurrentTrack(null);
+        if (!_errorController.isClosed) {
+          _errorController.add(AudioPlaybackError(
+            track: track,
+            message: 'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
+            cause: e,
+          ));
+        }
       }
     }
   }

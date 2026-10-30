@@ -25,12 +25,26 @@ class MiniPlayer extends ConsumerWidget {
 
     return HookGlassCard(
       theme: theme,
-      margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-      borderRadius: BorderRadius.circular(18),
+      elevation: 1.2,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      borderRadius: BorderRadius.circular(20),
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => FullscreenPlayer(theme: theme),
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => FullscreenPlayer(theme: theme),
+            transitionsBuilder: (_, animation, __, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                )),
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 400),
           ),
         );
       },
@@ -38,21 +52,34 @@ class MiniPlayer extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            height: 62,
+            height: 68,
             child: Padding(
-              padding: const EdgeInsets.only(left: 8, right: 4),
+              padding: const EdgeInsets.only(left: 10, right: 6),
               child: Row(
                 children: [
                   Hero(
                     tag: 'current_artwork',
-                    child: TrackArtwork(
-                      url: track.artworkUrl,
-                      size: 46,
-                      placeholderColor: theme.colors.surface,
-                      iconColor: theme.colors.textSecondary,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colors.primary.withValues(alpha: 0.25),
+                            blurRadius: 10,
+                            spreadRadius: 1,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: TrackArtwork(
+                        url: track.artworkUrl,
+                        size: 48,
+                        placeholderColor: theme.colors.surface,
+                        iconColor: theme.colors.textSecondary,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -63,53 +90,80 @@ class MiniPlayer extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w700,
                             color: theme.colors.textPrimary,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Text(
                           isLoading ? 'Загрузка…' : track.artist,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 12,
-                            color: theme.colors.textSecondary,
+                            color: isLoading
+                                ? theme.colors.accent
+                                : theme.colors.textSecondary,
+                            fontWeight: isLoading ? FontWeight.w600 : FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                   ),
+                  // Play / Pause button
                   SizedBox(
-                    width: 48,
-                    height: 48,
+                    width: 44,
+                    height: 44,
                     child: isLoading
                         ? Padding(
-                            padding: const EdgeInsets.all(14),
+                            padding: const EdgeInsets.all(12),
                             child: CircularProgressIndicator(
                               strokeWidth: 2.2,
-                              color: theme.colors.textPrimary,
+                              color: theme.colors.accent,
                             ),
                           )
-                        : IconButton(
-                            tooltip: isPlaying ? 'Пауза' : 'Играть',
-                            icon: Icon(
-                              isPlaying
-                                  ? Icons.pause_rounded
-                                  : Icons.play_arrow_rounded,
-                              color: theme.colors.textPrimary,
-                              size: 30,
+                        : Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  theme.colors.primary,
+                                  theme.colors.primary.withValues(alpha: 0.8),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.colors.primary.withValues(alpha: 0.35),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
-                            onPressed: playerService.togglePlayPause,
+                            child: IconButton(
+                              tooltip: isPlaying ? 'Пауза' : 'Играть',
+                              iconSize: 22,
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                isPlaying
+                                    ? Icons.pause_rounded
+                                    : Icons.play_arrow_rounded,
+                                color: Colors.white,
+                              ),
+                              onPressed: playerService.togglePlayPause,
+                            ),
                           ),
                   ),
+                  const SizedBox(width: 2),
                   IconButton(
                     tooltip: 'Следующий',
                     icon: Icon(
                       Icons.skip_next_rounded,
                       color: theme.colors.textSecondary,
-                      size: 28,
+                      size: 26,
                     ),
                     onPressed: playerService.next,
                   ),
@@ -140,11 +194,17 @@ class _MiniProgressBar extends ConsumerWidget {
         ? (position.inMilliseconds / total).clamp(0.0, 1.0)
         : 0.0;
 
-    return LinearProgressIndicator(
-      value: value,
-      minHeight: 2,
-      color: theme.colors.primary,
-      backgroundColor: theme.colors.border.withValues(alpha: 0.4),
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(20),
+        bottomRight: Radius.circular(20),
+      ),
+      child: LinearProgressIndicator(
+        value: value,
+        minHeight: 2.5,
+        color: theme.colors.accent,
+        backgroundColor: theme.colors.border.withValues(alpha: 0.3),
+      ),
     );
   }
 }

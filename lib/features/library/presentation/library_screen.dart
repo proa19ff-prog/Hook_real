@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/models/media_track.dart';
+import '../../import/presentation/import_bottom_sheet.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'library_provider.dart';
@@ -26,7 +27,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -54,6 +55,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     final cacheSizeAsync = ref.watch(cacheSizeProvider);
     final queueNotifier = ref.read(queueProvider.notifier);
     final currentTrack = ref.watch(currentTrackProvider);
+    final colors = widget.theme.colors;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -64,7 +66,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
             // Header
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -74,66 +76,129 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       Text(
                         'МЕДИАТЕКА',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                          color: widget.theme.colors.textPrimary,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Локальная коллекция и кэш',
+                        'Локальная коллекция и плейлисты',
                         style: TextStyle(
                           fontSize: 12,
-                          color: widget.theme.colors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
                   ),
-                  cacheSizeAsync.when(
-                    data: (bytes) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: widget.theme.colors.surfaceGlass,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: widget.theme.colors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.sd_storage_rounded,
-                              size: 14, color: widget.theme.colors.accent),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatBytes(bytes),
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: widget.theme.colors.textPrimary,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Import Link Button
+                      InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () =>
+                            ImportBottomSheet.show(context, widget.theme),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: colors.primary.withValues(alpha: 0.35),
                             ),
                           ),
-                        ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.add_link_rounded,
+                                  size: 16, color: colors.accent),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Импорт',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                      const SizedBox(width: 8),
+
+                      cacheSizeAsync.when(
+                        data: (bytes) => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                colors.primary.withValues(alpha: 0.2),
+                                colors.accent.withValues(alpha: 0.15),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: colors.primary.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.sd_storage_rounded,
+                                  size: 14, color: colors.accent),
+                              const SizedBox(width: 5),
+                              Text(
+                                _formatBytes(bytes),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: colors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
 
             // Tab bar
-            TabBar(
-              controller: _tabController,
-              indicatorColor: widget.theme.colors.primary,
-              indicatorWeight: 3,
-              labelColor: widget.theme.colors.primary,
-              unselectedLabelColor: widget.theme.colors.textSecondary,
-              tabs: const [
-                Tab(text: 'Избранное'),
-                Tab(text: 'История'),
-                Tab(text: 'Офлайн-кэш'),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: colors.primary,
+                indicatorWeight: 3,
+                indicatorSize: TabBarIndicatorSize.label,
+                labelColor: colors.primary,
+                unselectedLabelColor: colors.textSecondary,
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+                dividerColor: colors.border.withValues(alpha: 0.2),
+                tabs: const [
+                  Tab(text: 'Избранное'),
+                  Tab(text: 'Плейлисты'),
+                  Tab(text: 'История'),
+                  Tab(text: 'Офлайн'),
+                ],
+              ),
             ),
 
             // Tab contents
@@ -145,7 +210,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   _buildTrackList(
                     tracks: favorites,
                     emptyMessage:
-                        'В избранном пока пусто.\nНажмите ❤️ на треке, чтобы добавить.',
+                        'В избранном пока пусто.\nНажмите ❤️ на треке, чтобы добавить его сюда.',
                     emptyIcon: Icons.favorite_border_rounded,
                     onPlayAll: favorites.isNotEmpty
                         ? () => queueNotifier.playQueue(favorites)
@@ -161,11 +226,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     currentTrackSource: currentTrack?.source,
                   ),
 
-                  // 2. History Tab
+                  // 2. Playlists Tab
+                  _buildPlaylistsTab(),
+
+                  // 3. History Tab
                   _buildTrackList(
                     tracks: history,
                     emptyMessage:
-                        'История прослушиваний пуста.\nВключайте любимые треки в поиске!',
+                        'История прослушиваний пуста.\nВключайте треки в поиске, чтобы они появились здесь!',
                     emptyIcon: Icons.history_rounded,
                     onPlayAll: history.isNotEmpty
                         ? () => queueNotifier.playQueue(history)
@@ -175,6 +243,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                             icon: const Icon(Icons.delete_sweep_rounded,
                                 size: 16),
                             label: const Text('Очистить'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: colors.textSecondary,
+                            ),
                             onPressed: () =>
                                 ref.read(historyProvider.notifier).clear(),
                           )
@@ -183,7 +254,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     currentTrackSource: currentTrack?.source,
                   ),
 
-                  // 3. Offline Cache Tab
+                  // 4. Offline Cache Tab
                   _buildCacheTab(),
                 ],
               ),
@@ -191,6 +262,172 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPlaylistsTab() {
+    final colors = widget.theme.colors;
+    final playlists = ref.watch(playlistsProvider);
+    final queueNotifier = ref.read(queueProvider.notifier);
+
+    if (playlists.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colors.surfaceGlass.withValues(alpha: 0.3),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colors.border.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Icon(
+                  Icons.queue_music_rounded,
+                  size: 52,
+                  color: colors.textSecondary.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'У вас пока нет плейлистов',
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Импортируйте плейлист из Spotify или YouTube Music!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: colors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.add_link_rounded, size: 18),
+                label: const Text('Импортировать музыку'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primary,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () => ImportBottomSheet.show(context, widget.theme),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final entries = playlists.entries.toList();
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+      itemCount: entries.length,
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        final name = entry.key;
+        final tracks = entry.value;
+        final firstTrackArt = tracks.isNotEmpty ? tracks.first.artworkUrl : '';
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: colors.surfaceGlass.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: colors.border.withValues(alpha: 0.3),
+            ),
+          ),
+          child: ListTile(
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            leading: TrackArtwork(
+              url: firstTrackArt,
+              size: 50,
+              borderRadius: BorderRadius.circular(10),
+              placeholderColor: colors.surface,
+              iconColor: colors.textSecondary,
+            ),
+            title: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+            ),
+            subtitle: Text(
+              '${tracks.length} треков',
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: 'Слушать плейлист',
+                  icon: Icon(Icons.play_circle_fill_rounded,
+                      color: colors.primary, size: 32),
+                  onPressed: () {
+                    queueNotifier.playQueue(tracks);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Включен плейлист "$name" (${tracks.length} треков)'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert_rounded,
+                      color: colors.textSecondary, size: 20),
+                  onSelected: (val) {
+                    if (val == 'delete') {
+                      ref
+                          .read(playlistsProvider.notifier)
+                          .deletePlaylist(name);
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline_rounded,
+                              color: Colors.redAccent, size: 20),
+                          SizedBox(width: 8),
+                          Text('Удалить плейлист',
+                              style: TextStyle(color: Colors.redAccent)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () {
+              queueNotifier.playQueue(tracks);
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -204,23 +441,36 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     String? currentTrackId,
     TrackSource? currentTrackSource,
   }) {
+    final colors = widget.theme.colors;
+
     if (tracks.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(emptyIcon,
-                size: 64,
-                color:
-                    widget.theme.colors.textSecondary.withValues(alpha: 0.5)),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: colors.surfaceGlass.withValues(alpha: 0.3),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: colors.border.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Icon(
+                emptyIcon,
+                size: 52,
+                color: colors.textSecondary.withValues(alpha: 0.5),
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               emptyMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: widget.theme.colors.textSecondary,
+                color: colors.textSecondary,
                 fontSize: 14,
-                height: 1.4,
+                height: 1.5,
               ),
             ),
           ],
@@ -232,30 +482,52 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       children: [
         // Action Buttons Row (Play All / Shuffle)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           child: Row(
             children: [
               if (onPlayAll != null)
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                  label: const Text('Слушать всё'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: widget.theme.colors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [colors.primary, colors.accent],
                     ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: 0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
-                  onPressed: onPlayAll,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                    label: const Text('Слушать всё'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 9),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: onPlayAll,
+                  ),
                 ),
               const SizedBox(width: 8),
               if (onShuffle != null)
                 OutlinedButton.icon(
-                  icon: const Icon(Icons.shuffle_rounded, size: 16),
+                  icon: Icon(Icons.shuffle_rounded,
+                      size: 16, color: colors.textPrimary),
                   label: const Text('Перемешать'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: widget.theme.colors.textPrimary,
-                    side: BorderSide(color: widget.theme.colors.border),
+                    foregroundColor: colors.textPrimary,
+                    side: BorderSide(
+                        color: colors.border.withValues(alpha: 0.5)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -268,99 +540,138 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ),
         ),
 
-        // List
+        // Track List
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.only(bottom: 80, left: 16, right: 16),
+            padding: const EdgeInsets.only(bottom: 160, left: 12, right: 12),
             itemCount: tracks.length,
             separatorBuilder: (_, __) => Divider(
               height: 1,
-              color: widget.theme.colors.border.withValues(alpha: 0.3),
+              color: colors.border.withValues(alpha: 0.15),
             ),
             itemBuilder: (context, index) {
               final track = tracks[index];
               final isCurrent = track.id == currentTrackId &&
                   track.source == currentTrackSource;
 
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(vertical: 4),
-                leading: TrackArtwork(
-                  url: track.artworkUrl,
-                  size: 48,
-                  placeholderColor: widget.theme.colors.surface,
-                  iconColor: widget.theme.colors.textSecondary,
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                decoration: BoxDecoration(
+                  color: isCurrent
+                      ? colors.primary.withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                title: Text(
-                  track.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
-                    color: isCurrent
-                        ? widget.theme.colors.accent
-                        : widget.theme.colors.textPrimary,
-                    fontSize: 14,
-                  ),
-                ),
-                subtitle: Row(
-                  children: [
-                    Text(
-                      track.source == TrackSource.youtube
-                          ? 'YT Music'
-                          : 'SoundCloud',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: widget.theme.colors.accent,
-                        fontWeight: FontWeight.bold,
+                child: ListTile(
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  leading: Stack(
+                    children: [
+                      TrackArtwork(
+                        url: track.artworkUrl,
+                        size: 48,
+                        borderRadius: BorderRadius.circular(10),
+                        placeholderColor: colors.surface,
+                        iconColor: colors.textSecondary,
                       ),
+                      if (isCurrent)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.equalizer_rounded,
+                                size: 20,
+                                color: colors.accent,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  title: Text(
+                    track.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
+                      color: isCurrent ? colors.accent : colors.textPrimary,
+                      fontSize: 14,
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        track.artist,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: widget.theme.colors.textSecondary,
-                          fontSize: 12,
+                  ),
+                  subtitle: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: track.source == TrackSource.youtube
+                              ? Colors.red.withValues(alpha: 0.15)
+                              : Colors.orange.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          track.source == TrackSource.youtube ? 'YT' : 'SC',
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: track.source == TrackSource.youtube
+                                ? Colors.redAccent
+                                : Colors.orangeAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _formatDuration(track.duration),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: widget.theme.colors.textSecondary,
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          track.artist,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        ref.watch(favoritesProvider).any((t) =>
-                                t.id == track.id && t.source == track.source)
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        color: ref.watch(favoritesProvider).any((t) =>
-                                t.id == track.id && t.source == track.source)
-                            ? Colors.redAccent
-                            : widget.theme.colors.textSecondary,
-                        size: 20,
+                    ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formatDuration(track.duration),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.textSecondary,
+                        ),
                       ),
-                      onPressed: () {
-                        ref
-                            .read(favoritesProvider.notifier)
-                            .toggleFavorite(track);
-                      },
-                    ),
-                  ],
+                      IconButton(
+                        icon: Icon(
+                          ref.watch(favoritesProvider).any((t) =>
+                                  t.id == track.id && t.source == track.source)
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: ref.watch(favoritesProvider).any((t) =>
+                                  t.id == track.id && t.source == track.source)
+                              ? Colors.redAccent
+                              : colors.textSecondary.withValues(alpha: 0.6),
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(favoritesProvider.notifier)
+                              .toggleFavorite(track);
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    ref.read(queueProvider.notifier).playTrack(track);
+                  },
                 ),
-                onTap: () {
-                  ref.read(queueProvider.notifier).playTrack(track);
-                },
               );
             },
           ),
@@ -371,6 +682,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
   Widget _buildCacheTab() {
     final cacheManager = ref.watch(audioCacheManagerProvider);
+    final colors = widget.theme.colors;
 
     return FutureBuilder<List<CachedTrack>>(
       future: cacheManager.getCachedTracks(),
@@ -382,29 +694,51 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         );
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 160),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Main Cache Info Card
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: widget.theme.colors.surfaceGlass,
+                  color: colors.surfaceGlass.withValues(alpha: 0.4),
                   borderRadius:
                       BorderRadius.circular(widget.theme.styling.borderRadius),
-                  border: Border.all(color: widget.theme.colors.border),
+                  border: Border.all(
+                    color: colors.border.withValues(alpha: 0.4),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.download_done_rounded,
-                        size: 48, color: widget.theme.colors.accent),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            colors.primary.withValues(alpha: 0.2),
+                            colors.accent.withValues(alpha: 0.2),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.download_done_rounded,
+                          size: 40, color: colors.accent),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'Локальный аудио-кэш',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: widget.theme.colors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -413,7 +747,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
-                        color: widget.theme.colors.textSecondary,
+                        color: colors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -422,27 +756,33 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: widget.theme.colors.surface,
+                        color: colors.surface,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colors.border.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         'Занято на устройстве: ${_formatBytes(bytes)}',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: widget.theme.colors.primary,
+                          color: colors.primary,
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      icon: const Icon(Icons.delete_outline_rounded),
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
                       label: const Text('Очистить весь кэш'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
                             Colors.redAccent.withValues(alpha: 0.15),
                         foregroundColor: Colors.redAccent,
                         side: const BorderSide(color: Colors.redAccent),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
                       onPressed: bytes > 0
                           ? () => _confirmClearCache(cacheManager)
@@ -453,17 +793,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'СОХРАНЁННЫЕ ТРЕКИ:',
+                'СОХРАНЁННЫЕ ТРЕКИ (${cachedTracks.length}):',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.1,
-                  color: widget.theme.colors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: 12),
               if (snapshot.connectionState == ConnectionState.waiting)
-                const Center(child: CircularProgressIndicator())
+                Center(child: CircularProgressIndicator(color: colors.primary))
               else if (cachedTracks.isEmpty)
                 _buildEmptyCacheList()
               else
@@ -480,7 +820,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.1,
-                  color: widget.theme.colors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -507,34 +847,35 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   }
 
   Widget _buildEmptyCacheList() {
+    final colors = widget.theme.colors;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
-        color: widget.theme.colors.surfaceGlass,
+        color: colors.surfaceGlass.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(widget.theme.styling.borderRadius),
-        border: Border.all(color: widget.theme.colors.border),
+        border: Border.all(color: colors.border.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
           Icon(
             Icons.cloud_download_outlined,
             size: 36,
-            color: widget.theme.colors.textSecondary,
+            color: colors.textSecondary.withValues(alpha: 0.6),
           ),
           const SizedBox(height: 8),
           Text(
             'Кэш пока пуст',
             style: TextStyle(
-              color: widget.theme.colors.textPrimary,
+              color: colors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'Скачанные треки появятся здесь',
+            'Скачанные треки появятся здесь автоматически',
             style: TextStyle(
-              color: widget.theme.colors.textSecondary,
+              color: colors.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -548,28 +889,31 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     AudioCacheManager cacheManager,
   ) {
     final track = cachedTrack.track;
+    final colors = widget.theme.colors;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: widget.theme.colors.surfaceGlass,
+          color: colors.surfaceGlass.withValues(alpha: 0.35),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: widget.theme.colors.border),
+          border: Border.all(color: colors.border.withValues(alpha: 0.3)),
         ),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
           leading: TrackArtwork(
             url: track.artworkUrl,
             size: 44,
-            placeholderColor: widget.theme.colors.surface,
-            iconColor: widget.theme.colors.textSecondary,
+            borderRadius: BorderRadius.circular(8),
+            placeholderColor: colors.surface,
+            iconColor: colors.textSecondary,
           ),
           title: Text(
             track.title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: widget.theme.colors.textPrimary,
+              color: colors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -578,14 +922,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: widget.theme.colors.textSecondary,
+              color: colors.textSecondary,
               fontSize: 12,
             ),
           ),
           trailing: IconButton(
             tooltip: 'Удалить из кэша',
             icon: const Icon(Icons.delete_outline_rounded),
-            color: Colors.redAccent,
+            color: Colors.redAccent.withValues(alpha: 0.8),
             onPressed: () => _confirmRemoveCachedTrack(
               cacheManager,
               cachedTrack,
@@ -675,12 +1019,20 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   }
 
   Widget _buildFeatureTile(IconData icon, String title, String subtitle) {
+    final colors = widget.theme.colors;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: widget.theme.colors.primary),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: colors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 20, color: colors.primary),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -691,7 +1043,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: widget.theme.colors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -699,7 +1051,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   subtitle,
                   style: TextStyle(
                     fontSize: 12,
-                    color: widget.theme.colors.textSecondary,
+                    color: colors.textSecondary,
                     height: 1.3,
                   ),
                 ),

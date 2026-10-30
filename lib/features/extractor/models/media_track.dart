@@ -2,6 +2,7 @@ enum TrackSource {
   youtube,
   soundcloud,
   local,
+  spotify,
 }
 
 class MediaTrack {

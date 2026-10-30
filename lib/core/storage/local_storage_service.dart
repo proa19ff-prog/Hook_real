@@ -6,6 +6,8 @@ class LocalStorageService {
   static const String _favoritesKey = 'hook_favorites_tracks';
   static const String _historyKey = 'hook_history_tracks';
   static const String _playlistsKey = 'hook_user_playlists';
+  static const String _activeThemeKey = 'hook_active_theme_id';
+  static const String _customThemeJsonKey = 'hook_custom_theme_json';
   static const int _maxHistoryCount = 100;
 
   final SharedPreferences _prefs;
@@ -16,6 +18,14 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     return LocalStorageService(prefs);
   }
+
+  // --- THEME PERSISTENCE ---
+  String? getSavedThemeId() => _prefs.getString(_activeThemeKey);
+  Future<void> saveThemeId(String id) => _prefs.setString(_activeThemeKey, id);
+
+  String? getSavedCustomThemeJson() => _prefs.getString(_customThemeJsonKey);
+  Future<void> saveCustomThemeJson(String json) =>
+      _prefs.setString(_customThemeJsonKey, json);
 
   // --- FAVORITES ---
   List<MediaTrack> getFavorites() {

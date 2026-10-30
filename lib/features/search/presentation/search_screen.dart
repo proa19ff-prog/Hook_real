@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/models/media_track.dart';
+import '../../import/presentation/import_bottom_sheet.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/glass_card.dart';
@@ -30,10 +31,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<MediaTrack> _searchResults = [];
   bool _isLoading = false;
   bool _hasSearched = false;
+  bool _isLoadingRecommendations = false;
   String? _searchError;
   String _lastQuery = '';
   // YouTube is the main source; searching one source also answers faster.
-  String _activeSourceFilter = 'youtube'; // 'all', 'youtube', 'soundcloud'
+  String _activeSourceFilter = 'soundcloud'; // 'all', 'youtube', 'soundcloud'
   int _searchRequestId = 0;
 
   @override
@@ -61,9 +63,74 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _searchResults = [];
       _hasSearched = false;
       _isLoading = false;
+      _isLoadingRecommendations = false;
       _searchError = null;
       _lastQuery = '';
     });
+  }
+
+  Future<void> _loadPersonalizedMix({bool playImmediately = true}) async {
+    if (_isLoadingRecommendations) return;
+    setState(() {
+      _isLoadingRecommendations = true;
+      _searchError = null;
+    });
+
+    try {
+      final recService = ref.read(recommendationServiceProvider);
+      final tracks = await recService.getPersonalizedRecommendations(limit: 30);
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingRecommendations = false;
+      });
+
+      if (tracks.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Не удалось подобрать треки. Попробуйте поиск.'),
+              backgroundColor: widget.theme.colors.surface,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (playImmediately) {
+        ref.read(queueProvider.notifier).playQueue(tracks, startIndex: 0);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Включен персональный микс (${tracks.length} треков)'),
+              backgroundColor: widget.theme.colors.surface,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } else {
+        setState(() {
+          _searchResults = tracks;
+          _hasSearched = true;
+          _lastQuery = '✨ Мои предпочтения';
+          _searchController.text = 'Мои предпочтения';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingRecommendations = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка создания микса: $e'),
+            backgroundColor: Colors.redAccent.withValues(alpha: 0.9),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _performSearch(String query, {bool force = false}) async {
@@ -126,49 +193,73 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onTap: () => _focusNode.unfocus(),
           child: Column(
             children: [
+              // Page Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Поиск',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.8,
-                      color: colors.textPrimary,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Поиск',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        color: colors.textPrimary,
+                      ),
                     ),
-                  ),
+                    if (_isLoading)
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: colors.primary,
+                        ),
+                      ),
+                  ],
                 ),
               ),
+
+              // Search Bar
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
                 child: HookGlassCard(
                   theme: widget.theme,
-                  borderRadius: BorderRadius.circular(16),
+                  elevation: 1.0,
+                  borderRadius: BorderRadius.circular(18),
                   child: TextField(
                     controller: _searchController,
                     focusNode: _focusNode,
-                    style: TextStyle(color: colors.textPrimary, fontSize: 15),
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
                     cursorColor: colors.primary,
                     decoration: InputDecoration(
-                      hintText: 'Трек, артист или альбом',
+                      hintText: 'Трек, артист или альбом...',
                       hintStyle: TextStyle(
-                        color: colors.textSecondary,
+                        color: colors.textSecondary.withValues(alpha: 0.7),
                         fontSize: 15,
+                        fontWeight: FontWeight.w400,
                       ),
-                      prefixIcon:
-                          Icon(Icons.search_rounded, color: colors.textSecondary),
-                      // Only the clear button listens to the text, so typing
-                      // does not rebuild the results list.
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: colors.primary,
+                        size: 22,
+                      ),
                       suffixIcon: ValueListenableBuilder<TextEditingValue>(
                         valueListenable: _searchController,
                         builder: (context, value, _) => value.text.isEmpty
                             ? const SizedBox.shrink()
                             : IconButton(
                                 tooltip: 'Очистить',
-                                icon: Icon(Icons.close_rounded,
-                                    color: colors.textSecondary),
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: colors.textSecondary,
+                                  size: 20,
+                                ),
                                 onPressed: _clear,
                               ),
                       ),
@@ -187,31 +278,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                 ),
               ),
+
+              // Source Filter Chips
               SizedBox(
-                height: 48,
+                height: 44,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    _buildFilterChip('youtube', 'YouTube'),
+                    _buildFilterChip('soundcloud', 'SoundCloud', Icons.cloud_rounded),
                     const SizedBox(width: 8),
-                    _buildFilterChip('soundcloud', 'SoundCloud'),
+                    _buildFilterChip('youtube', 'YouTube', Icons.play_circle_fill_rounded),
                     const SizedBox(width: 8),
-                    _buildFilterChip('all', 'Все'),
+                    _buildFilterChip('all', 'Все источники', Icons.auto_awesome_rounded),
                   ],
                 ),
               ),
-              // Thin progress bar keeps old results visible while a new
-              // query loads, instead of flashing a full-screen spinner.
+
+              const SizedBox(height: 4),
+
+              // Linear Progress Line
               SizedBox(
-                height: 2,
+                height: 3,
                 child: _isLoading && _searchResults.isNotEmpty
                     ? LinearProgressIndicator(
                         color: colors.primary,
-                        backgroundColor: Colors.transparent,
+                        backgroundColor: colors.surfaceGlass.withValues(alpha: 0.2),
                       )
                     : null,
               ),
+
               Expanded(child: _buildBody()),
             ],
           ),
@@ -223,7 +319,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildBody() {
     if (_isLoading && _searchResults.isEmpty) {
       return Center(
-        child: CircularProgressIndicator(color: widget.theme.colors.primary),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: widget.theme.colors.primary),
+            const SizedBox(height: 16),
+            Text(
+              'Поиск музыки...',
+              style: TextStyle(
+                color: widget.theme.colors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
       );
     }
     if (_searchError != null) return _buildSearchError();
@@ -231,9 +340,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return ListView.builder(
       key: const ValueKey('search-results'),
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 180),
+      padding: const EdgeInsets.fromLTRB(12, 6, 12, 180),
       itemCount: _searchResults.length,
-      itemExtent: 68,
+      itemExtent: 72,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemBuilder: (context, index) => _SearchResultTile(
         theme: widget.theme,
@@ -250,33 +359,438 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildEmptyState() {
     final colors = widget.theme.colors;
-    return Center(
-      key: const ValueKey('search-empty'),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 120),
-        child: Column(
+
+    if (_hasSearched) {
+      return Center(
+        key: const ValueKey('search-empty'),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 100),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colors.surfaceGlass.withValues(alpha: 0.35),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colors.border.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Icon(
+                  Icons.search_off_rounded,
+                  size: 48,
+                  color: colors.textSecondary.withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Ничего не найдено',
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Попробуйте изменить запрос или сменить источник',
+                style: TextStyle(
+                  color: colors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final favorites = ref.watch(favoritesProvider);
+    final favoriteArtists = favorites
+        .map((t) => t.artist.trim())
+        .where((a) => a.isNotEmpty)
+        .toSet()
+        .take(6)
+        .toList();
+
+    return SingleChildScrollView(
+      key: const ValueKey('search-discovery'),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 140),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Personalized Recommendation Card
+          _buildPersonalizedCard(colors),
+
+          if (favoriteArtists.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Icon(
+                  Icons.favorite_rounded,
+                  size: 16,
+                  color: Colors.redAccent.withValues(alpha: 0.8),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Ваши любимые артисты',
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: favoriteArtists.map((artist) {
+                return _buildPillChip(
+                  label: artist,
+                  icon: Icons.person_rounded,
+                  onTap: () {
+                    _searchController.text = artist;
+                    _performSearch(artist);
+                    _focusNode.unfocus();
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Icon(
+                Icons.explore_rounded,
+                size: 16,
+                color: colors.accent,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Популярные жанры и настроения',
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildPillChip(
+                label: '📥 Импорт (Spotify / YT)',
+                icon: Icons.add_link_rounded,
+                onTap: () => ImportBottomSheet.show(context, widget.theme),
+              ),
+              _buildPillChip(
+                label: '🔥 В тренде',
+                onTap: () => _quickSearch('Тренды'),
+              ),
+              _buildPillChip(
+                label: '⚡ Phonk / Фонк',
+                onTap: () => _quickSearch('Phonk'),
+              ),
+              _buildPillChip(
+                label: '🎧 Chill & Relax',
+                onTap: () => _quickSearch('Chill'),
+              ),
+              _buildPillChip(
+                label: '🎸 Рок / Rock Hits',
+                onTap: () => _quickSearch('Rock'),
+              ),
+              _buildPillChip(
+                label: '🌙 Lo-Fi Beats',
+                onTap: () => _quickSearch('Lo-Fi'),
+              ),
+              _buildPillChip(
+                label: '💿 Рэп и Хип-Хоп',
+                onTap: () => _quickSearch('Hip-Hop'),
+              ),
+              _buildPillChip(
+                label: '🌌 Synthwave / Retro',
+                onTap: () => _quickSearch('Synthwave'),
+              ),
+              _buildPillChip(
+                label: '✨ Поп Хиты',
+                onTap: () => _quickSearch('Pop hits'),
+              ),
+              _buildPillChip(
+                label: '🚗 Ночной драйв',
+                onTap: () => _quickSearch('Night drive'),
+              ),
+              _buildPillChip(
+                label: '🏋️ Тренировка',
+                onTap: () => _quickSearch('Workout music'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPersonalizedCard(HookColors colors) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colors.primary.withValues(alpha: 0.22),
+            colors.accent.withValues(alpha: 0.12),
+            colors.surfaceGlass.withValues(alpha: 0.4),
+          ],
+        ),
+        border: Border.all(
+          color: colors.primary.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colors.primary.withValues(alpha: 0.16),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Badge row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: colors.primary.withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.auto_awesome_rounded,
+                          size: 13,
+                          color: colors.accent,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'AI РЕКОМЕНДАЦИИ',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: colors.accent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.graphic_eq_rounded,
+                        size: 16,
+                        color: colors.textSecondary.withValues(alpha: 0.8),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Smart Flow',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textSecondary.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+
+              // Title
+              Text(
+                'Музыка по моим предпочтениям',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                  color: colors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              // Description
+              Text(
+                'Умный персональный микс на основе ваших лайков, истории и вкусовых предпочтений.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: colors.textSecondary.withValues(alpha: 0.9),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: _isLoadingRecommendations
+                          ? null
+                          : () => _loadPersonalizedMix(playImmediately: true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [colors.primary, colors.accent],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colors.primary.withValues(alpha: 0.35),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: _isLoadingRecommendations
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.play_arrow_rounded,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Слушать микс',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: _isLoadingRecommendations
+                        ? null
+                        : () => _loadPersonalizedMix(playImmediately: false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceGlass.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: colors.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.format_list_bulleted_rounded,
+                            color: colors.textPrimary,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Треки',
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPillChip({
+    required String label,
+    required VoidCallback onTap,
+    IconData? icon,
+  }) {
+    final colors = widget.theme.colors;
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: colors.surfaceGlass.withValues(alpha: 0.45),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: colors.border.withValues(alpha: 0.35),
+          ),
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              _hasSearched ? Icons.search_off_rounded : Icons.headphones_rounded,
-              size: 56,
-              color: colors.textSecondary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 14),
+            if (icon != null) ...[
+              Icon(icon, size: 14, color: colors.primary),
+              const SizedBox(width: 6),
+            ],
             Text(
-              _hasSearched ? 'Ничего не найдено' : 'Найдите, что послушать',
+              label,
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _hasSearched
-                  ? 'Попробуйте другой запрос или источник'
-                  : 'Результаты появятся во время ввода',
-              style: TextStyle(color: colors.textSecondary, fontSize: 13),
             ),
           ],
         ),
@@ -284,31 +798,75 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildFilterChip(String value, String label) {
+  void _quickSearch(String query) {
+    _searchController.text = query;
+    _performSearch(query);
+    _focusNode.unfocus();
+  }
+
+  Widget _buildFilterChip(String value, String label, IconData icon) {
     final isSelected = _activeSourceFilter == value;
     final colors = widget.theme.colors;
+
     return Center(
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        showCheckmark: false,
-        selectedColor: colors.primary,
-        backgroundColor: colors.surface,
-        side: BorderSide(
-          color: isSelected ? colors.primary : colors.border,
-        ),
-        labelStyle: TextStyle(
-          color: isSelected ? Colors.white : colors.textSecondary,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          fontSize: 13,
-        ),
-        onSelected: (selected) {
-          if (!selected || isSelected) return;
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          if (isSelected) return;
           setState(() => _activeSourceFilter = value);
           if (_searchController.text.trim().isNotEmpty) {
             _performSearch(_searchController.text, force: true);
           }
         },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            gradient: isSelected
+                ? LinearGradient(
+                    colors: [colors.primary, colors.accent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : null,
+            color: isSelected ? null : colors.surfaceGlass.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? Colors.white.withValues(alpha: 0.25)
+                  : colors.border.withValues(alpha: 0.4),
+              width: 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: colors.primary.withValues(alpha: 0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 15,
+                color: isSelected ? Colors.white : colors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : colors.textSecondary,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -317,23 +875,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final colors = widget.theme.colors;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cloud_off_rounded, size: 56, color: colors.textSecondary),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.redAccent.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.wifi_off_rounded,
+                size: 48,
+                color: Colors.redAccent,
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               _searchError!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: colors.textSecondary, fontSize: 15),
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
               onPressed: () =>
                   _performSearch(_searchController.text, force: true),
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Повторить'),
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Повторить попытку'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
             ),
           ],
         ),
@@ -381,95 +962,160 @@ class _SearchResultTile extends ConsumerWidget {
       if (duration.isNotEmpty) duration,
     ].join(' · ');
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      onLongPress: () => _showActions(context, ref, isFav),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 52,
-              height: 52,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  TrackArtwork(
-                    url: track.artworkUrl,
-                    size: 52,
-                    placeholderColor: colors.surface,
-                    iconColor: colors.textSecondary,
-                  ),
-                  if (isCurrent)
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? colors.primary.withValues(alpha: 0.12)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        border: isCurrent
+            ? Border.all(
+                color: colors.primary.withValues(alpha: 0.35),
+                width: 1,
+              )
+            : null,
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        onLongPress: () => _showActions(context, ref, isFav),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            children: [
+              // Artwork with shadow and current track overlay
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    TrackArtwork(
+                      url: track.artworkUrl,
+                      size: 52,
+                      borderRadius: BorderRadius.circular(10),
+                      placeholderColor: colors.surface,
+                      iconColor: colors.textSecondary,
+                    ),
+                    if (isCurrent)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: isLoading
+                              ? SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.2,
+                                    color: colors.accent,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.equalizer_rounded,
+                                  color: colors.accent,
+                                  size: 24,
                                 ),
-                              )
-                            : const Icon(Icons.graphic_eq_rounded,
-                                color: Colors.white),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    track.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: isCurrent ? colors.accent : colors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      if (track.source == TrackSource.soundcloud) ...[
-                        const Icon(Icons.cloud_rounded,
-                            size: 13, color: Colors.orangeAccent),
-                        const SizedBox(width: 4),
-                      ],
-                      Expanded(
-                        child: Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: colors.textSecondary,
-                            fontSize: 13,
-                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              tooltip: 'Действия',
-              icon: Icon(Icons.more_vert_rounded, color: colors.textSecondary),
-              onPressed: () => _showActions(context, ref, isFav),
-            ),
-          ],
+              const SizedBox(width: 12),
+              // Track Info
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      track.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: isCurrent ? colors.accent : colors.textPrimary,
+                        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        if (track.source == TrackSource.soundcloud) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'SC',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orangeAccent,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                        ] else ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'YT',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                        ],
+                        Expanded(
+                          child: Text(
+                            subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Действия',
+                icon: Icon(Icons.more_vert_rounded,
+                    color: colors.textSecondary.withValues(alpha: 0.7),
+                    size: 20),
+                onPressed: () => _showActions(context, ref, isFav),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -480,29 +1126,52 @@ class _SearchResultTile extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: colors.surface,
-      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (sheetContext) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.textSecondary.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 12),
             ListTile(
               leading: TrackArtwork(
                 url: track.artworkUrl,
-                size: 44,
+                size: 46,
+                borderRadius: BorderRadius.circular(10),
                 placeholderColor: colors.background,
                 iconColor: colors.textSecondary,
               ),
-              title: Text(track.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      color: colors.textPrimary, fontWeight: FontWeight.w600)),
-              subtitle: Text(track.artist,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colors.textSecondary)),
+              title: Text(
+                track.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              subtitle: Text(
+                track.artist,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: colors.textSecondary, fontSize: 13),
+              ),
             ),
-            const Divider(height: 1),
+            Divider(
+              height: 1,
+              color: colors.border.withValues(alpha: 0.3),
+            ),
             ListTile(
               leading: Icon(
                 isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
@@ -533,6 +1202,7 @@ class _SearchResultTile extends ConsumerWidget {
                   ));
               },
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),

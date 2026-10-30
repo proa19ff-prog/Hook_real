@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme_engine/domain/hook_theme.dart';
+import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../data/audio_player_service.dart';
 import 'player_state_provider.dart';
 
@@ -28,7 +29,7 @@ class PlaybackControls extends ConsumerWidget {
       backgroundColor: theme.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(theme.styling.borderRadius)),
+            top: Radius.circular(theme.styling.borderRadius + 4)),
       ),
       builder: (ctx) {
         return StatefulBuilder(
@@ -39,6 +40,17 @@ class PlaybackControls extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.colors.textSecondary.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   Text(
                     'Скорость и тональность',
                     style: TextStyle(
@@ -47,7 +59,7 @@ class PlaybackControls extends ConsumerWidget {
                       color: theme.colors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -78,7 +90,7 @@ class PlaybackControls extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Высота тона (Pitch): ${pitch.toStringAsFixed(2)}x',
+                      Text('Высота тона: ${pitch.toStringAsFixed(2)}x',
                           style: TextStyle(color: theme.colors.textSecondary)),
                       TextButton(
                         onPressed: () {
@@ -116,21 +128,29 @@ class PlaybackControls extends ConsumerWidget {
     final isPlaying = ref.watch(isPlayingProvider);
     final isLoading = ref.watch(isTrackLoadingProvider);
 
+    final ambient = AmbientThemeScope.of(context);
+    final isLight = ambient?.isLight ?? false;
+    final textPrimary = ambient?.textPrimary ?? theme.colors.textPrimary;
+    final textSecondary = ambient?.textSecondary ?? theme.colors.textSecondary;
+    final playBtnBg = isLight ? const Color(0xFF141419) : theme.colors.textPrimary;
+    final playBtnFg = isLight ? Colors.white : theme.colors.background;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _SeekBar(theme: theme, formatDuration: _formatDuration),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
 
         // Main Control Buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            // Secondary playback actions stay behind the overflow menu.
+            // More options
             PopupMenuButton<String>(
               tooltip: 'Дополнительные действия',
-              icon: Icon(Icons.more_vert, color: theme.colors.textSecondary),
+              icon: Icon(Icons.more_horiz_rounded,
+                  color: textSecondary, size: 24),
               onSelected: (value) {
                 if (value == 'speed_pitch') {
                   _showSpeedPitchSheet(context, playerService);
@@ -145,66 +165,83 @@ class PlaybackControls extends ConsumerWidget {
             ),
 
             // Previous
-            IconButton(
-              tooltip: 'Предыдущий',
-              icon: Icon(Icons.skip_previous_rounded,
-                  color: theme.colors.textPrimary, size: 38),
-              onPressed: playerService.previous,
+            _ControlButton(
+              icon: Icons.skip_previous_rounded,
+              size: 36,
+              color: textPrimary,
+              onTap: playerService.previous,
             ),
 
-            // Play / Pause
+            // Play / Pause — Grand central button
             Container(
-              width: 72,
-              height: 72,
+              width: 76,
+              height: 76,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: theme.colors.textPrimary,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    playBtnBg,
+                    playBtnBg.withValues(alpha: 0.88),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: playBtnBg.withValues(alpha: isLight ? 0.3 : 0.25),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               child: isLoading
                   ? Padding(
                       padding: const EdgeInsets.all(22),
                       child: CircularProgressIndicator(
                         strokeWidth: 3,
-                        color: theme.colors.background,
+                        color: playBtnFg,
                       ),
                     )
                   : IconButton(
                       tooltip: isPlaying ? 'Пауза' : 'Играть',
-                      iconSize: 40,
-                      icon: Icon(
-                        isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        color: theme.colors.background,
+                      iconSize: 42,
+                      icon: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          key: ValueKey(isPlaying),
+                          color: playBtnFg,
+                          size: 42,
+                        ),
                       ),
                       onPressed: playerService.togglePlayPause,
                     ),
             ),
 
             // Next
-            IconButton(
-              tooltip: 'Следующий',
-              icon: Icon(Icons.skip_next_rounded,
-                  color: theme.colors.textPrimary, size: 38),
-              onPressed: playerService.next,
+            _ControlButton(
+              icon: Icons.skip_next_rounded,
+              size: 36,
+              color: textPrimary,
+              onTap: playerService.next,
             ),
 
-            // Loop Toggle. Loop mode lives in the service and has no stream,
-            // so this button keeps its own rebuild trigger.
+            // Loop Toggle
             StatefulBuilder(
               builder: (context, setLocalState) {
                 final mode = playerService.loopMode;
-                return IconButton(
-                  tooltip: 'Повтор',
-                  icon: Icon(
-                    mode == PlayerLoopMode.one
-                        ? Icons.repeat_one_rounded
-                        : Icons.repeat_rounded,
-                    color: mode != PlayerLoopMode.off
-                        ? theme.colors.primary
-                        : theme.colors.textSecondary,
-                  ),
-                  onPressed: () =>
+                return _ControlButton(
+                  icon: mode == PlayerLoopMode.one
+                      ? Icons.repeat_one_rounded
+                      : Icons.repeat_rounded,
+                  size: 24,
+                  color: mode != PlayerLoopMode.off
+                      ? theme.colors.accent
+                      : textSecondary,
+                  onTap: () =>
                       setLocalState(playerService.toggleLoopMode),
                 );
               },
@@ -216,9 +253,40 @@ class PlaybackControls extends ConsumerWidget {
   }
 }
 
-/// Timeline slider. Kept separate so position updates rebuild only the
-/// slider and labels. While dragging, the thumb follows the finger locally
-/// and a single seek is sent on release instead of one per pixel.
+/// Reusable circular control button with splash
+class _ControlButton extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final Color color;
+  final VoidCallback? onTap;
+
+  const _ControlButton({
+    required this.icon,
+    required this.size,
+    required this.color,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Icon(icon, color: color, size: size),
+        ),
+      ),
+    );
+  }
+}
+
+/// Timeline slider. While dragging, the thumb follows the finger locally
+/// and a single seek is sent on release.
 class _SeekBar extends ConsumerStatefulWidget {
   final HookTheme theme;
   final String Function(Duration?) formatDuration;
@@ -247,6 +315,12 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
             : 0.0);
     final shownPosition = Duration(milliseconds: sliderVal.toInt());
 
+    final ambient = AmbientThemeScope.of(context);
+    final textSecondary = ambient?.textSecondary ?? theme.colors.textSecondary;
+    final inactiveTrack = ambient?.isLight == true
+        ? Colors.black.withValues(alpha: 0.16)
+        : theme.colors.border.withValues(alpha: 0.5);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -254,10 +328,11 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
           data: SliderThemeData(
             trackHeight: 4,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            activeTrackColor: theme.colors.textPrimary,
-            inactiveTrackColor: theme.colors.border,
-            thumbColor: theme.colors.textPrimary,
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+            activeTrackColor: theme.colors.accent,
+            inactiveTrackColor: inactiveTrack,
+            thumbColor: theme.colors.accent,
+            overlayColor: theme.colors.accent.withValues(alpha: 0.15),
           ),
           child: Slider(
             value: sliderVal,
@@ -275,23 +350,25 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 widget.formatDuration(shownPosition),
                 style: TextStyle(
-                  color: theme.colors.textSecondary,
+                  color: textSecondary,
                   fontSize: 12,
+                  fontWeight: FontWeight.w500,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
               Text(
                 widget.formatDuration(duration),
                 style: TextStyle(
-                  color: theme.colors.textSecondary,
+                  color: textSecondary,
                   fontSize: 12,
+                  fontWeight: FontWeight.w500,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),

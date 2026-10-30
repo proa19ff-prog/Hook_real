@@ -4,6 +4,7 @@ import '../../extractor/models/media_track.dart';
 import '../../extractor/stream_resolver.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../lyrics/data/lrclib_client.dart';
+import '../../recommendations/recommendation_service.dart';
 import '../../theme_engine/data/theme_manager.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../data/audio_player_service.dart';
@@ -33,26 +34,53 @@ final lrclibClientProvider = Provider<LrclibClient>((ref) {
   return LrclibClient();
 });
 
-// Theme Management Provider
+final recommendationServiceProvider = Provider<RecommendationService>((ref) {
+  final storage = ref.watch(localStorageServiceProvider);
+  final resolver = ref.watch(streamResolverProvider);
+  return RecommendationService(storage: storage, resolver: resolver);
+});
+
+// Theme Management Provider with Persistence
 class ThemeNotifier extends StateNotifier<HookTheme> {
   final ThemeManager _manager;
+  final Ref _ref;
 
-  ThemeNotifier(this._manager) : super(_manager.currentTheme);
+  ThemeNotifier(this._manager, this._ref) : super(_manager.currentTheme);
 
   Future<void> init() async {
-    await _manager.initialize();
-    state = _manager.currentTheme;
+    try {
+      final storage = _ref.read(localStorageServiceProvider);
+      final savedThemeId = storage.getSavedThemeId();
+      final savedCustomJson = storage.getSavedCustomThemeJson();
+      await _manager.initialize(
+        savedThemeId: savedThemeId,
+        savedCustomJson: savedCustomJson,
+      );
+      state = _manager.currentTheme;
+    } catch (_) {
+      await _manager.initialize();
+      state = _manager.currentTheme;
+    }
   }
 
   void setTheme(String themeId) {
     _manager.setActiveTheme(themeId);
     state = _manager.currentTheme;
+    try {
+      final storage = _ref.read(localStorageServiceProvider);
+      storage.saveThemeId(themeId);
+    } catch (_) {}
   }
 
   void importJson(String jsonString) {
     final imported = _manager.importThemeFromJson(jsonString);
     if (imported != null) {
       state = imported;
+      try {
+        final storage = _ref.read(localStorageServiceProvider);
+        storage.saveThemeId(imported.id);
+        storage.saveCustomThemeJson(jsonString);
+      } catch (_) {}
     }
   }
 
@@ -61,7 +89,7 @@ class ThemeNotifier extends StateNotifier<HookTheme> {
 
 final themeProvider = StateNotifierProvider<ThemeNotifier, HookTheme>((ref) {
   final manager = ThemeManager();
-  final notifier = ThemeNotifier(manager);
+  final notifier = ThemeNotifier(manager, ref);
   notifier.init();
   return notifier;
 });

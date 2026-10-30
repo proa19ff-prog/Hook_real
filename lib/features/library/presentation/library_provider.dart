@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
+import '../../import/music_import_service.dart';
 
 // Providers for local storage & cache
 final localStorageServiceProvider = Provider<LocalStorageService>((ref) {
@@ -13,6 +14,12 @@ final localStorageServiceProvider = Provider<LocalStorageService>((ref) {
 
 final audioCacheManagerProvider = Provider<AudioCacheManager>((ref) {
   return AudioCacheManager();
+});
+
+final musicImportServiceProvider = Provider<MusicImportService>((ref) {
+  final service = MusicImportService();
+  ref.onDispose(() => service.close());
+  return service;
 });
 
 // Favorites State Notifier
@@ -68,6 +75,33 @@ final historyProvider =
     StateNotifierProvider<HistoryNotifier, List<MediaTrack>>((ref) {
   final storage = ref.watch(localStorageServiceProvider);
   return HistoryNotifier(storage);
+});
+
+// Playlists State Notifier
+class PlaylistsNotifier extends StateNotifier<Map<String, List<MediaTrack>>> {
+  final LocalStorageService _storage;
+
+  PlaylistsNotifier(this._storage) : super(_storage.getPlaylists());
+
+  void refresh() {
+    state = _storage.getPlaylists();
+  }
+
+  Future<void> savePlaylist(String name, List<MediaTrack> tracks) async {
+    await _storage.savePlaylist(name, tracks);
+    state = _storage.getPlaylists();
+  }
+
+  Future<void> deletePlaylist(String name) async {
+    await _storage.deletePlaylist(name);
+    state = _storage.getPlaylists();
+  }
+}
+
+final playlistsProvider =
+    StateNotifierProvider<PlaylistsNotifier, Map<String, List<MediaTrack>>>((ref) {
+  final storage = ref.watch(localStorageServiceProvider);
+  return PlaylistsNotifier(storage);
 });
 
 // Cache size future provider
