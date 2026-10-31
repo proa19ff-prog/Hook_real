@@ -12,9 +12,15 @@ Future<void> main() async {
   try {
     await JustAudioBackground.init(
       androidNotificationChannelId: 'com.hook.music.channel.audio',
-      androidNotificationChannelName: 'Hook Music Playback',
+      androidNotificationChannelName: 'Воспроизведение',
+      androidNotificationChannelDescription: 'Управление музыкой в шторке',
+      androidNotificationIcon: 'drawable/ic_stat_hook',
       androidNotificationOngoing: true,
       androidStopForegroundOnPause: true,
+      // Covers come at 500–600 px; a smaller bitmap shows up sooner.
+      artDownscaleWidth: 300,
+      artDownscaleHeight: 300,
+      preloadArtwork: true,
     );
   } catch (_) {
     // Graceful fallback on unsupported platforms

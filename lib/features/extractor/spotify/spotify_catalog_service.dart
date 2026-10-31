@@ -7,10 +7,15 @@ class SpotifyCatalogService {
 
   SpotifyCatalogService({Dio? dio}) : _dio = dio ?? Dio();
 
+  static final _cyrillic = RegExp(r'[а-яё]', caseSensitive: false);
+
   /// Searches tracks from the global streaming catalog (Spotify / Studio releases).
+  /// Cyrillic queries go to the Russian storefront: the default US one is
+  /// missing most Russian releases.
   Future<List<MediaTrack>> searchTracks(String query, {int limit = 25}) async {
     final cleanQuery = query.trim();
     if (cleanQuery.isEmpty) return const [];
+    final country = _cyrillic.hasMatch(cleanQuery) ? 'ru' : 'us';
 
     try {
       final res = await _dio.get<String>(
@@ -19,6 +24,7 @@ class SpotifyCatalogService {
           'term': cleanQuery,
           'entity': 'song',
           'limit': limit,
+          'country': country,
         },
         options: Options(
           headers: {

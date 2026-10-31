@@ -169,6 +169,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           _searchResults = results;
           _isLoading = false;
         });
+        // The top results are what users tap; resolving them now leaves only
+        // buffering for the tap.
+        ref.read(audioPlayerServiceProvider).prefetch(results.take(2));
       }
     } catch (e) {
       if (mounted && requestId == _searchRequestId) {

@@ -61,4 +61,35 @@ void main() {
     expect(originalScore, greaterThan(slowedScore));
     expect(originalScore, greaterThan(loopScore));
   });
+
+  MediaTrack track(String title, String artist, {int sec = 220}) => MediaTrack(
+        id: '$artist-$title',
+        title: title,
+        artist: artist,
+        artworkUrl: '',
+        duration: Duration(seconds: sec),
+        source: TrackSource.spotify,
+      );
+
+  test('scoreTrack matches Cyrillic titles', () {
+    final right = track('ДИНАСТИЯ', 'VILLIAN & madk1d');
+    final wrong = track('Движуха', 'Пал Лаич');
+    expect(
+      StreamResolver.scoreTrack(right, 'династия madkid'),
+      greaterThan(StreamResolver.scoreTrack(wrong, 'династия madkid') + 200),
+    );
+  });
+
+  test('scoreTrack finds a title by its first word', () {
+    final full = track('Sweater Weather', 'The Neighbourhood');
+    final other = track('Summer Rain', 'Someone');
+    expect(
+      StreamResolver.scoreTrack(full, 'sweater'),
+      greaterThan(StreamResolver.scoreTrack(other, 'sweater') + 200),
+    );
+    expect(
+      StreamResolver.scoreTrack(full, 'sweat'),
+      greaterThan(StreamResolver.scoreTrack(other, 'sweat')),
+    );
+  });
 }

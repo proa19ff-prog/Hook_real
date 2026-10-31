@@ -127,6 +127,21 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     });
   }
 
+  /// Clamps a palette color into a calm, dark range: capped saturation and
+  /// lightness keep the background behind white text and controls.
+  static Color _tame(
+    Color c, {
+    required double maxSat,
+    required double minLight,
+    required double maxLight,
+  }) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl
+        .withSaturation(hsl.saturation.clamp(0.0, maxSat))
+        .withLightness(hsl.lightness.clamp(minLight, maxLight))
+        .toColor();
+  }
+
   Future<void> _updatePalette() async {
     final artUrl = widget.artworkUrl;
     _paletteUrl = artUrl;
@@ -144,17 +159,25 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
       if (!mounted || _paletteUrl != artUrl) return;
 
       final dominant = palette.dominantColor?.color ?? widget.theme.colors.primary;
-      final vibrant = palette.vibrantColor?.color ?? widget.theme.colors.secondary;
-      final muted = palette.mutedColor?.color ?? widget.theme.colors.accent;
-      final darkMuted = palette.darkMutedColor?.color ?? widget.theme.colors.background;
-      final isLight = dominant.computeLuminance() > 0.58;
+      // Muted swatches first: raw vibrant swatches are what made the mesh
+      // garish (neon greens, hot pinks at full saturation).
+      final second = palette.darkVibrantColor?.color ??
+          palette.mutedColor?.color ??
+          widget.theme.colors.secondary;
+      final third = palette.mutedColor?.color ??
+          palette.vibrantColor?.color ??
+          widget.theme.colors.accent;
+      final base = palette.darkMutedColor?.color ?? widget.theme.colors.background;
 
       setState(() {
-        _c1 = dominant;
-        _c2 = vibrant;
-        _c3 = muted;
-        _c4 = darkMuted;
-        _isLightBackground = isLight;
+        _c1 = _tame(dominant, maxSat: 0.55, minLight: 0.22, maxLight: 0.42);
+        _c2 = _tame(second, maxSat: 0.50, minLight: 0.18, maxLight: 0.36);
+        _c3 = _tame(third, maxSat: 0.45, minLight: 0.16, maxLight: 0.32);
+        _c4 = _tame(base, maxSat: 0.35, minLight: 0.05, maxLight: 0.12);
+        // The mesh is always dark after taming, so text stays light on it.
+        // The aurora fallback still follows the raw artwork brightness.
+        _isLightBackground = !widget.theme.styling.shaderMeshEnabled &&
+            dominant.computeLuminance() > 0.58;
       });
     } catch (_) {
       if (mounted && _paletteUrl == artUrl) _useThemeColors();

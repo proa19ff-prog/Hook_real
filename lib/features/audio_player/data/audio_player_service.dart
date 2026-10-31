@@ -33,12 +33,24 @@ class AudioPlayerService {
   final StreamController<MediaTrack?> _trackController =
       StreamController<MediaTrack?>.broadcast();
 
-  /// Resolved stream URLs keyed by cache key. YouTube URLs stay valid for
-  /// about six hours, so reusing them makes replays and "previous" instant.
+  /// Resolved stream URLs keyed by cache key, so replays and "previous" are
+  /// instant. SoundCloud signs URLs for about two hours; the TTL stays well
+  /// under that so a cached URL never reaches the player already expired.
   final Map<String, ({String url, Map<String, String> headers, DateTime resolvedAt})>
       _urlCache = {};
   final Map<String, Future<ResolvedStream?>> _pendingStreams = {};
-  static const _urlTtl = Duration(hours: 2);
+  static const _urlTtl = Duration(minutes: 60);
+
+  /// ExoPlayer waits for 2.5 s of audio before starting by default. Half a
+  /// second is enough for SoundCloud's CDN and starts playback sooner.
+  static const _loadConfiguration = AudioLoadConfiguration(
+    androidLoadControl: AndroidLoadControl(
+      minBufferDuration: Duration(seconds: 15),
+      maxBufferDuration: Duration(seconds: 50),
+      bufferForPlaybackDuration: Duration(milliseconds: 500),
+      bufferForPlaybackAfterRebufferDuration: Duration(seconds: 2),
+    ),
+  );
   StreamSubscription<void>? _noisySubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
   int _currentIndex = -1;
@@ -53,7 +65,8 @@ class AudioPlayerService {
     StreamResolver? resolver,
     AudioCacheManager? cacheManager,
     LocalStorageService? storageService,
-  })  : _player = player ?? AudioPlayer(),
+  })  : _player =
+            player ?? AudioPlayer(audioLoadConfiguration: _loadConfiguration),
         _resolver = resolver ?? StreamResolver(),
         _cacheManager = cacheManager ?? AudioCacheManager(),
         _storageService = storageService;
@@ -125,6 +138,15 @@ class AudioPlayerService {
   void _prefetchNext() {
     if (_isShuffle || _currentIndex + 1 >= _queue.length) return;
     _resolveUrl(_queue[_currentIndex + 1]).ignore();
+  }
+
+  /// Resolves streams ahead of a tap (e.g. the top search results), so the
+  /// tap only has to buffer audio. Failures are ignored; a tap resolves again.
+  void prefetch(Iterable<MediaTrack> tracks) {
+    for (final track in tracks) {
+      if (track.source == TrackSource.local) continue;
+      _resolveUrl(track).catchError((_) => null).ignore();
+    }
   }
 
   /// Initializes audio session for background focus & headset unplug handling
@@ -233,7 +255,10 @@ class AudioPlayerService {
       final playUrl = stream?.url;
       if (playUrl == null || playUrl.isEmpty) return false;
 
-      final isLocal = playUrl.startsWith('file:') || File(playUrl).existsSync();
+      final isRemote =
+          playUrl.startsWith('http://') || playUrl.startsWith('https://');
+      final isLocal = !isRemote &&
+          (playUrl.startsWith('file:') || File(playUrl).existsSync());
       final audioSource = isLocal
           ? AudioSource.file(
               playUrl.startsWith('file:')
@@ -272,23 +297,31 @@ class AudioPlayerService {
     }
 
     try {
+      // Resolve while the session finishes initializing instead of after it.
+      // Errors are swallowed here because they could land before tryStart
+      // listens; a failed first attempt is retried below anyway.
+      final firstStream =
+          _resolveStream(track).catchError((Object _) => null);
       await initialize();
 
-      // Stop previous track completely to unload its audio source and reset position
+      // Unload the previous track. The stream is already resolving in
+      // parallel, so this wait costs nothing; the idle state also drives
+      // the loading indicator.
       await _player.stop();
 
-      // Attempt 1: cached or freshly resolved stream.
-      if (await tryStart(() => _resolveStream(track),
+      // Attempt 1: cached, prefetched, or freshly resolved stream.
+      if (await tryStart(() => firstStream,
           timeout: const Duration(seconds: 25))) {
         return;
       }
 
       if (requestId != _playRequestId) return;
 
-      // Attempt 2: the cached/signed URL may have expired (HTTP 403 at the CDN).
-      // Drop it so the resolver resolves afresh (SoundCloud also auto-refreshes
-      // its client_id on auth failures).
+      // Attempt 2: the cached/signed URL may have expired (HTTP 403 at the CDN)
+      // or the matched upload is broken. Drop both so the resolver picks
+      // afresh (SoundCloud also auto-refreshes its client_id on auth failures).
       _urlCache.remove(_cacheKey(track));
+      _resolver.forgetMatch(track);
       if (await tryStart(() => _resolveStream(track),
           timeout: const Duration(seconds: 25))) {
         return;

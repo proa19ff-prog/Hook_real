@@ -7,6 +7,14 @@ class SoundCloudExtractor {
   String _clientId;
   bool _isRefreshingKey = false;
 
+  /// Media info captured from search responses, so starting a found track
+  /// skips the extra `/tracks/{id}` round-trip.
+  final Map<String, Map<String, dynamic>> _mediaCache = {};
+  final Map<String, int> _playCounts = {};
+
+  /// Play count seen in the last search response (0 when unknown).
+  int playbackCount(String trackId) => _playCounts[trackId] ?? 0;
+
   SoundCloudExtractor({Dio? dio, String? clientId})
       : _dio = dio ?? Dio(),
         _clientId = clientId ?? ApiConstants.soundCloudFallbackClientId;
@@ -89,7 +97,13 @@ class SoundCloudExtractor {
         final id = (item['id'] ?? '').toString();
         final title = item['title'] as String? ?? 'Unknown Title';
         final user = item['user'] as Map<String, dynamic>?;
-        final artist = user?['username'] as String? ?? 'Unknown Artist';
+        // Label uploads carry the real performers in publisher metadata
+        // (e.g. uploader "VILLIAN", artist "VILLIAN & madk1d").
+        final publisherArtist =
+            ((item['publisher_metadata'] as Map?)?['artist'] as String?)?.trim();
+        final artist = (publisherArtist != null && publisherArtist.isNotEmpty)
+            ? publisherArtist
+            : user?['username'] as String? ?? 'Unknown Artist';
         final durationMs = item['duration'] as int? ?? 0;
         final fullDurationMs = item['full_duration'] as int? ?? durationMs;
         final policy = (item['policy'] as String? ?? '').toUpperCase();
@@ -112,6 +126,17 @@ class SoundCloudExtractor {
         } else if (artworkUrl.contains('-t300x300.')) {
           artworkUrl = artworkUrl.replaceAll('-t300x300.', '-t500x500.');
         }
+
+        final media = item['media'];
+        if (media is Map && (media['transcodings'] as List?)?.isNotEmpty == true) {
+          if (_mediaCache.length > 500) _mediaCache.clear();
+          _mediaCache[id] = {
+            'media': media,
+            'duration': item['duration'],
+            'track_authorization': item['track_authorization'],
+          };
+        }
+        _playCounts[id] = (item['playback_count'] as num?)?.toInt() ?? 0;
 
         tracks.add(
           MediaTrack(
@@ -141,6 +166,18 @@ class SoundCloudExtractor {
 
   /// Resolves the actual streaming URL for a SoundCloud track by track ID.
   Future<String?> resolveAudioStreamUrl(String trackId, {bool isRetry = false}) async {
+    // Fast path: transcodings from the search response, one request to start.
+    final cached = isRetry ? null : _mediaCache[trackId];
+    if (cached != null) {
+      try {
+        final url = await _resolveFromTrackData(cached);
+        if (url != null && url.isNotEmpty) return url;
+      } catch (_) {
+        // Stale search data; fall through to the full track lookup.
+      }
+      _mediaCache.remove(trackId);
+    }
+
     try {
       final trackDetailsRes = await _dio.get(
         '${ApiConstants.soundCloudApiBaseUrl}/tracks/$trackId',
@@ -148,76 +185,8 @@ class SoundCloudExtractor {
       ).timeout(const Duration(seconds: 10));
 
       final trackData = trackDetailsRes.data;
-      if (trackData == null || trackData['media'] == null) return null;
-
-      final transcodings = trackData['media']['transcodings'] as List?;
-      if (transcodings == null || transcodings.isEmpty) return null;
-
-      // Filter out any encrypted/DRM transcodings that standard players cannot play
-      final playableTranscodings = transcodings.where((t) {
-        if (t is! Map<String, dynamic>) return false;
-        final format = t['format'] as Map<String, dynamic>?;
-        final protocol = (format?['protocol'] as String? ?? '').toLowerCase();
-        final mimeType = (format?['mime_type'] as String? ?? '').toLowerCase();
-        final isEncrypted = protocol.contains('encrypted') ||
-            protocol.contains('drm') ||
-            mimeType.contains('encrypted');
-        return !isEncrypted;
-      }).toList();
-
-      // Separate full tracks from 30s preview snippets (SoundCloud Go+ previews)
-      final trackDurationMs = (trackData['duration'] as num?) ?? 0;
-      final fullTranscodings = playableTranscodings.where((t) {
-        final isSnipped = t['snipped'] == true;
-        final url = (t['url'] as String? ?? '').toLowerCase();
-        final isPreviewUrl = url.contains('/preview');
-        final tDur = (t['duration'] as num?) ?? 0;
-        final isDurationSnippet = trackDurationMs > 40000 && tDur > 0 && tDur <= 35000;
-        return !isSnipped && !isPreviewUrl && !isDurationSnippet;
-      }).toList();
-
-      // Prefer full non-snipped transcodings
-      final candidateTranscodings = fullTranscodings.isNotEmpty
-          ? fullTranscodings
-          : playableTranscodings;
-
-      Map<String, dynamic>? targetTranscoding;
-
-      // 1. If full transcodings exist, prioritize full progressive or full HLS
-      for (final t in candidateTranscodings) {
-        final format = t['format'] as Map<String, dynamic>?;
-        if (format?['protocol'] == 'progressive' && t['snipped'] != true) {
-          targetTranscoding = t;
-          break;
-        }
-      }
-
-      // 2. Prioritize clean HLS streams
-      if (targetTranscoding == null) {
-        for (final t in candidateTranscodings) {
-          final format = t['format'] as Map<String, dynamic>?;
-          if (format?['protocol'] == 'hls') {
-            targetTranscoding = t;
-            break;
-          }
-        }
-      }
-
-      // 3. Fallback to any remaining candidate
-      targetTranscoding ??= candidateTranscodings.isNotEmpty
-          ? (candidateTranscodings.first as Map<String, dynamic>?)
-          : (transcodings.first as Map<String, dynamic>?);
-
-      if (targetTranscoding == null) return null;
-
-      final streamInfoUrl = targetTranscoding['url'] as String;
-      final streamResolveRes = await _dio.get(
-        streamInfoUrl,
-        queryParameters: {'client_id': _clientId},
-      ).timeout(const Duration(seconds: 10));
-
-      final streamUrl = streamResolveRes.data?['url'] as String?;
-      return streamUrl;
+      if (trackData is! Map<String, dynamic>) return null;
+      return await _resolveFromTrackData(trackData);
     } on DioException catch (dioErr) {
       if (!isRetry && dioErr.response?.statusCode == 401) {
         final newKey = await refreshClientId();
@@ -235,6 +204,87 @@ class SoundCloudExtractor {
         StackTrace.current,
       );
     }
+  }
+
+  /// Picks the fastest-starting playable transcoding and resolves its signed
+  /// URL. Falls through to the next transcoding when one answers 404 (the
+  /// `abr_sq` preset does on most tracks).
+  Future<String?> _resolveFromTrackData(Map<String, dynamic> trackData) async {
+    final media = trackData['media'];
+    if (media is! Map) return null;
+    final transcodings = media['transcodings'] as List?;
+    if (transcodings == null || transcodings.isEmpty) return null;
+
+
+    final trackDurationMs = (trackData['duration'] as num?) ?? 0;
+    final playable = <Map<String, dynamic>>[];
+    for (final t in transcodings) {
+      if (t is! Map<String, dynamic>) continue;
+      final format = t['format'] as Map<String, dynamic>?;
+      final protocol = (format?['protocol'] as String? ?? '').toLowerCase();
+      final mimeType = (format?['mime_type'] as String? ?? '').toLowerCase();
+      // Encrypted/DRM streams can't be played by a standard player.
+      if (protocol.contains('encrypted') ||
+          protocol.contains('drm') ||
+          mimeType.contains('encrypted')) {
+        continue;
+      }
+      playable.add(t);
+    }
+    if (playable.isEmpty) return null;
+
+    // Separate full tracks from 30s preview snippets (SoundCloud Go+ previews).
+    bool isFull(Map<String, dynamic> t) {
+      final url = (t['url'] as String? ?? '').toLowerCase();
+      final tDur = (t['duration'] as num?) ?? 0;
+      final isDurationSnippet =
+          trackDurationMs > 40000 && tDur > 0 && tDur <= 35000;
+      return t['snipped'] != true && !url.contains('/preview') && !isDurationSnippet;
+    }
+
+    final full = playable.where(isFull).toList();
+    final candidates = full.isNotEmpty ? full : playable;
+
+    // Progressive MP3 is one file, so the player starts after a single
+    // request. Plain HLS needs a playlist fetch first. `abr_sq` presets
+    // currently answer 404, so they go last.
+    int rank(Map<String, dynamic> t) {
+      final protocol = (t['format'] as Map?)?['protocol'];
+      final preset = (t['preset'] as String? ?? '').toLowerCase();
+      if (protocol == 'progressive') return 0;
+      if (preset.startsWith('abr')) return 3;
+      if (protocol == 'hls') return preset.contains('160') ? 1 : 2;
+      return 4;
+    }
+
+    candidates.sort((a, b) => rank(a).compareTo(rank(b)));
+
+    final auth = trackData['track_authorization'] as String?;
+    Object? lastError;
+    for (final t in candidates.take(3)) {
+      final streamInfoUrl = t['url'] as String?;
+      if (streamInfoUrl == null) continue;
+      try {
+        final res = await _dio.get(
+          streamInfoUrl,
+          queryParameters: {
+            'client_id': _clientId,
+            if (auth != null && auth.isNotEmpty) 'track_authorization': auth,
+          },
+        ).timeout(const Duration(seconds: 8));
+        final data = res.data;
+        final url = data is Map ? data['url'] as String? : null;
+        if (url != null && url.isNotEmpty) return url;
+      } on DioException catch (e) {
+        // A 401 means the client_id is stale; let the caller refresh it.
+        if (e.response?.statusCode == 401) rethrow;
+        lastError = e;
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    if (lastError != null) throw lastError;
+    return null;
   }
 
   void close() {
