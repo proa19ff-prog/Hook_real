@@ -36,6 +36,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
       ),
       builder: (ctx) {
         final playerService = ref.watch(audioPlayerServiceProvider);
+        ref.watch(queueChangesProvider);
         final queue = playerService.queue;
         final currentIndex = playerService.currentIndex;
 
@@ -150,8 +151,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                         itemCount: queue.length,
                         separatorBuilder: (_, __) => Divider(
                           height: 1,
-                          color: widget.theme.colors.border
-                              .withValues(alpha: 0.2),
+                          color:
+                              widget.theme.colors.border.withValues(alpha: 0.2),
                         ),
                         itemBuilder: (context, i) {
                           final track = queue[i];
@@ -179,7 +180,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                   Positioned.fill(
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.35),
+                                        color: Colors.black
+                                            .withValues(alpha: 0.35),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Center(
@@ -232,7 +234,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                   )
                                 : null,
                             onTap: () {
-                              playerService.playTrack(track);
+                              ref.read(queueProvider.notifier).playAt(i);
                               Navigator.of(ctx).pop();
                             },
                           );
@@ -268,10 +270,13 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
           builder: (context) {
             final ambient = AmbientThemeScope.of(context);
             final textPrimary = ambient?.textPrimary ?? colors.textPrimary;
-            final textSecondary = ambient?.textSecondary ?? colors.textSecondary;
+            final textSecondary =
+                ambient?.textSecondary ?? colors.textSecondary;
             final iconColor = ambient?.iconColor ?? colors.textPrimary;
-            final cardBg = ambient?.cardBackground ?? colors.surfaceGlass.withValues(alpha: 0.3);
-            final cardBorder = ambient?.cardBorder ?? colors.border.withValues(alpha: 0.3);
+            final cardBg = ambient?.cardBackground ??
+                colors.surfaceGlass.withValues(alpha: 0.3);
+            final cardBorder =
+                ambient?.cardBorder ?? colors.border.withValues(alpha: 0.3);
 
             return SafeArea(
               child: Column(
@@ -351,9 +356,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       ? MingCuteIcons.mgc_heart_fill
                                       : MingCuteIcons.mgc_heart_line,
                                   key: ValueKey(isFavorite),
-                                  color: isFavorite
-                                      ? Colors.redAccent
-                                      : iconColor,
+                                  color:
+                                      isFavorite ? Colors.redAccent : iconColor,
                                   size: 22,
                                 ),
                               ),
@@ -370,14 +374,28 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                               onPressed: () => _showQueueSheet(context),
                             ),
                             IconButton(
-                              tooltip: _showLyrics ? 'Обложка' : 'Текст караоке',
+                              tooltip: 'Запустить волну',
+                              icon: Icon(
+                                MingCuteIcons.mgc_sound_line_fill,
+                                color: iconColor,
+                                size: 22,
+                              ),
+                              onPressed: track == null
+                                  ? null
+                                  : () async {
+                                      await ref
+                                          .read(queueProvider.notifier)
+                                          .startWave(track);
+                                    },
+                            ),
+                            IconButton(
+                              tooltip:
+                                  _showLyrics ? 'Обложка' : 'Текст караоке',
                               icon: Icon(
                                 _showLyrics
                                     ? MingCuteIcons.mgc_music_fill
                                     : MingCuteIcons.mgc_subtitle_line,
-                                color: _showLyrics
-                                    ? colors.accent
-                                    : iconColor,
+                                color: _showLyrics ? colors.accent : iconColor,
                                 size: 22,
                               ),
                               onPressed: () {
@@ -411,12 +429,14 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                         borderRadius: BorderRadius.circular(
                                             (borderRadius * 1.2).clamp(18, 28)),
                                         border: Border.all(
-                                          color: Colors.white.withValues(alpha: 0.12),
+                                          color: Colors.white
+                                              .withValues(alpha: 0.12),
                                           width: 1.2,
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.45),
+                                            color: Colors.black
+                                                .withValues(alpha: 0.45),
                                             blurRadius: 36,
                                             spreadRadius: 2,
                                             offset: const Offset(0, 18),
@@ -432,10 +452,12 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                         image: track.artworkUrl.isNotEmpty
                                             ? DecorationImage(
                                                 image: NetworkImage(
-                                                  TrackArtwork.getHighResUrl(track.artworkUrl),
+                                                  TrackArtwork.getHighResUrl(
+                                                      track.artworkUrl),
                                                 ),
                                                 fit: BoxFit.cover,
-                                                filterQuality: FilterQuality.high,
+                                                filterQuality:
+                                                    FilterQuality.high,
                                               )
                                             : null,
                                         color: colors.surface,
@@ -456,8 +478,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
 
                   // Track Title & Artist
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 10),
                     child: Column(
                       children: [
                         Text(
@@ -491,7 +513,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
 
                   // Playback Controls
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+                    padding:
+                        const EdgeInsets.only(bottom: 24, left: 16, right: 16),
                     child: PlaybackControls(theme: widget.theme),
                   ),
                 ],

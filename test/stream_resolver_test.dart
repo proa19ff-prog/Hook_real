@@ -54,8 +54,10 @@ void main() {
       source: TrackSource.soundcloud,
     );
 
-    final originalScore = StreamResolver.scoreTrack(original, 'alan walker faded');
-    final slowedScore = StreamResolver.scoreTrack(slowedReverb, 'alan walker faded');
+    final originalScore =
+        StreamResolver.scoreTrack(original, 'alan walker faded');
+    final slowedScore =
+        StreamResolver.scoreTrack(slowedReverb, 'alan walker faded');
     final loopScore = StreamResolver.scoreTrack(loop1Hour, 'alan walker faded');
 
     expect(originalScore, greaterThan(slowedScore));
@@ -93,11 +95,16 @@ void main() {
     final original = sc('"Sweater Weather"', 'theneighbourhood', 240);
     final remix = sc('The Neighbourhood - Sweater Weather (Marcus Melt Remix)',
         'Marcus Melt, The Neighbourhood', 201);
-    final slowed = sc('sweater weather - the neighbourhood (slowed)', 'oleariia', 295);
+    final slowed =
+        sc('sweater weather - the neighbourhood (slowed)', 'oleariia', 295);
 
     final o = StreamResolver.scoreCandidate(target, original, plays: 99000000);
-    expect(o, greaterThan(StreamResolver.scoreCandidate(target, remix, plays: 2000)));
-    expect(o, greaterThan(StreamResolver.scoreCandidate(target, slowed, plays: 50000)));
+    expect(o,
+        greaterThan(StreamResolver.scoreCandidate(target, remix, plays: 2000)));
+    expect(
+        o,
+        greaterThan(
+            StreamResolver.scoreCandidate(target, slowed, plays: 50000)));
   });
 
   test('scoreTrack finds a title by its first word', () {
@@ -110,6 +117,22 @@ void main() {
     expect(
       StreamResolver.scoreTrack(full, 'sweat'),
       greaterThan(StreamResolver.scoreTrack(other, 'sweat')),
+    );
+  });
+
+  test('scoreTrack tolerates a small title typo and bracketed subtitle', () {
+    final original = track(
+      'Sunflower (Spider-Man: Into the Spider-Verse)',
+      'Post Malone & Swae Lee',
+    );
+    final cover = track(
+      'Sunflower - Spider-Man: Into the Spider-Verse',
+      'Acoustic Heartstrings',
+    );
+
+    expect(
+      StreamResolver.scoreTrack(original, 'sunflowee spider man'),
+      greaterThan(StreamResolver.scoreTrack(cover, 'sunflowee spider man')),
     );
   });
 }

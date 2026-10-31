@@ -8,6 +8,7 @@ import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
 import '../../extractor/models/resolved_stream.dart';
 import '../../extractor/stream_resolver.dart';
+import '../../recommendations/track_wave_service.dart';
 
 enum PlayerLoopMode { off, all, one }
 
@@ -25,6 +26,7 @@ class AudioPlayerService {
   final StreamResolver _resolver;
   final AudioCacheManager _cacheManager;
   final LocalStorageService? _storageService;
+  late final TrackWaveService _waveService;
 
   MediaTrack? _currentTrack;
   final List<MediaTrack> _queue = [];
@@ -36,7 +38,8 @@ class AudioPlayerService {
   /// Resolved stream URLs keyed by cache key, so replays and "previous" are
   /// instant. SoundCloud signs URLs for about two hours; the TTL stays well
   /// under that so a cached URL never reaches the player already expired.
-  final Map<String, ({String url, Map<String, String> headers, DateTime resolvedAt})>
+  final Map<String,
+          ({String url, Map<String, String> headers, DateTime resolvedAt})>
       _urlCache = {};
   final Map<String, Future<ResolvedStream?>> _pendingStreams = {};
   static const _urlTtl = Duration(minutes: 60);
@@ -59,6 +62,14 @@ class AudioPlayerService {
 
   PlayerLoopMode _loopMode = PlayerLoopMode.off;
   bool _isShuffle = false;
+  bool _waveActive = false;
+  MediaTrack? _waveSeed;
+  String? _playbackContext;
+  int _waveGeneration = 0;
+  Future<void>? _waveExtension;
+  final StreamController<int> _queueController =
+      StreamController<int>.broadcast();
+  int _queueVersion = 0;
 
   AudioPlayerService({
     AudioPlayer? player,
@@ -69,7 +80,9 @@ class AudioPlayerService {
             player ?? AudioPlayer(audioLoadConfiguration: _loadConfiguration),
         _resolver = resolver ?? StreamResolver(),
         _cacheManager = cacheManager ?? AudioCacheManager(),
-        _storageService = storageService;
+        _storageService = storageService {
+    _waveService = TrackWaveService(_resolver);
+  }
 
   AudioPlayer get rawPlayer => _player;
   MediaTrack? get currentTrack => _currentTrack;
@@ -77,6 +90,14 @@ class AudioPlayerService {
   int get currentIndex => _currentIndex;
   PlayerLoopMode get loopMode => _loopMode;
   bool get isShuffle => _isShuffle;
+  bool get waveActive => _waveActive;
+  String? get playbackContext => _playbackContext;
+  Stream<int> get queueChanges => _queueController.stream;
+
+  void _notifyQueue() {
+    _queueVersion++;
+    if (!_queueController.isClosed) _queueController.add(_queueVersion);
+  }
 
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
   Stream<Duration> get positionStream => _player.positionStream;
@@ -175,10 +196,15 @@ class AudioPlayerService {
 
   /// Sets track queue and plays the track at [startIndex]
   Future<void> setQueue(List<MediaTrack> tracks, {int startIndex = 0}) async {
+    _waveActive = false;
+    _waveSeed = null;
+    _playbackContext = null;
+    _waveGeneration++;
     _queue.clear();
     _queue.addAll(tracks);
     _currentIndex =
         tracks.isEmpty ? -1 : startIndex.clamp(0, tracks.length - 1);
+    _notifyQueue();
 
     if (_queue.isNotEmpty) {
       await playTrack(_queue[_currentIndex]);
@@ -191,6 +217,13 @@ class AudioPlayerService {
   /// Adds a track to the end of current queue
   void addToQueue(MediaTrack track) {
     _queue.add(track);
+    _notifyQueue();
+  }
+
+  void playNext(MediaTrack track) {
+    final index = _currentIndex < 0 ? _queue.length : _currentIndex + 1;
+    _queue.insert(index.clamp(0, _queue.length), track);
+    _notifyQueue();
   }
 
   /// Removes track at index from queue
@@ -207,6 +240,7 @@ class AudioPlayerService {
       _setCurrentTrack(null);
       unawaited(stop());
     }
+    _notifyQueue();
   }
 
   /// Reorders track position in the queue
@@ -227,6 +261,7 @@ class AudioPlayerService {
     } else if (oldIndex > _currentIndex && targetIndex <= _currentIndex) {
       _currentIndex++;
     }
+    _notifyQueue();
   }
 
   /// Plays a specific track, checking local cache first, then resolving stream URL.
@@ -300,8 +335,7 @@ class AudioPlayerService {
       // Resolve while the session finishes initializing instead of after it.
       // Errors are swallowed here because they could land before tryStart
       // listens; a failed first attempt is retried below anyway.
-      final firstStream =
-          _resolveStream(track).catchError((Object _) => null);
+      final firstStream = _resolveStream(track).catchError((Object _) => null);
       await initialize();
 
       // Unload the previous track. The stream is already resolving in
@@ -343,7 +377,8 @@ class AudioPlayerService {
         if (!_errorController.isClosed) {
           _errorController.add(AudioPlaybackError(
             track: track,
-            message: 'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
+            message:
+                'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
           ));
         }
       }
@@ -372,6 +407,47 @@ class AudioPlayerService {
     }
   }
 
+  Future<void> playAt(int index) async {
+    if (index < 0 || index >= _queue.length) return;
+    _currentIndex = index;
+    await playTrack(_queue[index]);
+  }
+
+  Future<void> startWave(MediaTrack seed) async {
+    final currentIsSeed = _currentTrack?.id == seed.id && _player.playing;
+    _waveActive = true;
+    _waveSeed = seed;
+    _playbackContext = 'Волна: ${seed.title}';
+    _waveGeneration++;
+    _queue
+      ..clear()
+      ..add(seed);
+    _currentIndex = 0;
+    _notifyQueue();
+    if (!currentIsSeed) {
+      await playTrack(seed);
+    }
+    unawaited(_extendWave());
+  }
+
+  Future<void> _extendWave() async {
+    if (!_waveActive || _waveSeed == null || _waveExtension != null) return;
+    final generation = _waveGeneration;
+    final seed = _queue.isNotEmpty ? _queue.last : _waveSeed!;
+    final excluded =
+        _queue.map((track) => '${track.artist}|${track.title}').toSet();
+    final future = _waveService.nextBatch(seed, excluded: excluded);
+    _waveExtension = future.then((tracks) {
+      if (generation != _waveGeneration || !_waveActive || tracks.isEmpty) {
+        return;
+      }
+      _queue.addAll(tracks);
+      _notifyQueue();
+      _prefetchNext();
+    }).whenComplete(() => _waveExtension = null);
+    await _waveExtension;
+  }
+
   Future<File?> downloadTrack(
     MediaTrack track, {
     void Function(double progress)? onProgress,
@@ -379,7 +455,9 @@ class AudioPlayerService {
     final stream = await _resolveStream(track);
     final streamUrl = stream?.url;
     if (streamUrl == null || streamUrl.isEmpty) return null;
-    if (streamUrl.startsWith('file:')) return File(Uri.parse(streamUrl).toFilePath());
+    if (streamUrl.startsWith('file:')) {
+      return File(Uri.parse(streamUrl).toFilePath());
+    }
     return _cacheManager.downloadTrack(
       track,
       streamUrl,
@@ -413,10 +491,12 @@ class AudioPlayerService {
         _loopMode = PlayerLoopMode.off;
         break;
     }
+    _notifyQueue();
   }
 
   void toggleShuffle() {
     _isShuffle = !_isShuffle;
+    _notifyQueue();
   }
 
   Future<void> togglePlayPause() async {
@@ -430,7 +510,10 @@ class AudioPlayerService {
   Future<void> next() async {
     if (_queue.isEmpty) return;
 
-    if (_isShuffle && _queue.length > 1) {
+    if (_waveActive && _currentIndex + 1 >= _queue.length) {
+      await _extendWave();
+    }
+    if (_isShuffle && !_waveActive && _queue.length > 1) {
       final candidates = List<int>.generate(_queue.length, (index) => index)
         ..remove(_currentIndex);
       candidates.shuffle();
@@ -478,6 +561,7 @@ class AudioPlayerService {
     await _playerStateSubscription?.cancel();
     await _errorController.close();
     await _trackController.close();
+    await _queueController.close();
     await _player.dispose();
     _resolver.dispose();
   }

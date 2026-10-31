@@ -140,6 +140,26 @@ class QueueNotifier extends StateNotifier<List<MediaTrack>> {
     await _service.setQueue(tracks, startIndex: startIndex);
   }
 
+  Future<void> startWave(MediaTrack track) async {
+    await _service.startWave(track);
+    state = _service.queue;
+  }
+
+  Future<void> playAt(int index) async {
+    await _service.playAt(index);
+    state = _service.queue;
+  }
+
+  void addToQueue(MediaTrack track) {
+    _service.addToQueue(track);
+    state = _service.queue;
+  }
+
+  void playNext(MediaTrack track) {
+    _service.playNext(track);
+    state = _service.queue;
+  }
+
   MediaTrack? get currentTrack => _service.currentTrack;
 }
 
@@ -147,6 +167,20 @@ final queueProvider =
     StateNotifierProvider<QueueNotifier, List<MediaTrack>>((ref) {
   final service = ref.watch(audioPlayerServiceProvider);
   return QueueNotifier(service);
+});
+
+final queueChangesProvider = StreamProvider<int>((ref) {
+  return ref.watch(audioPlayerServiceProvider).queueChanges;
+});
+
+final waveActiveProvider = Provider<bool>((ref) {
+  ref.watch(queueChangesProvider);
+  return ref.watch(audioPlayerServiceProvider).waveActive;
+});
+
+final playbackContextProvider = Provider<String?>((ref) {
+  ref.watch(queueChangesProvider);
+  return ref.watch(audioPlayerServiceProvider).playbackContext;
 });
 
 final _currentTrackStreamProvider = StreamProvider<MediaTrack?>((ref) {

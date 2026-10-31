@@ -32,13 +32,16 @@ class ImportBottomSheet extends ConsumerStatefulWidget {
 
 class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
   final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   bool _isLoading = false;
+  bool _textMode = false;
   String? _errorMessage;
   ImportedCollection? _importedResult;
 
   @override
   void dispose() {
     _urlController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -55,7 +58,8 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
   Future<void> _startImport() async {
     final url = _urlController.text.trim();
     if (url.isEmpty) {
-      setState(() => _errorMessage = 'Вставьте ссылку для импорта');
+      setState(() => _errorMessage =
+          _textMode ? 'Вставьте список треков' : 'Вставьте ссылку для импорта');
       return;
     }
 
@@ -67,7 +71,12 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
 
     try {
       final importService = ref.read(musicImportServiceProvider);
-      final result = await importService.importFromUrl(url);
+      final result = _textMode
+          ? await importService.importFromText(
+              url,
+              title: _nameController.text,
+            )
+          : await importService.importFromUrl(url);
 
       if (!mounted) return;
 
@@ -99,7 +108,8 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
     Navigator.of(context).pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Включен импортированный плейлист (${tracks.length} треков)'),
+        content:
+            Text('Включен импортированный плейлист (${tracks.length} треков)'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -208,18 +218,20 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                 decoration: BoxDecoration(
                   color: colors.surfaceGlass.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: colors.border.withValues(alpha: 0.4),
-                  ),
+                  border:
+                      Border.all(color: colors.border.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   children: [
                     const SizedBox(width: 14),
                     Icon(
-                      detectedPlatform == ImportPlatform.spotify
-                          ? MingCuteIcons.mgc_music_3_fill
-                          : MingCuteIcons.mgc_link_line,
-                      color: detectedPlatform == ImportPlatform.spotify
+                      _textMode
+                          ? MingCuteIcons.mgc_list_check_line
+                          : detectedPlatform == ImportPlatform.spotify
+                              ? MingCuteIcons.mgc_music_3_fill
+                              : MingCuteIcons.mgc_link_line,
+                      color: detectedPlatform == ImportPlatform.spotify ||
+                              _textMode
                           ? const Color(0xFF1DB954)
                           : colors.textSecondary,
                       size: 22,
@@ -228,34 +240,70 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                     Expanded(
                       child: TextField(
                         controller: _urlController,
+                        maxLines: _textMode ? 5 : 1,
                         onChanged: (_) => setState(() => _errorMessage = null),
-                        style: TextStyle(
-                          color: colors.textPrimary,
-                          fontSize: 14,
-                        ),
+                        style:
+                            TextStyle(color: colors.textPrimary, fontSize: 14),
                         decoration: InputDecoration(
-                          hintText: 'Вставьте ссылку на плейлист или трек',
+                          hintText: _textMode
+                              ? 'Артист — Трек или CSV из Exportify'
+                              : 'Вставьте ссылку на плейлист или трек',
                           hintStyle: TextStyle(
                             color: colors.textSecondary.withValues(alpha: 0.6),
                             fontSize: 14,
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 14),
                         ),
                       ),
                     ),
                     IconButton(
                       tooltip: 'Вставить из буфера',
-                      icon: Icon(
-                        MingCuteIcons.mgc_paste_line,
-                        color: colors.primary,
-                        size: 20,
-                      ),
+                      icon: Icon(MingCuteIcons.mgc_paste_line,
+                          color: colors.primary, size: 20),
                       onPressed: _pasteFromClipboard,
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('Ссылка'),
+                      selected: !_textMode,
+                      onSelected: (_) => setState(() => _textMode = false),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('Список треков'),
+                      selected: _textMode,
+                      onSelected: (_) => setState(() => _textMode = true),
+                    ),
+                  ),
+                ],
+              ),
+              if (_textMode) ...[
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _nameController,
+                  style: TextStyle(color: colors.textPrimary),
+                  decoration: InputDecoration(
+                    labelText: 'Название плейлиста',
+                    labelStyle: TextStyle(color: colors.textSecondary),
+                    filled: true,
+                    fillColor: colors.surfaceGlass.withValues(alpha: 0.4),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ],
 
               // Supported badges
               Padding(
@@ -426,8 +474,8 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon:
-                          const Icon(MingCuteIcons.mgc_list_check_line, size: 20),
+                      icon: const Icon(MingCuteIcons.mgc_list_check_line,
+                          size: 20),
                       label: const Text('В плейлисты'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: colors.textPrimary,
@@ -482,7 +530,9 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? widget.theme.colors.textPrimary : widget.theme.colors.textSecondary,
+              color: isActive
+                  ? widget.theme.colors.textPrimary
+                  : widget.theme.colors.textSecondary,
             ),
           ),
         ],

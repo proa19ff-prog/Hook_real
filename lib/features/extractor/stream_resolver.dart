@@ -105,6 +105,16 @@ class StreamResolver {
       .replaceAll(_spaces, ' ')
       .trim();
 
+  /// Like [_norm], but keeps text inside parentheses/brackets. This matters
+  /// for catalogue titles such as "Sunflower (Spider-Man...)": a cover often
+  /// writes the subtitle plainly while the original keeps it in brackets.
+  static String _normFull(String s) => s
+      .toLowerCase()
+      .replaceAll('ё', 'е')
+      .replaceAll(_nonWord, ' ')
+      .replaceAll(_spaces, ' ')
+      .trim();
+
   /// Maps stylized digits to letters so "madk1d" matches "madkid".
   static String _loose(String s) => s
       .replaceAll('0', 'o')
@@ -115,6 +125,53 @@ class StreamResolver {
 
   static List<String> _words(String s) =>
       s.split(' ').where((w) => w.isNotEmpty).toList();
+
+  static int _editDistance(String a, String b, {int max = 3}) {
+    if ((a.length - b.length).abs() > max) return max + 1;
+    if (a.isEmpty) return b.length;
+    if (b.isEmpty) return a.length;
+    var previous = List<int>.generate(b.length + 1, (i) => i);
+    for (var i = 1; i <= a.length; i++) {
+      final current = <int>[i];
+      var rowMin = i;
+      for (var j = 1; j <= b.length; j++) {
+        final value = math.min(
+          math.min(current[j - 1] + 1, previous[j] + 1),
+          previous[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1),
+        );
+        current.add(value);
+        rowMin = math.min(rowMin, value);
+      }
+      if (rowMin > max) return max + 1;
+      previous = current;
+    }
+    return previous.last;
+  }
+
+  static bool _fuzzyWordEquals(String a, String b) {
+    if (a == b) return true;
+    if (a.length < 4 || b.length < 4) return false;
+    final limit = math.max(a.length, b.length) >= 8 ? 2 : 1;
+    return _editDistance(a, b, max: limit) <= limit;
+  }
+
+  static bool _hasFuzzyPhrase(String text, String query) {
+    final queryWords = _words(query);
+    final textWords = _words(text);
+    if (queryWords.isEmpty || textWords.length < queryWords.length) {
+      return false;
+    }
+    for (var start = 0;
+        start <= textWords.length - queryWords.length;
+        start++) {
+      if (List.generate(queryWords.length,
+              (i) => _fuzzyWordEquals(queryWords[i], textWords[start + i]))
+          .every((value) => value)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// Whole-word phrase containment ("faded" in "alan walker faded").
   static bool _hasPhrase(String haystack, String needle) =>
@@ -145,6 +202,9 @@ class StreamResolver {
         if (e.value.hasMatch(t)) e.key,
     };
   }
+
+  /// Public variant information used by radio/import quality filters.
+  static Set<String> variantTags(String rawTitle) => _variantTags(rawTitle);
 
   /// Drops the artist from the start or end of a title, the way SoundCloud
   /// uploads are often named ("The Neighbourhood - Sweater Weather").
@@ -237,6 +297,7 @@ class StreamResolver {
   static double scoreTrack(MediaTrack track, String query) {
     final q = _norm(query);
     final title = _norm(track.title);
+    final fullTitle = _normFull(track.title);
     final artist = _norm(track.artist);
     final rawTitle = track.title.toLowerCase();
 
@@ -245,14 +306,18 @@ class StreamResolver {
 
     // 1. Title matching. A query that is the start of a title ("sweater" for
     //    "Sweater Weather") counts almost as much as the exact title.
-    if (title == q) {
-      score += 200.0;
-    } else if (title.startsWith('$q ')) {
-      score += 190.0;
-    } else if (_hasPhrase(title, q)) {
-      score += 110.0;
-    } else if (title.startsWith(q)) {
-      score += 90.0; // the last word is still being typed: "sweat"
+    double titleScore(String candidate) {
+      if (candidate == q) return 200.0;
+      if (candidate.startsWith('$q ')) return 190.0;
+      if (_hasPhrase(candidate, q)) return 110.0;
+      if (candidate.startsWith(q)) return 90.0;
+      if (_hasFuzzyPhrase(candidate, q)) return 135.0;
+      return 0.0;
+    }
+
+    final titleMatchScore = math.max(titleScore(title), titleScore(fullTitle));
+    if (titleMatchScore > 0) {
+      score += titleMatchScore;
     }
 
     // 2. Artist matching (digits loosened: "madk1d" == "madkid").
@@ -261,7 +326,8 @@ class StreamResolver {
     if (artist.isNotEmpty) {
       if (_hasPhrase(qLoose, artistLoose)) {
         score += 120.0; // user typed the artist
-      } else if (_hasPhrase(artistLoose, qLoose) || artistLoose.startsWith(qLoose)) {
+      } else if (_hasPhrase(artistLoose, qLoose) ||
+          artistLoose.startsWith(qLoose)) {
         score += 80.0;
       }
       if ('$artist $title' == q || '$title $artist' == q) score += 150.0;
@@ -270,7 +336,7 @@ class StreamResolver {
     // 3. Word-level coverage, with prefix matching for partial words.
     final qWords = _words(qLoose).where((w) => w.length >= 2).toList();
     if (qWords.isNotEmpty) {
-      final titleWords = _words(_loose(title));
+      final titleWords = _words(_loose(fullTitle));
       final artistWords = _words(artistLoose);
       var matched = 0;
       for (final word in qWords) {
@@ -280,6 +346,9 @@ class StreamResolver {
           hit = true;
         } else if (titleWords.any((w) => w.startsWith(word))) {
           score += 25.0;
+          hit = true;
+        } else if (titleWords.any((w) => _fuzzyWordEquals(w, word))) {
+          score += 28.0;
           hit = true;
         }
         if (artistWords.any((w) => w.startsWith(word))) {
@@ -309,6 +378,12 @@ class StreamResolver {
     if (!isQueryLookingForCover &&
         (rawTitle.contains('cover') || rawTitle.contains('tribute'))) {
       score -= 100.0;
+    }
+    final coverArtist = RegExp(
+      r'\b(acoustic|cover|covers|tribute|karaoke|quartet|orchestra|ensemble|instrumental|piano version)\b',
+    );
+    if (!coverArtist.hasMatch(rawQuery) && coverArtist.hasMatch(artist)) {
+      score -= 130.0;
     }
     if (!isQueryLookingForSpeed) {
       if (rawTitle.contains('slowed') ||
@@ -355,7 +430,9 @@ class StreamResolver {
     if (qWords.isEmpty) return true;
     return tracks.any((t) {
       final words = _words(_loose(_norm('${t.title} ${t.artist}')));
-      return qWords.every((q) => words.any((w) => w.startsWith(q)));
+      return qWords.every((q) =>
+              words.any((w) => w.startsWith(q) || _fuzzyWordEquals(w, q))) ||
+          _hasFuzzyPhrase(_normFull(t.title), _normFull(query));
     });
   }
 
@@ -379,8 +456,7 @@ class StreamResolver {
     bool includeSpotify = true,
   }) async {
     final normalizedQuery = query.trim().toLowerCase();
-    final cacheKey =
-        '$normalizedQuery|$includeSoundCloud|$includeSpotify';
+    final cacheKey = '$normalizedQuery|$includeSoundCloud|$includeSpotify';
     final cached = _searchCache[cacheKey];
     if (cached != null) return List.unmodifiable(cached);
     if (_searchCache.length >= 50) {
@@ -392,7 +468,8 @@ class StreamResolver {
     final bonus = <String, double>{};
     String keyOf(MediaTrack t) => '${t.source.name}:${t.id}';
 
-    Future<void> collect(Future<List<MediaTrack>> request, int queryIndex) async {
+    Future<void> collect(
+        Future<List<MediaTrack>> request, int queryIndex) async {
       final list = await request.timeout(
         const Duration(seconds: 8),
         onTimeout: () => <MediaTrack>[],
@@ -413,9 +490,17 @@ class StreamResolver {
 
     for (var i = 0; i < searchQueries.length; i++) {
       final q = searchQueries[i];
+      final catalogRequests = <Future<List<MediaTrack>>>[];
+      if (includeSpotify) {
+        final countries =
+            _cyrillic.hasMatch(q) ? const ['ru'] : const ['us', 'ru'];
+        catalogRequests.addAll(countries.map(
+          (country) => _spotifyCatalog.searchTracks(q, country: country),
+        ));
+      }
       await Future.wait([
         if (withSoundCloud) collect(_scExtractor.searchTracks(q), i),
-        if (includeSpotify) collect(_spotifyCatalog.searchTracks(q), i),
+        ...catalogRequests.map((request) => collect(request, i)),
       ]);
       // If primary query gave ample results, no need to query subsequent variants
       if (rawResults.length >= 15) break;
@@ -464,8 +549,7 @@ class StreamResolver {
     final ranked = groups.values.toList()
       ..sort((a, b) => b.score.compareTo(a.score));
 
-    final output =
-        ranked.take(30).map((e) => e.track).toList(growable: false);
+    final output = ranked.take(30).map((e) => e.track).toList(growable: false);
     if (output.isNotEmpty) _searchCache[cacheKey] = output;
     return output;
   }
@@ -557,8 +641,8 @@ class StreamResolver {
       for (final c in candidates)
         (
           track: c,
-          score: scoreCandidate(track, c,
-              plays: _scExtractor.playbackCount(c.id)),
+          score:
+              scoreCandidate(track, c, plays: _scExtractor.playbackCount(c.id)),
         ),
     ]..sort((a, b) => b.score.compareTo(a.score));
 
@@ -575,7 +659,9 @@ class StreamResolver {
           _hasPhrase(t, normTitle) ||
           titleWords.any(t.contains);
       final artistOk = artistWords.isEmpty
-          ? a == normArtist || _hasPhrase(a, normArtist) || _hasPhrase(tl, normArtist)
+          ? a == normArtist ||
+              _hasPhrase(a, normArtist) ||
+              _hasPhrase(tl, normArtist)
           : artistWords.any((w) => a.contains(w) || tl.contains(w));
 
       if (!titleOk || !artistOk) continue;
@@ -592,6 +678,40 @@ class StreamResolver {
     }
 
     return null;
+  }
+
+  /// Gets related SoundCloud tracks for a seed, resolving a catalog seed to
+  /// the best matching SoundCloud upload when necessary.
+  Future<List<MediaTrack>> relatedTracks(MediaTrack seed,
+      {int limit = 20}) async {
+    if (seed.source == TrackSource.soundcloud) {
+      return _scExtractor.relatedTracks(seed.id, limit: limit);
+    }
+    final match = await _findSoundCloudMatch(seed);
+    if (match == null) return const [];
+    return _scExtractor.relatedTracks(match.id, limit: limit);
+  }
+
+  Future<MediaTrack?> _findSoundCloudMatch(MediaTrack track) async {
+    final query =
+        '${_primaryArtist(track.artist)} ${_cleanTitle(track.title)}'.trim();
+    final candidates = await _scExtractor.searchTracks(query, limit: 12);
+    final usable =
+        candidates.where((candidate) => !_badMatches.contains(candidate.id));
+    MediaTrack? best;
+    var bestScore = double.negativeInfinity;
+    for (final candidate in usable) {
+      final score = scoreCandidate(
+        track,
+        candidate,
+        plays: _scExtractor.playbackCount(candidate.id),
+      );
+      if (score > bestScore) {
+        bestScore = score;
+        best = candidate;
+      }
+    }
+    return best;
   }
 
   void dispose() {
