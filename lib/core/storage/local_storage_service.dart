@@ -20,6 +20,13 @@ class LocalStorageService {
   }
 
   // --- THEME PERSISTENCE ---
+  static const String _oledDefaultAppliedKey = 'hook_oled_default_applied';
+
+  /// Whether the switch to OLED Monolith as the default theme already ran.
+  bool get oledDefaultApplied => _prefs.getBool(_oledDefaultAppliedKey) ?? false;
+  Future<void> markOledDefaultApplied() =>
+      _prefs.setBool(_oledDefaultAppliedKey, true);
+
   String? getSavedThemeId() => _prefs.getString(_activeThemeKey);
   Future<void> saveThemeId(String id) => _prefs.setString(_activeThemeKey, id);
 

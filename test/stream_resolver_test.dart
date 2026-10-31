@@ -80,6 +80,26 @@ void main() {
     );
   });
 
+  test('scoreCandidate prefers the original upload over a remix', () {
+    final target = track('Sweater Weather', 'The Neighbourhood', sec: 240);
+    MediaTrack sc(String title, String artist, int sec) => MediaTrack(
+          id: title,
+          title: title,
+          artist: artist,
+          artworkUrl: '',
+          duration: Duration(seconds: sec),
+          source: TrackSource.soundcloud,
+        );
+    final original = sc('"Sweater Weather"', 'theneighbourhood', 240);
+    final remix = sc('The Neighbourhood - Sweater Weather (Marcus Melt Remix)',
+        'Marcus Melt, The Neighbourhood', 201);
+    final slowed = sc('sweater weather - the neighbourhood (slowed)', 'oleariia', 295);
+
+    final o = StreamResolver.scoreCandidate(target, original, plays: 99000000);
+    expect(o, greaterThan(StreamResolver.scoreCandidate(target, remix, plays: 2000)));
+    expect(o, greaterThan(StreamResolver.scoreCandidate(target, slowed, plays: 50000)));
+  });
+
   test('scoreTrack finds a title by its first word', () {
     final full = track('Sweater Weather', 'The Neighbourhood');
     final other = track('Summer Rain', 'Someone');

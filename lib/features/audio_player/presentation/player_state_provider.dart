@@ -3,7 +3,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../extractor/models/media_track.dart';
 import '../../extractor/stream_resolver.dart';
 import '../../library/presentation/library_provider.dart';
-import '../../lyrics/data/lrclib_client.dart';
+import '../../lyrics/data/lyrics_client.dart';
 import '../../recommendations/recommendation_service.dart';
 import '../../theme_engine/data/theme_manager.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -30,8 +30,10 @@ final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
   return service;
 });
 
-final lrclibClientProvider = Provider<LrclibClient>((ref) {
-  return LrclibClient();
+final lyricsClientProvider = Provider<LyricsClient>((ref) {
+  final client = LyricsClient();
+  ref.onDispose(client.close);
+  return client;
 });
 
 final recommendationServiceProvider = Provider<RecommendationService>((ref) {
@@ -50,12 +52,19 @@ class ThemeNotifier extends StateNotifier<HookTheme> {
   Future<void> init() async {
     try {
       final storage = _ref.read(localStorageServiceProvider);
-      final savedThemeId = storage.getSavedThemeId();
+      var savedThemeId = storage.getSavedThemeId();
       final savedCustomJson = storage.getSavedCustomThemeJson();
       await _manager.initialize(
         savedThemeId: savedThemeId,
         savedCustomJson: savedCustomJson,
       );
+      // One-time move to OLED Monolith as the default. Later choices persist.
+      if (!storage.oledDefaultApplied) {
+        savedThemeId = ThemeManager.defaultThemeId;
+        _manager.setActiveTheme(savedThemeId);
+        await storage.saveThemeId(savedThemeId);
+        await storage.markOledDefaultApplied();
+      }
       state = _manager.currentTheme;
     } catch (_) {
       await _manager.initialize();
@@ -176,8 +185,8 @@ final trackLyricsProvider = FutureProvider<LyricsResult?>((ref) async {
   final track = ref.watch(currentTrackProvider);
   if (track == null) return null;
 
-  final lrclib = ref.watch(lrclibClientProvider);
-  return await lrclib.fetchLyrics(
+  final lyrics = ref.watch(lyricsClientProvider);
+  return await lyrics.fetchLyrics(
     trackName: track.title,
     artistName: track.artist,
     duration: track.duration,

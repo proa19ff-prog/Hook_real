@@ -20,9 +20,9 @@ class LyricLine {
   final String text;
   final List<LyricWord> words;
 
-  /// True only when [words] came from real `<mm:ss.xx>` word-level LRC tags.
-  /// Synthesized (invented) timelines must not drive word karaoke, otherwise
-  /// the highlight visibly runs ahead of or behind the actual singing.
+  /// True when [words] carry real per-word timestamps (NetEase YRC or
+  /// `<mm:ss.xx>` LRC tags). False when they were estimated from the line
+  /// timing, so the UI draws a softer, less precise sweep.
   final bool hasRealWordTimings;
 
   const LyricLine({
@@ -34,6 +34,11 @@ class LyricLine {
   });
 
   bool get hasWordTimings => words.isNotEmpty;
+
+  /// When the singer finishes this line. A long gap before the next line
+  /// after this point is an instrumental break.
+  Duration get vocalEnd =>
+      words.isNotEmpty ? words.last.endTime : (endTime ?? startTime);
 
   bool isActiveAt(Duration position) {
     if (endTime != null) {

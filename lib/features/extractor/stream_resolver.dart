@@ -120,6 +120,118 @@ class StreamResolver {
   static bool _hasPhrase(String haystack, String needle) =>
       needle.isNotEmpty && ' $haystack '.contains(' $needle ');
 
+  /// Spaces removed, so the uploader "theneighbourhood" equals "The Neighbourhood".
+  static String _compact(String s) => s.replaceAll(' ', '');
+
+  static final Map<String, RegExp> _variantPatterns = {
+    'remix': RegExp(r'\b(remix|rmx|rework|vip)\b'),
+    'edit': RegExp(r'\b(edit|bootleg|flip)\b'),
+    'mashup': RegExp(r'\bmash ?up\b'),
+    'cover': RegExp(r'\b(cover|tribute)\b'),
+    'speed': RegExp(
+        r'\b(slowed|reverb|sped|speed ?up|nightcore|8d|bass ?boost(ed)?)\b'),
+    'live': RegExp(r'\blive\b'),
+    'acoustic': RegExp(r'\bacoustic\b'),
+    'instrumental': RegExp(r'\b(instrumental|karaoke)\b|минус'),
+    'extended': RegExp(r'\bextended\b'),
+    'demo': RegExp(r'\b(demo|snippet)\b'),
+  };
+
+  /// Kinds of alternate versions named in a title ("remix", "live", ...).
+  static Set<String> _variantTags(String rawTitle) {
+    final t = rawTitle.toLowerCase();
+    return {
+      for (final e in _variantPatterns.entries)
+        if (e.value.hasMatch(t)) e.key,
+    };
+  }
+
+  /// Drops the artist from the start or end of a title, the way SoundCloud
+  /// uploads are often named ("The Neighbourhood - Sweater Weather").
+  static String _stripArtist(String title, String artist) {
+    final target = _compact(artist);
+    if (target.isEmpty) return title;
+    final words = _words(title);
+    for (var k = math.min(4, words.length - 1); k >= 1; k--) {
+      if (_compact(_loose(words.take(k).join(' '))) == target) {
+        return words.skip(k).join(' ');
+      }
+      if (_compact(_loose(words.skip(words.length - k).join(' '))) == target) {
+        return words.take(words.length - k).join(' ');
+      }
+    }
+    return title;
+  }
+
+  /// Scores a SoundCloud [candidate] as the playable copy of a catalog
+  /// [target]. Alternate versions the catalog title doesn't name (a remix
+  /// filed under the original title) are pushed far down, and the artist's
+  /// own upload, recognized by its play count, rises to the top.
+  static double scoreCandidate(
+    MediaTrack target,
+    MediaTrack candidate, {
+    int plays = 0,
+  }) {
+    final primaryArtist = _primaryArtist(target.artist);
+    final cleanTitle = _cleanTitle(target.title);
+    final query = '$primaryArtist $cleanTitle'.trim();
+    final normTitle = _norm(cleanTitle);
+    final normArtist = _loose(_norm(primaryArtist));
+    final artistWords = _words(normArtist).where((w) => w.length > 2).toList();
+
+    final a = _loose(_norm(candidate.artist));
+    final t = _stripArtist(_norm(candidate.title), normArtist);
+    final tl = _loose(_norm(candidate.title));
+    double s = scoreTrack(candidate, query);
+
+    if (t == normTitle) {
+      s += 150.0;
+    } else if (_hasPhrase(t, normTitle)) {
+      s += 60.0;
+    }
+    if (_compact(a) == _compact(normArtist)) {
+      s += 140.0;
+    } else if (_hasPhrase(a, normArtist)) {
+      s += 50.0;
+    }
+    if (artistWords.isNotEmpty &&
+        !artistWords.any((w) => tl.contains(w) || a.contains(w))) {
+      s -= 160.0;
+    }
+
+    final wanted = _variantTags(target.title);
+    for (final tag in _variantTags(candidate.title)) {
+      if (!wanted.contains(tag)) s -= 260.0;
+    }
+
+    final wantSec = target.duration.inSeconds;
+    final gotSec = candidate.duration.inSeconds;
+    if (wantSec > 0 && gotSec > 0) {
+      final diff = (wantSec - gotSec).abs();
+      if (diff <= 4) {
+        s += 90.0;
+      } else if (diff <= 12) {
+        s += 40.0;
+      } else if (diff > 30) {
+        s -= 120.0;
+      }
+    }
+
+    if (plays > 0) {
+      s += math.min(math.log(plays) / math.ln10 * 15.0, 120.0);
+    }
+    return s;
+  }
+
+  static String _primaryArtist(String artist) => artist
+      .split(RegExp(r'[,&]'))
+      .first
+      .replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '')
+      .trim();
+
+  static String _cleanTitle(String title) =>
+      title.replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '').trim();
+
   /// Calculates a quality and relevance score for a track given the user's query.
   /// Original tracks get high bonuses; covers, 1-hour loops, and bootlegs are penalized.
   static double scoreTrack(MediaTrack track, String query) {
@@ -332,8 +444,10 @@ class StreamResolver {
     final groups = <String, ({MediaTrack track, double score})>{};
     for (final track in rawResults) {
       final s = scoreOf(track);
+      // Version tags keep "Song (Remix)" apart from "Song".
+      final tags = _variantTags(track.title).toList()..sort();
       final key =
-          '${_norm(track.title)}|${_loose(_norm(track.artist))}';
+          '${_norm(track.title)}|${_loose(_norm(track.artist))}|${tags.join(',')}';
       final existing = groups[key];
       if (existing == null) {
         groups[key] = (track: track, score: s);
@@ -419,16 +533,8 @@ class StreamResolver {
     }
 
     // 1. Clean primary artist and title to form a laser-targeted query
-    final primaryArtist = track.artist
-        .split(RegExp(r'[,&]'))
-        .first
-        .replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '')
-        .trim();
-
-    final cleanTitle = track.title
-        .replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '')
-        .trim();
-
+    final primaryArtist = _primaryArtist(track.artist);
+    final cleanTitle = _cleanTitle(track.title);
     final query = '$primaryArtist $cleanTitle'.trim();
 
     // 2. Fetch candidates from SoundCloud (extra candidates since junk
@@ -444,48 +550,16 @@ class StreamResolver {
     final normArtist = _loose(_norm(primaryArtist));
     final titleWords = _words(normTitle).where((w) => w.length > 2).toList();
     final artistWords = _words(normArtist).where((w) => w.length > 2).toList();
-    final wantSec = track.duration.inSeconds;
 
-    // 3. Score candidates: strict title/artist/duration checks on top of the
-    //    generic scoreTrack heuristics (which alone let junk reposts through).
-    double candidateScore(MediaTrack c) {
-      final t = _norm(c.title);
-      final tl = _loose(t);
-      final a = _loose(_norm(c.artist));
-      double s = scoreTrack(c, query);
-
-      if (t == normTitle) {
-        s += 150.0;
-      } else if (_hasPhrase(t, normTitle)) {
-        s += 60.0;
-      }
-      if (a == normArtist) {
-        s += 120.0;
-      } else if (_hasPhrase(a, normArtist)) {
-        s += 50.0;
-      }
-      // Nobody in the whole candidate is the requested artist: distrust it.
-      if (artistWords.isNotEmpty &&
-          !artistWords.any((w) => tl.contains(w) || a.contains(w))) {
-        s -= 160.0;
-      }
-      // Same song, same length: the strongest signal against edits/covers.
-      final gotSec = c.duration.inSeconds;
-      if (wantSec > 0 && gotSec > 0) {
-        final diff = (wantSec - gotSec).abs();
-        if (diff <= 4) {
-          s += 90.0;
-        } else if (diff <= 12) {
-          s += 40.0;
-        } else if (diff > 30) {
-          s -= 120.0;
-        }
-      }
-      return s;
-    }
-
+    // 3. Score candidates: strict title/artist/version/duration checks on top
+    //    of the generic scoreTrack heuristics.
     final scored = [
-      for (final c in candidates) (track: c, score: candidateScore(c)),
+      for (final c in candidates)
+        (
+          track: c,
+          score: scoreCandidate(track, c,
+              plays: _scExtractor.playbackCount(c.id)),
+        ),
     ]..sort((a, b) => b.score.compareTo(a.score));
 
     // 4. Require BOTH a title signal and an artist signal. This blocks

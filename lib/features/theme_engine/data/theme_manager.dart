@@ -10,34 +10,38 @@ class ThemeManager {
   ];
 
   final Map<String, HookTheme> _loadedThemes = {};
-  String _activeThemeId = 'default_dark';
+  static const String defaultThemeId = 'minimal_oled';
+
+  String _activeThemeId = defaultThemeId;
 
   String get activeThemeId => _activeThemeId;
   List<HookTheme> get availableThemes => _loadedThemes.values.toList();
   HookTheme get currentTheme => _loadedThemes[_activeThemeId] ?? _fallbackTheme;
 
+  /// Same values as assets/themes/minimal_oled.json, so the first frame
+  /// (before the assets load) already looks like the default theme.
   static final HookTheme _fallbackTheme = HookTheme(
-    id: 'default_dark',
-    name: 'Hook Obsidian',
+    id: defaultThemeId,
+    name: 'OLED Monolith',
     author: 'Hook Core Team',
     version: '1.0.0',
     isDark: true,
     colors: const HookColors(
-      background: Color(0xFF0D0E12),
-      surface: Color(0xFF16181F),
-      surfaceGlass: Color(0x2416181F),
-      primary: Color(0xFF6C5CE7),
-      secondary: Color(0xFFA29BFE),
-      accent: Color(0xFF00CEC9),
+      background: Color(0xFF000000),
+      surface: Color(0xFF0A0A0A),
+      surfaceGlass: Color(0x440A0A0A),
+      primary: Color(0xFFE2E8F0),
+      secondary: Color(0xFF94A3B8),
+      accent: Color(0xFFF59E0B),
       textPrimary: Color(0xFFFFFFFF),
-      textSecondary: Color(0xFF8E92A4),
-      border: Color(0xFF282B37),
+      textSecondary: Color(0xFF64748B),
+      border: Color(0xFF1E293B),
     ),
     styling: const HookStyling(
-      borderRadius: 16.0,
-      cardBlur: 24.0,
-      shaderMeshEnabled: true,
-      shaderNoiseIntensity: 0.04,
+      borderRadius: 20.0,
+      cardBlur: 0.0,
+      shaderMeshEnabled: false,
+      shaderNoiseIntensity: 0.0,
       fontFamily: 'Inter',
     ),
   );
