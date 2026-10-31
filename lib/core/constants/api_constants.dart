@@ -6,14 +6,7 @@ class ApiConstants {
   static const String soundCloudFallbackClientId =
       'ZeISTkUY1Q4so1FsHJKZaJo898iWk0d3';
 
-  // InnerTube Music client identification
-  static const String innerTubeMusicClientName = 'WEB_REMIX';
-  static const String innerTubeMusicClientVersion = '1.20240401.01.00';
-
-  // Invidious fallback mirrors for network environments where YouTube DNS is blocked
-  static const List<String> invidiousInstances = [
-    'https://yt.chocolatemoo53.com',
-    'https://invidious.jing.rocks',
-    'https://invidious.privacydev.net',
-  ];
+  // User-Agent used for SoundCloud API requests and CDN playback probes.
+  static const String streamUserAgent =
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 }

@@ -6,6 +6,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
+import '../../extractor/models/resolved_stream.dart';
 import '../../extractor/stream_resolver.dart';
 
 enum PlayerLoopMode { off, all, one }
@@ -34,8 +35,9 @@ class AudioPlayerService {
 
   /// Resolved stream URLs keyed by cache key. YouTube URLs stay valid for
   /// about six hours, so reusing them makes replays and "previous" instant.
-  final Map<String, ({String url, DateTime resolvedAt})> _urlCache = {};
-  final Map<String, Future<String?>> _pendingResolves = {};
+  final Map<String, ({String url, Map<String, String> headers, DateTime resolvedAt})>
+      _urlCache = {};
+  final Map<String, Future<ResolvedStream?>> _pendingStreams = {};
   static const _urlTtl = Duration(hours: 2);
   StreamSubscription<void>? _noisySubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
@@ -82,31 +84,42 @@ class AudioPlayerService {
 
   /// Resolves a playable URL, reusing recent results and sharing in-flight
   /// requests so a prefetch and a tap never resolve the same track twice.
-  Future<String?> _resolveUrl(MediaTrack track) {
+  Future<ResolvedStream?> _resolveStream(MediaTrack track) {
     final key = _cacheKey(track);
     final cached = _urlCache[key];
     if (cached != null &&
         DateTime.now().difference(cached.resolvedAt) < _urlTtl) {
-      return Future.value(cached.url);
+      return Future.value(
+        ResolvedStream(cached.url, headers: cached.headers),
+      );
     }
 
-    return _pendingResolves[key] ??= () async {
+    return _pendingStreams[key] ??= () async {
       try {
         final local = await _cacheManager.getLocalCachedUrl(key);
-        if (local != null) return local;
+        if (local != null) return ResolvedStream(local);
 
-        final url = await _resolver
-            .resolveStreamUrl(track)
+        final resolved = await _resolver
+            .resolveStream(track)
             .timeout(const Duration(seconds: 25));
-        if (url != null && url.isNotEmpty) {
-          _urlCache[key] = (url: url, resolvedAt: DateTime.now());
+        if (resolved != null && !resolved.isEmpty) {
+          _urlCache[key] = (
+            url: resolved.url,
+            headers: resolved.headers,
+            resolvedAt: DateTime.now(),
+          );
+          return resolved;
         }
-        return url;
+        return null;
       } finally {
-        _pendingResolves.remove(key);
+        _pendingStreams.remove(key);
       }
     }();
   }
+
+  /// URL-only helper kept for callers that do not need request headers.
+  Future<String?> _resolveUrl(MediaTrack track) async =>
+      (await _resolveStream(track))?.url;
 
   /// Resolves the next queue item in the background so skipping is instant.
   void _prefetchNext() {
@@ -194,7 +207,10 @@ class AudioPlayerService {
     }
   }
 
-  /// Plays a specific track, checking local cache first, then resolving stream URL
+  /// Plays a specific track, checking local cache first, then resolving stream URL.
+  /// On failure it retries with a freshly-resolved URL (signed SoundCloud URLs
+  /// expire → CDN answers 403) and finally falls back to re-matching the song
+  /// via a SoundCloud search before reporting an error.
   Future<void> playTrack(MediaTrack track) async {
     final requestId = ++_playRequestId;
     if (!_errorController.isClosed) _errorController.add(null);
@@ -202,31 +218,20 @@ class AudioPlayerService {
     // Show the tapped track right away; the stream resolves in the background.
     _setCurrentTrack(track);
 
-    try {
-      await initialize();
+    MediaItem buildMediaItem() => MediaItem(
+          id: track.id,
+          album: track.album ?? track.artist,
+          title: track.title,
+          artist: track.artist,
+          artUri: track.artworkUrl.isNotEmpty
+              ? Uri.tryParse(track.artworkUrl)
+              : null,
+          duration: track.duration,
+        );
 
-      // Stop previous track completely to unload its audio source and reset position
-      await _player.stop();
-
-      final playUrl = await _resolveUrl(track);
-
-      if (playUrl == null || playUrl.isEmpty) {
-        throw Exception(
-            'Unable to resolve audio stream for track: ${track.title}');
-      }
-
-      if (requestId != _playRequestId) return;
-
-      // Set AudioSource with MediaItem for Android lockscreen and notifications
-      final mediaItem = MediaItem(
-        id: track.id,
-        album: track.album ?? track.artist,
-        title: track.title,
-        artist: track.artist,
-        artUri:
-            track.artworkUrl.isNotEmpty ? Uri.tryParse(track.artworkUrl) : null,
-        duration: track.duration,
-      );
+    Future<bool> startWith(ResolvedStream? stream) async {
+      final playUrl = stream?.url;
+      if (playUrl == null || playUrl.isEmpty) return false;
 
       final isLocal = playUrl.startsWith('file:') || File(playUrl).existsSync();
       final audioSource = isLocal
@@ -234,27 +239,70 @@ class AudioPlayerService {
               playUrl.startsWith('file:')
                   ? Uri.parse(playUrl).toFilePath()
                   : playUrl,
-              tag: mediaItem,
+              tag: buildMediaItem(),
             )
           : AudioSource.uri(
               Uri.parse(playUrl),
-              tag: mediaItem,
+              tag: buildMediaItem(),
+              headers: stream == null || stream.headers.isEmpty
+                  ? null
+                  : stream.headers,
             );
 
       await _player
           .setAudioSource(audioSource)
           .timeout(const Duration(seconds: 20));
-      if (requestId != _playRequestId) return;
+      if (requestId != _playRequestId) return true;
 
       // just_audio's play() future completes only when playback pauses or
-      // ends, so it must not be awaited with a timeout: that used to report
-      // "playback failed" for tracks that were actually playing.
+      // ends, so it must not be awaited with a timeout.
       unawaited(_player.play());
       unawaited(_storageService?.addToHistory(track));
       _prefetchNext();
-    } catch (e) {
-      // A cached URL may have expired; drop it so a retry resolves afresh.
+      return true;
+    }
+
+    Future<bool> tryStart(Future<ResolvedStream?> Function() resolve,
+        {required Duration timeout}) async {
+      try {
+        return await startWith(await resolve().timeout(timeout));
+      } catch (_) {
+        return false;
+      }
+    }
+
+    try {
+      await initialize();
+
+      // Stop previous track completely to unload its audio source and reset position
+      await _player.stop();
+
+      // Attempt 1: cached or freshly resolved stream.
+      if (await tryStart(() => _resolveStream(track),
+          timeout: const Duration(seconds: 25))) {
+        return;
+      }
+
+      if (requestId != _playRequestId) return;
+
+      // Attempt 2: the cached/signed URL may have expired (HTTP 403 at the CDN).
+      // Drop it so the resolver resolves afresh (SoundCloud also auto-refreshes
+      // its client_id on auth failures).
       _urlCache.remove(_cacheKey(track));
+      if (await tryStart(() => _resolveStream(track),
+          timeout: const Duration(seconds: 25))) {
+        return;
+      }
+
+      if (requestId != _playRequestId) return;
+
+      // Attempt 3: last resort — search SoundCloud for the same song and play
+      // the best match, so the music never stops.
+      if (await tryStart(() => _resolver.resolveSpotifyTrack(track),
+          timeout: const Duration(seconds: 40))) {
+        return;
+      }
+
       if (requestId == _playRequestId) {
         // Completely stop playback and reset current track so old audio doesn't linger
         unawaited(_player.stop());
@@ -263,8 +311,29 @@ class AudioPlayerService {
           _errorController.add(AudioPlaybackError(
             track: track,
             message: 'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
-            cause: e,
           ));
+        }
+      }
+    } catch (e) {
+      // A cached URL may have expired; drop it so a retry resolves afresh.
+      _urlCache.remove(_cacheKey(track));
+
+      if (requestId == _playRequestId) {
+        if (await tryStart(() => _resolver.resolveSpotifyTrack(track),
+            timeout: const Duration(seconds: 40))) {
+          return;
+        }
+        if (requestId == _playRequestId) {
+          unawaited(_player.stop());
+          _setCurrentTrack(null);
+          if (!_errorController.isClosed) {
+            _errorController.add(AudioPlaybackError(
+              track: track,
+              message:
+                  'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
+              cause: e,
+            ));
+          }
         }
       }
     }
@@ -274,13 +343,15 @@ class AudioPlayerService {
     MediaTrack track, {
     void Function(double progress)? onProgress,
   }) async {
-    final streamUrl = await _resolveUrl(track);
+    final stream = await _resolveStream(track);
+    final streamUrl = stream?.url;
     if (streamUrl == null || streamUrl.isEmpty) return null;
     if (streamUrl.startsWith('file:')) return File(Uri.parse(streamUrl).toFilePath());
     return _cacheManager.downloadTrack(
       track,
       streamUrl,
       cacheKey: '${track.source.name}_${track.id}',
+      headers: stream!.headers.isEmpty ? null : stream.headers,
       onProgress: onProgress,
     );
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/models/media_track.dart';
 import '../../import/presentation/import_bottom_sheet.dart';
@@ -34,8 +35,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _isLoadingRecommendations = false;
   String? _searchError;
   String _lastQuery = '';
-  // YouTube is the main source; searching one source also answers faster.
-  String _activeSourceFilter = 'soundcloud'; // 'all', 'youtube', 'soundcloud'
+  // Spotify (iTunes catalog) is the default source; SoundCloud backs playback.
+  String _activeSourceFilter = 'spotify'; // 'all', 'soundcloud', 'spotify'
   int _searchRequestId = 0;
 
   @override
@@ -151,16 +152,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     });
 
     final resolver = ref.read(streamResolverProvider);
-    final includeYt =
-        _activeSourceFilter == 'all' || _activeSourceFilter == 'youtube';
+    final includeSpotify =
+        _activeSourceFilter == 'all' || _activeSourceFilter == 'spotify';
     final includeSc =
         _activeSourceFilter == 'all' || _activeSourceFilter == 'soundcloud';
 
     try {
       final results = await resolver.search(
         query: normalizedQuery,
-        includeYouTube: includeYt,
         includeSoundCloud: includeSc,
+        includeSpotify: includeSpotify,
       );
 
       if (mounted && requestId == _searchRequestId) {
@@ -245,7 +246,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         fontWeight: FontWeight.w400,
                       ),
                       prefixIcon: Icon(
-                        Icons.search_rounded,
+                        MingCuteIcons.mgc_search_2_line,
                         color: colors.primary,
                         size: 22,
                       ),
@@ -256,7 +257,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             : IconButton(
                                 tooltip: 'Очистить',
                                 icon: Icon(
-                                  Icons.close_rounded,
+                                  MingCuteIcons.mgc_close_line,
                                   color: colors.textSecondary,
                                   size: 20,
                                 ),
@@ -286,11 +287,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    _buildFilterChip('soundcloud', 'SoundCloud', Icons.cloud_rounded),
+                    _buildFilterChip(
+                        'spotify', 'Spotify', MingCuteIcons.mgc_music_fill),
                     const SizedBox(width: 8),
-                    _buildFilterChip('youtube', 'YouTube', Icons.play_circle_fill_rounded),
+                    _buildFilterChip(
+                        'soundcloud', 'SoundCloud', MingCuteIcons.mgc_cloud_line),
                     const SizedBox(width: 8),
-                    _buildFilterChip('all', 'Все источники', Icons.auto_awesome_rounded),
+                    _buildFilterChip('all', 'Все источники',
+                        MingCuteIcons.mgc_sparkles_line),
                   ],
                 ),
               ),
@@ -378,7 +382,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                 ),
                 child: Icon(
-                  Icons.search_off_rounded,
+                  MingCuteIcons.mgc_search_3_line,
                   size: 48,
                   color: colors.textSecondary.withValues(alpha: 0.6),
                 ),
@@ -429,7 +433,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Row(
               children: [
                 Icon(
-                  Icons.favorite_rounded,
+                  MingCuteIcons.mgc_heart_fill,
                   size: 16,
                   color: Colors.redAccent.withValues(alpha: 0.8),
                 ),
@@ -451,7 +455,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               children: favoriteArtists.map((artist) {
                 return _buildPillChip(
                   label: artist,
-                  icon: Icons.person_rounded,
+                  icon: MingCuteIcons.mgc_user_3_line,
                   onTap: () {
                     _searchController.text = artist;
                     _performSearch(artist);
@@ -466,7 +470,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Row(
             children: [
               Icon(
-                Icons.explore_rounded,
+                MingCuteIcons.mgc_compass_line,
                 size: 16,
                 color: colors.accent,
               ),
@@ -488,7 +492,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               _buildPillChip(
                 label: '📥 Импорт (Spotify / YT)',
-                icon: Icons.add_link_rounded,
+                icon: MingCuteIcons.mgc_link_line,
                 onTap: () => ImportBottomSheet.show(context, widget.theme),
               ),
               _buildPillChip(
@@ -589,7 +593,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.auto_awesome_rounded,
+                          MingCuteIcons.mgc_sparkles_line,
                           size: 13,
                           color: colors.accent,
                         ),
@@ -610,7 +614,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.graphic_eq_rounded,
+                        MingCuteIcons.mgc_music_line,
                         size: 16,
                         color: colors.textSecondary.withValues(alpha: 0.8),
                       ),
@@ -692,7 +696,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      Icons.play_arrow_rounded,
+                                      MingCuteIcons.mgc_play_fill,
                                       color: Colors.white,
                                       size: 20,
                                     ),
@@ -733,7 +737,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.format_list_bulleted_rounded,
+                            MingCuteIcons.mgc_playlist_2_line,
                             color: colors.textPrimary,
                             size: 18,
                           ),
@@ -886,7 +890,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.wifi_off_rounded,
+                MingCuteIcons.mgc_wifi_off_line,
                 size: 48,
                 color: Colors.redAccent,
               ),
@@ -905,7 +909,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ElevatedButton.icon(
               onPressed: () =>
                   _performSearch(_searchController.text, force: true),
-              icon: const Icon(Icons.refresh_rounded, size: 18),
+              icon: const Icon(MingCuteIcons.mgc_refresh_3_line, size: 18),
               label: const Text('Повторить попытку'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
@@ -1025,7 +1029,7 @@ class _SearchResultTile extends ConsumerWidget {
                                   ),
                                 )
                               : Icon(
-                                  Icons.equalizer_rounded,
+                                  MingCuteIcons.mgc_sound_line_fill,
                                   color: colors.accent,
                                   size: 24,
                                 ),
@@ -1054,43 +1058,48 @@ class _SearchResultTile extends ConsumerWidget {
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        if (track.source == TrackSource.soundcloud) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
+                        Builder(builder: (_) {
+                          final (String label, Color bg, Color fg) = switch (
+                              track.source) {
+                            TrackSource.soundcloud => (
                               'SC',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orangeAccent,
-                              ),
+                              Colors.orange,
+                              Colors.orangeAccent
                             ),
-                          ),
-                          const SizedBox(width: 5),
-                        ] else ...[
-                          Container(
+                            TrackSource.spotify => (
+                              'SP',
+                              const Color(0xFF1DB954),
+                              const Color(0xFF1DB954)
+                            ),
+                            TrackSource.youtube => (
+                              'YT',
+                              Colors.red,
+                              Colors.redAccent
+                            ),
+                            TrackSource.local => (
+                              'LO',
+                              Colors.blueGrey,
+                              Colors.blueGrey
+                            ),
+                          };
+                          return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 4, vertical: 1),
                             decoration: BoxDecoration(
-                              color: Colors.red.withValues(alpha: 0.15),
+                              color: bg.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'YT',
+                            child: Text(
+                              label,
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.redAccent,
+                                color: fg,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 5),
-                        ],
+                          );
+                        }),
+                        const SizedBox(width: 5),
                         Expanded(
                           child: Text(
                             subtitle,
@@ -1109,7 +1118,7 @@ class _SearchResultTile extends ConsumerWidget {
               ),
               IconButton(
                 tooltip: 'Действия',
-                icon: Icon(Icons.more_vert_rounded,
+                icon: Icon(MingCuteIcons.mgc_more_2_line,
                     color: colors.textSecondary.withValues(alpha: 0.7),
                     size: 20),
                 onPressed: () => _showActions(context, ref, isFav),
@@ -1174,7 +1183,9 @@ class _SearchResultTile extends ConsumerWidget {
             ),
             ListTile(
               leading: Icon(
-                isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                isFav
+                    ? MingCuteIcons.mgc_heart_fill
+                    : MingCuteIcons.mgc_heart_line,
                 color: isFav ? Colors.redAccent : colors.textPrimary,
               ),
               title: Text(
@@ -1188,7 +1199,7 @@ class _SearchResultTile extends ConsumerWidget {
             ),
             ListTile(
               leading:
-                  Icon(Icons.playlist_add_rounded, color: colors.textPrimary),
+                  Icon(MingCuteIcons.mgc_playlist_line, color: colors.textPrimary),
               title: Text('Добавить в очередь',
                   style: TextStyle(color: colors.textPrimary)),
               onTap: () {

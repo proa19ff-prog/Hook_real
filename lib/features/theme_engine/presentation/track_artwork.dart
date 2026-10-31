@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 /// Small, bounded artwork widget used in scrolling lists and player chrome.
 ///
@@ -34,6 +35,10 @@ class TrackArtwork extends StatelessWidget {
           .replaceAll('-badge.', '-t500x500.')
           .replaceAll('-small.', '-t500x500.')
           .replaceAll('-tiny.', '-t500x500.');
+    }
+    // Apple / iTunes / Spotify catalog: upgrade 100x100 to 600x600
+    if (result.contains('mzstatic.com')) {
+      result = result.replaceAll('100x100bb', '600x600bb');
     }
     // YouTube: upgrade low-res thumbnails to maxresdefault
     if (result.contains('ytimg.com')) {
@@ -75,6 +80,6 @@ class TrackArtwork extends StatelessWidget {
   Widget _placeholder() => SizedBox(
         width: size,
         height: size,
-        child: Icon(Icons.music_note_rounded, color: iconColor),
+        child: Icon(MingCuteIcons.mgc_music_line, color: iconColor),
       );
 }

@@ -61,6 +61,7 @@ class AudioCacheManager {
     MediaTrack track,
     String streamUrl, {
     String? cacheKey,
+    Map<String, String>? headers,
     void Function(double progress)? onProgress,
   }) async {
     File? temporaryFile;
@@ -73,6 +74,7 @@ class AudioCacheManager {
       await _dio.download(
         streamUrl,
         temporaryFile.path,
+        options: headers == null ? null : Options(headers: headers),
         onReceiveProgress: (received, total) {
           if (total > 0 && onProgress != null) {
             onProgress(received / total);

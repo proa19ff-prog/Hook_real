@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/models/media_track.dart';
@@ -114,7 +115,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.add_link_rounded,
+                              Icon(MingCuteIcons.mgc_link_2_line,
                                   size: 16, color: colors.accent),
                               const SizedBox(width: 4),
                               Text(
@@ -150,7 +151,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.sd_storage_rounded,
+                              Icon(MingCuteIcons.mgc_storage_line,
                                   size: 14, color: colors.accent),
                               const SizedBox(width: 5),
                               Text(
@@ -211,7 +212,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     tracks: favorites,
                     emptyMessage:
                         'В избранном пока пусто.\nНажмите ❤️ на треке, чтобы добавить его сюда.',
-                    emptyIcon: Icons.favorite_border_rounded,
+                    emptyIcon: MingCuteIcons.mgc_heart_line,
                     onPlayAll: favorites.isNotEmpty
                         ? () => queueNotifier.playQueue(favorites)
                         : null,
@@ -234,13 +235,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     tracks: history,
                     emptyMessage:
                         'История прослушиваний пуста.\nВключайте треки в поиске, чтобы они появились здесь!',
-                    emptyIcon: Icons.history_rounded,
+                    emptyIcon: MingCuteIcons.mgc_history_line,
                     onPlayAll: history.isNotEmpty
                         ? () => queueNotifier.playQueue(history)
                         : null,
                     trailingHeaderAction: history.isNotEmpty
                         ? TextButton.icon(
-                            icon: const Icon(Icons.delete_sweep_rounded,
+                            icon: const Icon(MingCuteIcons.mgc_delete_2_line,
                                 size: 16),
                             label: const Text('Очистить'),
                             style: TextButton.styleFrom(
@@ -287,7 +288,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   ),
                 ),
                 child: Icon(
-                  Icons.queue_music_rounded,
+                  MingCuteIcons.mgc_playlist_line,
                   size: 52,
                   color: colors.textSecondary.withValues(alpha: 0.5),
                 ),
@@ -312,7 +313,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               const SizedBox(height: 18),
               ElevatedButton.icon(
-                icon: const Icon(Icons.add_link_rounded, size: 18),
+                icon: const Icon(MingCuteIcons.mgc_link_2_line, size: 18),
                 label: const Text('Импортировать музыку'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
@@ -382,7 +383,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               children: [
                 IconButton(
                   tooltip: 'Слушать плейлист',
-                  icon: Icon(Icons.play_circle_fill_rounded,
+                  icon: Icon(MingCuteIcons.mgc_play_circle_fill,
                       color: colors.primary, size: 32),
                   onPressed: () {
                     queueNotifier.playQueue(tracks);
@@ -396,7 +397,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   },
                 ),
                 PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert_rounded,
+                  icon: Icon(MingCuteIcons.mgc_more_2_line,
                       color: colors.textSecondary, size: 20),
                   onSelected: (val) {
                     if (val == 'delete') {
@@ -410,7 +411,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_outline_rounded,
+                          Icon(MingCuteIcons.mgc_delete_line,
                               color: Colors.redAccent, size: 20),
                           SizedBox(width: 8),
                           Text('Удалить плейлист',
@@ -501,7 +502,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     ],
                   ),
                   child: ElevatedButton.icon(
-                    icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                    icon: const Icon(MingCuteIcons.mgc_play_fill, size: 20),
                     label: const Text('Слушать всё'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
@@ -519,7 +520,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               const SizedBox(width: 8),
               if (onShuffle != null)
                 OutlinedButton.icon(
-                  icon: Icon(Icons.shuffle_rounded,
+                  icon: Icon(MingCuteIcons.mgc_shuffle_2_line,
                       size: 16, color: colors.textPrimary),
                   label: const Text('Перемешать'),
                   style: OutlinedButton.styleFrom(
@@ -583,7 +584,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                             ),
                             child: Center(
                               child: Icon(
-                                Icons.equalizer_rounded,
+                                MingCuteIcons.mgc_sound_line_fill,
                                 size: 20,
                                 color: colors.accent,
                               ),
@@ -604,26 +605,47 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   ),
                   subtitle: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 5, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: track.source == TrackSource.youtube
-                              ? Colors.red.withValues(alpha: 0.15)
-                              : Colors.orange.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          track.source == TrackSource.youtube ? 'YT' : 'SC',
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: track.source == TrackSource.youtube
-                                ? Colors.redAccent
-                                : Colors.orangeAccent,
-                            fontWeight: FontWeight.bold,
+                      Builder(builder: (_) {
+                        final (String label, Color bg, Color fg) = switch (
+                            track.source) {
+                          TrackSource.soundcloud => (
+                            'SC',
+                            Colors.orange,
+                            Colors.orangeAccent
                           ),
-                        ),
-                      ),
+                          TrackSource.spotify => (
+                            'SP',
+                            const Color(0xFF1DB954),
+                            const Color(0xFF1DB954)
+                          ),
+                          TrackSource.youtube => (
+                            'YT',
+                            Colors.red,
+                            Colors.redAccent
+                          ),
+                          TrackSource.local => (
+                            'LO',
+                            Colors.blueGrey,
+                            Colors.blueGrey
+                          ),
+                        };
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: bg.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: fg,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        );
+                      }),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -652,8 +674,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                         icon: Icon(
                           ref.watch(favoritesProvider).any((t) =>
                                   t.id == track.id && t.source == track.source)
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
+                              ? MingCuteIcons.mgc_heart_fill
+                              : MingCuteIcons.mgc_heart_line,
                           color: ref.watch(favoritesProvider).any((t) =>
                                   t.id == track.id && t.source == track.source)
                               ? Colors.redAccent
@@ -729,7 +751,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                         ),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.download_done_rounded,
+                      child: Icon(MingCuteIcons.mgc_download_2_fill,
                           size: 40, color: colors.accent),
                     ),
                     const SizedBox(height: 12),
@@ -773,7 +795,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      icon: const Icon(MingCuteIcons.mgc_delete_line, size: 18),
                       label: const Text('Очистить весь кэш'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
@@ -825,17 +847,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               const SizedBox(height: 12),
               _buildFeatureTile(
-                Icons.wifi_off_rounded,
+                MingCuteIcons.mgc_wifi_off_line,
                 'Полный Offline-First',
                 'При повторном запуске аудио проигрывается напрямую из файловой системы устройства.',
               ),
               _buildFeatureTile(
-                Icons.high_quality_rounded,
+                MingCuteIcons.mgc_diamond_line,
                 'Максимальный битрейт',
                 'Кэшируются чистые аудиопотоки Opus/M4A 160-256 kbps без перекодирования.',
               ),
               _buildFeatureTile(
-                Icons.battery_charging_full_rounded,
+                MingCuteIcons.mgc_battery_charging_line,
                 'Экономия трафика и батареи',
                 'Отсутствие повторных сетевых запросов продлевает время работы смартфона.',
               ),
@@ -859,7 +881,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       child: Column(
         children: [
           Icon(
-            Icons.cloud_download_outlined,
+            MingCuteIcons.mgc_file_download_line,
             size: 36,
             color: colors.textSecondary.withValues(alpha: 0.6),
           ),
@@ -928,7 +950,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ),
           trailing: IconButton(
             tooltip: 'Удалить из кэша',
-            icon: const Icon(Icons.delete_outline_rounded),
+            icon: const Icon(MingCuteIcons.mgc_delete_line),
             color: Colors.redAccent.withValues(alpha: 0.8),
             onPressed: () => _confirmRemoveCachedTrack(
               cacheManager,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/mini_player.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
@@ -53,7 +54,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           SnackBar(
             content: Row(
               children: [
-                Icon(Icons.error_outline_rounded,
+                Icon(MingCuteIcons.mgc_alert_line,
                     color: Colors.white, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
@@ -132,9 +133,9 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _navItem(0, Icons.search_rounded, 'Поиск', theme),
-          _navItem(1, Icons.library_music_rounded, 'Медиатека', theme),
-          _navItem(2, Icons.palette_outlined, 'Темы', theme),
+          _navItem(0, MingCuteIcons.mgc_search_2_line, 'Поиск', theme),
+          _navItem(1, MingCuteIcons.mgc_disc_line, 'Медиатека', theme),
+          _navItem(2, MingCuteIcons.mgc_palette_line, 'Темы', theme),
         ],
       ),
     );

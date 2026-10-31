@@ -90,6 +90,7 @@ class LrcParser {
           startTime: lineStartTime,
           text: cleanLineText,
           words: words,
+          hasRealWordTimings: words.isNotEmpty,
         ),
       );
     }
@@ -106,8 +107,9 @@ class LrcParser {
           (current.startTime + const Duration(seconds: 5));
 
       var words = current.words;
-      // If line lacks word-level tokens, synthesize word timings
-      // so word-by-word karaoke animations work for every song!
+      // Lines lacking word-level tags keep their (optional) synthesized word
+      // list for data consumers, but `hasRealWordTimings` stays false so the
+      // karaoke UI never animates fake per-word timelines.
       if (words.isEmpty && current.text.isNotEmpty) {
         words = _synthesizeWords(current.text, current.startTime, endTime);
       }
@@ -118,6 +120,7 @@ class LrcParser {
           endTime: endTime,
           text: current.text,
           words: words,
+          hasRealWordTimings: current.hasRealWordTimings,
         ),
       );
     }

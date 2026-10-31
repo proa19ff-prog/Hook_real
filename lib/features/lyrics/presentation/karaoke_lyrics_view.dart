@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../data/lrclib_client.dart';
@@ -19,22 +20,37 @@ class KaraokeLyricsView extends ConsumerStatefulWidget {
 
 class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
   final ScrollController _scrollController = ScrollController();
+  final Map<int, GlobalKey> _itemKeys = {};
   int _lastActiveIndex = -1;
   double _syncOffsetSeconds = 0.0;
 
-  void _scrollToActiveIndex(int index, int totalLines) {
-    if (index == _lastActiveIndex || !mounted || !_scrollController.hasClients) return;
+  GlobalKey _keyForIndex(int index) =>
+      _itemKeys.putIfAbsent(index, () => GlobalKey());
+
+  void _scrollToActiveIndex(int index) {
+    if (index == _lastActiveIndex || !mounted) return;
     _lastActiveIndex = index;
 
-    // Line height ~ 60px; keep active line in the upper third for comfortable reading
-    const itemHeight = 60.0;
-    final targetOffset = (index * itemHeight) - 32.0;
-
-    _scrollController.animateTo(
-      targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
-    );
+    final keyContext = _itemKeys[index]?.currentContext;
+    if (keyContext != null) {
+      // Element is already built: glide it to the upper third (0.3) of the
+      // viewport without jumping.
+      Scrollable.ensureVisible(
+        keyContext,
+        alignment: 0.3,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    } else if (_scrollController.hasClients) {
+      // Fallback: the user seeked far ahead and the widget is not laid out yet.
+      const estimatedItemHeight = 60.0;
+      final targetOffset = (index * estimatedItemHeight) - 80.0;
+      _scrollController.animateTo(
+        targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   @override
@@ -62,7 +78,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.subtitles_off_rounded,
+            Icon(MingCuteIcons.mgc_forbid_circle_line,
                 size: 48, color: colors.textSecondary.withValues(alpha: 0.5)),
             const SizedBox(height: 12),
             Text(
@@ -82,7 +98,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lyrics_outlined,
+                Icon(MingCuteIcons.mgc_mic_line,
                     size: 48, color: colors.textSecondary.withValues(alpha: 0.5)),
                 const SizedBox(height: 12),
                 Text(
@@ -100,6 +116,51 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
 
         final lines = result.lines;
 
+        // Unsynced lyrics (synthesized from plain text) have invented timings
+        // that never match the actual audio — show them as calm static text
+        // instead of a karaoke highlight that runs ahead of / behind the song.
+        if (!result.isRealSync) {
+          return Stack(
+            children: [
+              ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: const [
+                    Colors.transparent,
+                    Colors.white,
+                    Colors.white,
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.06, 0.92, 1.0],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+                  itemCount: lines.length,
+                  itemBuilder: (context, index) {
+                    final line = lines[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 8),
+                      child: Text(
+                        line.text,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
+                          color: colors.textPrimary.withValues(alpha: 0.8),
+                          height: 1.4,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+
         // Find active line index using offset-adjusted position
         int activeIndex = -1;
         for (int i = 0; i < lines.length; i++) {
@@ -109,10 +170,16 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
           }
         }
 
+        // Drop stale keys when the track changed and the line count shrank.
+        if (_itemKeys.length > lines.length) {
+          _itemKeys.clear();
+          _lastActiveIndex = -1;
+        }
+
         // Auto-scroll when active line changes
-        if (activeIndex >= 0 && _scrollController.hasClients) {
+        if (activeIndex >= 0 && activeIndex != _lastActiveIndex) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollToActiveIndex(activeIndex, lines.length);
+            if (mounted) _scrollToActiveIndex(activeIndex);
           });
         }
 
@@ -141,13 +208,23 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
                   final isPast = activeIndex != -1 && index < activeIndex;
 
                   return InkWell(
-                    onTap: () => playerService.seek(line.startTime),
+                    key: _keyForIndex(index),
+                    onTap: () {
+                      // Respect the user timing offset when seeking by tap.
+                      final adjustedTarget =
+                          line.startTime - Duration(milliseconds: offsetMillis);
+                      playerService.seek(
+                        adjustedTarget < Duration.zero
+                            ? Duration.zero
+                            : adjustedTarget,
+                      );
+                    },
                     borderRadius: BorderRadius.circular(12),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
                       padding:
                           const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                      child: line.hasWordTimings && isActive
+                      child: line.hasRealWordTimings && isActive
                           ? _buildWordHighlightedLine(line, position, colors)
                           : Text(
                               line.text,
@@ -260,6 +337,8 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
       LyricLine line, Duration position, HookColors colors) {
     return Wrap(
       alignment: WrapAlignment.center,
+      spacing: 6.0, // gap between words
+      runSpacing: 4.0, // gap between wrapped lines
       children: line.words.map((w) {
         final isWordActive = w.isActiveAt(position);
         final isWordPast = position >= w.endTime;
@@ -287,7 +366,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView> {
                     ]
                   : null,
             ),
-            child: Text(w.text),
+            child: Text(w.text.trim()),
           ),
         );
       }).toList(),

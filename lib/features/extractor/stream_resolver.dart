@@ -1,17 +1,18 @@
-import 'innertube/youtube_extractor.dart';
 import 'models/media_track.dart';
+import 'models/resolved_stream.dart';
 import 'soundcloud/soundcloud_extractor.dart';
+import 'spotify/spotify_catalog_service.dart';
 
 class StreamResolver {
-  final YouTubeExtractor _ytExtractor;
   final SoundCloudExtractor _scExtractor;
+  final SpotifyCatalogService _spotifyCatalog;
   final Map<String, List<MediaTrack>> _searchCache = {};
 
   StreamResolver({
-    YouTubeExtractor? ytExtractor,
     SoundCloudExtractor? scExtractor,
-  })  : _ytExtractor = ytExtractor ?? YouTubeExtractor(),
-        _scExtractor = scExtractor ?? SoundCloudExtractor();
+    SpotifyCatalogService? spotifyCatalog,
+  })  : _scExtractor = scExtractor ?? SoundCloudExtractor(),
+        _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService();
 
   // Common Russian phonetic transliterations to official artist/track names
   static const Map<String, String> _phoneticMap = {
@@ -164,13 +165,15 @@ class StreamResolver {
   }
 
   /// Searches tracks across selected sources with intelligent ranking and fuzzy matching.
+  /// Spotify (catalog) provides discovery; SoundCloud provides playback.
   Future<List<MediaTrack>> search({
     required String query,
-    bool includeYouTube = true,
     bool includeSoundCloud = true,
+    bool includeSpotify = true,
   }) async {
     final normalizedQuery = query.trim().toLowerCase();
-    final cacheKey = '$normalizedQuery|$includeYouTube|$includeSoundCloud';
+    final cacheKey =
+        '$normalizedQuery|$includeSoundCloud|$includeSpotify';
     final cached = _searchCache[cacheKey];
     if (cached != null) return List.unmodifiable(cached);
     if (_searchCache.length >= 50) {
@@ -185,8 +188,8 @@ class StreamResolver {
       if (includeSoundCloud) {
         futures.add(_scExtractor.searchTracks(q));
       }
-      if (includeYouTube) {
-        futures.add(_ytExtractor.searchTracks(q));
+      if (includeSpotify) {
+        futures.add(_spotifyCatalog.searchTracks(q));
       }
 
       if (futures.isEmpty) continue;
@@ -229,30 +232,58 @@ class StreamResolver {
     return output;
   }
 
-  /// Resolves the actual playable stream URL for a given track based on its source.
-  Future<String?> resolveStreamUrl(MediaTrack track) async {
+  /// Resolves the actual playable stream for a given track based on its source.
+  /// The result carries the HTTP headers the player must send, otherwise
+  /// YouTube CDN rejects the request with 403.
+  Future<ResolvedStream?> resolveStream(MediaTrack track) async {
     if (track.source == TrackSource.local &&
         track.streamUrl != null &&
         track.streamUrl!.isNotEmpty) {
-      return track.streamUrl;
+      return ResolvedStream(track.streamUrl!);
     }
 
     switch (track.source) {
       case TrackSource.youtube:
-        return _ytExtractor.resolveAudioStreamUrl(track.id);
+        // YouTube is cut from the app (unusable on many networks). Old saved
+        // tracks keep playing through the SoundCloud search match.
+        return resolveSpotifyTrack(track);
 
       case TrackSource.soundcloud:
-        return _scExtractor.resolveAudioStreamUrl(track.id);
+        // The CDN signs the URL in its query string, so no extra headers are
+        // needed here; sending them only risked a rejection.
+        final url = await _scExtractor.resolveAudioStreamUrl(track.id);
+        return (url == null || url.isEmpty) ? null : ResolvedStream(url);
 
       case TrackSource.spotify:
-        return _resolveSpotifyTrack(track);
+        return resolveSpotifyTrack(track);
 
       case TrackSource.local:
-        return track.streamUrl;
+        return track.streamUrl == null
+            ? null
+            : ResolvedStream(track.streamUrl!);
     }
   }
 
-  Future<String?> _resolveSpotifyTrack(MediaTrack track) async {
+  /// Backwards-compatible URL-only helper.
+  Future<String?> resolveStreamUrl(MediaTrack track) async =>
+      (await resolveStream(track))?.url;
+
+  /// Normalizes a title/artist string for strict matching: lowercase, strip
+  /// parenthetical/bracketed extras, collapse whitespace.
+  static String _norm(String s) {
+    var v = s
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\(\[\{].*?[\)\]\}]'), '')
+        .replaceAll(RegExp(r'[^\p{L}\p{N}\s]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return v;
+  }
+
+  static bool _containsWord(String haystack, Iterable<String> words) =>
+      words.any((w) => haystack.contains(w));
+
+  Future<ResolvedStream?> resolveSpotifyTrack(MediaTrack track) async {
     // 1. Clean primary artist and title to form a laser-targeted query
     final primaryArtist = track.artist
         .split(RegExp(r'[,&]'))
@@ -266,60 +297,75 @@ class StreamResolver {
 
     final query = '$primaryArtist $cleanTitle';
 
-    // 2. Fetch candidates from SoundCloud and YouTube
+    // 2. Fetch candidates from SoundCloud (extra candidates since junk
+    //    re-uploads are common on SoundCloud search).
     final candidates = <MediaTrack>[];
 
     try {
-      final scResults = await _scExtractor.searchTracks(query, limit: 6);
+      final scResults = await _scExtractor.searchTracks(query, limit: 12);
       candidates.addAll(scResults);
     } catch (_) {}
 
-    try {
-      final ytResults = await _ytExtractor.searchTracks(query, limit: 6);
-      candidates.addAll(ytResults);
-    } catch (_) {}
+    final normTitle = _norm(cleanTitle);
+    final normArtist = _norm(primaryArtist);
+    final titleWords = normTitle
+        .split(' ')
+        .where((w) => w.length > 2)
+        .toList();
+    final artistWords = normArtist
+        .split(' ')
+        .where((w) => w.length > 2)
+        .toList();
 
     if (candidates.isEmpty) return null;
 
-    // 3. Score all candidates using intelligent relevance ranking
-    candidates.sort((a, b) {
-      final scoreA = StreamResolver.scoreTrack(a, query);
-      final scoreB = StreamResolver.scoreTrack(b, query);
-      return scoreB.compareTo(scoreA);
-    });
+    // 3. Score candidates: strict title/artist bonuses on top of the generic
+    //    scoreTrack heuristics (which alone lets junk reposts through).
+    double candidateScore(MediaTrack c) {
+      final t = _norm(c.title);
+      final a = _norm(c.artist);
+      double s = scoreTrack(c, query);
 
-    // 4. Verify candidate quality and resolve audio stream
-    final targetWords = cleanTitle
-        .toLowerCase()
-        .split(RegExp(r'\s+'))
-        .where((w) => w.length > 2)
-        .toList();
-    final artistWord = primaryArtist
-        .toLowerCase()
-        .split(RegExp(r'\s+'))
-        .firstWhere((w) => w.length > 2, orElse: () => '');
+      if (t == normTitle) {
+        s += 150.0;
+      } else if (normTitle.isNotEmpty && t.contains(normTitle)) {
+        s += 60.0;
+      }
+      if (a == normArtist) {
+        s += 120.0;
+      } else if (normArtist.isNotEmpty && a.contains(normArtist)) {
+        s += 50.0;
+      }
+      // Harmonic junk guard: nobody in the whole candidate is the requested
+      // artist — distrust uploader-name-only matches.
+      if (artistWords.isNotEmpty && !_containsWord(t, artistWords) && !_containsWord(a, artistWords)) {
+        s -= 160.0;
+      }
+      return s;
+    }
 
+    candidates.sort((a, b) => candidateScore(b).compareTo(candidateScore(a)));
+
+    // 4. Verify candidate quality: require BOTH a title signal and an artist
+    //    signal (word-level, normalized). This blocks reposts like
+    //    "NCM - Alan Walker Faded" when the true artist never matches.
     for (final candidate in candidates) {
-      final cTitle = candidate.title.toLowerCase();
-      final cArtist = candidate.artist.toLowerCase();
+      final t = _norm(candidate.title);
+      final a = _norm(candidate.artist);
 
-      final hasTitleOverlap =
-          targetWords.isEmpty || targetWords.any((w) => cTitle.contains(w));
-      final hasArtistOverlap = artistWord.isEmpty ||
-          cArtist.contains(artistWord) ||
-          cTitle.contains(artistWord);
+      final titleOk = t == normTitle ||
+          (normTitle.isNotEmpty && t.contains(normTitle)) ||
+          _containsWord(t, titleWords);
+      final artistOk = a == normArtist ||
+          (normArtist.isNotEmpty && a.contains(normArtist)) ||
+          _containsWord(a, artistWords) ||
+          _containsWord(t, artistWords);
 
-      // Skip candidates that don't match either title or artist
-      if (!hasTitleOverlap && !hasArtistOverlap) continue;
+      if (!titleOk || !artistOk) continue;
 
       try {
-        if (candidate.source == TrackSource.soundcloud) {
-          final url = await _scExtractor.resolveAudioStreamUrl(candidate.id);
-          if (url != null && url.isNotEmpty) return url;
-        } else if (candidate.source == TrackSource.youtube) {
-          final url = await _ytExtractor.resolveAudioStreamUrl(candidate.id);
-          if (url != null && url.isNotEmpty) return url;
-        }
+        final resolved = await resolveStream(candidate);
+        if (resolved != null && !resolved.isEmpty) return resolved;
       } catch (_) {
         continue;
       }
@@ -329,7 +375,7 @@ class StreamResolver {
   }
 
   void dispose() {
-    _ytExtractor.close();
     _scExtractor.close();
+    _spotifyCatalog.close();
   }
 }

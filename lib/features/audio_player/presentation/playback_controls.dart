@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../data/audio_player_service.dart';
@@ -149,7 +150,7 @@ class PlaybackControls extends ConsumerWidget {
             // More options
             PopupMenuButton<String>(
               tooltip: 'Дополнительные действия',
-              icon: Icon(Icons.more_horiz_rounded,
+              icon: Icon(MingCuteIcons.mgc_more_1_line,
                   color: textSecondary, size: 24),
               onSelected: (value) {
                 if (value == 'speed_pitch') {
@@ -166,7 +167,7 @@ class PlaybackControls extends ConsumerWidget {
 
             // Previous
             _ControlButton(
-              icon: Icons.skip_previous_rounded,
+              icon: MingCuteIcons.mgc_skip_previous_fill,
               size: 36,
               color: textPrimary,
               onTap: playerService.previous,
@@ -210,8 +211,8 @@ class PlaybackControls extends ConsumerWidget {
                         duration: const Duration(milliseconds: 200),
                         child: Icon(
                           isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
+                              ? MingCuteIcons.mgc_pause_fill
+                              : MingCuteIcons.mgc_play_fill,
                           key: ValueKey(isPlaying),
                           color: playBtnFg,
                           size: 42,
@@ -223,7 +224,7 @@ class PlaybackControls extends ConsumerWidget {
 
             // Next
             _ControlButton(
-              icon: Icons.skip_next_rounded,
+              icon: MingCuteIcons.mgc_skip_forward_fill,
               size: 36,
               color: textPrimary,
               onTap: playerService.next,
@@ -235,8 +236,8 @@ class PlaybackControls extends ConsumerWidget {
                 final mode = playerService.loopMode;
                 return _ControlButton(
                   icon: mode == PlayerLoopMode.one
-                      ? Icons.repeat_one_rounded
-                      : Icons.repeat_rounded,
+                      ? MingCuteIcons.mgc_repeat_one_fill
+                      : MingCuteIcons.mgc_repeat_line,
                   size: 24,
                   color: mode != PlayerLoopMode.off
                       ? theme.colors.accent

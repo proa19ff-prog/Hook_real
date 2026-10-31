@@ -113,7 +113,7 @@ class RecommendationService {
         final results = await _resolver.search(
           query: query,
           includeSoundCloud: true,
-          includeYouTube: true,
+          includeSpotify: true,
         );
         for (final track in results) {
           if (seenIds.add(track.id)) {
@@ -128,7 +128,7 @@ class RecommendationService {
         final fallbacks = await _resolver.search(
           query: 'Top Hits 2024',
           includeSoundCloud: true,
-          includeYouTube: false,
+          includeSpotify: true,
         );
         for (final track in fallbacks) {
           if (seenIds.add(track.id)) {

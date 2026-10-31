@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-import '../extractor/innertube/youtube_extractor.dart';
 import '../extractor/models/media_track.dart';
 
 enum ImportPlatform {
   spotify,
-  youtubeMusic,
   unknown,
 }
 
@@ -28,11 +25,8 @@ class ImportedCollection {
 
 class MusicImportService {
   final Dio _dio;
-  final YoutubeExplode _yt;
 
-  MusicImportService({Dio? dio, YoutubeExplode? yt})
-      : _dio = dio ?? Dio(),
-        _yt = yt ?? YoutubeExplode();
+  MusicImportService({Dio? dio}) : _dio = dio ?? Dio();
 
   static ImportPlatform detectPlatform(String input) {
     final lower = input.trim().toLowerCase();
@@ -41,15 +35,10 @@ class MusicImportService {
         lower.startsWith('spotify:')) {
       return ImportPlatform.spotify;
     }
-    if (lower.contains('music.youtube.com') ||
-        lower.contains('youtube.com') ||
-        lower.contains('youtu.be')) {
-      return ImportPlatform.youtubeMusic;
-    }
     return ImportPlatform.unknown;
   }
 
-  /// Imports tracks or playlists from Spotify or YouTube / YouTube Music.
+  /// Imports tracks or playlists from Spotify.
   Future<ImportedCollection> importFromUrl(String url) async {
     final cleanUrl = url.trim();
     final platform = detectPlatform(cleanUrl);
@@ -57,11 +46,9 @@ class MusicImportService {
     switch (platform) {
       case ImportPlatform.spotify:
         return _importSpotify(cleanUrl);
-      case ImportPlatform.youtubeMusic:
-        return _importYouTubeMusic(cleanUrl);
       case ImportPlatform.unknown:
         throw ArgumentError(
-          'Неподдерживаемая ссылка. Вставьте ссылку на Spotify или YouTube Music.',
+          'Неподдерживаемая ссылка. Вставьте ссылку на Spotify.',
         );
     }
   }
@@ -279,81 +266,7 @@ class MusicImportService {
     throw const FormatException('Не удалось извлечь список треков из Spotify.');
   }
 
-  // --- YOUTUBE / YOUTUBE MUSIC PARSER ---
-  Future<ImportedCollection> _importYouTubeMusic(String rawUrl) async {
-    final uri = Uri.tryParse(rawUrl);
-    final playlistId = uri?.queryParameters['list'];
-
-    // 1. YouTube Playlist
-    if (playlistId != null && playlistId.isNotEmpty) {
-      final playlist = await _yt.playlists
-          .get(playlistId)
-          .timeout(const Duration(seconds: 10));
-
-      final tracks = <MediaTrack>[];
-      await for (final video in _yt.playlists.getVideos(playlistId)) {
-        if (video.duration == null || video.duration! < const Duration(seconds: 5)) {
-          continue;
-        }
-        tracks.add(
-          MediaTrack(
-            id: video.id.value,
-            title: YouTubeExtractor.cleanTrackTitle(video.title),
-            artist: video.author,
-            duration: video.duration!,
-            artworkUrl: video.thumbnails.highResUrl,
-            source: TrackSource.youtube,
-          ),
-        );
-        if (tracks.length >= 200) break; // Practical cap for mobile memory
-      }
-
-      return ImportedCollection(
-        title: playlist.title,
-        author: playlist.author,
-        artworkUrl: playlist.thumbnails.highResUrl,
-        tracks: tracks,
-        platform: ImportPlatform.youtubeMusic,
-      );
-    }
-
-    // 2. Single Video / Music Track
-    String videoId = '';
-    if (uri != null) {
-      if (uri.host.contains('youtu.be') && uri.pathSegments.isNotEmpty) {
-        videoId = uri.pathSegments.first;
-      } else {
-        videoId = uri.queryParameters['v'] ?? '';
-      }
-    }
-
-    if (videoId.isNotEmpty) {
-      final video =
-          await _yt.videos.get(videoId).timeout(const Duration(seconds: 8));
-
-      final track = MediaTrack(
-        id: video.id.value,
-        title: YouTubeExtractor.cleanTrackTitle(video.title),
-        artist: video.author,
-        duration: video.duration ?? Duration.zero,
-        artworkUrl: video.thumbnails.highResUrl,
-        source: TrackSource.youtube,
-      );
-
-      return ImportedCollection(
-        title: track.title,
-        author: track.artist,
-        artworkUrl: track.artworkUrl,
-        tracks: [track],
-        platform: ImportPlatform.youtubeMusic,
-      );
-    }
-
-    throw const FormatException('Не удалось распознать ссылку на YouTube Music.');
-  }
-
   void close() {
     _dio.close(force: true);
-    _yt.close();
   }
 }

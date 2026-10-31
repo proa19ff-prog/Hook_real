@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../lyrics/presentation/karaoke_lyrics_view.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -68,7 +69,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                       Row(
                         children: [
                           Icon(
-                            Icons.queue_music_rounded,
+                            MingCuteIcons.mgc_playlist_line,
                             size: 20,
                             color: widget.theme.colors.primary,
                           ),
@@ -123,7 +124,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.queue_music_rounded,
+                                MingCuteIcons.mgc_playlist_line,
                                 size: 48,
                                 color: widget.theme.colors.textSecondary
                                     .withValues(alpha: 0.4),
@@ -183,7 +184,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       ),
                                       child: Center(
                                         child: Icon(
-                                          Icons.equalizer_rounded,
+                                          MingCuteIcons.mgc_sound_line_fill,
                                           size: 20,
                                           color: widget.theme.colors.accent,
                                         ),
@@ -224,7 +225,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      Icons.volume_up_rounded,
+                                      MingCuteIcons.mgc_volume_line,
                                       size: 16,
                                       color: widget.theme.colors.accent,
                                     ),
@@ -292,7 +293,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                           ),
                           child: IconButton(
                             icon: Icon(
-                              Icons.keyboard_arrow_down_rounded,
+                              MingCuteIcons.mgc_down_line,
                               color: iconColor,
                               size: 26,
                             ),
@@ -347,8 +348,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                     ScaleTransition(scale: anim, child: child),
                                 child: Icon(
                                   isFavorite
-                                      ? Icons.favorite_rounded
-                                      : Icons.favorite_border_rounded,
+                                      ? MingCuteIcons.mgc_heart_fill
+                                      : MingCuteIcons.mgc_heart_line,
                                   key: ValueKey(isFavorite),
                                   color: isFavorite
                                       ? Colors.redAccent
@@ -364,7 +365,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                             ),
                             IconButton(
                               tooltip: 'Очередь',
-                              icon: Icon(Icons.queue_music_rounded,
+                              icon: Icon(MingCuteIcons.mgc_playlist_line,
                                   color: iconColor, size: 22),
                               onPressed: () => _showQueueSheet(context),
                             ),
@@ -372,8 +373,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                               tooltip: _showLyrics ? 'Обложка' : 'Текст караоке',
                               icon: Icon(
                                 _showLyrics
-                                    ? Icons.music_note_rounded
-                                    : Icons.subtitles_rounded,
+                                    ? MingCuteIcons.mgc_music_fill
+                                    : MingCuteIcons.mgc_subtitle_line,
                                 color: _showLyrics
                                     ? colors.accent
                                     : iconColor,
@@ -441,7 +442,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       ),
                                       child: track.artworkUrl.isEmpty
                                           ? Icon(
-                                              Icons.music_note_rounded,
+                                              MingCuteIcons.mgc_music_fill,
                                               size: 96,
                                               color: colors.textSecondary
                                                   .withValues(alpha: 0.6),
@@ -520,7 +521,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                 ),
               ),
               child: Icon(
-                Icons.music_off_rounded,
+                MingCuteIcons.mgc_headphone_line,
                 size: 56,
                 color: colors.textSecondary.withValues(alpha: 0.5),
               ),

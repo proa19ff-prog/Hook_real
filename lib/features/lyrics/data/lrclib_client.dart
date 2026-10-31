@@ -8,10 +8,16 @@ class LyricsResult {
   final String? syncedLyrics;
   final List<LyricLine> lines;
 
+  /// True when [lines] carry real timestamps from a synced source. False when
+  /// lines were synthesized from plain unsynchronized text — their timings are
+  /// guesses and must not drive karaoke highlighting or auto-scroll.
+  final bool isRealSync;
+
   const LyricsResult({
     this.plainLyrics,
     this.syncedLyrics,
     this.lines = const [],
+    this.isRealSync = false,
   });
 
   bool get hasSynced => lines.isNotEmpty;
@@ -173,6 +179,7 @@ class LrclibClient {
           plainLyrics: plain,
           syncedLyrics: synced,
           lines: lines,
+          isRealSync: synced != null && synced.isNotEmpty && lines.isNotEmpty,
         );
       }
     } catch (_) {}
@@ -222,6 +229,7 @@ class LrclibClient {
           plainLyrics: plain,
           syncedLyrics: synced,
           lines: lines,
+          isRealSync: synced != null && synced.isNotEmpty && lines.isNotEmpty,
         );
       }
     } catch (_) {}

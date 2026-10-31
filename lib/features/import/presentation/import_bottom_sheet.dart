@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
@@ -168,7 +169,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.add_link_rounded,
+                    MingCuteIcons.mgc_link_2_line,
                     color: colors.primary,
                     size: 24,
                   ),
@@ -188,7 +189,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                         ),
                       ),
                       Text(
-                        'Spotify • YouTube Music • Плейлисты и треки',
+                        'Spotify • Плейлисты, альбомы и треки',
                         style: TextStyle(
                           fontSize: 12,
                           color: colors.textSecondary,
@@ -216,15 +217,11 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                     const SizedBox(width: 14),
                     Icon(
                       detectedPlatform == ImportPlatform.spotify
-                          ? Icons.spatial_audio_rounded
-                          : detectedPlatform == ImportPlatform.youtubeMusic
-                              ? Icons.play_circle_fill_rounded
-                              : Icons.link_rounded,
+                          ? MingCuteIcons.mgc_music_3_fill
+                          : MingCuteIcons.mgc_link_line,
                       color: detectedPlatform == ImportPlatform.spotify
                           ? const Color(0xFF1DB954)
-                          : detectedPlatform == ImportPlatform.youtubeMusic
-                              ? Colors.redAccent
-                              : colors.textSecondary,
+                          : colors.textSecondary,
                       size: 22,
                     ),
                     const SizedBox(width: 10),
@@ -250,7 +247,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                     IconButton(
                       tooltip: 'Вставить из буфера',
                       icon: Icon(
-                        Icons.content_paste_rounded,
+                        MingCuteIcons.mgc_paste_line,
                         color: colors.primary,
                         size: 20,
                       ),
@@ -270,12 +267,6 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                       const Color(0xFF1DB954),
                       detectedPlatform == ImportPlatform.spotify,
                     ),
-                    const SizedBox(width: 8),
-                    _buildPlatformBadge(
-                      'YouTube Music',
-                      Colors.redAccent,
-                      detectedPlatform == ImportPlatform.youtubeMusic,
-                    ),
                   ],
                 ),
               ),
@@ -293,7 +284,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline_rounded,
+                      const Icon(MingCuteIcons.mgc_alert_line,
                           color: Colors.redAccent, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
@@ -337,7 +328,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                       : const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.download_rounded, size: 20),
+                            Icon(MingCuteIcons.mgc_download_2_line, size: 20),
                             SizedBox(width: 8),
                             Text(
                               'Начать импорт',
@@ -395,7 +386,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Импортировано из ${_importedResult!.platform == ImportPlatform.spotify ? "Spotify" : "YouTube Music"}',
+                            'Импортировано из Spotify',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -419,7 +410,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.play_arrow_rounded, size: 20),
+                      icon: const Icon(MingCuteIcons.mgc_play_fill, size: 20),
                       label: const Text('Слушать'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primary,
@@ -435,7 +426,8 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon: const Icon(Icons.playlist_add_check_rounded, size: 20),
+                      icon:
+                          const Icon(MingCuteIcons.mgc_list_check_line, size: 20),
                       label: const Text('В плейлисты'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: colors.textPrimary,

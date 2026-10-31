@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/glass_card.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
@@ -149,8 +150,8 @@ class MiniPlayer extends ConsumerWidget {
                               padding: EdgeInsets.zero,
                               icon: Icon(
                                 isPlaying
-                                    ? Icons.pause_rounded
-                                    : Icons.play_arrow_rounded,
+                                    ? MingCuteIcons.mgc_pause_fill
+                                    : MingCuteIcons.mgc_play_fill,
                                 color: Colors.white,
                               ),
                               onPressed: playerService.togglePlayPause,
@@ -161,7 +162,7 @@ class MiniPlayer extends ConsumerWidget {
                   IconButton(
                     tooltip: 'Следующий',
                     icon: Icon(
-                      Icons.skip_next_rounded,
+                      MingCuteIcons.mgc_skip_forward_fill,
                       color: theme.colors.textSecondary,
                       size: 26,
                     ),

@@ -17,11 +17,11 @@ void main() {
     expect(
       MusicImportService.detectPlatform(
           'https://music.youtube.com/playlist?list=PLrAl60GSp4B_e76v7iR_t2u'),
-      ImportPlatform.youtubeMusic,
+      ImportPlatform.unknown,
     );
     expect(
       MusicImportService.detectPlatform('https://youtu.be/dQw4w9WgXcQ'),
-      ImportPlatform.youtubeMusic,
+      ImportPlatform.unknown,
     );
     expect(
       MusicImportService.detectPlatform('https://example.com/something'),

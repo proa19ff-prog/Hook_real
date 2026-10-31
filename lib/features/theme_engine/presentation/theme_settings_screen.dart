@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../domain/hook_theme.dart';
 
@@ -149,7 +150,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
               ),
             ),
             ElevatedButton.icon(
-              icon: const Icon(Icons.copy_rounded, size: 16),
+              icon: const Icon(MingCuteIcons.mgc_copy_line, size: 16),
               label: const Text('Скопировать JSON'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
@@ -227,7 +228,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                           ),
                           child: IconButton(
                             tooltip: 'Экспорт JSON',
-                            icon: Icon(Icons.file_upload_outlined,
+                            icon: Icon(MingCuteIcons.mgc_file_upload_line,
                                 color: colors.textPrimary, size: 20),
                             onPressed: () =>
                                 _showExportJsonDialog(context, theme),
@@ -243,7 +244,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                           ),
                           child: IconButton(
                             tooltip: 'Импорт JSON',
-                            icon: Icon(Icons.file_download_outlined,
+                            icon: Icon(MingCuteIcons.mgc_file_download_line,
                                 color: colors.textPrimary, size: 20),
                             onPressed: () => _showImportJsonDialog(context),
                           ),
@@ -379,7 +380,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
-                                  Icons.check_rounded,
+                                  MingCuteIcons.mgc_check_line,
                                   color: Colors.white,
                                   size: 14,
                                 ),
@@ -453,7 +454,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                                 color: colors.accent.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Icon(Icons.auto_awesome_rounded,
+                              child: Icon(MingCuteIcons.mgc_sparkles_line,
                                   color: colors.accent, size: 20),
                             ),
                             const SizedBox(width: 12),
