@@ -131,12 +131,12 @@ class QueueNotifier extends StateNotifier<List<MediaTrack>> {
   final AudioPlayerService _service;
   late final StreamSubscription<int> _queueSubscription;
 
-  QueueNotifier(this._service) : super(_service.queue) {
+  QueueNotifier(this._service) : super(_service.trackQueue) {
     // Radio may extend the queue asynchronously after the user presses play.
     // Mirror every service mutation so queue sheets and shared track rows stay
     // in sync instead of showing the initial one-track seed forever.
     _queueSubscription = _service.queueChanges.listen((_) {
-      if (mounted) state = _service.queue;
+      if (mounted) state = _service.trackQueue;
     });
   }
 
@@ -148,32 +148,32 @@ class QueueNotifier extends StateNotifier<List<MediaTrack>> {
 
   Future<void> playTrack(MediaTrack track) async {
     await _service.setQueue([track]);
-    state = _service.queue;
+    state = _service.trackQueue;
   }
 
   Future<void> playQueue(List<MediaTrack> tracks, {int startIndex = 0}) async {
     await _service.setQueue(tracks, startIndex: startIndex);
-    state = _service.queue;
+    state = _service.trackQueue;
   }
 
   Future<void> startWave(MediaTrack track) async {
     await _service.startWave(track);
-    state = _service.queue;
+    state = _service.trackQueue;
   }
 
   Future<void> playAt(int index) async {
     await _service.playAt(index);
-    state = _service.queue;
+    state = _service.trackQueue;
   }
 
   void addToQueue(MediaTrack track) {
     _service.addToQueue(track);
-    state = _service.queue;
+    state = _service.trackQueue;
   }
 
   void playNext(MediaTrack track) {
     _service.playNext(track);
-    state = _service.queue;
+    state = _service.trackQueue;
   }
 
   MediaTrack? get currentTrack => _service.currentTrack;

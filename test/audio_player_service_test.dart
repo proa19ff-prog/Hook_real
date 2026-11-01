@@ -34,9 +34,22 @@ void main() {
       service.addToQueue(first);
       service.addToQueue(second);
 
-      expect(service.queue, [first, second]);
+      expect(service.trackQueue, [first, second]);
       expect(service.currentIndex, -1);
       expect(service.currentTrack, isNull);
+    });
+
+    test('publishes tracks to the media session queue', () {
+      final first = _track('first');
+      final second = _track('second', source: TrackSource.soundcloud);
+
+      service.addToQueue(first);
+      service.addToQueue(second);
+
+      expect(
+        service.queue.value.map((item) => item.id).toList(),
+        ['youtube:first', 'soundcloud:second'],
+      );
     });
 
     test('reorders tracks and keeps the queue identity intact', () {
@@ -49,7 +62,7 @@ void main() {
 
       service.reorderQueue(0, 3);
 
-      expect(service.queue, [second, third, first]);
+      expect(service.trackQueue, [second, third, first]);
       expect(service.currentIndex, -1);
     });
 
@@ -61,7 +74,7 @@ void main() {
       service.removeFromQueue(1);
       service.reorderQueue(1, 0);
 
-      expect(service.queue, [first]);
+      expect(service.trackQueue, [first]);
     });
 
     test('removing the last queued track resets the empty state', () {
@@ -69,7 +82,7 @@ void main() {
 
       service.removeFromQueue(0);
 
-      expect(service.queue, isEmpty);
+      expect(service.trackQueue, isEmpty);
       expect(service.currentIndex, -1);
       expect(service.currentTrack, isNull);
     });

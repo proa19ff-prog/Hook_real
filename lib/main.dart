@@ -1,38 +1,47 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'app.dart';
+import 'core/storage/audio_cache_manager.dart';
 import 'core/storage/local_storage_service.dart';
+import 'features/audio_player/data/audio_player_service.dart';
+import 'features/audio_player/presentation/player_state_provider.dart';
+import 'features/extractor/stream_resolver.dart';
 import 'features/library/presentation/library_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Android background playback notifications
-  try {
-    await JustAudioBackground.init(
+  final storageService = await LocalStorageService.create();
+  final resolver = StreamResolver();
+  final cacheManager = AudioCacheManager();
+  final audioService = await AudioService.init<AudioPlayerService>(
+    builder: () => AudioPlayerService(
+      resolver: resolver,
+      storageService: storageService,
+      cacheManager: cacheManager,
+    ),
+    config: const AudioServiceConfig(
       androidNotificationChannelId: 'com.hook.music.channel.audio',
       androidNotificationChannelName: 'Воспроизведение',
       androidNotificationChannelDescription: 'Управление музыкой в шторке',
       androidNotificationIcon: 'drawable/ic_stat_hook',
       androidNotificationOngoing: true,
       androidStopForegroundOnPause: true,
-      // Covers come at 500–600 px; a smaller bitmap shows up sooner.
       artDownscaleWidth: 300,
       artDownscaleHeight: 300,
       preloadArtwork: true,
-    );
-  } catch (_) {
-    // Graceful fallback on unsupported platforms
-  }
-
-  // Pre-load local storage service for offline favorites & history
-  final storageService = await LocalStorageService.create();
+    ),
+  );
+  await audioService.initialize();
 
   runApp(
     ProviderScope(
       overrides: [
         localStorageServiceProvider.overrideWithValue(storageService),
+        audioCacheManagerProvider.overrideWithValue(cacheManager),
+        streamResolverProvider.overrideWithValue(resolver),
+        audioPlayerServiceProvider.overrideWithValue(audioService),
       ],
       child: const HookApp(),
     ),

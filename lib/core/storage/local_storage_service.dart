@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/extractor/models/media_track.dart';
@@ -11,6 +12,10 @@ class LocalStorageService {
   static const int _maxHistoryCount = 100;
 
   final SharedPreferences _prefs;
+  final StreamController<void> _favoritesController =
+      StreamController<void>.broadcast();
+
+  Stream<void> get favoritesChanges => _favoritesController.stream;
 
   LocalStorageService(this._prefs);
 
@@ -23,7 +28,8 @@ class LocalStorageService {
   static const String _oledDefaultAppliedKey = 'hook_oled_default_applied';
 
   /// Whether the switch to OLED Monolith as the default theme already ran.
-  bool get oledDefaultApplied => _prefs.getBool(_oledDefaultAppliedKey) ?? false;
+  bool get oledDefaultApplied =>
+      _prefs.getBool(_oledDefaultAppliedKey) ?? false;
   Future<void> markOledDefaultApplied() =>
       _prefs.setBool(_oledDefaultAppliedKey, true);
 
@@ -67,6 +73,7 @@ class LocalStorageService {
       favorites.insert(0, track);
     }
     await _saveFavorites(favorites);
+    if (!_favoritesController.isClosed) _favoritesController.add(null);
   }
 
   Future<void> _saveFavorites(List<MediaTrack> tracks) async {

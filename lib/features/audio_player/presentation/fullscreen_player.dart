@@ -80,7 +80,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
       builder: (ctx) {
         final playerService = ref.watch(audioPlayerServiceProvider);
         ref.watch(queueChangesProvider);
-        final queue = playerService.queue;
+        final queue = playerService.trackQueue;
         final currentIndex = playerService.currentIndex;
 
         return DraggableScrollableSheet(

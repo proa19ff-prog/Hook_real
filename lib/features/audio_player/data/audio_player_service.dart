@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:audio_session/audio_session.dart';
+import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
@@ -21,7 +21,8 @@ class AudioPlaybackError {
       {required this.track, required this.message, this.cause});
 }
 
-class AudioPlayerService {
+class AudioPlayerService extends audio_service.BaseAudioHandler
+    with audio_service.QueueHandler, audio_service.SeekHandler {
   final AudioPlayer _player;
   final StreamResolver _resolver;
   final AudioCacheManager _cacheManager;
@@ -43,6 +44,7 @@ class AudioPlayerService {
       _urlCache = {};
   final Map<String, Future<ResolvedStream?>> _pendingStreams = {};
   static const _urlTtl = Duration(minutes: 60);
+  static const _toggleFavoriteAction = 'toggleFavorite';
 
   /// ExoPlayer waits for 2.5 s of audio before starting by default. Half a
   /// second is enough for SoundCloud's CDN and starts playback sooner.
@@ -55,6 +57,7 @@ class AudioPlayerService {
     ),
   );
   StreamSubscription<void>? _noisySubscription;
+  StreamSubscription<void>? _favoritesSubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
   int _currentIndex = -1;
   int _playRequestId = 0;
@@ -87,7 +90,7 @@ class AudioPlayerService {
 
   AudioPlayer get rawPlayer => _player;
   MediaTrack? get currentTrack => _currentTrack;
-  List<MediaTrack> get queue => List.unmodifiable(_queue);
+  List<MediaTrack> get trackQueue => List.unmodifiable(_queue);
   int get currentIndex => _currentIndex;
   PlayerLoopMode get loopMode => _loopMode;
   bool get isShuffle => _isShuffle;
@@ -97,7 +100,9 @@ class AudioPlayerService {
 
   void _notifyQueue() {
     _queueVersion++;
+    queue.add(_queue.map(_toMediaItem).toList(growable: false));
     if (!_queueController.isClosed) _queueController.add(_queueVersion);
+    _broadcastPlaybackState();
   }
 
   Stream<PlayerState> get playerStateStream => _player.playerStateStream;
@@ -105,13 +110,80 @@ class AudioPlayerService {
   Stream<Duration?> get durationStream => _player.durationStream;
   Stream<Duration> get bufferedPositionStream => _player.bufferedPositionStream;
   Stream<AudioPlaybackError?> get errorStream => _errorController.stream;
-
-  /// Emits whenever the selected track changes, before its stream is ready,
-  /// so the UI can react to a tap immediately.
   Stream<MediaTrack?> get currentTrackStream => _trackController.stream;
+
+  audio_service.MediaItem _toMediaItem(MediaTrack track) =>
+      audio_service.MediaItem(
+        id: '${track.source.name}:${track.id}',
+        album: track.album ?? track.artist,
+        title: track.title,
+        artist: track.artist,
+        artUri:
+            track.artworkUrl.isNotEmpty ? Uri.tryParse(track.artworkUrl) : null,
+        duration: track.duration,
+      );
+
+  bool _isFavorite(MediaTrack track) =>
+      _storageService?.getFavorites().any(
+            (favorite) =>
+                favorite.id == track.id && favorite.source == track.source,
+          ) ??
+      false;
+
+  audio_service.AudioProcessingState _toAudioProcessingState(
+    ProcessingState state,
+  ) {
+    switch (state) {
+      case ProcessingState.idle:
+        return audio_service.AudioProcessingState.idle;
+      case ProcessingState.loading:
+        return audio_service.AudioProcessingState.loading;
+      case ProcessingState.buffering:
+        return audio_service.AudioProcessingState.buffering;
+      case ProcessingState.ready:
+        return audio_service.AudioProcessingState.ready;
+      case ProcessingState.completed:
+        return audio_service.AudioProcessingState.completed;
+    }
+  }
+
+  void _broadcastPlaybackState() {
+    final track = _currentTrack;
+    final controls = <audio_service.MediaControl>[
+      audio_service.MediaControl.skipToPrevious,
+      if (track != null)
+        audio_service.MediaControl.custom(
+          androidIcon: _isFavorite(track)
+              ? 'drawable/ic_notification_favorite'
+              : 'drawable/ic_notification_favorite_border',
+          label: _isFavorite(track) ? 'Убрать из избранного' : 'В избранное',
+          name: _toggleFavoriteAction,
+        ),
+      _player.playing
+          ? audio_service.MediaControl.pause
+          : audio_service.MediaControl.play,
+      audio_service.MediaControl.skipToNext,
+    ];
+    final playPauseIndex = track == null ? 1 : 2;
+    playbackState.add(
+      audio_service.PlaybackState(
+        controls: controls,
+        systemActions: const {audio_service.MediaAction.seek},
+        androidCompactActionIndices: [0, playPauseIndex, controls.length - 1],
+        processingState: _toAudioProcessingState(_player.processingState),
+        playing: _player.playing,
+        updatePosition: _player.position,
+        bufferedPosition: _player.bufferedPosition,
+        speed: _player.speed,
+        queueIndex: _currentIndex < 0 ? null : _currentIndex,
+      ),
+    );
+  }
 
   void _setCurrentTrack(MediaTrack? track) {
     _currentTrack = track;
+    mediaItem.add(track == null ? null : _toMediaItem(track));
+    _broadcastPlaybackState();
     if (!_trackController.isClosed) _trackController.add(track);
   }
 
@@ -189,9 +261,12 @@ class AudioPlayerService {
     _noisySubscription = session.becomingNoisyEventStream.listen((_) {
       pause();
     });
+    _favoritesSubscription = _storageService?.favoritesChanges
+        .listen((_) => _broadcastPlaybackState());
 
     // Auto-advance to next track when finished
     _playerStateSubscription = _player.playerStateStream.listen((state) {
+      _broadcastPlaybackState();
       if (state.processingState == ProcessingState.completed) {
         _onTrackCompleted();
       }
@@ -280,17 +355,6 @@ class AudioPlayerService {
     // Show the tapped track right away; the stream resolves in the background.
     _setCurrentTrack(track);
 
-    MediaItem buildMediaItem() => MediaItem(
-          id: track.id,
-          album: track.album ?? track.artist,
-          title: track.title,
-          artist: track.artist,
-          artUri: track.artworkUrl.isNotEmpty
-              ? Uri.tryParse(track.artworkUrl)
-              : null,
-          duration: track.duration,
-        );
-
     Future<bool> startWith(ResolvedStream? stream) async {
       final playUrl = stream?.url;
       if (playUrl == null || playUrl.isEmpty) return false;
@@ -304,11 +368,11 @@ class AudioPlayerService {
               playUrl.startsWith('file:')
                   ? Uri.parse(playUrl).toFilePath()
                   : playUrl,
-              tag: buildMediaItem(),
+              tag: _toMediaItem(track),
             )
           : AudioSource.uri(
               Uri.parse(playUrl),
-              tag: buildMediaItem(),
+              tag: _toMediaItem(track),
               headers: stream == null || stream.headers.isEmpty
                   ? null
                   : stream.headers,
@@ -488,11 +552,19 @@ class AudioPlayerService {
     );
   }
 
+  @override
   Future<void> play() async => await _player.play();
+
+  @override
   Future<void> pause() async => await _player.pause();
+
+  @override
   Future<void> stop() async => await _player.stop();
+
+  @override
   Future<void> seek(Duration position) async => await _player.seek(position);
 
+  @override
   Future<void> setSpeed(double speed) async =>
       await _player.setSpeed(speed.clamp(0.25, 2.5));
   Future<void> setPitch(double pitch) async =>
@@ -573,6 +645,25 @@ class AudioPlayerService {
     }
   }
 
+  @override
+  Future<void> skipToNext() => next();
+
+  @override
+  Future<void> skipToPrevious() => previous();
+
+  @override
+  Future<dynamic> customAction(
+    String name, [
+    Map<String, dynamic>? extras,
+  ]) async {
+    if (name == _toggleFavoriteAction &&
+        _currentTrack != null &&
+        _storageService != null) {
+      await _storageService.toggleFavorite(_currentTrack!);
+    }
+    return null;
+  }
+
   void _onTrackCompleted() {
     if (_loopMode == PlayerLoopMode.one) {
       seek(Duration.zero);
@@ -585,6 +676,7 @@ class AudioPlayerService {
   Future<void> dispose() async {
     _playRequestId++;
     await _noisySubscription?.cancel();
+    await _favoritesSubscription?.cancel();
     await _playerStateSubscription?.cancel();
     await _errorController.close();
     await _trackController.close();

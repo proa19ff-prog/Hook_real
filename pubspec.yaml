@@ -15,7 +15,7 @@ dependencies:
 
   # Audio Engine & Background Service
   just_audio: ^0.9.40
-  just_audio_background: ^0.0.1-beta.13
+  audio_service: ^0.18.19
   audio_session: ^0.1.21
 
   # Zero-Backend Stream Extraction & Network

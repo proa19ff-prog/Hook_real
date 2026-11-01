@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
@@ -25,8 +27,13 @@ final musicImportServiceProvider = Provider<MusicImportService>((ref) {
 // Favorites State Notifier
 class FavoritesNotifier extends StateNotifier<List<MediaTrack>> {
   final LocalStorageService _storage;
+  late final StreamSubscription<void> _favoritesSubscription;
 
-  FavoritesNotifier(this._storage) : super(_storage.getFavorites());
+  FavoritesNotifier(this._storage) : super(_storage.getFavorites()) {
+    _favoritesSubscription = _storage.favoritesChanges.listen((_) {
+      if (mounted) state = _storage.getFavorites();
+    });
+  }
 
   void refresh() {
     state = _storage.getFavorites();
@@ -34,13 +41,18 @@ class FavoritesNotifier extends StateNotifier<List<MediaTrack>> {
 
   Future<void> toggleFavorite(MediaTrack track) async {
     await _storage.toggleFavorite(track);
-    state = _storage.getFavorites();
   }
 
   bool isFavorite(String trackId, {TrackSource? source}) {
     return state.any(
       (t) => t.id == trackId && (source == null || t.source == source),
     );
+  }
+
+  @override
+  void dispose() {
+    _favoritesSubscription.cancel();
+    super.dispose();
   }
 }
 
@@ -99,7 +111,8 @@ class PlaylistsNotifier extends StateNotifier<Map<String, List<MediaTrack>>> {
 }
 
 final playlistsProvider =
-    StateNotifierProvider<PlaylistsNotifier, Map<String, List<MediaTrack>>>((ref) {
+    StateNotifierProvider<PlaylistsNotifier, Map<String, List<MediaTrack>>>(
+        (ref) {
   final storage = ref.watch(localStorageServiceProvider);
   return PlaylistsNotifier(storage);
 });
