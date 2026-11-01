@@ -26,6 +26,14 @@ void main() {
     expect(phonkQueries.any((q) => q.toLowerCase().contains('phonk')), isTrue);
   });
 
+  test('getSearchQueries adds catalog-friendly digit aliases', () {
+    final queries = resolver.getSearchQueries('madkid rise');
+    expect(queries, contains('madk1d rise'));
+
+    final reverse = resolver.getSearchQueries('madk1d rise');
+    expect(reverse, contains('madkid rise'));
+  });
+
   test('scoreTrack prioritizes original songs over bootleg edits', () {
     final original = MediaTrack(
       id: '1',
@@ -105,6 +113,52 @@ void main() {
         o,
         greaterThan(
             StreamResolver.scoreCandidate(target, slowed, plays: 50000)));
+  });
+
+  test('isPlayableMatch rejects alternate SoundCloud uploads', () {
+    final target = MediaTrack(
+      id: 'catalog',
+      title: 'Sunflower',
+      artist: 'Post Malone',
+      artworkUrl: '',
+      duration: const Duration(minutes: 2, seconds: 38),
+      source: TrackSource.spotify,
+    );
+    MediaTrack soundCloud(
+            String id, String title, String artist, int seconds) =>
+        MediaTrack(
+          id: id,
+          title: title,
+          artist: artist,
+          artworkUrl: '',
+          duration: Duration(seconds: seconds),
+          source: TrackSource.soundcloud,
+        );
+
+    final original = soundCloud(
+      'original',
+      'Post Malone - Sunflower',
+      'Post Malone',
+      158,
+    );
+    final remix = soundCloud(
+      'remix',
+      'Sunflower (Remix)',
+      'Post Malone',
+      158,
+    );
+    final cover = soundCloud('cover', 'Sunflower', 'Acoustic Collective', 158);
+    final wrongDuration = soundCloud(
+      'extended',
+      'Sunflower',
+      'Post Malone',
+      220,
+    );
+
+    expect(StreamResolver.isPlayableMatch(target, original), isTrue);
+    expect(StreamResolver.isPlayableMatch(target, remix), isFalse);
+    expect(StreamResolver.isPlayableMatch(target, cover), isFalse);
+    expect(StreamResolver.isPlayableMatch(target, wrongDuration), isFalse);
   });
 
   test('scoreTrack finds a title by its first word', () {

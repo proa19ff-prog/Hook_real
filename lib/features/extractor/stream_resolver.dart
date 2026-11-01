@@ -64,25 +64,46 @@ class StreamResolver {
     return sb.toString();
   }
 
-  /// Normalizes a search query and expands it if a transliteration or layout slip is detected.
+  /// Normalizes a search query and expands it if a transliteration, layout slip,
+  /// or common digit-styled spelling is detected. Variants are used to retrieve
+  /// catalog records; scoring still happens against the exact user query.
   List<String> getSearchQueries(String query) {
     final normalized = query.trim().toLowerCase();
     final queries = <String>[normalized];
 
-    // 1. Check phonetic dictionary
-    for (final entry in _phoneticMap.entries) {
-      if (normalized.contains(entry.key)) {
-        final expanded = normalized.replaceAll(entry.key, entry.value).trim();
-        if (!queries.contains(expanded)) {
-          queries.add(expanded);
-        }
+    void add(String value) {
+      final candidate = value.trim();
+      if (candidate.isNotEmpty && !queries.contains(candidate)) {
+        queries.add(candidate);
       }
     }
 
-    // 2. Check keyboard layout conversion if input looks like mixed/scrambled text
+    // 1. Check phonetic dictionary.
+    for (final entry in _phoneticMap.entries) {
+      if (normalized.contains(entry.key)) {
+        add(normalized.replaceAll(entry.key, entry.value));
+      }
+    }
+
+    // 2. Check keyboard layout conversion if input looks like mixed/scrambled text.
     final fixedLayout = fixKeyboardLayout(normalized);
-    if (fixedLayout != normalized && !queries.contains(fixedLayout)) {
-      queries.add(fixedLayout);
+    if (fixedLayout != normalized) add(fixedLayout);
+
+    // 3. Artists and aliases often replace letters with digits. Querying the
+    // catalog with the stylized spelling is essential: normalizing only during
+    // ranking cannot return a record that the storefront never found.
+    final digitLoose = <String, String>{
+      'madkid': 'madk1d',
+      'madk1d': 'madkid',
+      'k1d': 'kid',
+    };
+    for (final entry in digitLoose.entries) {
+      if (normalized.contains(entry.key)) {
+        add(normalized.replaceAll(entry.key, entry.value));
+      }
+      if (fixedLayout.contains(entry.key)) {
+        add(fixedLayout.replaceAll(entry.key, entry.value));
+      }
     }
 
     return queries;
@@ -281,6 +302,41 @@ class StreamResolver {
       s += math.min(math.log(plays) / math.ln10 * 15.0, 120.0);
     }
     return s;
+  }
+
+  static bool isPlayableMatch(MediaTrack target, MediaTrack candidate) {
+    final primaryArtist = _primaryArtist(target.artist);
+    final targetArtist = _loose(_norm(primaryArtist));
+    final targetTitle = _loose(_norm(_cleanTitle(target.title)));
+    final candidateArtist = _loose(_norm(candidate.artist));
+    final candidateFullTitle = _loose(_norm(candidate.title));
+    final candidateTitle = _stripArtist(candidateFullTitle, targetArtist);
+
+    final titleMatches = candidateTitle == targetTitle ||
+        _hasPhrase(candidateTitle, targetTitle);
+    final artistMatches = _compact(candidateArtist) == _compact(targetArtist) ||
+        _hasPhrase(candidateArtist, targetArtist) ||
+        _hasPhrase(candidateFullTitle, targetArtist) ||
+        _compact(candidateFullTitle).contains(_compact(targetArtist));
+    if (!titleMatches || !artistMatches) return false;
+
+    final targetTags = _variantTags(target.title);
+    final candidateTags = _variantTags(candidate.title);
+    if (targetTags.length != candidateTags.length ||
+        !targetTags.containsAll(candidateTags)) {
+      return false;
+    }
+
+    final targetSeconds = target.duration.inSeconds;
+    final candidateSeconds = candidate.duration.inSeconds;
+    if (targetSeconds >= 60 && candidateSeconds >= 60) {
+      final allowedDifference = math.max(12, (targetSeconds * 0.08).round());
+      if ((targetSeconds - candidateSeconds).abs() > allowedDifference) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   static String _primaryArtist(String artist) => artist
@@ -521,6 +577,14 @@ class StreamResolver {
       for (final variant in searchQueries.skip(1)) {
         best = math.max(best, scoreTrack(t, variant) - 25.0);
       }
+      // The catalog's order and metadata are substantially more reliable than
+      // SoundCloud upload titles. Keep that preference modest so a genuinely
+      // stronger SoundCloud match can still appear, but enough to stop noisy
+      // reposts from displacing a full catalog match.
+      if (t.source == TrackSource.spotify &&
+          _hasFullMatch(<MediaTrack>[t], normalizedQuery)) {
+        best += 55.0;
+      }
       return best + (bonus[keyOf(t)] ?? 0.0);
     }
 
@@ -616,27 +680,38 @@ class StreamResolver {
       _matchCache.remove(matchKey);
     }
 
-    // 1. Clean primary artist and title to form a laser-targeted query
+    // Preserve featured artists and release subtitles in precise searches.
     final primaryArtist = _primaryArtist(track.artist);
     final cleanTitle = _cleanTitle(track.title);
-    final query = '$primaryArtist $cleanTitle'.trim();
+    final fullArtist = track.artist.trim();
+    final fullTitle = track.title.trim();
+    final compactQuery = '$primaryArtist $cleanTitle'.trim();
+    final queries = <String>{
+      '$fullArtist $fullTitle'.trim(),
+      '$primaryArtist $fullTitle'.trim(),
+      compactQuery,
+    }.where((value) => value.isNotEmpty).toList(growable: false);
 
-    // 2. Fetch candidates from SoundCloud (extra candidates since junk
-    //    re-uploads are common on SoundCloud search).
+    // Merge result sets; isPlayableMatch remains authoritative.
     final candidates = <MediaTrack>[];
-    try {
-      final scResults = await _scExtractor.searchTracks(query, limit: 12);
-      candidates.addAll(scResults.where((c) => !_badMatches.contains(c.id)));
-    } catch (_) {}
+    final candidateIds = <String>{};
+    for (final candidateQuery in queries) {
+      try {
+        final scResults = await _scExtractor.searchTracks(
+          candidateQuery,
+          limit: candidateQuery == compactQuery ? 12 : 24,
+        );
+        for (final candidate in scResults) {
+          if (!_badMatches.contains(candidate.id) &&
+              candidateIds.add(candidate.id)) {
+            candidates.add(candidate);
+          }
+        }
+      } catch (_) {}
+    }
     if (candidates.isEmpty) return null;
 
-    final normTitle = _norm(cleanTitle);
-    final normArtist = _loose(_norm(primaryArtist));
-    final titleWords = _words(normTitle).where((w) => w.length > 2).toList();
-    final artistWords = _words(normArtist).where((w) => w.length > 2).toList();
-
-    // 3. Score candidates: strict title/artist/version/duration checks on top
-    //    of the generic scoreTrack heuristics.
+    // 3. Score candidates, then permit only a strict original-match contract.
     final scored = [
       for (final c in candidates)
         (
@@ -646,25 +721,9 @@ class StreamResolver {
         ),
     ]..sort((a, b) => b.score.compareTo(a.score));
 
-    // 4. Require BOTH a title signal and an artist signal. This blocks
-    //    reposts like "NCM - Alan Walker Faded" when the true artist never
-    //    matches.
     for (final entry in scored) {
       final candidate = entry.track;
-      final t = _norm(candidate.title);
-      final tl = _loose(t);
-      final a = _loose(_norm(candidate.artist));
-
-      final titleOk = t == normTitle ||
-          _hasPhrase(t, normTitle) ||
-          titleWords.any(t.contains);
-      final artistOk = artistWords.isEmpty
-          ? a == normArtist ||
-              _hasPhrase(a, normArtist) ||
-              _hasPhrase(tl, normArtist)
-          : artistWords.any((w) => a.contains(w) || tl.contains(w));
-
-      if (!titleOk || !artistOk) continue;
+      if (!isPlayableMatch(track, candidate)) continue;
 
       try {
         final resolved = await resolveStream(candidate);

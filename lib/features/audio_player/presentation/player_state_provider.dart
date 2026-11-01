@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../extractor/models/media_track.dart';
@@ -127,17 +129,31 @@ final playbackErrorProvider = StreamProvider<AudioPlaybackError?>((ref) {
 // State Notifier for Current Track & Queue
 class QueueNotifier extends StateNotifier<List<MediaTrack>> {
   final AudioPlayerService _service;
+  late final StreamSubscription<int> _queueSubscription;
 
-  QueueNotifier(this._service) : super(_service.queue);
+  QueueNotifier(this._service) : super(_service.queue) {
+    // Radio may extend the queue asynchronously after the user presses play.
+    // Mirror every service mutation so queue sheets and shared track rows stay
+    // in sync instead of showing the initial one-track seed forever.
+    _queueSubscription = _service.queueChanges.listen((_) {
+      if (mounted) state = _service.queue;
+    });
+  }
+
+  @override
+  void dispose() {
+    _queueSubscription.cancel();
+    super.dispose();
+  }
 
   Future<void> playTrack(MediaTrack track) async {
-    state = [track];
     await _service.setQueue([track]);
+    state = _service.queue;
   }
 
   Future<void> playQueue(List<MediaTrack> tracks, {int startIndex = 0}) async {
-    state = tracks;
     await _service.setQueue(tracks, startIndex: startIndex);
+    state = _service.queue;
   }
 
   Future<void> startWave(MediaTrack track) async {

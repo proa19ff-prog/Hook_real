@@ -342,7 +342,7 @@ class SoundCloudExtractor {
 
     final auth = trackData['track_authorization'] as String?;
     Object? lastError;
-    for (final t in candidates.take(3)) {
+    for (final t in candidates) {
       final streamInfoUrl = t['url'] as String?;
       if (streamInfoUrl == null) continue;
       try {

@@ -28,14 +28,14 @@ class ThemeManager {
     isDark: true,
     colors: const HookColors(
       background: Color(0xFF000000),
-      surface: Color(0xFF0A0A0A),
-      surfaceGlass: Color(0x440A0A0A),
-      primary: Color(0xFFE2E8F0),
-      secondary: Color(0xFF94A3B8),
-      accent: Color(0xFFF59E0B),
+      surface: Color(0xFF121212),
+      surfaceGlass: Color(0xE6121212),
+      primary: Color(0xFF8B5CF6),
+      secondary: Color(0xFF5EEAD4),
+      accent: Color(0xFFF0B35A),
       textPrimary: Color(0xFFFFFFFF),
-      textSecondary: Color(0xFF64748B),
-      border: Color(0xFF1E293B),
+      textSecondary: Color(0xFFB3B3B3),
+      border: Color(0xFF2A2A2A),
     ),
     styling: const HookStyling(
       borderRadius: 20.0,
@@ -47,7 +47,8 @@ class ThemeManager {
   );
 
   /// Preloads built-in JSON themes from assets, restoring saved theme if available
-  Future<void> initialize({String? savedThemeId, String? savedCustomJson}) async {
+  Future<void> initialize(
+      {String? savedThemeId, String? savedCustomJson}) async {
     _loadedThemes[_fallbackTheme.id] = _fallbackTheme;
 
     for (final path in builtinThemePaths) {

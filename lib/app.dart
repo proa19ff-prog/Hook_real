@@ -4,12 +4,11 @@ import 'package:ming_cute_icons/ming_cute_icons.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/mini_player.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
+import 'features/home/presentation/home_screen.dart';
 import 'features/library/presentation/library_screen.dart';
 import 'features/search/presentation/search_screen.dart';
 import 'features/theme_engine/domain/hook_theme.dart';
 import 'features/theme_engine/presentation/dynamic_shader_background.dart';
-import 'features/theme_engine/presentation/glass_card.dart';
-import 'features/theme_engine/presentation/theme_settings_screen.dart';
 
 class HookApp extends ConsumerWidget {
   const HookApp({super.key});
@@ -36,7 +35,17 @@ class MainNavigationShell extends ConsumerStatefulWidget {
 }
 
 class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
+  static const _navigationHeight = 76.0;
+
   int _currentIndex = 0;
+  int _searchFocusRequest = 0;
+
+  void _openSearch() {
+    setState(() {
+      _currentIndex = 1;
+      _searchFocusRequest++;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +93,18 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     });
 
     final screens = [
-      SearchScreen(theme: theme),
+      HomeScreen(
+        theme: theme,
+        onOpenSearch: _openSearch,
+      ),
+      SearchScreen(
+        theme: theme,
+        focusRequestId: _searchFocusRequest,
+      ),
       LibraryScreen(theme: theme),
-      ThemeSettingsScreen(theme: theme),
     ];
+    final navigationHeight =
+        _navigationHeight + MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       body: DynamicShaderBackground(
@@ -95,26 +112,23 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         artworkUrl: currentTrack?.artworkUrl,
         child: Stack(
           children: [
-            // Active Tab Page
             Positioned.fill(
               child: IndexedStack(
                 index: _currentIndex,
                 children: screens,
               ),
             ),
-
-            // Persistent MiniPlayer & Floating Glass Bottom Navigation
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: navigationHeight,
+              child: MiniPlayer(theme: theme),
+            ),
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MiniPlayer(theme: theme),
-                  _buildGlassNavigationBar(theme),
-                ],
-              ),
+              child: _buildGlassNavigationBar(theme),
             ),
           ],
         ),
@@ -123,20 +137,30 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
   }
 
   Widget _buildGlassNavigationBar(HookTheme theme) {
-    return HookGlassCard(
-      theme: theme,
-      elevation: 1.0,
-      margin: EdgeInsets.fromLTRB(
-          16, 0, 16, 10 + MediaQuery.paddingOf(context).bottom),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      borderRadius: BorderRadius.circular(24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _navItem(0, MingCuteIcons.mgc_search_2_line, 'Поиск', theme),
-          _navItem(1, MingCuteIcons.mgc_disc_line, 'Медиатека', theme),
-          _navItem(2, MingCuteIcons.mgc_palette_line, 'Темы', theme),
-        ],
+    final colors = theme.colors;
+    return SizedBox(
+      height: _navigationHeight + MediaQuery.paddingOf(context).bottom,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colors.surface.withValues(alpha: 0.98),
+          border: Border(
+            top: BorderSide(color: colors.border.withValues(alpha: 0.8)),
+          ),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          8,
+          7,
+          8,
+          7 + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _navItem(0, MingCuteIcons.mgc_compass_line, 'Главная', theme),
+            _navItem(1, MingCuteIcons.mgc_search_2_line, 'Поиск', theme),
+            _navItem(2, MingCuteIcons.mgc_disc_line, 'Медиатека', theme),
+          ],
+        ),
       ),
     );
   }
@@ -151,29 +175,17 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 280),
           curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 7),
           decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      theme.colors.primary.withValues(alpha: 0.85),
-                      theme.colors.primary.withValues(alpha: 0.6),
-                    ],
-                  )
-                : null,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: theme.colors.primary.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : null,
+            color: isSelected
+                ? theme.colors.primary.withValues(alpha: 0.13)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected
+                  ? theme.colors.primary.withValues(alpha: 0.28)
+                  : Colors.transparent,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -184,7 +196,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
                 child: Icon(
                   icon,
                   color: isSelected
-                      ? Colors.white
+                      ? theme.colors.primary
                       : theme.colors.textSecondary.withValues(alpha: 0.75),
                   size: 22,
                 ),
@@ -194,7 +206,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
                 label,
                 style: TextStyle(
                   color: isSelected
-                      ? Colors.white
+                      ? theme.colors.primary
                       : theme.colors.textSecondary.withValues(alpha: 0.75),
                   fontSize: 10.5,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

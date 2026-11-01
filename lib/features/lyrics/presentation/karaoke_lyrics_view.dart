@@ -85,6 +85,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   List<GlobalKey> _keys = const [];
   int _active = -1;
   double _syncOffsetSeconds = 0.0;
+  bool _showOffsetControls = false;
 
   DateTime _userScrollUntil = DateTime.fromMillisecondsSinceEpoch(0);
   Timer? _resumeTimer;
@@ -249,7 +250,8 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: colors.textSecondary.withValues(alpha: 0.5)),
+          Icon(icon,
+              size: 48, color: colors.textSecondary.withValues(alpha: 0.5)),
           const SizedBox(height: 12),
           Text(
             text,
@@ -372,7 +374,33 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
             );
           },
         ),
-        _buildOffsetBar(colors),
+        if (_source?.any((line) => line.hasRealWordTimings) ?? false)
+          Positioned(
+            bottom: 12,
+            left: 16,
+            right: 16,
+            child: Align(
+              alignment: _showOffsetControls
+                  ? Alignment.center
+                  : Alignment.centerRight,
+              child: _showOffsetControls
+                  ? _buildOffsetBar(colors)
+                  : IconButton(
+                      tooltip: 'Настроить синхронизацию текста',
+                      style: IconButton.styleFrom(
+                        backgroundColor: colors.surface.withValues(alpha: 0.88),
+                        foregroundColor: colors.textSecondary,
+                        side: BorderSide(
+                          color: colors.border.withValues(alpha: 0.45),
+                        ),
+                      ),
+                      icon: const Icon(MingCuteIcons.mgc_settings_3_line),
+                      onPressed: () {
+                        setState(() => _showOffsetControls = true);
+                      },
+                    ),
+            ),
+          ),
       ],
     );
   }
@@ -382,47 +410,51 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
         ? 'Сдвиг: 0.0с'
         : 'Сдвиг: ${_syncOffsetSeconds > 0 ? "+" : ""}${_syncOffsetSeconds.toStringAsFixed(1)}с';
 
-    return Positioned(
-      bottom: 12,
-      left: 16,
-      right: 16,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: colors.surface.withValues(alpha: 0.88),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: colors.border.withValues(alpha: 0.45),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildOffsetBtn('-0.5s', () => _shiftOffset(-0.5)),
-              _buildOffsetBtn('-0.1s', () => _shiftOffset(-0.1)),
-              InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => setState(() => _syncOffsetSeconds = 0.0),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text(
-                    offsetStr,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: _syncOffsetSeconds == 0.0
-                          ? colors.textSecondary
-                          : colors.accent,
-                    ),
-                  ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: colors.surface.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colors.border.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildOffsetBtn('-0.5s', () => _shiftOffset(-0.5)),
+          _buildOffsetBtn('-0.1s', () => _shiftOffset(-0.1)),
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => setState(() => _syncOffsetSeconds = 0.0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Text(
+                offsetStr,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: _syncOffsetSeconds == 0.0
+                      ? colors.textSecondary
+                      : colors.accent,
                 ),
               ),
-              _buildOffsetBtn('+0.1s', () => _shiftOffset(0.1)),
-              _buildOffsetBtn('+0.5s', () => _shiftOffset(0.5)),
-            ],
+            ),
           ),
-        ),
+          _buildOffsetBtn('+0.1s', () => _shiftOffset(0.1)),
+          _buildOffsetBtn('+0.5s', () => _shiftOffset(0.5)),
+          IconButton(
+            tooltip: 'Скрыть настройку',
+            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
+            padding: EdgeInsets.zero,
+            iconSize: 16,
+            icon: Icon(
+              MingCuteIcons.mgc_close_line,
+              color: colors.textSecondary,
+            ),
+            onPressed: () => setState(() => _showOffsetControls = false),
+          ),
+        ],
       ),
     );
   }
@@ -544,7 +576,8 @@ class _LineTile extends StatelessWidget {
           child: AnimatedScale(
             scale: isActive || !animate ? 1.0 : 0.94,
             alignment: Alignment.centerLeft,
-            duration: animate ? const Duration(milliseconds: 450) : Duration.zero,
+            duration:
+                animate ? const Duration(milliseconds: 450) : Duration.zero,
             curve: _easeOut,
             child: body,
           ),
@@ -642,7 +675,8 @@ class _SweepWord extends StatelessWidget {
       painted = ShaderMask(
         blendMode: BlendMode.srcIn,
         shaderCallback: (rect) {
-          final f = rect.width <= 0 ? 0.2 : (feather / rect.width).clamp(0.02, 0.45);
+          final f =
+              rect.width <= 0 ? 0.2 : (feather / rect.width).clamp(0.02, 0.45);
           final edge = -f + progress * (1 + 2 * f);
           return LinearGradient(
             colors: [sung, dim],
@@ -695,7 +729,8 @@ class _BreakDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
       curve: _easeOut,
       alignment: Alignment.topLeft,
       child: !active
@@ -711,8 +746,8 @@ class _BreakDots extends StatelessWidget {
                       : ((pos - item.start).inMilliseconds / totalMs)
                           .clamp(0.0, 1.0);
                   final remainingMs = (item.end - pos).inMilliseconds;
-                  final exit = _easeOut
-                      .transform((remainingMs / 450).clamp(0.0, 1.0));
+                  final exit =
+                      _easeOut.transform((remainingMs / 450).clamp(0.0, 1.0));
                   final breathe = reduceMotion
                       ? 1.0
                       : 1.0 +

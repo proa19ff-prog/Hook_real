@@ -60,7 +60,8 @@ class DynamicShaderBackground extends StatefulWidget {
 
 class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     with SingleTickerProviderStateMixin {
-  static const _frameInterval = Duration(milliseconds: 33); // ~30 fps for smooth, battery-friendly ambient flow
+  static const _frameInterval = Duration(
+      milliseconds: 33); // ~30 fps for smooth, battery-friendly ambient flow
 
   late final Ticker _ticker;
   final ValueNotifier<double> _time = ValueNotifier(0);
@@ -123,7 +124,8 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
       _c2 = widget.theme.colors.secondary;
       _c3 = widget.theme.colors.accent;
       _c4 = widget.theme.colors.background;
-      _isLightBackground = widget.theme.colors.background.computeLuminance() > 0.58;
+      _isLightBackground =
+          widget.theme.colors.background.computeLuminance() > 0.58;
     });
   }
 
@@ -158,7 +160,8 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
 
       if (!mounted || _paletteUrl != artUrl) return;
 
-      final dominant = palette.dominantColor?.color ?? widget.theme.colors.primary;
+      final dominant =
+          palette.dominantColor?.color ?? widget.theme.colors.primary;
       // Muted swatches first: raw vibrant swatches are what made the mesh
       // garish (neon greens, hot pinks at full saturation).
       final second = palette.darkVibrantColor?.color ??
@@ -167,17 +170,15 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
       final third = palette.mutedColor?.color ??
           palette.vibrantColor?.color ??
           widget.theme.colors.accent;
-      final base = palette.darkMutedColor?.color ?? widget.theme.colors.background;
+      final base =
+          palette.darkMutedColor?.color ?? widget.theme.colors.background;
 
       setState(() {
         _c1 = _tame(dominant, maxSat: 0.55, minLight: 0.22, maxLight: 0.42);
         _c2 = _tame(second, maxSat: 0.50, minLight: 0.18, maxLight: 0.36);
         _c3 = _tame(third, maxSat: 0.45, minLight: 0.16, maxLight: 0.32);
         _c4 = _tame(base, maxSat: 0.35, minLight: 0.05, maxLight: 0.12);
-        // The mesh is always dark after taming, so text stays light on it.
-        // The aurora fallback still follows the raw artwork brightness.
-        _isLightBackground = !widget.theme.styling.shaderMeshEnabled &&
-            dominant.computeLuminance() > 0.58;
+        _isLightBackground = false;
       });
     } catch (_) {
       if (mounted && _paletteUrl == artUrl) _useThemeColors();
@@ -218,15 +219,12 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     }
 
     final isLight = _isLightBackground;
-    final textPrimary = isLight
-        ? const Color(0xFF141419)
-        : widget.theme.colors.textPrimary;
-    final textSecondary = isLight
-        ? const Color(0xFF4A4A5A)
-        : widget.theme.colors.textSecondary;
-    final iconColor = isLight
-        ? const Color(0xFF1A1A22)
-        : widget.theme.colors.textPrimary;
+    final textPrimary =
+        isLight ? const Color(0xFF141419) : widget.theme.colors.textPrimary;
+    final textSecondary =
+        isLight ? const Color(0xFF4A4A5A) : widget.theme.colors.textSecondary;
+    final iconColor =
+        isLight ? const Color(0xFF1A1A22) : widget.theme.colors.textPrimary;
     final cardBg = isLight
         ? Colors.white.withValues(alpha: 0.65)
         : widget.theme.colors.surfaceGlass.withValues(alpha: 0.4);

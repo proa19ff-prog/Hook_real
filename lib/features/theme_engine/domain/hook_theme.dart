@@ -24,26 +24,56 @@ class HookColors {
   });
 
   factory HookColors.fromJson(Map<String, dynamic> json) {
-    Color parseHex(String hex) {
-      final clean = hex.replaceAll('#', '');
-      if (clean.length == 6) {
-        return Color(int.parse('FF$clean', radix: 16));
-      } else if (clean.length == 8) {
-        return Color(int.parse(clean, radix: 16));
+    Color parseHex(Object? value, Color fallback) {
+      final clean = value is String ? value.trim().replaceAll('#', '') : '';
+      if (clean.length != 6 && clean.length != 8) return fallback;
+      try {
+        return Color(
+          int.parse(clean.length == 6 ? 'FF$clean' : clean, radix: 16),
+        );
+      } on FormatException {
+        return fallback;
       }
-      return const Color(0xFF000000);
     }
 
+    double contrastRatio(Color foreground, Color background) {
+      final light = foreground.computeLuminance();
+      final dark = background.computeLuminance();
+      return (light > dark ? light + 0.05 : dark + 0.05) /
+          (light > dark ? dark + 0.05 : light + 0.05);
+    }
+
+    final background = parseHex(json['background'], const Color(0xFF0D0E12));
+    final surface = parseHex(json['surface'], const Color(0xFF16181F));
+    final surfaceGlass =
+        parseHex(json['surfaceGlass'], const Color(0x2416181F));
+    final primary = parseHex(json['primary'], const Color(0xFF6C5CE7));
+    final secondary = parseHex(json['secondary'], const Color(0xFFA29BFE));
+    final accent = parseHex(json['accent'], const Color(0xFF00CEC9));
+    final textPrimary = parseHex(json['textPrimary'], const Color(0xFFFFFFFF));
+    final textSecondary =
+        parseHex(json['textSecondary'], const Color(0xFF8E92A4));
+    final border = parseHex(json['border'], const Color(0xFF282B37));
+    final lightBackground = background.computeLuminance() > 0.45;
+    final safePrimaryText =
+        lightBackground ? const Color(0xFF141419) : const Color(0xFFFFFFFF);
+    final safeSecondaryText =
+        lightBackground ? const Color(0xFF4A4A5A) : const Color(0xFFB3B3B3);
+
     return HookColors(
-      background: parseHex(json['background'] ?? '#0D0E12'),
-      surface: parseHex(json['surface'] ?? '#16181F'),
-      surfaceGlass: parseHex(json['surfaceGlass'] ?? '#2416181F'),
-      primary: parseHex(json['primary'] ?? '#6C5CE7'),
-      secondary: parseHex(json['secondary'] ?? '#A29BFE'),
-      accent: parseHex(json['accent'] ?? '#00CEC9'),
-      textPrimary: parseHex(json['textPrimary'] ?? '#FFFFFF'),
-      textSecondary: parseHex(json['textSecondary'] ?? '#8E92A4'),
-      border: parseHex(json['border'] ?? '#282B37'),
+      background: background,
+      surface: surface,
+      surfaceGlass: surfaceGlass,
+      primary: primary,
+      secondary: secondary,
+      accent: accent,
+      textPrimary: contrastRatio(textPrimary, background) >= 4.5
+          ? textPrimary
+          : safePrimaryText,
+      textSecondary: contrastRatio(textSecondary, background) >= 3
+          ? textSecondary
+          : safeSecondaryText,
+      border: border,
     );
   }
 

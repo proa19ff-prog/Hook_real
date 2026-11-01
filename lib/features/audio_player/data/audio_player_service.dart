@@ -67,6 +67,7 @@ class AudioPlayerService {
   String? _playbackContext;
   int _waveGeneration = 0;
   Future<void>? _waveExtension;
+  final Set<String> _waveSeen = <String>{};
   final StreamController<int> _queueController =
       StreamController<int>.broadcast();
   int _queueVersion = 0;
@@ -157,6 +158,9 @@ class AudioPlayerService {
 
   /// Resolves the next queue item in the background so skipping is instant.
   void _prefetchNext() {
+    if (_waveActive && _currentIndex >= _queue.length - 3) {
+      unawaited(_extendWave());
+    }
     if (_isShuffle || _currentIndex + 1 >= _queue.length) return;
     _resolveUrl(_queue[_currentIndex + 1]).ignore();
   }
@@ -198,6 +202,7 @@ class AudioPlayerService {
   Future<void> setQueue(List<MediaTrack> tracks, {int startIndex = 0}) async {
     _waveActive = false;
     _waveSeed = null;
+    _waveSeen.clear();
     _playbackContext = null;
     _waveGeneration++;
     _queue.clear();
@@ -363,10 +368,13 @@ class AudioPlayerService {
 
       if (requestId != _playRequestId) return;
 
-      // Attempt 3: last resort — search SoundCloud for the same song and play
-      // the best match, so the music never stops.
-      if (await tryStart(() => _resolver.resolveSpotifyTrack(track),
-          timeout: const Duration(seconds: 40))) {
+      // Attempt 3 is only safe for catalogue entries. A SoundCloud track with
+      // a broken stream must report that failure rather than silently becoming
+      // a different upload with the same words in its title.
+      if ((track.source == TrackSource.spotify ||
+              track.source == TrackSource.youtube) &&
+          await tryStart(() => _resolver.resolveSpotifyTrack(track),
+              timeout: const Duration(seconds: 40))) {
         return;
       }
 
@@ -387,8 +395,9 @@ class AudioPlayerService {
       _urlCache.remove(_cacheKey(track));
 
       if (requestId == _playRequestId) {
-        if (await tryStart(() => _resolver.resolveSpotifyTrack(track),
-            timeout: const Duration(seconds: 40))) {
+        if (track.source != TrackSource.soundcloud &&
+            await tryStart(() => _resolver.resolveSpotifyTrack(track),
+                timeout: const Duration(seconds: 40))) {
           return;
         }
         if (requestId == _playRequestId) {
@@ -419,6 +428,14 @@ class AudioPlayerService {
     _waveSeed = seed;
     _playbackContext = 'Волна: ${seed.title}';
     _waveGeneration++;
+    _waveSeen
+      ..clear()
+      ..add(TrackWaveService.trackKey(seed));
+    // Do not replay tracks recently heard by the listener when a new radio
+    // session begins. The queue is included again before every extension.
+    for (final track in _storageService?.getHistory() ?? const <MediaTrack>[]) {
+      _waveSeen.add(TrackWaveService.trackKey(track));
+    }
     _queue
       ..clear()
       ..add(seed);
@@ -433,14 +450,18 @@ class AudioPlayerService {
   Future<void> _extendWave() async {
     if (!_waveActive || _waveSeed == null || _waveExtension != null) return;
     final generation = _waveGeneration;
-    final seed = _queue.isNotEmpty ? _queue.last : _waveSeed!;
-    final excluded =
-        _queue.map((track) => '${track.artist}|${track.title}').toSet();
-    final future = _waveService.nextBatch(seed, excluded: excluded);
+    final relatedSeed = _queue.isNotEmpty ? _queue.last : _waveSeed!;
+    _waveSeen.addAll(_queue.map(TrackWaveService.trackKey));
+    final future = _waveService.nextBatch(
+      _waveSeed!,
+      relatedSeed: relatedSeed,
+      excluded: _waveSeen,
+    );
     _waveExtension = future.then((tracks) {
       if (generation != _waveGeneration || !_waveActive || tracks.isEmpty) {
         return;
       }
+      _waveSeen.addAll(tracks.map(TrackWaveService.trackKey));
       _queue.addAll(tracks);
       _notifyQueue();
       _prefetchNext();
@@ -536,6 +557,12 @@ class AudioPlayerService {
       await seek(Duration.zero);
       return;
     }
+
+    await previousTrack();
+  }
+
+  Future<void> previousTrack() async {
+    if (_queue.isEmpty) return;
 
     if (_currentIndex - 1 >= 0) {
       _currentIndex--;

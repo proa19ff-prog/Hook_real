@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
+import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../import/presentation/import_bottom_sheet.dart';
 import '../../library/presentation/library_provider.dart';
@@ -13,10 +14,12 @@ import '../../theme_engine/presentation/track_artwork.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final HookTheme theme;
+  final int focusRequestId;
 
   const SearchScreen({
     super.key,
     required this.theme,
+    required this.focusRequestId,
   });
 
   @override
@@ -32,12 +35,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<MediaTrack> _searchResults = [];
   bool _isLoading = false;
   bool _hasSearched = false;
-  bool _isLoadingRecommendations = false;
   String? _searchError;
   String _lastQuery = '';
   // Spotify (iTunes catalog) is the default source; SoundCloud backs playback.
   String _activeSourceFilter = 'spotify'; // 'all', 'soundcloud', 'spotify'
   int _searchRequestId = 0;
+
+  @override
+  void didUpdateWidget(covariant SearchScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusRequestId == oldWidget.focusRequestId) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
+  }
 
   @override
   void dispose() {
@@ -64,74 +75,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _searchResults = [];
       _hasSearched = false;
       _isLoading = false;
-      _isLoadingRecommendations = false;
       _searchError = null;
       _lastQuery = '';
     });
-  }
-
-  Future<void> _loadPersonalizedMix({bool playImmediately = true}) async {
-    if (_isLoadingRecommendations) return;
-    setState(() {
-      _isLoadingRecommendations = true;
-      _searchError = null;
-    });
-
-    try {
-      final recService = ref.read(recommendationServiceProvider);
-      final tracks = await recService.getPersonalizedRecommendations(limit: 30);
-      if (!mounted) return;
-
-      setState(() {
-        _isLoadingRecommendations = false;
-      });
-
-      if (tracks.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Не удалось подобрать треки. Попробуйте поиск.'),
-              backgroundColor: widget.theme.colors.surface,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        return;
-      }
-
-      if (playImmediately) {
-        ref.read(queueProvider.notifier).playQueue(tracks, startIndex: 0);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Включен персональный микс (${tracks.length} треков)'),
-              backgroundColor: widget.theme.colors.surface,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      } else {
-        setState(() {
-          _searchResults = tracks;
-          _hasSearched = true;
-          _lastQuery = '✨ Мои предпочтения';
-          _searchController.text = 'Мои предпочтения';
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingRecommendations = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка создания микса: $e'),
-            backgroundColor: Colors.redAccent.withValues(alpha: 0.9),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
   }
 
   Future<void> _performSearch(String query, {bool force = false}) async {
@@ -293,8 +239,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     _buildFilterChip(
                         'spotify', 'Spotify', MingCuteIcons.mgc_music_fill),
                     const SizedBox(width: 8),
-                    _buildFilterChip(
-                        'soundcloud', 'SoundCloud', MingCuteIcons.mgc_cloud_line),
+                    _buildFilterChip('soundcloud', 'SoundCloud',
+                        MingCuteIcons.mgc_cloud_line),
                     const SizedBox(width: 8),
                     _buildFilterChip('all', 'Все источники',
                         MingCuteIcons.mgc_sparkles_line),
@@ -310,7 +256,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 child: _isLoading && _searchResults.isNotEmpty
                     ? LinearProgressIndicator(
                         color: colors.primary,
-                        backgroundColor: colors.surfaceGlass.withValues(alpha: 0.2),
+                        backgroundColor:
+                            colors.surfaceGlass.withValues(alpha: 0.2),
                       )
                     : null,
               ),
@@ -351,7 +298,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       itemCount: _searchResults.length,
       itemExtent: 72,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      itemBuilder: (context, index) => _SearchResultTile(
+      itemBuilder: (context, index) => SpotifyTrackTile(
         theme: widget.theme,
         track: _searchResults[index],
         onTap: () {
@@ -359,6 +306,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ref
               .read(queueProvider.notifier)
               .playQueue(_searchResults, startIndex: index);
+        },
+        onFindArtist: () {
+          final artist = _searchResults[index].artist;
+          _searchController.text = artist;
+          _performSearch(artist, force: true);
+          _focusNode.unfocus();
         },
       ),
     );
@@ -428,9 +381,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Personalized Recommendation Card
-          _buildPersonalizedCard(colors),
-
           if (favoriteArtists.isNotEmpty) ...[
             const SizedBox(height: 24),
             Row(
@@ -468,7 +418,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               }).toList(),
             ),
           ],
-
           const SizedBox(height: 24),
           Row(
             children: [
@@ -494,7 +443,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             runSpacing: 8,
             children: [
               _buildPillChip(
-                label: '📥 Импорт (Spotify / YT)',
+                label: 'Импорт Spotify / список',
                 icon: MingCuteIcons.mgc_link_line,
                 onTap: () => ImportBottomSheet.show(context, widget.theme),
               ),
@@ -541,227 +490,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPersonalizedCard(HookColors colors) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            colors.primary.withValues(alpha: 0.22),
-            colors.accent.withValues(alpha: 0.12),
-            colors.surfaceGlass.withValues(alpha: 0.4),
-          ],
-        ),
-        border: Border.all(
-          color: colors.primary.withValues(alpha: 0.35),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colors.primary.withValues(alpha: 0.16),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Badge row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: colors.primary.withValues(alpha: 0.4),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          MingCuteIcons.mgc_sparkles_line,
-                          size: 13,
-                          color: colors.accent,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'AI РЕКОМЕНДАЦИИ',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: colors.accent,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        MingCuteIcons.mgc_music_line,
-                        size: 16,
-                        color: colors.textSecondary.withValues(alpha: 0.8),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Smart Flow',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textSecondary.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-
-              // Title
-              Text(
-                'Музыка по моим предпочтениям',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.4,
-                  color: colors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              // Description
-              Text(
-                'Умный персональный микс на основе ваших лайков, истории и вкусовых предпочтений.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colors.textSecondary.withValues(alpha: 0.9),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: _isLoadingRecommendations
-                          ? null
-                          : () => _loadPersonalizedMix(playImmediately: true),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [colors.primary, colors.accent],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.primary.withValues(alpha: 0.35),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: _isLoadingRecommendations
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      MingCuteIcons.mgc_play_fill,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Слушать микс',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: _isLoadingRecommendations
-                        ? null
-                        : () => _loadPersonalizedMix(playImmediately: false),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colors.surfaceGlass.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colors.border.withValues(alpha: 0.5),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            MingCuteIcons.mgc_playlist_2_line,
-                            color: colors.textPrimary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Треки',
-                            style: TextStyle(
-                              color: colors.textPrimary,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -836,7 +564,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     end: Alignment.bottomRight,
                   )
                 : null,
-            color: isSelected ? null : colors.surfaceGlass.withValues(alpha: 0.45),
+            color:
+                isSelected ? null : colors.surfaceGlass.withValues(alpha: 0.45),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected
@@ -917,7 +646,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: colors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -933,6 +663,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 /// One search result row. It watches only the providers it needs, so a
 /// track change or a favourite toggle rebuilds the affected rows rather
 /// than the whole screen.
+// Kept temporarily for backwards-compatible internal references while all
+// visible search rows use [SpotifyTrackTile].
+// ignore: unused_element
 class _SearchResultTile extends ConsumerWidget {
   final HookTheme theme;
   final MediaTrack track;
@@ -958,8 +691,7 @@ class _SearchResultTile extends ConsumerWidget {
     final isCurrent = ref.watch(
       currentTrackProvider.select((current) => current == track),
     );
-    final isLoading =
-        isCurrent && ref.watch(isTrackLoadingProvider);
+    final isLoading = isCurrent && ref.watch(isTrackLoadingProvider);
     final isFav = ref.watch(
       favoritesProvider.select((favs) => favs.contains(track)),
     );
@@ -1054,7 +786,8 @@ class _SearchResultTile extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: isCurrent ? colors.accent : colors.textPrimary,
-                        fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w600,
+                        fontWeight:
+                            isCurrent ? FontWeight.w700 : FontWeight.w600,
                         fontSize: 14,
                       ),
                     ),
@@ -1062,28 +795,28 @@ class _SearchResultTile extends ConsumerWidget {
                     Row(
                       children: [
                         Builder(builder: (_) {
-                          final (String label, Color bg, Color fg) = switch (
-                              track.source) {
+                          final (String label, Color bg, Color fg) =
+                              switch (track.source) {
                             TrackSource.soundcloud => (
-                              'SC',
-                              Colors.orange,
-                              Colors.orangeAccent
-                            ),
+                                'SC',
+                                Colors.orange,
+                                Colors.orangeAccent
+                              ),
                             TrackSource.spotify => (
-                              'SP',
-                              const Color(0xFF1DB954),
-                              const Color(0xFF1DB954)
-                            ),
+                                'SP',
+                                const Color(0xFF1DB954),
+                                const Color(0xFF1DB954)
+                              ),
                             TrackSource.youtube => (
-                              'YT',
-                              Colors.red,
-                              Colors.redAccent
-                            ),
+                                'YT',
+                                Colors.red,
+                                Colors.redAccent
+                              ),
                             TrackSource.local => (
-                              'LO',
-                              Colors.blueGrey,
-                              Colors.blueGrey
-                            ),
+                                'LO',
+                                Colors.blueGrey,
+                                Colors.blueGrey
+                              ),
                           };
                           return Container(
                             padding: const EdgeInsets.symmetric(
@@ -1201,8 +934,8 @@ class _SearchResultTile extends ConsumerWidget {
               },
             ),
             ListTile(
-              leading:
-                  Icon(MingCuteIcons.mgc_playlist_line, color: colors.textPrimary),
+              leading: Icon(MingCuteIcons.mgc_playlist_line,
+                  color: colors.textPrimary),
               title: Text('Добавить в очередь',
                   style: TextStyle(color: colors.textPrimary)),
               onTap: () {

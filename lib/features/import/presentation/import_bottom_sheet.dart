@@ -63,15 +63,19 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
       return;
     }
 
+    final inferredTextMode = _textMode ||
+        MusicImportService.detectPlatform(url) == ImportPlatform.text;
+
     setState(() {
       _isLoading = true;
+      _textMode = inferredTextMode;
       _errorMessage = null;
       _importedResult = null;
     });
 
     try {
       final importService = ref.read(musicImportServiceProvider);
-      final result = _textMode
+      final result = inferredTextMode
           ? await importService.importFromText(
               url,
               title: _nameController.text,
@@ -96,9 +100,15 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = e is FormatException || e is ArgumentError
+        _errorMessage = e is MusicImportException ||
+                e is FormatException ||
+                e is ArgumentError
             ? e.toString().replaceFirst(RegExp(r'^[A-Za-z]+Exception:\s*'), '')
             : 'Ошибка импорта: Проверьте ссылку и интернет-соединение.';
+        if (e is MusicImportException && e.blocked) {
+          _textMode = true;
+          _urlController.clear();
+        }
       });
     }
   }

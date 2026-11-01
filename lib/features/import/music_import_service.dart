@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import '../extractor/models/media_track.dart';
+import '../extractor/spotify/spotify_catalog_service.dart';
+import '../extractor/stream_resolver.dart';
 
 enum ImportPlatform {
   spotify,
@@ -38,8 +40,11 @@ class MusicImportException implements Exception {
 
 class MusicImportService {
   final Dio _dio;
+  final SpotifyCatalogService _catalog;
 
-  MusicImportService({Dio? dio}) : _dio = dio ?? Dio();
+  MusicImportService({Dio? dio, SpotifyCatalogService? catalog})
+      : _dio = dio ?? Dio(),
+        _catalog = catalog ?? SpotifyCatalogService();
 
   static ImportPlatform detectPlatform(String input) {
     final value = input.trim();
@@ -67,19 +72,76 @@ class MusicImportService {
   Future<ImportedCollection> importFromText(
     String text, {
     String? title,
+    bool resolveTracks = true,
   }) async {
-    final tracks = parseTrackList(text);
-    if (tracks.isEmpty) {
+    final parsedTracks = parseTrackList(text);
+    if (parsedTracks.isEmpty) {
       throw const FormatException(
           'Не удалось найти треки в вставленном тексте.');
     }
+    final tracks =
+        resolveTracks ? await _resolveTextTracks(parsedTracks) : parsedTracks;
     return ImportedCollection(
       title:
           title?.trim().isNotEmpty == true ? title!.trim() : 'Импорт из текста',
       author: 'Импорт',
-      artworkUrl: '',
+      artworkUrl: tracks
+          .firstWhere(
+            (track) => track.artworkUrl.isNotEmpty,
+            orElse: () => tracks.first,
+          )
+          .artworkUrl,
       tracks: tracks,
       platform: ImportPlatform.text,
+    );
+  }
+
+  /// Resolves pasted entries against the catalog before the playlist is saved.
+  /// A small worker pool avoids both a burst of requests and slow serial imports;
+  /// unmatched lines are deliberately retained so a temporary network failure
+  /// never destroys the user's exported playlist.
+  Future<List<MediaTrack>> _resolveTextTracks(List<MediaTrack> tracks) async {
+    final resolved = List<MediaTrack?>.filled(tracks.length, null);
+    var nextIndex = 0;
+
+    Future<void> worker() async {
+      while (true) {
+        final index = nextIndex++;
+        if (index >= tracks.length) return;
+        final source = tracks[index];
+        try {
+          final query = '${source.artist} ${source.title}'.trim();
+          final results = await Future.wait([
+            _catalog.searchTracks(query, country: 'us'),
+            _catalog.searchTracks(query, country: 'ru'),
+          ]);
+          final candidates = <MediaTrack>[...results[0], ...results[1]];
+          if (candidates.isNotEmpty) {
+            final scored = candidates
+                .map((candidate) => (
+                      track: candidate,
+                      score: StreamResolver.scoreTrack(candidate, query),
+                    ))
+                .toList()
+              ..sort((a, b) => b.score.compareTo(a.score));
+            // Do not replace a precise pasted title with a vague catalog hit.
+            if (scored.first.score >= 220) resolved[index] = scored.first.track;
+          }
+        } catch (_) {
+          // Keep the lightweight text placeholder below.
+        }
+      }
+    }
+
+    final workers = List.generate(
+      tracks.length < 4 ? tracks.length : 4,
+      (_) => worker(),
+    );
+    await Future.wait(workers);
+    return List<MediaTrack>.generate(
+      tracks.length,
+      (index) => resolved[index] ?? tracks[index],
+      growable: false,
     );
   }
 
@@ -234,7 +296,7 @@ class MusicImportService {
         ).hasMatch(html);
     if (blocked) {
       throw const MusicImportException(
-        'Spotify недоступен в этом регионе. Используйте VPN или вставьте список треков текстом.',
+        'Spotify не отдал этот плейлист в вашем регионе. Скопируйте треки и вставьте их списком или CSV.',
         blocked: true,
       );
     }
@@ -251,7 +313,7 @@ class MusicImportService {
     if (data is! Map) {
       throw const FormatException('Неверный формат данных Spotify.');
     }
-    return _parseSpotifyData(
+    return parseSpotifyData(
       Map<String, dynamic>.from(data),
       type: type,
       id: id,
@@ -293,50 +355,55 @@ class MusicImportService {
     return ('playlist', '');
   }
 
-  static ImportedCollection _parseSpotifyData(
+  /// Parses both the current embedded Spotify state shape and the older
+  /// playlist/album payloads. Keeping this public makes the parser testable
+  /// without attempting a real Spotify request (which can be region-blocked).
+  static ImportedCollection parseSpotifyData(
     Map<String, dynamic> data, {
     required String type,
     required String id,
   }) {
-    final entity = data['entity'] is Map
-        ? Map<String, dynamic>.from(data['entity'] as Map)
-        : null;
-    final legacy =
-        data[type] is Map ? Map<String, dynamic>.from(data[type] as Map) : null;
-    final root = entity ?? legacy;
-    if (root == null) throw const FormatException('Список Spotify пуст.');
-
+    final entity = _map(data['entity']);
+    final legacy = _map(data[type]);
+    final root = entity ?? legacy ?? data;
     final title = _string(root, ['name', 'title']) ?? 'Импорт Spotify';
     final author = _author(root) ?? 'Spotify';
     final cover = _image(root) ?? '';
-    final rawItems = root['trackList'] is List
-        ? root['trackList'] as List
-        : root['tracks'] is Map && root['tracks']['items'] is List
-            ? root['tracks']['items'] as List
-            : const [];
+    final rawItems = _extractTrackItems(root, data);
     final tracks = <MediaTrack>[];
+    final seen = <String>{};
+
     for (final raw in rawItems) {
-      if (raw is! Map) continue;
-      final item = Map<String, dynamic>.from(raw);
-      final track = item['track'] is Map
-          ? Map<String, dynamic>.from(item['track'] as Map)
-          : item;
+      final item = _map(raw);
+      if (item == null) continue;
+      // New embeds place the actual record at entry.track; legacy data may
+      // use item.track or contain the track directly.
+      final track = _map(item['track']) ?? item;
       final trackTitle = _string(track, ['title', 'name']);
       if (trackTitle == null || trackTitle.isEmpty) continue;
-      final artist = _author(track) ?? _string(item, ['subtitle']) ?? author;
-      final duration = _duration(track['duration'] ?? item['duration']);
+      final artist = _author(track) ??
+          _author(item) ??
+          _string(item, ['subtitle', 'artist']) ??
+          author;
       final trackId = _spotifyId(track['uri']) ??
+          _spotifyId(item['uri']) ??
           _string(track, ['uid', 'id']) ??
+          _string(item, ['uid', 'id']) ??
           '${id}_${tracks.length}';
+      final key =
+          '$trackId|${trackTitle.toLowerCase()}|${artist.toLowerCase()}';
+      if (!seen.add(key)) continue;
       tracks.add(MediaTrack(
-        id: 'sp_$trackId',
+        id: trackId.startsWith('sp_') ? trackId : 'sp_$trackId',
         title: trackTitle,
         artist: artist,
-        duration: duration,
-        artworkUrl: _image(track) ?? cover,
+        album: _string(track, ['album', 'albumName']) ?? title,
+        duration: _duration(track['duration'] ?? item['duration']),
+        artworkUrl: _image(track) ?? _image(item) ?? cover,
         source: TrackSource.spotify,
       ));
     }
+
     if (tracks.isEmpty && type == 'track') {
       final trackTitle = _string(root, ['name', 'title']) ?? title;
       tracks.add(MediaTrack(
@@ -357,6 +424,41 @@ class MusicImportService {
     );
   }
 
+  static Map<String, dynamic>? _map(dynamic value) {
+    return value is Map ? Map<String, dynamic>.from(value) : null;
+  }
+
+  /// Handles `entity.trackList`, `trackList.items`, legacy `tracks.items`, and
+  /// the nested `state.data.entity.trackList` representations Spotify has used.
+  static List<dynamic> _extractTrackItems(
+    Map<String, dynamic> root,
+    Map<String, dynamic> data,
+  ) {
+    final candidates = <dynamic>[
+      root['trackList'],
+      root['tracks'],
+      root['items'],
+      data['trackList'],
+      data['tracks'],
+      _map(data['entity'])?['trackList'],
+    ];
+    for (final candidate in candidates) {
+      final items = _itemsFrom(candidate);
+      if (items.isNotEmpty) return items;
+    }
+    return const [];
+  }
+
+  static List<dynamic> _itemsFrom(dynamic value, {int depth = 0}) {
+    if (value is List) return List<dynamic>.from(value);
+    if (value is! Map || depth > 3) return const [];
+    for (final key in const ['items', 'tracks', 'trackList', 'entries']) {
+      final items = _itemsFrom(value[key], depth: depth + 1);
+      if (items.isNotEmpty) return items;
+    }
+    return const [];
+  }
+
   static String? _string(Map<String, dynamic> map, List<String> keys) {
     for (final key in keys) {
       final value = map[key];
@@ -369,31 +471,48 @@ class MusicImportService {
     final artists = map['artists'];
     if (artists is List) {
       final names = artists
-          .whereType<Map>()
-          .map((a) => a['name']?.toString() ?? '')
+          .map(_map)
+          .whereType<Map<String, dynamic>>()
+          .map((artist) => _string(artist, ['name', 'title']) ?? '')
           .where((name) => name.isNotEmpty)
           .toList();
       if (names.isNotEmpty) return names.join(', ');
     }
-    final owner = map['owner'];
-    if (owner is Map && owner['name'] is String) return owner['name'] as String;
-    return _string(map, ['subtitle', 'artist']);
+    if (artists is Map) {
+      final items = _itemsFrom(artists);
+      final names = items
+          .map(_map)
+          .whereType<Map<String, dynamic>>()
+          .map((artist) => _string(artist, ['name', 'title']) ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList();
+      if (names.isNotEmpty) return names.join(', ');
+    }
+    final owner = _map(map['owner']);
+    if (owner != null) return _string(owner, ['name', 'displayName']);
+    return _string(map, ['subtitle', 'artist', 'artistName']);
   }
 
   static String? _image(Map<String, dynamic> map) {
     final candidates = <dynamic>[
-      map['coverArt'] is Map ? map['coverArt']['sources'] : null,
-      map['visualIdentity'] is Map ? map['visualIdentity']['image'] : null,
+      _map(map['coverArt'])?['sources'],
+      _map(map['visualIdentity'])?['image'],
       map['images'],
-      map['visual'] is Map ? map['visual']['url'] : null,
+      _map(map['visual'])?['url'],
+      map['image'],
+      map['artworkUrl'],
     ];
     for (final value in candidates) {
       if (value is String && value.isNotEmpty) return value;
+      if (value is Map) {
+        final url = value['url'];
+        if (url is String && url.isNotEmpty) return url;
+      }
       if (value is List) {
         for (final source in value) {
-          if (source is Map && source['url'] is String) {
-            return source['url'] as String;
-          }
+          final sourceMap = _map(source);
+          final url = sourceMap?['url'];
+          if (url is String && url.isNotEmpty) return url;
         }
       }
     }
@@ -409,13 +528,26 @@ class MusicImportService {
   static Duration _duration(dynamic value) {
     if (value is num) return Duration(milliseconds: value.toInt());
     if (value is String) {
-      final seconds = double.tryParse(value);
-      if (seconds != null) {
-        return Duration(milliseconds: (seconds * 1000).round());
+      final trimmed = value.trim();
+      final numeric = double.tryParse(trimmed);
+      if (numeric != null) {
+        // Embed durations are milliseconds; very small numeric strings occur
+        // only in legacy second-based values.
+        final milliseconds = numeric > 1000 ? numeric : numeric * 1000;
+        return Duration(milliseconds: milliseconds.round());
+      }
+      final match = RegExp(r'^(\d+):(\d{1,2})$').firstMatch(trimmed);
+      if (match != null) {
+        final seconds =
+            int.parse(match.group(1)!) * 60 + int.parse(match.group(2)!);
+        return Duration(seconds: seconds);
       }
     }
     return Duration.zero;
   }
 
-  void close() => _dio.close(force: true);
+  void close() {
+    _dio.close(force: true);
+    _catalog.close();
+  }
 }

@@ -6,14 +6,14 @@
   "isDark": true,
   "colors": {
     "background": "#000000",
-    "surface": "#0A0A0A",
-    "surfaceGlass": "#440A0A0A",
-    "primary": "#E2E8F0",
-    "secondary": "#94A3B8",
-    "accent": "#F59E0B",
+    "surface": "#121212",
+    "surfaceGlass": "#E6121212",
+    "primary": "#8B5CF6",
+    "secondary": "#5EEAD4",
+    "accent": "#F0B35A",
     "textPrimary": "#FFFFFF",
-    "textSecondary": "#64748B",
-    "border": "#1E293B"
+    "textSecondary": "#B3B3B3",
+    "border": "#2A2A2A"
   },
   "styling": {
     "borderRadius": 20.0,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+import '../../extractor/models/media_track.dart';
 import '../../lyrics/presentation/karaoke_lyrics_view.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -8,6 +9,7 @@ import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'playback_controls.dart';
 import 'player_state_provider.dart';
+import 'spotify_track_tile.dart';
 
 class FullscreenPlayer extends ConsumerStatefulWidget {
   final HookTheme theme;
@@ -23,6 +25,47 @@ class FullscreenPlayer extends ConsumerStatefulWidget {
 
 class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
   bool _showLyrics = false;
+  bool _isChangingTrack = false;
+  double _horizontalDragDistance = 0;
+  int _swipeDirection = -1;
+
+  String _trackKey(MediaTrack? track) {
+    if (track == null) return 'empty';
+    return '${track.source.name}:${track.id}';
+  }
+
+  void _onHorizontalDragStart(DragStartDetails details) {
+    _horizontalDragDistance = 0;
+  }
+
+  void _onHorizontalDragUpdate(DragUpdateDetails details) {
+    _horizontalDragDistance += details.primaryDelta ?? 0;
+  }
+
+  Future<void> _onHorizontalDragEnd(DragEndDetails details) async {
+    if (_isChangingTrack) return;
+
+    final velocity = details.primaryVelocity ?? 0;
+    final movesToNext = _horizontalDragDistance < -56 || velocity < -520;
+    final movesToPrevious = _horizontalDragDistance > 56 || velocity > 520;
+    if (!movesToNext && !movesToPrevious) return;
+
+    setState(() {
+      _isChangingTrack = true;
+      _swipeDirection = movesToNext ? -1 : 1;
+    });
+
+    final player = ref.read(audioPlayerServiceProvider);
+    if (movesToNext) {
+      await player.next();
+    } else {
+      await player.previousTrack();
+    }
+
+    if (mounted) {
+      setState(() => _isChangingTrack = false);
+    }
+  }
 
   void _showQueueSheet(BuildContext context) {
     showModalBottomSheet(
@@ -156,83 +199,14 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                         ),
                         itemBuilder: (context, i) {
                           final track = queue[i];
-                          final isCurrent = i == currentIndex;
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          return SpotifyTrackTile(
+                            theme: widget.theme,
+                            track: track,
+                            isCurrent: i == currentIndex,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 6,
                             ),
-                            tileColor: isCurrent
-                                ? widget.theme.colors.primary
-                                    .withValues(alpha: 0.12)
-                                : null,
-                            leading: Stack(
-                              children: [
-                                TrackArtwork(
-                                  url: track.artworkUrl,
-                                  size: 44,
-                                  borderRadius: BorderRadius.circular(10),
-                                  placeholderColor: widget.theme.colors.surface,
-                                  iconColor: widget.theme.colors.textSecondary,
-                                ),
-                                if (isCurrent)
-                                  Positioned.fill(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.black
-                                            .withValues(alpha: 0.35),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Center(
-                                        child: Icon(
-                                          MingCuteIcons.mgc_sound_line_fill,
-                                          size: 20,
-                                          color: widget.theme.colors.accent,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            title: Text(
-                              track.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontWeight: isCurrent
-                                    ? FontWeight.bold
-                                    : FontWeight.w500,
-                                color: isCurrent
-                                    ? widget.theme.colors.accent
-                                    : widget.theme.colors.textPrimary,
-                                fontSize: 14,
-                              ),
-                            ),
-                            subtitle: Text(
-                              track.artist,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: widget.theme.colors.textSecondary,
-                                fontSize: 12,
-                              ),
-                            ),
-                            trailing: isCurrent
-                                ? Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: widget.theme.colors.accent
-                                          .withValues(alpha: 0.15),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      MingCuteIcons.mgc_volume_line,
-                                      size: 16,
-                                      color: widget.theme.colors.accent,
-                                    ),
-                                  )
-                                : null,
                             onTap: () {
                               ref.read(queueProvider.notifier).playAt(i);
                               Navigator.of(ctx).pop();
@@ -284,7 +258,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                   // Header
                   Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -305,45 +279,16 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ),
-                        // Frosted pill badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: cardBorder,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: colors.primary,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'СЕЙЧАС ИГРАЕТ',
-                                style: TextStyle(
-                                  letterSpacing: 1.6,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        const Spacer(),
                         Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             // Favorite toggle with AnimatedSwitcher
                             IconButton(
+                              constraints: const BoxConstraints.tightFor(
+                                width: 38,
+                                height: 48,
+                              ),
                               tooltip: isFavorite
                                   ? 'Убрать из избранного'
                                   : 'Добавить в избранное',
@@ -368,12 +313,20 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       .toggleFavorite(track),
                             ),
                             IconButton(
+                              constraints: const BoxConstraints.tightFor(
+                                width: 38,
+                                height: 48,
+                              ),
                               tooltip: 'Очередь',
                               icon: Icon(MingCuteIcons.mgc_playlist_line,
                                   color: iconColor, size: 22),
                               onPressed: () => _showQueueSheet(context),
                             ),
                             IconButton(
+                              constraints: const BoxConstraints.tightFor(
+                                width: 38,
+                                height: 48,
+                              ),
                               tooltip: 'Запустить волну',
                               icon: Icon(
                                 MingCuteIcons.mgc_sound_line_fill,
@@ -389,6 +342,10 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                     },
                             ),
                             IconButton(
+                              constraints: const BoxConstraints.tightFor(
+                                width: 38,
+                                height: 48,
+                              ),
                               tooltip:
                                   _showLyrics ? 'Обложка' : 'Текст караоке',
                               icon: Icon(
@@ -410,104 +367,12 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                     ),
                   ),
 
-                  // Center: Album Art OR Lyrics View
                   Expanded(
-                    child: track == null
-                        ? _buildEmptyPlayerState()
-                        : _showLyrics
-                            ? KaraokeLyricsView(theme: widget.theme)
-                            : Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 32.0, vertical: 16.0),
-                                  child: Hero(
-                                    tag: 'current_artwork',
-                                    child: Container(
-                                      constraints: const BoxConstraints(
-                                          maxHeight: 340, maxWidth: 340),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(
-                                            (borderRadius * 1.2).clamp(18, 28)),
-                                        border: Border.all(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.12),
-                                          width: 1.2,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black
-                                                .withValues(alpha: 0.45),
-                                            blurRadius: 36,
-                                            spreadRadius: 2,
-                                            offset: const Offset(0, 18),
-                                          ),
-                                          BoxShadow(
-                                            color: colors.primary
-                                                .withValues(alpha: 0.18),
-                                            blurRadius: 44,
-                                            spreadRadius: 0,
-                                            offset: const Offset(0, 6),
-                                          ),
-                                        ],
-                                        image: track.artworkUrl.isNotEmpty
-                                            ? DecorationImage(
-                                                image: NetworkImage(
-                                                  TrackArtwork.getHighResUrl(
-                                                      track.artworkUrl),
-                                                ),
-                                                fit: BoxFit.cover,
-                                                filterQuality:
-                                                    FilterQuality.high,
-                                              )
-                                            : null,
-                                        color: colors.surface,
-                                      ),
-                                      child: track.artworkUrl.isEmpty
-                                          ? Icon(
-                                              MingCuteIcons.mgc_music_fill,
-                                              size: 96,
-                                              color: colors.textSecondary
-                                                  .withValues(alpha: 0.6),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                  ),
-
-                  // Track Title & Artist
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 28, vertical: 10),
-                    child: Column(
-                      children: [
-                        Text(
-                          track?.title ?? 'Очередь пуста',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          track?.artist ??
-                              'Найдите музыку и начните воспроизведение',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: textSecondary,
-                          ),
-                        ),
-                      ],
+                    child: _buildSwipeableTrackStage(
+                      track: track,
+                      borderRadius: borderRadius,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
                   ),
 
@@ -522,6 +387,175 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildSwipeableTrackStage({
+    required MediaTrack? track,
+    required double borderRadius,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    final trackKey = _trackKey(track);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragStart: _onHorizontalDragStart,
+      onHorizontalDragUpdate: _onHorizontalDragUpdate,
+      onHorizontalDragEnd: _onHorizontalDragEnd,
+      child: Column(
+        children: [
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 340),
+              reverseDuration: const Duration(milliseconds: 260),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                final isIncoming = child.key == ValueKey(trackKey);
+                final offset = isIncoming
+                    ? Offset(-_swipeDirection * 0.16, 0)
+                    : Offset(_swipeDirection * 0.16, 0);
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: offset,
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey(trackKey),
+                child: track == null
+                    ? _buildEmptyPlayerState()
+                    : _showLyrics
+                        ? KaraokeLyricsView(theme: widget.theme)
+                        : _buildArtwork(track, borderRadius),
+              ),
+            ),
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              final isIncoming = child.key == ValueKey('details:$trackKey');
+              final offset = isIncoming
+                  ? Offset(-_swipeDirection * 0.1, 0)
+                  : Offset(_swipeDirection * 0.1, 0);
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: offset,
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: KeyedSubtree(
+              key: ValueKey('details:$trackKey'),
+              child: _buildTrackDetails(track, textPrimary, textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildArtwork(MediaTrack track, double borderRadius) {
+    final colors = widget.theme.colors;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+        child: Hero(
+          tag: 'current_artwork_${_trackKey(track)}',
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 340, maxWidth: 340),
+            decoration: BoxDecoration(
+              borderRadius:
+                  BorderRadius.circular((borderRadius * 1.2).clamp(18, 28)),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  blurRadius: 36,
+                  spreadRadius: 2,
+                  offset: const Offset(0, 18),
+                ),
+                BoxShadow(
+                  color: colors.primary.withValues(alpha: 0.18),
+                  blurRadius: 44,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+              image: track.artworkUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(
+                        TrackArtwork.getHighResUrl(track.artworkUrl),
+                      ),
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.high,
+                    )
+                  : null,
+              color: colors.surface,
+            ),
+            child: track.artworkUrl.isEmpty
+                ? Icon(
+                    MingCuteIcons.mgc_music_fill,
+                    size: 96,
+                    color: colors.textSecondary.withValues(alpha: 0.6),
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTrackDetails(
+    MediaTrack? track,
+    Color textPrimary,
+    Color textSecondary,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+      child: Column(
+        children: [
+          Text(
+            track?.title ?? 'Очередь пуста',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+              color: textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            track?.artist ?? 'Найдите музыку и начните воспроизведение',
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }

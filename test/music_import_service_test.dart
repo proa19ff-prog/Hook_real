@@ -60,9 +60,56 @@ Rise,MADKID,RISE
     expect(tracks.first.artist, 'Post Malone, Swae Lee');
   });
 
-  test(
-      'TrackArtwork.getHighResUrl upgrades low-res thumbnails to crystal clear resolution',
-      () {
+  test('parses modern Spotify entity.trackList embed data', () {
+    final collection = MusicImportService.parseSpotifyData(
+      {
+        'entity': {
+          'name': 'Мой микс',
+          'owner': {'name': 'Hook User'},
+          'coverArt': {
+            'sources': [
+              {'url': 'https://example.com/cover.jpg'},
+            ],
+          },
+          'trackList': {
+            'items': [
+              {
+                'track': {
+                  'uri': 'spotify:track:abc123',
+                  'name': 'Sunflower (Spider-Man)',
+                  'artists': [
+                    {'name': 'Post Malone'},
+                    {'name': 'Swae Lee'},
+                  ],
+                  'duration': 158000,
+                },
+              },
+              {
+                'track': {
+                  'uri': 'spotify:track:def456',
+                  'title': 'Rise',
+                  'artists': [
+                    {'name': 'MADKID'},
+                  ],
+                  'duration': '3:42',
+                },
+              },
+            ],
+          },
+        },
+      },
+      type: 'playlist',
+      id: 'playlist-id',
+    );
+
+    expect(collection.title, 'Мой микс');
+    expect(collection.tracks, hasLength(2));
+    expect(collection.tracks.first.id, 'sp_abc123');
+    expect(collection.tracks.first.artist, 'Post Malone, Swae Lee');
+    expect(collection.tracks.last.duration,
+        const Duration(minutes: 3, seconds: 42));
+  });
+  test('TrackArtwork upgrades known low-resolution URLs', () {
     // SoundCloud
     final scLow =
         'https://i1.sndcdn.com/artworks-000123456789-abcdef-large.jpg';

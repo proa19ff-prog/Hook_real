@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
+import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../import/presentation/import_bottom_sheet.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
+import 'playlist_detail_screen.dart';
 import 'library_provider.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
@@ -35,12 +37,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes;
-    final seconds = d.inSeconds % 60;
-    return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 
   String _formatBytes(int bytes) {
@@ -401,9 +397,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       color: colors.textSecondary, size: 20),
                   onSelected: (val) {
                     if (val == 'delete') {
-                      ref
-                          .read(playlistsProvider.notifier)
-                          .deletePlaylist(name);
+                      ref.read(playlistsProvider.notifier).deletePlaylist(name);
                     }
                   },
                   itemBuilder: (ctx) => [
@@ -424,7 +418,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ],
             ),
             onTap: () {
-              queueNotifier.playQueue(tracks);
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => PlaylistDetailScreen(
+                    theme: widget.theme,
+                    name: name,
+                    tracks: tracks,
+                  ),
+                ),
+              );
             },
           ),
         );
@@ -525,10 +527,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   label: const Text('Перемешать'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: colors.textPrimary,
-                    side: BorderSide(
-                        color: colors.border.withValues(alpha: 0.5)),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 9),
+                    side:
+                        BorderSide(color: colors.border.withValues(alpha: 0.5)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -555,145 +557,16 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               final isCurrent = track.id == currentTrackId &&
                   track.source == currentTrackSource;
 
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 2),
-                decoration: BoxDecoration(
-                  color: isCurrent
-                      ? colors.primary.withValues(alpha: 0.1)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  leading: Stack(
-                    children: [
-                      TrackArtwork(
-                        url: track.artworkUrl,
-                        size: 48,
-                        borderRadius: BorderRadius.circular(10),
-                        placeholderColor: colors.surface,
-                        iconColor: colors.textSecondary,
-                      ),
-                      if (isCurrent)
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.35),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                MingCuteIcons.mgc_sound_line_fill,
-                                size: 20,
-                                color: colors.accent,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  title: Text(
-                    track.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
-                      color: isCurrent ? colors.accent : colors.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
-                  subtitle: Row(
-                    children: [
-                      Builder(builder: (_) {
-                        final (String label, Color bg, Color fg) = switch (
-                            track.source) {
-                          TrackSource.soundcloud => (
-                            'SC',
-                            Colors.orange,
-                            Colors.orangeAccent
-                          ),
-                          TrackSource.spotify => (
-                            'SP',
-                            const Color(0xFF1DB954),
-                            const Color(0xFF1DB954)
-                          ),
-                          TrackSource.youtube => (
-                            'YT',
-                            Colors.red,
-                            Colors.redAccent
-                          ),
-                          TrackSource.local => (
-                            'LO',
-                            Colors.blueGrey,
-                            Colors.blueGrey
-                          ),
-                        };
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: bg.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 9,
-                              color: fg,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
-                      }),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          track.artist,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: colors.textSecondary,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _formatDuration(track.duration),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          ref.watch(favoritesProvider).any((t) =>
-                                  t.id == track.id && t.source == track.source)
-                              ? MingCuteIcons.mgc_heart_fill
-                              : MingCuteIcons.mgc_heart_line,
-                          color: ref.watch(favoritesProvider).any((t) =>
-                                  t.id == track.id && t.source == track.source)
-                              ? Colors.redAccent
-                              : colors.textSecondary.withValues(alpha: 0.6),
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          ref
-                              .read(favoritesProvider.notifier)
-                              .toggleFavorite(track);
-                        },
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    ref.read(queueProvider.notifier).playTrack(track);
-                  },
-                ),
+              return SpotifyTrackTile(
+                theme: widget.theme,
+                track: track,
+                isCurrent: isCurrent,
+                onTap: () {
+                  ref.read(queueProvider.notifier).playQueue(
+                        tracks,
+                        startIndex: index,
+                      );
+                },
               );
             },
           ),
