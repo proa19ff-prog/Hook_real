@@ -1,8 +1,21 @@
 enum TrackSource {
-  youtube,
   soundcloud,
   local,
+  // Retained for saved libraries: this is catalog metadata, not Spotify audio.
   spotify,
+  // A distinct key keeps old `youtube` catalog entries on the migration path.
+  youtubeMusic,
+  audius;
+
+  String get label => switch (this) {
+        soundcloud => 'SoundCloud',
+        local => 'На устройстве',
+        spotify => 'Каталог',
+        youtubeMusic => 'YouTube',
+        audius => 'Audius',
+      };
+
+  bool get isCatalog => this == spotify;
 }
 
 class MediaTrack {
@@ -79,7 +92,8 @@ class MediaTrack {
       artworkUrl: json['artworkUrl'] as String? ?? '',
       source: TrackSource.values.firstWhere(
         (e) => e.name == json['source'],
-        orElse: () => TrackSource.youtube,
+        // Legacy `youtube` entries were catalog records, not playable video IDs.
+        orElse: () => TrackSource.spotify,
       ),
       streamUrl: json['streamUrl'] as String?,
       isCached: json['isCached'] as bool? ?? false,

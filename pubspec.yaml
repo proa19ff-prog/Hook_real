@@ -4,7 +4,8 @@ publish_to: "none"
 version: 0.1.0+1
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
@@ -18,13 +19,16 @@ dependencies:
   audio_service: ^0.18.19
   audio_session: ^0.1.21
 
-  # Zero-Backend Stream Extraction & Network
+  # Public stream sources & network (no private backend or embedded credentials)
   dio: ^5.7.0
+  youtube_explode_dart: ^3.1.0
+  http: ^1.2.2
 
   # Theming, Shaders & Dynamic UI
   palette_generator: ^0.3.3+4
   google_fonts: ^6.2.1
   flutter_animate: ^4.5.2
+  lottie: ^3.8.1
 
   # Storage & System
   path_provider: ^2.1.4
@@ -51,6 +55,7 @@ flutter:
   # source, so it is not bundled into the app.
   assets:
     - assets/themes/
+    - assets/animations/
 
   shaders:
     - assets/shaders/mesh_gradient.frag

@@ -18,6 +18,7 @@ class SpotifyTrackTile extends ConsumerWidget {
   final VoidCallback? onFindArtist;
   final bool showDuration;
   final bool showArtwork;
+  final bool showSource;
   final bool isCurrent;
   final EdgeInsetsGeometry padding;
 
@@ -29,6 +30,7 @@ class SpotifyTrackTile extends ConsumerWidget {
     this.onFindArtist,
     this.showDuration = true,
     this.showArtwork = true,
+    this.showSource = false,
     this.isCurrent = false,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
   });
@@ -131,7 +133,10 @@ class SpotifyTrackTile extends ConsumerWidget {
                     Text(
                       [
                         track.artist,
-                        if (track.album?.isNotEmpty == true) track.album!,
+                        if (showSource)
+                          track.source.label
+                        else if (track.album?.isNotEmpty == true)
+                          track.album!,
                       ].where((part) => part.isNotEmpty).join(' • '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

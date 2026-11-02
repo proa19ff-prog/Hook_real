@@ -23,7 +23,7 @@ class TrackArtwork extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
   });
 
-  /// Upgrades any thumbnail URL (SoundCloud / YouTube) to its highest resolution.
+  /// Upgrades SoundCloud and catalog thumbnails to their highest resolution.
   static String getHighResUrl(String? rawUrl) {
     if (rawUrl == null || rawUrl.isEmpty) return '';
     var result = rawUrl;
@@ -39,13 +39,6 @@ class TrackArtwork extends StatelessWidget {
     // Apple / iTunes / Spotify catalog: upgrade 100x100 to 600x600
     if (result.contains('mzstatic.com')) {
       result = result.replaceAll('100x100bb', '600x600bb');
-    }
-    // YouTube: upgrade low-res thumbnails to maxresdefault
-    if (result.contains('ytimg.com')) {
-      result = result.replaceFirst(
-        RegExp(r'(mqdefault|hqdefault|sddefault|default)\.jpg'),
-        'maxresdefault.jpg',
-      );
     }
     return result;
   }

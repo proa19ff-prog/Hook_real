@@ -3,59 +3,77 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../import/presentation/import_bottom_sheet.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
-import '../../theme_engine/presentation/glass_card.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
+import '../data/lyrics_search_service.dart';
+
+final lyricsSearchServiceProvider = Provider<LyricsSearchService>((ref) {
+  final service = LyricsSearchService();
+  ref.onDispose(service.close);
+  return service;
+});
+
+enum MusicSearchMode { tracks, lyrics }
 
 class SearchScreen extends ConsumerStatefulWidget {
   final HookTheme theme;
   final int focusRequestId;
-
-  const SearchScreen({
-    super.key,
-    required this.theme,
-    required this.focusRequestId,
-  });
+  const SearchScreen(
+      {super.key, required this.theme, required this.focusRequestId});
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
 }
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
-  static const _debounce = Duration(milliseconds: 400);
-
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final _searchController = TextEditingController();
+  final _focusNode = FocusNode();
   Timer? _debounceTimer;
-  List<MediaTrack> _searchResults = [];
+  List<MediaTrack> _results = const [];
+  Map<MediaTrack, String> _snippets = const {};
+  MusicSearchMode _mode = MusicSearchMode.tracks;
+  TrackSource? _source;
   bool _isLoading = false;
   bool _hasSearched = false;
-  String? _searchError;
-  String _lastQuery = '';
-  // Spotify (iTunes catalog) is the default source; SoundCloud backs playback.
-  String _activeSourceFilter = 'spotify'; // 'all', 'soundcloud', 'spotify'
-  int _searchRequestId = 0;
+  String? _error;
+  int _requestId = 0;
 
   @override
   void didUpdateWidget(covariant SearchScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusRequestId == oldWidget.focusRequestId) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focusNode.requestFocus();
-    });
+    if (widget.focusRequestId != oldWidget.focusRequestId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focusNode.requestFocus();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _requestId++;
     _debounceTimer?.cancel();
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _clear({bool keepText = false}) {
+    _debounceTimer?.cancel();
+    if (!keepText) _searchController.clear();
+    setState(() {
+      _requestId++;
+      _results = const [];
+      _snippets = const {};
+      _isLoading = false;
+      _hasSearched = false;
+      _error = null;
+    });
   }
 
   void _onQueryChanged(String value) {
@@ -64,895 +82,531 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _clear(keepText: true);
       return;
     }
-    _debounceTimer = Timer(_debounce, () => _performSearch(value));
-  }
-
-  void _clear({bool keepText = false}) {
-    _debounceTimer?.cancel();
-    if (!keepText) _searchController.clear();
+    // Invalidate immediately, not after debounce: an older network response
+    // must not replace the text the listener is currently typing.
     setState(() {
-      _searchRequestId++;
-      _searchResults = [];
-      _hasSearched = false;
-      _isLoading = false;
-      _searchError = null;
-      _lastQuery = '';
+      _requestId++;
+      _results = const [];
+      _snippets = const {};
+      _isLoading = true;
+      _hasSearched = true;
+      _error = null;
     });
+    _debounceTimer =
+        Timer(const Duration(milliseconds: 400), () => _search(value));
   }
 
-  Future<void> _performSearch(String query, {bool force = false}) async {
+  Future<void> _search(String value) async {
     _debounceTimer?.cancel();
-    final normalizedQuery = query.trim();
-    if (normalizedQuery.isEmpty) return;
-    if (!force && normalizedQuery == _lastQuery && _searchError == null) {
-      return;
-    }
-    _lastQuery = normalizedQuery;
-
-    // A newer request supersedes the one in flight instead of being dropped.
-    final requestId = ++_searchRequestId;
+    final query = value.trim();
+    if (query.isEmpty) return;
+    final id = ++_requestId;
+    final mode = _mode;
+    final source = _source;
     setState(() {
       _isLoading = true;
       _hasSearched = true;
-      _searchError = null;
+      _error = null;
     });
-
-    final resolver = ref.read(streamResolverProvider);
-    final includeSpotify =
-        _activeSourceFilter == 'all' || _activeSourceFilter == 'spotify';
-    final includeSc =
-        _activeSourceFilter == 'all' || _activeSourceFilter == 'soundcloud';
-
     try {
-      final results = await resolver.search(
-        query: normalizedQuery,
-        includeSoundCloud: includeSc,
-        includeSpotify: includeSpotify,
-      );
-
-      if (mounted && requestId == _searchRequestId) {
-        setState(() {
-          _searchResults = results;
-          _isLoading = false;
-        });
-        // The top results are what users tap; resolving them now leaves only
-        // buffering for the tap.
-        ref.read(audioPlayerServiceProvider).prefetch(results.take(2));
+      List<MediaTrack> results;
+      var snippets = <MediaTrack, String>{};
+      if (mode == MusicSearchMode.lyrics) {
+        final hits = await ref.read(lyricsSearchServiceProvider).search(query);
+        results = hits.map((hit) => hit.track).toList(growable: false);
+        snippets = {for (final hit in hits) hit.track: hit.snippet};
+      } else {
+        results = await ref.read(streamResolverProvider).search(
+              query: query,
+              sources: source == null ? null : {source},
+            );
       }
-    } catch (e) {
-      if (mounted && requestId == _searchRequestId) {
-        setState(() {
-          _isLoading = false;
-          _searchError =
-              'Не удалось выполнить поиск. Проверьте соединение и повторите попытку.';
-        });
-      }
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _results = results;
+        _snippets = snippets;
+        _isLoading = false;
+      });
+      // Do not resolve several expensive catalogs on every keystroke. Only the
+      // leading result is warmed; the queue prefetch handles subsequent songs.
+      ref.read(audioPlayerServiceProvider).prefetch(results.take(1));
+    } catch (_) {
+      if (!mounted || id != _requestId) return;
+      setState(() {
+        _isLoading = false;
+        _error = mode == MusicSearchMode.lyrics
+            ? 'Сервис поиска по тексту сейчас недоступен. Попробуйте позже или ищите по названию.'
+            : 'Не удалось выполнить поиск. Проверьте соединение и попробуйте ещё раз.';
+      });
     }
+  }
+
+  void _changeMode(MusicSearchMode mode) {
+    if (mode == _mode) return;
+    _clear(keepText: true);
+    setState(() => _mode = mode);
+    if (_searchController.text.trim().isNotEmpty) {
+      _search(_searchController.text);
+    }
+  }
+
+  void _quickSearch(String value,
+      {MusicSearchMode mode = MusicSearchMode.tracks}) {
+    _searchController.text = value;
+    setState(() {
+      _mode = mode;
+      _source = null;
+    });
+    _search(value);
+    _focusNode.unfocus();
+  }
+
+  void _play(int index) {
+    _focusNode.unfocus();
+    ref.read(queueProvider.notifier).playQueue(_results, startIndex: index);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = widget.theme.colors;
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        bottom: false,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => _focusNode.unfocus(),
-          child: Column(
-            children: [
-              // Page Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          bottom: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 760),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Поиск',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.8,
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                    if (_isLoading)
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: colors.primary,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 18, 20, 16),
+                      child: Row(children: [
+                        Expanded(
+                            child: Text('Найти своё.',
+                                style: TextStyle(
+                                  color: colors.textPrimary,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -1.2,
+                                ))),
+                        IconButton(
+                          tooltip: 'Импорт музыки',
+                          onPressed: () =>
+                              ImportBottomSheet.show(context, widget.theme),
+                          icon: Icon(MingCuteIcons.mgc_link_line,
+                              color: colors.textSecondary),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                child: HookGlassCard(
-                  theme: widget.theme,
-                  elevation: 1.0,
-                  borderRadius: BorderRadius.circular(18),
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _focusNode,
-                    style: TextStyle(
-                      color: colors.textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
+                      ]),
                     ),
-                    cursorColor: colors.primary,
-                    decoration: InputDecoration(
-                      hintText: 'Трек, артист или альбом...',
-                      hintStyle: TextStyle(
-                        color: colors.textSecondary.withValues(alpha: 0.7),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      prefixIcon: Icon(
-                        MingCuteIcons.mgc_search_2_line,
-                        color: colors.primary,
-                        size: 22,
-                      ),
-                      suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: _searchController,
-                        builder: (context, value, _) => value.text.isEmpty
-                            ? const SizedBox.shrink()
-                            : IconButton(
-                                tooltip: 'Очистить',
-                                icon: Icon(
-                                  MingCuteIcons.mgc_close_line,
-                                  color: colors.textSecondary,
-                                  size: 20,
-                                ),
-                                onPressed: _clear,
-                              ),
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: TextField(
+                        key: const ValueKey('music-search-field'),
+                        controller: _searchController,
+                        focusNode: _focusNode,
+                        maxLength: 200,
+                        style:
+                            TextStyle(color: colors.textPrimary, fontSize: 16),
+                        cursorColor: colors.primary,
+                        decoration: InputDecoration(
+                          counterText: '',
+                          hintText: _mode == MusicSearchMode.lyrics
+                              ? 'Слова, которые запомнились…'
+                              : 'Трек, артист — можно по-русски',
+                          hintStyle: TextStyle(
+                              color: colors.textSecondary, fontSize: 14),
+                          filled: true,
+                          fillColor: colors.surface,
+                          prefixIcon: Icon(Icons.search_rounded,
+                              color: colors.textSecondary),
+                          suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: _searchController,
+                            builder: (_, value, __) => value.text.isEmpty
+                                ? const SizedBox.shrink()
+                                : IconButton(
+                                    tooltip: 'Очистить',
+                                    onPressed: _clear,
+                                    icon: Icon(Icons.close_rounded,
+                                        color: colors.textSecondary)),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none),
+                          focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                  color:
+                                      colors.primary.withValues(alpha: 0.65))),
+                        ),
+                        textInputAction: TextInputAction.search,
+                        onChanged: _onQueryChanged,
+                        onSubmitted: (value) {
+                          _search(value);
+                          _focusNode.unfocus();
+                        },
                       ),
                     ),
-                    textInputAction: TextInputAction.search,
-                    onChanged: _onQueryChanged,
-                    onSubmitted: (value) {
-                      _performSearch(value);
-                      _focusNode.unfocus();
-                    },
-                  ),
-                ),
-              ),
-
-              // Source Filter Chips
-              SizedBox(
-                height: 44,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _buildFilterChip(
-                        'spotify', 'Spotify', MingCuteIcons.mgc_music_fill),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('soundcloud', 'SoundCloud',
-                        MingCuteIcons.mgc_cloud_line),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('all', 'Все источники',
-                        MingCuteIcons.mgc_sparkles_line),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              // Linear Progress Line
-              SizedBox(
-                height: 3,
-                child: _isLoading && _searchResults.isNotEmpty
-                    ? LinearProgressIndicator(
-                        color: colors.primary,
-                        backgroundColor:
-                            colors.surfaceGlass.withValues(alpha: 0.2),
-                      )
-                    : null,
-              ),
-
-              Expanded(child: _buildBody()),
-            ],
-          ),
-        ),
-      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
+                      child: Row(children: [
+                        _modeButton(MusicSearchMode.tracks, 'Музыка',
+                            Icons.music_note_rounded),
+                        const SizedBox(width: 8),
+                        _modeButton(MusicSearchMode.lyrics, 'По тексту',
+                            Icons.lyrics_outlined),
+                      ]),
+                    ),
+                    if (_mode == MusicSearchMode.tracks)
+                      SizedBox(
+                          height: 44,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            children: [
+                              _sourceChip(null, 'Все источники'),
+                              for (final source in [
+                                TrackSource.spotify,
+                                TrackSource.youtubeMusic,
+                                TrackSource.soundcloud,
+                                TrackSource.audius
+                              ])
+                                _sourceChip(source, source.label),
+                            ],
+                          ))
+                    else
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 6, 24, 12),
+                          child: Text(
+                              'Ищем фразу в песне, а не только в названии.',
+                              style: TextStyle(
+                                  color: colors.textSecondary, fontSize: 12))),
+                    const SizedBox(height: 6),
+                    Expanded(child: _buildBody()),
+                  ]),
+            ),
+          )),
     );
+  }
+
+  Widget _modeButton(MusicSearchMode mode, String label, IconData icon) {
+    final colors = widget.theme.colors;
+    final selected = _mode == mode;
+    return Expanded(
+        child: Semantics(
+            selected: selected,
+            child: TextButton.icon(
+              onPressed: () => _changeMode(mode),
+              icon: Icon(icon, size: 18),
+              label: Text(label),
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    selected ? colors.textPrimary : colors.textSecondary,
+                backgroundColor: selected
+                    ? colors.textPrimary.withValues(alpha: 0.08)
+                    : Colors.transparent,
+                minimumSize: const Size(0, 44),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                textStyle: TextStyle(
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500),
+              ),
+            )));
+  }
+
+  Widget _sourceChip(TrackSource? source, String label) {
+    final colors = widget.theme.colors;
+    final selected = source == _source;
+    return Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: ChoiceChip(
+          label: Text(label),
+          selected: selected,
+          showCheckmark: false,
+          onSelected: (_) {
+            if (selected) return;
+            _clear(keepText: true);
+            setState(() => _source = source);
+            if (_searchController.text.trim().isNotEmpty) {
+              _search(_searchController.text);
+            }
+          },
+          selectedColor: colors.textPrimary,
+          backgroundColor: Colors.transparent,
+          side: BorderSide.none,
+          labelStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: selected ? colors.background : colors.textSecondary),
+          shape: const StadiumBorder(),
+        ));
   }
 
   Widget _buildBody() {
-    if (_isLoading && _searchResults.isEmpty) {
+    final colors = widget.theme.colors;
+    if (_isLoading) {
       return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(color: widget.theme.colors.primary),
-            const SizedBox(height: 16),
-            Text(
-              'Поиск музыки...',
-              style: TextStyle(
-                color: widget.theme.colors.textSecondary,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      );
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+                strokeWidth: 2, color: colors.primary)),
+        const SizedBox(height: 16),
+        Text(
+            _mode == MusicSearchMode.lyrics
+                ? 'Ищем знакомые строки…'
+                : 'Собираем музыку из источников…',
+            style: TextStyle(color: colors.textSecondary, fontSize: 13)),
+      ]));
     }
-    if (_searchError != null) return _buildSearchError();
-    if (_searchResults.isEmpty) return _buildEmptyState();
-
+    if (_error != null || (_hasSearched && _results.isEmpty)) {
+      return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(28, 48, 28, 160),
+          child: Column(children: [
+            Icon(
+                _error != null
+                    ? Icons.wifi_off_rounded
+                    : Icons.search_off_rounded,
+                size: 38,
+                color: colors.textSecondary),
+            const SizedBox(height: 18),
+            Text(
+                _error != null ? 'Не удалось связаться' : 'Пока без совпадений',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Text(
+                _error ??
+                    (_mode == MusicSearchMode.lyrics
+                        ? 'Попробуйте другую строчку. Не все тексты есть в индексе.'
+                        : 'Уточните исполнителя или выберите другой источник. Часть сервисов может быть недоступна в вашей сети.'),
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colors.textSecondary, height: 1.5)),
+            const SizedBox(height: 16),
+            TextButton.icon(
+                onPressed: () => _search(_searchController.text),
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Повторить поиск')),
+          ]));
+    }
+    if (!_hasSearched) return _buildDiscovery();
     return ListView.builder(
       key: const ValueKey('search-results'),
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 180),
-      itemCount: _searchResults.length,
-      itemExtent: 72,
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 180),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      itemBuilder: (context, index) => SpotifyTrackTile(
-        theme: widget.theme,
-        track: _searchResults[index],
-        onTap: () {
-          _focusNode.unfocus();
-          ref
-              .read(queueProvider.notifier)
-              .playQueue(_searchResults, startIndex: index);
-        },
-        onFindArtist: () {
-          final artist = _searchResults[index].artist;
-          _searchController.text = artist;
-          _performSearch(artist, force: true);
-          _focusNode.unfocus();
-        },
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    final colors = widget.theme.colors;
-
-    if (_hasSearched) {
-      return Center(
-        key: const ValueKey('search-empty'),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 100),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: colors.surfaceGlass.withValues(alpha: 0.35),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: colors.border.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Icon(
-                  MingCuteIcons.mgc_search_3_line,
-                  size: 48,
-                  color: colors.textSecondary.withValues(alpha: 0.6),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Ничего не найдено',
+      itemCount: _results.length == 1 ? 1 : _results.length + 1,
+      itemBuilder: (_, index) {
+        if (index == 0) return _buildTopResult();
+        if (index == 1) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(12, 24, 12, 10),
+            child: Text(
+                _mode == MusicSearchMode.lyrics
+                    ? 'СОВПАДЕНИЯ ПО ТЕКСТУ'
+                    : 'ТРЕКИ',
                 style: TextStyle(
-                  color: colors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Попробуйте изменить запрос или сменить источник',
-                style: TextStyle(
-                  color: colors.textSecondary,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final favorites = ref.watch(favoritesProvider);
-    final favoriteArtists = favorites
-        .map((t) => t.artist.trim())
-        .where((a) => a.isNotEmpty)
-        .toSet()
-        .take(6)
-        .toList();
-
-    return SingleChildScrollView(
-      key: const ValueKey('search-discovery'),
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 140),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (favoriteArtists.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Icon(
-                  MingCuteIcons.mgc_heart_fill,
-                  size: 16,
-                  color: Colors.redAccent.withValues(alpha: 0.8),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Ваши любимые артисты',
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: 15,
+                    color: colors.textSecondary,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: favoriteArtists.map((artist) {
-                return _buildPillChip(
-                  label: artist,
-                  icon: MingCuteIcons.mgc_user_3_line,
-                  onTap: () {
-                    _searchController.text = artist;
-                    _performSearch(artist);
-                    _focusNode.unfocus();
-                  },
-                );
-              }).toList(),
-            ),
-          ],
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Icon(
-                MingCuteIcons.mgc_compass_line,
-                size: 16,
-                color: colors.accent,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Популярные жанры и настроения',
-                style: TextStyle(
-                  color: colors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildPillChip(
-                label: 'Импорт Spotify / список',
-                icon: MingCuteIcons.mgc_link_line,
-                onTap: () => ImportBottomSheet.show(context, widget.theme),
-              ),
-              _buildPillChip(
-                label: '🔥 В тренде',
-                onTap: () => _quickSearch('Тренды'),
-              ),
-              _buildPillChip(
-                label: '⚡ Phonk / Фонк',
-                onTap: () => _quickSearch('Phonk'),
-              ),
-              _buildPillChip(
-                label: '🎧 Chill & Relax',
-                onTap: () => _quickSearch('Chill'),
-              ),
-              _buildPillChip(
-                label: '🎸 Рок / Rock Hits',
-                onTap: () => _quickSearch('Rock'),
-              ),
-              _buildPillChip(
-                label: '🌙 Lo-Fi Beats',
-                onTap: () => _quickSearch('Lo-Fi'),
-              ),
-              _buildPillChip(
-                label: '💿 Рэп и Хип-Хоп',
-                onTap: () => _quickSearch('Hip-Hop'),
-              ),
-              _buildPillChip(
-                label: '🌌 Synthwave / Retro',
-                onTap: () => _quickSearch('Synthwave'),
-              ),
-              _buildPillChip(
-                label: '✨ Поп Хиты',
-                onTap: () => _quickSearch('Pop hits'),
-              ),
-              _buildPillChip(
-                label: '🚗 Ночной драйв',
-                onTap: () => _quickSearch('Night drive'),
-              ),
-              _buildPillChip(
-                label: '🏋️ Тренировка',
-                onTap: () => _quickSearch('Workout music'),
-              ),
-            ],
-          ),
-        ],
-      ),
+                    letterSpacing: 1.8)),
+          );
+        }
+        final trackIndex = index - 1;
+        final track = _results[trackIndex];
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SpotifyTrackTile(
+              theme: widget.theme,
+              track: track,
+              showSource: true,
+              onTap: () => _play(trackIndex),
+              onFindArtist: () => _quickSearch(track.artist)),
+          if (_snippets[track] case final String snippet)
+            Padding(
+                padding: const EdgeInsets.fromLTRB(80, 0, 24, 12),
+                child: Text(
+                  '«$snippet»',
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: colors.textSecondary, fontSize: 12, height: 1.4),
+                )),
+        ]);
+      },
     );
   }
 
-  Widget _buildPillChip({
-    required String label,
-    required VoidCallback onTap,
-    IconData? icon,
-  }) {
+  Widget _buildTopResult() {
     final colors = widget.theme.colors;
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: colors.surfaceGlass.withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: colors.border.withValues(alpha: 0.35),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 14, color: colors.primary),
-              const SizedBox(width: 6),
-            ],
-            Text(
-              label,
+    final track = _results.first;
+    return Semantics(
+        button: true,
+        label: 'Воспроизвести ${track.title}, ${track.artist}',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _play(0),
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      _mode == MusicSearchMode.lyrics
+                          ? 'ЗНАКОМЫЕ СТРОКИ'
+                          : 'ЛУЧШЕЕ СОВПАДЕНИЕ',
+                      style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.8)),
+                  const SizedBox(height: 18),
+                  Row(children: [
+                    TrackArtwork(
+                        url: track.artworkUrl,
+                        size: 84,
+                        borderRadius: BorderRadius.circular(12),
+                        placeholderColor: colors.surface,
+                        iconColor: colors.textSecondary),
+                    const SizedBox(width: 16),
+                    Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text(track.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: colors.textPrimary,
+                                  fontSize: 23,
+                                  height: 1.1,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.6)),
+                          const SizedBox(height: 6),
+                          Text(track.artist,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: colors.textSecondary, fontSize: 14)),
+                          const SizedBox(height: 8),
+                          Text(
+                              [
+                                track.source.label,
+                                SpotifyTrackTile.formatDuration(track.duration)
+                              ].where((value) => value.isNotEmpty).join(' · '),
+                              style: TextStyle(
+                                  color: colors.textSecondary, fontSize: 11)),
+                        ])),
+                    const SizedBox(width: 8),
+                    Icon(Icons.play_circle_fill_rounded,
+                        color: colors.textPrimary, size: 42),
+                  ]),
+                  if (_snippets[track] case final String snippet) ...[
+                    const SizedBox(height: 16),
+                    Text('«$snippet»',
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: 14,
+                            height: 1.5)),
+                  ],
+                  if (track.source.isCatalog) ...[
+                    const SizedBox(height: 14),
+                    Text('Полную версию подберём при воспроизведении.',
+                        style: TextStyle(
+                            color: colors.textSecondary, fontSize: 11)),
+                  ],
+                ],
+              )),
+        ));
+  }
+
+  Widget _buildDiscovery() {
+    final colors = widget.theme.colors;
+    final artists = ref
+        .watch(favoritesProvider)
+        .map((track) => track.artist.trim())
+        .where((artist) => artist.isNotEmpty)
+        .toSet()
+        .take(6);
+    return ListView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 180),
+        children: [
+          Text('Название забыли.\nМузыку — нет.',
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _quickSearch(String query) {
-    _searchController.text = query;
-    _performSearch(query);
-    _focusNode.unfocus();
-  }
-
-  Widget _buildFilterChip(String value, String label, IconData icon) {
-    final isSelected = _activeSourceFilter == value;
-    final colors = widget.theme.colors;
-
-    return Center(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () {
-          if (isSelected) return;
-          setState(() => _activeSourceFilter = value);
-          if (_searchController.text.trim().isNotEmpty) {
-            _performSearch(_searchController.text, force: true);
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-                    colors: [colors.primary, colors.accent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color:
-                isSelected ? null : colors.surfaceGlass.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected
-                  ? Colors.white.withValues(alpha: 0.25)
-                  : colors.border.withValues(alpha: 0.4),
-              width: 1,
-            ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: colors.primary.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 15,
-                color: isSelected ? Colors.white : colors.textSecondary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : colors.textSecondary,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchError() {
-    final colors = widget.theme.colors;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.redAccent.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                MingCuteIcons.mgc_wifi_off_line,
-                size: 48,
-                color: Colors.redAccent,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _searchError!,
-              textAlign: TextAlign.center,
+                fontSize: 30,
+                height: 1.12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -1,
+              )),
+          const SizedBox(height: 14),
+          Text(
+              'Имя на слух, название или строчка из песни.\nНачните так, как помните.',
               style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: 14,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () =>
-                  _performSearch(_searchController.text, force: true),
-              icon: const Icon(MingCuteIcons.mgc_refresh_3_line, size: 18),
-              label: const Text('Повторить попытку'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// One search result row. It watches only the providers it needs, so a
-/// track change or a favourite toggle rebuilds the affected rows rather
-/// than the whole screen.
-// Kept temporarily for backwards-compatible internal references while all
-// visible search rows use [SpotifyTrackTile].
-// ignore: unused_element
-class _SearchResultTile extends ConsumerWidget {
-  final HookTheme theme;
-  final MediaTrack track;
-  final VoidCallback onTap;
-
-  const _SearchResultTile({
-    required this.theme,
-    required this.track,
-    required this.onTap,
-  });
-
-  static String _formatDuration(Duration d) {
-    if (d == Duration.zero) return '';
-    final h = d.inHours;
-    final m = d.inMinutes % 60;
-    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return h > 0 ? '$h:${m.toString().padLeft(2, '0')}:$s' : '$m:$s';
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = theme.colors;
-    final isCurrent = ref.watch(
-      currentTrackProvider.select((current) => current == track),
-    );
-    final isLoading = isCurrent && ref.watch(isTrackLoadingProvider);
-    final isFav = ref.watch(
-      favoritesProvider.select((favs) => favs.contains(track)),
-    );
-    final duration = _formatDuration(track.duration);
-    final subtitle = [
-      track.artist,
-      if (duration.isNotEmpty) duration,
-    ].join(' · ');
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      decoration: BoxDecoration(
-        color: isCurrent
-            ? colors.primary.withValues(alpha: 0.12)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
-        border: isCurrent
-            ? Border.all(
-                color: colors.primary.withValues(alpha: 0.35),
-                width: 1,
-              )
-            : null,
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: onTap,
-        onLongPress: () => _showActions(context, ref, isFav),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          child: Row(
-            children: [
-              // Artwork with shadow and current track overlay
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    TrackArtwork(
-                      url: track.artworkUrl,
-                      size: 52,
-                      borderRadius: BorderRadius.circular(10),
-                      placeholderColor: colors.surface,
-                      iconColor: colors.textSecondary,
-                    ),
-                    if (isCurrent)
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: isLoading
-                              ? SizedBox(
-                                  width: 22,
-                                  height: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.2,
-                                    color: colors.accent,
-                                  ),
-                                )
-                              : Icon(
-                                  MingCuteIcons.mgc_sound_line_fill,
-                                  color: colors.accent,
-                                  size: 24,
-                                ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Track Info
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      track.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isCurrent ? colors.accent : colors.textPrimary,
-                        fontWeight:
-                            isCurrent ? FontWeight.w700 : FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        Builder(builder: (_) {
-                          final (String label, Color bg, Color fg) =
-                              switch (track.source) {
-                            TrackSource.soundcloud => (
-                                'SC',
-                                Colors.orange,
-                                Colors.orangeAccent
-                              ),
-                            TrackSource.spotify => (
-                                'SP',
-                                const Color(0xFF1DB954),
-                                const Color(0xFF1DB954)
-                              ),
-                            TrackSource.youtube => (
-                                'YT',
-                                Colors.red,
-                                Colors.redAccent
-                              ),
-                            TrackSource.local => (
-                                'LO',
-                                Colors.blueGrey,
-                                Colors.blueGrey
-                              ),
-                          };
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 1),
-                            decoration: BoxDecoration(
-                              color: bg.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                color: fg,
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: Text(
-                            subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: colors.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: 'Действия',
-                icon: Icon(MingCuteIcons.mgc_more_2_line,
-                    color: colors.textSecondary.withValues(alpha: 0.7),
-                    size: 20),
-                onPressed: () => _showActions(context, ref, isFav),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showActions(BuildContext context, WidgetRef ref, bool isFav) {
-    final colors = theme.colors;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: colors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: colors.textSecondary.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              leading: TrackArtwork(
-                url: track.artworkUrl,
-                size: 46,
-                borderRadius: BorderRadius.circular(10),
-                placeholderColor: colors.background,
-                iconColor: colors.textSecondary,
-              ),
-              title: Text(
-                track.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                  color: colors.textSecondary, fontSize: 14, height: 1.6)),
+          const SizedBox(height: 24),
+          _discoveryAction(
+              Icons.language_rounded,
+              'Мартин роз',
+              'Иностранные имена — русскими буквами',
+              () => _quickSearch('Мартин роз')),
+          _discoveryAction(Icons.lyrics_outlined, 'Помню только строчку',
+              'Найти песню по словам', () {
+            _clear();
+            setState(() => _mode = MusicSearchMode.lyrics);
+            _focusNode.requestFocus();
+          }),
+          _discoveryAction(
+              Icons.album_outlined,
+              'Sunflower',
+              'Post Malone & Swae Lee',
+              () => _quickSearch('Post Malone Swae Lee Sunflower')),
+          if (artists.isNotEmpty) ...[
+            const SizedBox(height: 28),
+            Text('ВАШИ АРТИСТЫ',
                 style: TextStyle(
-                  color: colors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
-              ),
-              subtitle: Text(
-                track.artist,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: colors.textSecondary, fontSize: 13),
-              ),
-            ),
-            Divider(
-              height: 1,
-              color: colors.border.withValues(alpha: 0.3),
-            ),
-            ListTile(
-              leading: Icon(
-                isFav
-                    ? MingCuteIcons.mgc_heart_fill
-                    : MingCuteIcons.mgc_heart_line,
-                color: isFav ? Colors.redAccent : colors.textPrimary,
-              ),
-              title: Text(
-                isFav ? 'Убрать из избранного' : 'В избранное',
-                style: TextStyle(color: colors.textPrimary),
-              ),
-              onTap: () {
-                ref.read(favoritesProvider.notifier).toggleFavorite(track);
-                Navigator.of(sheetContext).pop();
-              },
-            ),
-            ListTile(
-              leading: Icon(MingCuteIcons.mgc_playlist_line,
-                  color: colors.textPrimary),
-              title: Text('Добавить в очередь',
-                  style: TextStyle(color: colors.textPrimary)),
-              onTap: () {
-                ref.read(audioPlayerServiceProvider).addToQueue(track);
-                Navigator.of(sheetContext).pop();
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(SnackBar(
-                    content: Text('В очереди: ${track.title}'),
-                    duration: const Duration(seconds: 2),
-                  ));
-              },
-            ),
-            const SizedBox(height: 8),
+                    color: colors.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.8)),
+            const SizedBox(height: 10),
+            Wrap(spacing: 8, children: [
+              for (final artist in artists)
+                ActionChip(
+                    label: Text(artist),
+                    onPressed: () => _quickSearch(artist),
+                    backgroundColor: colors.surface,
+                    side: BorderSide.none,
+                    labelStyle: TextStyle(color: colors.textPrimary)),
+            ]),
           ],
-        ),
-      ),
+        ]);
+  }
+
+  Widget _discoveryAction(
+      IconData icon, String title, String subtitle, VoidCallback action) {
+    final colors = widget.theme.colors;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      minVerticalPadding: 12,
+      leading: Icon(icon, color: colors.textSecondary, size: 23),
+      title: Text(title,
+          style: TextStyle(
+              color: colors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w600)),
+      subtitle: Text(subtitle,
+          style: TextStyle(
+              color: colors.textSecondary, fontSize: 12, height: 1.5)),
+      trailing:
+          Icon(Icons.north_east_rounded, color: colors.textSecondary, size: 18),
+      onTap: action,
     );
   }
 }

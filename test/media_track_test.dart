@@ -28,6 +28,16 @@ void main() {
 
     expect(track.id, '42');
     expect(track.duration, const Duration(milliseconds: 900));
-    expect(track.source, TrackSource.youtube);
+    expect(track.source, TrackSource.spotify);
+  });
+  test('legacy YouTube source migrates to the catalog source', () {
+    final track = MediaTrack.fromJson(<String, dynamic>{
+      'id': 'legacy',
+      'title': 'Legacy track',
+      'artist': 'Legacy artist',
+      'source': 'youtube',
+    });
+
+    expect(track.source, TrackSource.spotify);
   });
 }

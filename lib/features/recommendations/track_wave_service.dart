@@ -23,8 +23,7 @@ class TrackWaveService {
       _resolver.relatedTracks(sourceForRelated, limit: 24),
       _resolver.search(
         query: seed.artist,
-        includeSoundCloud: false,
-        includeSpotify: true,
+        sources: {TrackSource.spotify},
       ),
     ]);
     final related = results[0];

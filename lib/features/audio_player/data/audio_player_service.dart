@@ -39,9 +39,13 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   /// Resolved stream URLs keyed by cache key, so replays and "previous" are
   /// instant. SoundCloud signs URLs for about two hours; the TTL stays well
   /// under that so a cached URL never reaches the player already expired.
-  final Map<String,
-          ({String url, Map<String, String> headers, DateTime resolvedAt})>
-      _urlCache = {};
+  final Map<String, ({ResolvedStream stream, DateTime resolvedAt})> _urlCache =
+      {};
+  final StreamController<TrackSource?> _sourceController =
+      StreamController<TrackSource?>.broadcast();
+  TrackSource? _playbackSource;
+  TrackSource? get playbackSource => _playbackSource;
+  Stream<TrackSource?> get playbackSourceStream => _sourceController.stream;
   final Map<String, Future<ResolvedStream?>> _pendingStreams = {};
   static const _urlTtl = Duration(minutes: 60);
   static const _toggleFavoriteAction = 'toggleFavorite';
@@ -182,6 +186,8 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
   void _setCurrentTrack(MediaTrack? track) {
     _currentTrack = track;
+    _playbackSource = null;
+    if (!_sourceController.isClosed) _sourceController.add(null);
     mediaItem.add(track == null ? null : _toMediaItem(track));
     _broadcastPlaybackState();
     if (!_trackController.isClosed) _trackController.add(track);
@@ -196,25 +202,22 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     final cached = _urlCache[key];
     if (cached != null &&
         DateTime.now().difference(cached.resolvedAt) < _urlTtl) {
-      return Future.value(
-        ResolvedStream(cached.url, headers: cached.headers),
-      );
+      return Future.value(cached.stream);
     }
 
     return _pendingStreams[key] ??= () async {
       try {
         final local = await _cacheManager.getLocalCachedUrl(key);
-        if (local != null) return ResolvedStream(local);
+        if (local != null) {
+          return ResolvedStream(local, source: TrackSource.local);
+        }
 
         final resolved = await _resolver
             .resolveStream(track)
             .timeout(const Duration(seconds: 25));
         if (resolved != null && !resolved.isEmpty) {
-          _urlCache[key] = (
-            url: resolved.url,
-            headers: resolved.headers,
-            resolvedAt: DateTime.now(),
-          );
+          if (_urlCache.length >= 100) _urlCache.remove(_urlCache.keys.first);
+          _urlCache[key] = (stream: resolved, resolvedAt: DateTime.now());
           return resolved;
         }
         return null;
@@ -354,10 +357,33 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
     // Show the tapped track right away; the stream resolves in the background.
     _setCurrentTrack(track);
+    var attemptedPlayback = false;
+    Object? lastError;
+
+    void reportError(Object? cause) {
+      if (requestId != _playRequestId) return;
+      _urlCache.remove(_cacheKey(track));
+      if (attemptedPlayback) _resolver.forgetMatch(track);
+      _player.stop().ignore();
+      _setCurrentTrack(null);
+      if (!_errorController.isClosed) {
+        _errorController.add(AudioPlaybackError(
+          track: track,
+          message: track.source.isCatalog
+              ? 'Полная версия не найдена в доступных источниках. Проверьте сеть или попробуйте позже.'
+              : 'Источник ${track.source.label} не смог воспроизвести трек. Проверьте сеть или попробуйте позже.',
+          cause: cause,
+        ));
+      }
+    }
 
     Future<bool> startWith(ResolvedStream? stream) async {
+      // Check before touching the native player, not only after setAudioSource:
+      // a slow previous tap must never replace the newly selected song.
+      if (requestId != _playRequestId) return true;
       final playUrl = stream?.url;
       if (playUrl == null || playUrl.isEmpty) return false;
+      attemptedPlayback = true;
 
       final isRemote =
           playUrl.startsWith('http://') || playUrl.startsWith('https://');
@@ -378,14 +404,30 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
                   : stream.headers,
             );
 
-      await _player
+      final actualDuration = await _player
           .setAudioSource(audioSource)
           .timeout(const Duration(seconds: 20));
       if (requestId != _playRequestId) return true;
+      // Metadata alone cannot prove a CDN returned the full song. Reject an
+      // obvious preview after the native decoder reports its real duration.
+      if (track.duration.inSeconds >= 60 &&
+          actualDuration != null &&
+          (actualDuration.inMilliseconds <
+                  track.duration.inMilliseconds * 0.8 ||
+              (track.source.isCatalog &&
+                  !StreamResolver.isPlayableMatch(
+                      track, track.copyWith(duration: actualDuration))))) {
+        await _player.stop();
+        return false;
+      }
+      _playbackSource =
+          stream?.source ?? (track.source.isCatalog ? null : track.source);
+      if (!_sourceController.isClosed) _sourceController.add(_playbackSource);
 
       // just_audio's play() future completes only when playback pauses or
       // ends, so it must not be awaited with a timeout.
-      unawaited(_player.play());
+      unawaited(
+          _player.play().catchError((Object error) => reportError(error)));
       unawaited(_storageService?.addToHistory(track));
       _prefetchNext();
       return true;
@@ -395,7 +437,8 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         {required Duration timeout}) async {
       try {
         return await startWith(await resolve().timeout(timeout));
-      } catch (_) {
+      } catch (error) {
+        lastError = error;
         return false;
       }
     }
@@ -406,6 +449,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       // listens; a failed first attempt is retried below anyway.
       final firstStream = _resolveStream(track).catchError((Object _) => null);
       await initialize();
+      if (requestId != _playRequestId) return;
 
       // Unload the previous track. The stream is already resolving in
       // parallel, so this wait costs nothing; the idle state also drives
@@ -420,63 +464,31 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
       if (requestId != _playRequestId) return;
 
-      // Attempt 2: the cached/signed URL may have expired (HTTP 403 at the CDN)
-      // or the matched upload is broken. Drop both so the resolver picks
-      // afresh (SoundCloud also auto-refreshes its client_id on auth failures).
-      _urlCache.remove(_cacheKey(track));
-      _resolver.forgetMatch(track);
-      if (await tryStart(() => _resolveStream(track),
-          timeout: const Duration(seconds: 25))) {
-        return;
-      }
-
-      if (requestId != _playRequestId) return;
-
-      // Attempt 3 is only safe for catalogue entries. A SoundCloud track with
-      // a broken stream must report that failure rather than silently becoming
-      // a different upload with the same words in its title.
-      if ((track.source == TrackSource.spotify ||
-              track.source == TrackSource.youtube) &&
-          await tryStart(() => _resolver.resolveSpotifyTrack(track),
-              timeout: const Duration(seconds: 40))) {
-        return;
-      }
-
-      if (requestId == _playRequestId) {
-        // Completely stop playback and reset current track so old audio doesn't linger
-        unawaited(_player.stop());
-        _setCurrentTrack(null);
-        if (!_errorController.isClosed) {
-          _errorController.add(AudioPlaybackError(
-            track: track,
-            message:
-                'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
-          ));
-        }
-      }
-    } catch (e) {
-      // A cached URL may have expired; drop it so a retry resolves afresh.
-      _urlCache.remove(_cacheKey(track));
-
-      if (requestId == _playRequestId) {
-        if (track.source != TrackSource.soundcloud &&
-            await tryStart(() => _resolver.resolveSpotifyTrack(track),
-                timeout: const Duration(seconds: 40))) {
+      if (attemptedPlayback) {
+        // Refresh only the signed URL first. Banning the matched recording at
+        // this point would lose the only original just because its URL expired.
+        _urlCache.remove(_cacheKey(track));
+        if (await tryStart(() => _resolveStream(track),
+            timeout: const Duration(seconds: 25))) {
           return;
         }
-        if (requestId == _playRequestId) {
-          unawaited(_player.stop());
-          _setCurrentTrack(null);
-          if (!_errorController.isClosed) {
-            _errorController.add(AudioPlaybackError(
-              track: track,
-              message:
-                  'Не удалось воспроизвести трек (${track.source.name.toUpperCase()})',
-              cause: e,
-            ));
+        if (requestId != _playRequestId) return;
+
+        // Only a catalog entry may switch recordings, and only after refreshing
+        // the original URL failed too. Direct uploads retain their identity.
+        if (track.source.isCatalog) {
+          _resolver.forgetMatch(track);
+          if (await tryStart(() => _resolver.resolveSpotifyTrack(track),
+              timeout: const Duration(seconds: 25))) {
+            return;
           }
         }
       }
+      // No stream at all: don't repeat the same expensive multi-source search
+      // three times. The listener can explicitly retry when their network changes.
+      reportError(lastError);
+    } catch (error) {
+      reportError(error);
     }
   }
 
@@ -559,7 +571,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   Future<void> pause() async => await _player.pause();
 
   @override
-  Future<void> stop() async => await _player.stop();
+  Future<void> stop() async {
+    _playRequestId++;
+    await _player.stop();
+  }
 
   @override
   Future<void> seek(Duration position) async => await _player.seek(position);
@@ -680,6 +695,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     await _playerStateSubscription?.cancel();
     await _errorController.close();
     await _trackController.close();
+    await _sourceController.close();
     await _queueController.close();
     await _player.dispose();
     _resolver.dispose();

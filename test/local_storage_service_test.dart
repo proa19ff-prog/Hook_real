@@ -10,7 +10,7 @@ MediaTrack _track(String id) {
     artist: 'Artist',
     duration: const Duration(minutes: 3),
     artworkUrl: '',
-    source: TrackSource.youtube,
+    source: TrackSource.spotify,
   );
 }
 
@@ -33,19 +33,19 @@ void main() {
   });
 
   test('keeps same id when tracks come from different sources', () async {
-    final youtubeTrack = _track('shared-id');
-    final soundCloudTrack = youtubeTrack.copyWith(
+    final catalogTrack = _track('shared-id');
+    final soundCloudTrack = catalogTrack.copyWith(
       source: TrackSource.soundcloud,
     );
 
-    await storage.toggleFavorite(youtubeTrack);
+    await storage.toggleFavorite(catalogTrack);
     await storage.toggleFavorite(soundCloudTrack);
     expect(
-        storage.getFavorites(), containsAll([youtubeTrack, soundCloudTrack]));
+        storage.getFavorites(), containsAll([catalogTrack, soundCloudTrack]));
 
-    await storage.addToHistory(youtubeTrack);
+    await storage.addToHistory(catalogTrack);
     await storage.addToHistory(soundCloudTrack);
-    expect(storage.getHistory(), containsAll([youtubeTrack, soundCloudTrack]));
+    expect(storage.getHistory(), containsAll([catalogTrack, soundCloudTrack]));
   });
 
   test('history moves repeated tracks to the front and caps at 100', () async {

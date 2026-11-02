@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../extractor/models/media_track.dart';
 import '../../lyrics/presentation/karaoke_lyrics_view.dart';
+import '../../lyrics/presentation/lyrics_mode_selector.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
@@ -227,6 +228,13 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
   @override
   Widget build(BuildContext context) {
     final track = ref.watch(currentTrackProvider);
+    final source = ref.watch(playbackSourceProvider);
+    final sourceLabel = source?.label ??
+        (track == null
+            ? 'HOOK'
+            : track.source.isCatalog
+                ? 'Подбор источника'
+                : track.source.label);
     final isFavorite = track != null &&
         ref.watch(favoritesProvider).any(
               (favorite) =>
@@ -276,10 +284,28 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                               color: iconColor,
                               size: 26,
                             ),
+                            tooltip: 'Свернуть плеер',
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ),
-                        const Spacer(),
+                        Expanded(
+                            child: Column(children: [
+                          Text('СЕЙЧАС ИГРАЕТ',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 8,
+                                  letterSpacing: 1.1)),
+                          const SizedBox(height: 4),
+                          Text(sourceLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: textPrimary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600)),
+                        ])),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -367,6 +393,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                     ),
                   ),
 
+                  if (_showLyrics) LyricsModeButton(theme: widget.theme),
                   Expanded(
                     child: _buildSwipeableTrackStage(
                       track: track,
@@ -470,56 +497,21 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
 
   Widget _buildArtwork(MediaTrack track, double borderRadius) {
     final colors = widget.theme.colors;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
-        child: Hero(
-          tag: 'current_artwork_${_trackKey(track)}',
-          child: Container(
-            constraints: const BoxConstraints(maxHeight: 340, maxWidth: 340),
-            decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.circular((borderRadius * 1.2).clamp(18, 28)),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
-                width: 1.2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  blurRadius: 36,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 18),
-                ),
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.18),
-                  blurRadius: 44,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-              image: track.artworkUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(
-                        TrackArtwork.getHighResUrl(track.artworkUrl),
-                      ),
-                      fit: BoxFit.cover,
-                      filterQuality: FilterQuality.high,
-                    )
-                  : null,
-              color: colors.surface,
-            ),
-            child: track.artworkUrl.isEmpty
-                ? Icon(
-                    MingCuteIcons.mgc_music_fill,
-                    size: 96,
-                    color: colors.textSecondary.withValues(alpha: 0.6),
-                  )
-                : null,
-          ),
+    return LayoutBuilder(builder: (context, constraints) {
+      final available = (constraints.maxWidth - 64).clamp(0.0, 380.0);
+      final size = (constraints.maxHeight - 24).clamp(0.0, available);
+      return Center(
+          child: Hero(
+        tag: 'current_artwork_${_trackKey(track)}',
+        child: TrackArtwork(
+          url: track.artworkUrl,
+          size: size,
+          borderRadius: BorderRadius.circular(borderRadius.clamp(12, 20)),
+          placeholderColor: colors.surface,
+          iconColor: colors.textSecondary,
         ),
-      ),
-    );
+      ));
+    });
   }
 
   Widget _buildTrackDetails(
@@ -537,9 +529,9 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
+              fontSize: _showLyrics ? 19 : 25,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.6,
               color: textPrimary,
             ),
           ),

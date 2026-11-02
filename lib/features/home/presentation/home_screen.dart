@@ -216,7 +216,7 @@ class _SearchLaunch extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Найти трек, альбом или артиста',
+                  'Трек, артист или слова песни',
                   style: TextStyle(
                     color: colors.textSecondary,
                     fontSize: 14,

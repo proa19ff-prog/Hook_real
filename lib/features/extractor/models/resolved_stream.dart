@@ -1,12 +1,19 @@
-/// A playable audio stream: the direct URL plus the HTTP headers the request
-/// must carry. YouTube's googlevideo CDN rejects requests whose User-Agent
-/// does not match the one that signed the URL, which is what makes ExoPlayer
-/// fail with "Response code: 403" when the headers are simply dropped.
+import 'media_track.dart';
+
+/// A playable full-length stream and the headers required by its CDN.
+/// [source] is the actual audio provider, not the catalog used for discovery.
 class ResolvedStream {
   final String url;
   final Map<String, String> headers;
+  final TrackSource? source;
+  final Duration? duration;
 
-  const ResolvedStream(this.url, {this.headers = const {}});
+  const ResolvedStream(
+    this.url, {
+    this.headers = const {},
+    this.source,
+    this.duration,
+  });
 
   bool get isEmpty => url.isEmpty;
 }

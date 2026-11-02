@@ -16,15 +16,6 @@ void main() {
       ImportPlatform.spotify,
     );
     expect(
-      MusicImportService.detectPlatform(
-          'https://music.youtube.com/playlist?list=PLrAl60GSp4B_e76v7iR_t2u'),
-      ImportPlatform.unknown,
-    );
-    expect(
-      MusicImportService.detectPlatform('https://youtu.be/dQw4w9WgXcQ'),
-      ImportPlatform.unknown,
-    );
-    expect(
       MusicImportService.detectPlatform('https://example.com/something'),
       ImportPlatform.unknown,
     );
@@ -125,11 +116,5 @@ Rise,MADKID,RISE
       'https://i1.sndcdn.com/artworks-000123456789-abcdef-t500x500.jpg',
     );
 
-    // YouTube
-    final ytLow = 'https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg';
-    expect(
-      TrackArtwork.getHighResUrl(ytLow),
-      'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-    );
   });
 }

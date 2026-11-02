@@ -40,6 +40,39 @@ class LocalStorageService {
   Future<void> saveCustomThemeJson(String json) =>
       _prefs.setString(_customThemeJsonKey, json);
 
+  // --- LYRICS PRESENTATION ---
+  String? getLyricsDisplayMode() =>
+      _prefs.getString('hook_lyrics_display_mode');
+  Future<void> saveLyricsDisplayMode(String mode) =>
+      _prefs.setString('hook_lyrics_display_mode', mode);
+
+  Map<String, dynamic> _lyricsOffsets() {
+    try {
+      final decoded =
+          jsonDecode(_prefs.getString('hook_lyrics_offsets') ?? '{}');
+      return decoded is Map<String, dynamic> ? decoded : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  double getLyricsOffset(String trackKey) {
+    final value = _lyricsOffsets()[trackKey];
+    return value is num && value.isFinite
+        ? value.toDouble().clamp(-15.0, 15.0)
+        : 0.0;
+  }
+
+  Future<void> saveLyricsOffset(String trackKey, double seconds) async {
+    if (!seconds.isFinite) return;
+    final offsets = _lyricsOffsets()..remove(trackKey);
+    if (seconds != 0) offsets[trackKey] = seconds.clamp(-15.0, 15.0);
+    while (offsets.length > 200) {
+      offsets.remove(offsets.keys.first);
+    }
+    await _prefs.setString('hook_lyrics_offsets', jsonEncode(offsets));
+  }
+
   // --- FAVORITES ---
   List<MediaTrack> getFavorites() {
     final raw = _prefs.getStringList(_favoritesKey) ?? [];

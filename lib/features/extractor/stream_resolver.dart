@@ -1,113 +1,42 @@
+import 'dart:async';
 import 'dart:math' as math;
 
+import '../search/domain/search_query_normalizer.dart';
 import 'models/media_track.dart';
 import 'models/resolved_stream.dart';
 import 'soundcloud/soundcloud_extractor.dart';
+import 'sources/audius_source.dart';
+import 'sources/music_source.dart';
+import 'sources/youtube_music_source.dart';
 import 'spotify/spotify_catalog_service.dart';
 
 class StreamResolver {
   final SoundCloudExtractor _scExtractor;
   final SpotifyCatalogService _spotifyCatalog;
+  final List<MusicSource> _additionalSources;
+  final Duration _searchTimeout;
+  final Duration _resolveTimeout;
   final Map<String, List<MediaTrack>> _searchCache = {};
+  bool _disposed = false;
 
   StreamResolver({
     SoundCloudExtractor? scExtractor,
     SpotifyCatalogService? spotifyCatalog,
+    List<MusicSource>? additionalSources,
+    Duration searchTimeout = const Duration(seconds: 9),
+    Duration resolveTimeout = const Duration(seconds: 14),
   })  : _scExtractor = scExtractor ?? SoundCloudExtractor(),
-        _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService();
+        _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService(),
+        _additionalSources =
+            additionalSources ?? [YouTubeMusicSource(), AudiusSource()],
+        _searchTimeout = searchTimeout,
+        _resolveTimeout = resolveTimeout;
 
-  // Common Russian phonetic transliterations to official artist/track names
-  static const Map<String, String> _phoneticMap = {
-    'алан волкер': 'alan walker',
-    'алан уокер': 'alan walker',
-    'фейдед': 'faded',
-    'викнд': 'the weeknd',
-    'викенд': 'the weeknd',
-    'зе викенд': 'the weeknd',
-    'блайндинг лайтс': 'blinding lights',
-    'линкин парк': 'linkin park',
-    'ин зе энд': 'in the end',
-    'билли айлиш': 'billie eilish',
-    'эминем': 'eminem',
-    'квин': 'queen',
-    'имеджин драгонс': 'imagine dragons',
-    'имаджин драгонс': 'imagine dragons',
-    'белавер': 'believer',
-    'радиохед': 'radiohead',
-    'крип': 'creep',
-    'нирвана': 'nirvana',
-    'колдплей': 'coldplay',
-    'фонк': 'phonk',
-  };
+  static String fixKeyboardLayout(String input) =>
+      SearchQueryNormalizer.fixKeyboardLayout(input);
 
-  // Keyboard layout slip mapping (English <-> Russian)
-  static const String _enChars =
-      "qwertyuiop[]asdfghjkl;'zxcvbnm,.`QWERTYUIOP{}ASDFGHJKL:\"ZXCVBNM<>~";
-  static const String _ruChars =
-      "йцукенгшщзхъфывапролджэячсмитьбюёЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮЁ";
-
-  /// Fixes accidental keyboard layout typing (e.g. "fkfy djkrth" -> "alan walker")
-  static String fixKeyboardLayout(String input) {
-    final sb = StringBuffer();
-    for (int i = 0; i < input.length; i++) {
-      final ch = input[i];
-      final ruIndex = _ruChars.indexOf(ch);
-      final enIndex = _enChars.indexOf(ch);
-      if (ruIndex != -1) {
-        sb.write(_enChars[ruIndex]);
-      } else if (enIndex != -1) {
-        sb.write(_ruChars[enIndex]);
-      } else {
-        sb.write(ch);
-      }
-    }
-    return sb.toString();
-  }
-
-  /// Normalizes a search query and expands it if a transliteration, layout slip,
-  /// or common digit-styled spelling is detected. Variants are used to retrieve
-  /// catalog records; scoring still happens against the exact user query.
-  List<String> getSearchQueries(String query) {
-    final normalized = query.trim().toLowerCase();
-    final queries = <String>[normalized];
-
-    void add(String value) {
-      final candidate = value.trim();
-      if (candidate.isNotEmpty && !queries.contains(candidate)) {
-        queries.add(candidate);
-      }
-    }
-
-    // 1. Check phonetic dictionary.
-    for (final entry in _phoneticMap.entries) {
-      if (normalized.contains(entry.key)) {
-        add(normalized.replaceAll(entry.key, entry.value));
-      }
-    }
-
-    // 2. Check keyboard layout conversion if input looks like mixed/scrambled text.
-    final fixedLayout = fixKeyboardLayout(normalized);
-    if (fixedLayout != normalized) add(fixedLayout);
-
-    // 3. Artists and aliases often replace letters with digits. Querying the
-    // catalog with the stylized spelling is essential: normalizing only during
-    // ranking cannot return a record that the storefront never found.
-    final digitLoose = <String, String>{
-      'madkid': 'madk1d',
-      'madk1d': 'madkid',
-      'k1d': 'kid',
-    };
-    for (final entry in digitLoose.entries) {
-      if (normalized.contains(entry.key)) {
-        add(normalized.replaceAll(entry.key, entry.value));
-      }
-      if (fixedLayout.contains(entry.key)) {
-        add(fixedLayout.replaceAll(entry.key, entry.value));
-      }
-    }
-
-    return queries;
-  }
+  List<String> getSearchQueries(String query) =>
+      SearchQueryNormalizer.variants(query);
 
   static final _cyrillic = RegExp(r'[а-яё]', caseSensitive: false);
   static final _brackets = RegExp(r'[\(\[\{].*?[\)\]\}]');
@@ -212,7 +141,7 @@ class StreamResolver {
     'acoustic': RegExp(r'\bacoustic\b'),
     'instrumental': RegExp(r'\b(instrumental|karaoke)\b|минус'),
     'extended': RegExp(r'\bextended\b'),
-    'demo': RegExp(r'\b(demo|snippet)\b'),
+    'demo': RegExp(r'\b(demo|snippet|preview|teaser)\b'),
   };
 
   /// Kinds of alternate versions named in a title ("remix", "live", ...).
@@ -290,7 +219,7 @@ class StreamResolver {
     if (wantSec > 0 && gotSec > 0) {
       final diff = (wantSec - gotSec).abs();
       if (diff <= 4) {
-        s += 90.0;
+        s += 90.0 - diff * 15.0;
       } else if (diff <= 12) {
         s += 40.0;
       } else if (diff > 30) {
@@ -311,6 +240,11 @@ class StreamResolver {
     final candidateArtist = _loose(_norm(candidate.artist));
     final candidateFullTitle = _loose(_norm(candidate.title));
     final candidateTitle = _stripArtist(candidateFullTitle, targetArtist);
+    if (targetArtist.isEmpty ||
+        targetTitle.isEmpty ||
+        candidateFullTitle.isEmpty) {
+      return false;
+    }
 
     final titleMatches = candidateTitle == targetTitle ||
         _hasPhrase(candidateTitle, targetTitle);
@@ -329,8 +263,10 @@ class StreamResolver {
 
     final targetSeconds = target.duration.inSeconds;
     final candidateSeconds = candidate.duration.inSeconds;
-    if (targetSeconds >= 60 && candidateSeconds >= 60) {
-      final allowedDifference = math.max(12, (targetSeconds * 0.08).round());
+    if (targetSeconds > 0) {
+      // Unknown lengths and 30-second previews cannot satisfy a known release.
+      if (candidateSeconds <= 0) return false;
+      final allowedDifference = math.max(4, (targetSeconds * 0.03).round());
       if ((targetSeconds - candidateSeconds).abs() > allowedDifference) {
         return false;
       }
@@ -504,239 +440,332 @@ class StreamResolver {
     return math.max(0.0, 60.0 - 8.0 * position) + popularity;
   }
 
-  /// Searches tracks across selected sources with intelligent ranking and fuzzy matching.
-  /// Spotify (catalog) provides discovery; SoundCloud provides playback.
+  /// Searches independent sources in parallel. An explicit [sources] filter is
+  /// respected exactly; catalog discovery never masquerades as Spotify audio.
   Future<List<MediaTrack>> search({
     required String query,
     bool includeSoundCloud = true,
     bool includeSpotify = true,
+    Set<TrackSource>? sources,
   }) async {
-    final normalizedQuery = query.trim().toLowerCase();
-    final cacheKey = '$normalizedQuery|$includeSoundCloud|$includeSpotify';
+    final normalizedQuery = SearchQueryNormalizer.normalize(query);
+    if (normalizedQuery.isEmpty || _disposed) return const [];
+    final selected = sources ??
+        {
+          if (includeSoundCloud) TrackSource.soundcloud,
+          if (includeSpotify) TrackSource.spotify,
+          ..._additionalSources.map((source) => source.source),
+        };
+    if (selected.isEmpty) return const [];
+    final names = selected.map((source) => source.name).toList()..sort();
+    final cacheKey = '$normalizedQuery|${names.join(',')}';
     final cached = _searchCache[cacheKey];
     if (cached != null) return List.unmodifiable(cached);
-    if (_searchCache.length >= 50) {
-      _searchCache.remove(_searchCache.keys.first);
-    }
 
     final searchQueries = getSearchQueries(normalizedQuery);
     final rawResults = <MediaTrack>[];
     final bonus = <String, double>{};
-    String keyOf(MediaTrack t) => '${t.source.name}:${t.id}';
+    var hadFailure = false;
 
     Future<void> collect(
         Future<List<MediaTrack>> request, int queryIndex) async {
-      final list = await request.timeout(
-        const Duration(seconds: 8),
-        onTimeout: () => <MediaTrack>[],
-      );
-      for (var i = 0; i < list.length; i++) {
-        final t = list[i];
-        final b = _rankBonus(t, i) * (queryIndex == 0 ? 1.0 : 0.5);
-        bonus[keyOf(t)] = math.max(bonus[keyOf(t)] ?? 0.0, b);
-        rawResults.add(t);
+      try {
+        final list = await request.timeout(_searchTimeout);
+        for (var i = 0; i < list.length; i++) {
+          final track = list[i];
+          if (!selected.contains(track.source)) continue;
+          final rank = _rankBonus(track, i) * (queryIndex == 0 ? 1.0 : 0.8);
+          bonus[_matchKey(track)] =
+              math.max(bonus[_matchKey(track)] ?? 0, rank);
+          rawResults.add(track);
+        }
+      } catch (_) {
+        // One blocked source must not discard another source's results.
+        hadFailure = true;
       }
     }
 
-    // The studio catalog is missing many Russian releases (MADKID & VILLIAN
-    // "Династия" is not there at all), so Cyrillic queries always pull in
-    // SoundCloud too.
-    var withSoundCloud = includeSoundCloud ||
-        (includeSpotify && _cyrillic.hasMatch(normalizedQuery));
+    Future<void> retrieve(String q) => Future.wait<void>([
+          if (selected.contains(TrackSource.spotify))
+            collect(
+                _spotifyCatalog.searchTracks(q,
+                    country: _cyrillic.hasMatch(q) ? 'ru' : 'us'),
+                searchQueries.indexOf(q)),
+          if (selected.contains(TrackSource.soundcloud))
+            collect(_scExtractor.searchTracks(q), searchQueries.indexOf(q)),
+          for (final source in _additionalSources)
+            if (selected.contains(source.source))
+              collect(source.searchTracks(q), searchQueries.indexOf(q)),
+        ]).then((_) {});
 
-    for (var i = 0; i < searchQueries.length; i++) {
-      final q = searchQueries[i];
-      final catalogRequests = <Future<List<MediaTrack>>>[];
-      if (includeSpotify) {
-        final countries =
-            _cyrillic.hasMatch(q) ? const ['ru'] : const ['us', 'ru'];
-        catalogRequests.addAll(countries.map(
-          (country) => _spotifyCatalog.searchTracks(q, country: country),
-        ));
-      }
-      await Future.wait([
-        if (withSoundCloud) collect(_scExtractor.searchTracks(q), i),
-        ...catalogRequests.map((request) => collect(request, i)),
-      ]);
-      // If primary query gave ample results, no need to query subsequent variants
-      if (rawResults.length >= 15) break;
+    final layout = fixKeyboardLayout(normalizedQuery);
+    // Always retrieve meaningful phonetic variants, even if the original query
+    // already returned many irrelevant uploads. Pure layout guessing is last.
+    final primary =
+        searchQueries.where((q) => q == normalizedQuery || q != layout);
+    await Future.wait(primary.map(retrieve));
+    if (layout != normalizedQuery &&
+        searchQueries.contains(layout) &&
+        !primary.any((q) => _hasFullMatch(rawResults, q))) {
+      await retrieve(layout);
     }
+    if (_disposed || rawResults.isEmpty) return const [];
 
-    // The catalog had nothing covering the whole query: fall back to SoundCloud.
-    if (includeSpotify &&
-        !withSoundCloud &&
-        !_hasFullMatch(rawResults, normalizedQuery)) {
-      withSoundCloud = true;
-      await collect(_scExtractor.searchTracks(searchQueries.first), 0);
-    }
-
-    if (rawResults.isEmpty) return const [];
-
-    double scoreOf(MediaTrack t) {
-      var best = scoreTrack(t, normalizedQuery);
+    double scoreOf(MediaTrack track) {
+      var best = scoreTrack(track, normalizedQuery);
       for (final variant in searchQueries.skip(1)) {
-        best = math.max(best, scoreTrack(t, variant) - 25.0);
+        best = math.max(best, scoreTrack(track, variant) - 25);
       }
-      // The catalog's order and metadata are substantially more reliable than
-      // SoundCloud upload titles. Keep that preference modest so a genuinely
-      // stronger SoundCloud match can still appear, but enough to stop noisy
-      // reposts from displacing a full catalog match.
-      if (t.source == TrackSource.spotify &&
-          _hasFullMatch(<MediaTrack>[t], normalizedQuery)) {
-        best += 55.0;
+      if (track.source.isCatalog &&
+          searchQueries.any((q) => _hasFullMatch([track], q))) {
+        best += 55;
       }
-      return best + (bonus[keyOf(t)] ?? 0.0);
+      return best + (bonus[_matchKey(track)] ?? 0);
     }
 
-    // Collapse the same song from several uploads/sources into one entry.
-    // The catalog copy wins (better metadata); the group keeps its best score.
     final groups = <String, ({MediaTrack track, double score})>{};
     for (final track in rawResults) {
-      final s = scoreOf(track);
-      // Version tags keep "Song (Remix)" apart from "Song".
+      if (!track.source.isCatalog) _rememberDiscovery(track);
+      final score = scoreOf(track);
       final tags = _variantTags(track.title).toList()..sort();
-      final key =
+      var key =
           '${_norm(track.title)}|${_loose(_norm(track.artist))}|${tags.join(',')}';
-      final existing = groups[key];
-      if (existing == null) {
-        groups[key] = (track: track, score: s);
-        continue;
+      var existing = groups[key];
+      // Don't hide a materially different recording with identical metadata.
+      if (existing != null &&
+          track.duration > Duration.zero &&
+          existing.track.duration > Duration.zero &&
+          (existing.track.duration - track.duration).inSeconds.abs() > 5) {
+        key = '$key|${track.duration.inSeconds}';
+        existing = groups[key];
       }
-      final preferNew = existing.track.source != TrackSource.spotify &&
-          (track.source == TrackSource.spotify || s > existing.score);
+      final preferNew = existing == null ||
+          (!existing.track.source.isCatalog &&
+              (track.source.isCatalog || score > existing.score));
       groups[key] = (
         track: preferNew ? track : existing.track,
-        score: math.max(s, existing.score),
+        score: math.max(score, existing?.score ?? score),
       );
     }
-
     final ranked = groups.values.toList()
-      ..sort((a, b) => b.score.compareTo(a.score));
-
-    final output = ranked.take(30).map((e) => e.track).toList(growable: false);
-    if (output.isNotEmpty) _searchCache[cacheKey] = output;
-    return output;
+      ..sort((a, b) {
+        final score = b.score.compareTo(a.score);
+        return score != 0
+            ? score
+            : _matchKey(a.track).compareTo(_matchKey(b.track));
+      });
+    final output =
+        ranked.take(40).map((entry) => entry.track).toList(growable: false);
+    if (!hadFailure) {
+      if (_searchCache.length >= 50) {
+        _searchCache.remove(_searchCache.keys.first);
+      }
+      _searchCache[cacheKey] = output;
+    }
+    return List.unmodifiable(output);
   }
 
-  /// Resolves the actual playable stream for a given track based on its source.
+  /// Source-specific entries retain their identity. Only catalog entries are
+  /// matched across providers; a selected upload never silently becomes another.
   Future<ResolvedStream?> resolveStream(MediaTrack track) async {
-    if (track.source == TrackSource.local &&
-        track.streamUrl != null &&
-        track.streamUrl!.isNotEmpty) {
-      return ResolvedStream(track.streamUrl!);
+    if (_disposed) return null;
+    if (track.source.isCatalog) return resolveSpotifyTrack(track);
+    if (track.source == TrackSource.local) {
+      final url = track.streamUrl;
+      return url == null || url.isEmpty
+          ? null
+          : ResolvedStream(url, source: track.source);
     }
-
-    switch (track.source) {
-      case TrackSource.youtube:
-        // YouTube is cut from the app (unusable on many networks). Old saved
-        // tracks keep playing through the SoundCloud search match.
-        return resolveSpotifyTrack(track);
-
-      case TrackSource.soundcloud:
-        // The CDN signs the URL in its query string, so no extra headers are
-        // needed here; sending them only risked a rejection.
-        final url = await _scExtractor.resolveAudioStreamUrl(track.id);
-        return (url == null || url.isEmpty) ? null : ResolvedStream(url);
-
-      case TrackSource.spotify:
-        return resolveSpotifyTrack(track);
-
-      case TrackSource.local:
-        return track.streamUrl == null
-            ? null
-            : ResolvedStream(track.streamUrl!);
+    if (track.source == TrackSource.soundcloud) {
+      final url = await _scExtractor.resolveAudioStreamUrl(track.id);
+      return url == null || url.isEmpty
+          ? null
+          : ResolvedStream(
+              url,
+              source: track.source,
+              duration: track.duration,
+            );
     }
+    for (final source in _additionalSources) {
+      if (source.source == track.source) return source.resolveTrack(track);
+    }
+    return null;
   }
 
-  /// Backwards-compatible URL-only helper.
   Future<String?> resolveStreamUrl(MediaTrack track) async =>
       (await resolveStream(track))?.url;
 
-  /// Catalog track key → matched SoundCloud track id. A repeat play (or a
-  /// re-resolve after the signed URL expires) then skips the search.
-  final Map<String, String> _matchCache = {};
+  final Map<String, MediaTrack> _matchCache = {};
+  final Map<String, int> _matchGeneration = {};
+  final Map<String, DateTime> _badMatches = {};
+  final Map<String, List<MediaTrack>> _discoveryCache = {};
 
-  /// SoundCloud ids whose stream failed to play; skipped when matching.
-  final Set<String> _badMatches = {};
-
-  String _matchKey(MediaTrack t) => '${t.source.name}:${t.id}';
-
-  /// Call after a resolved stream failed to play, so the next resolve picks
-  /// a different SoundCloud upload.
-  void forgetMatch(MediaTrack track) {
-    final id = _matchCache.remove(_matchKey(track));
-    if (id != null) _badMatches.add(id);
-    if (track.source == TrackSource.soundcloud) _badMatches.add(track.id);
+  String _matchKey(MediaTrack track) => '${track.source.name}:${track.id}';
+  String _recordingKey(MediaTrack track) {
+    final tags = _variantTags(track.title).toList()..sort();
+    return '${_norm(_primaryArtist(track.artist))}|${_norm(_cleanTitle(track.title))}|${tags.join(',')}';
   }
 
-  Future<ResolvedStream?> resolveSpotifyTrack(MediaTrack track) async {
-    final matchKey = _matchKey(track);
-    final knownId = _matchCache[matchKey];
-    if (knownId != null) {
-      try {
-        final url = await _scExtractor.resolveAudioStreamUrl(knownId);
-        if (url != null && url.isNotEmpty) return ResolvedStream(url);
-      } catch (_) {}
-      _matchCache.remove(matchKey);
+  void _rememberDiscovery(MediaTrack track) {
+    final key = _recordingKey(track);
+    if (!_discoveryCache.containsKey(key) && _discoveryCache.length >= 200) {
+      _discoveryCache.remove(_discoveryCache.keys.first);
     }
-
-    // Preserve featured artists and release subtitles in precise searches.
-    final primaryArtist = _primaryArtist(track.artist);
-    final cleanTitle = _cleanTitle(track.title);
-    final fullArtist = track.artist.trim();
-    final fullTitle = track.title.trim();
-    final compactQuery = '$primaryArtist $cleanTitle'.trim();
-    final queries = <String>{
-      '$fullArtist $fullTitle'.trim(),
-      '$primaryArtist $fullTitle'.trim(),
-      compactQuery,
-    }.where((value) => value.isNotEmpty).toList(growable: false);
-
-    // Merge result sets; isPlayableMatch remains authoritative.
-    final candidates = <MediaTrack>[];
-    final candidateIds = <String>{};
-    for (final candidateQuery in queries) {
-      try {
-        final scResults = await _scExtractor.searchTracks(
-          candidateQuery,
-          limit: candidateQuery == compactQuery ? 12 : 24,
-        );
-        for (final candidate in scResults) {
-          if (!_badMatches.contains(candidate.id) &&
-              candidateIds.add(candidate.id)) {
-            candidates.add(candidate);
-          }
-        }
-      } catch (_) {}
+    final candidates = _discoveryCache.putIfAbsent(key, () => []);
+    if (!candidates.contains(track) && candidates.length < 12) {
+      candidates.add(track);
     }
-    if (candidates.isEmpty) return null;
+  }
 
-    // 3. Score candidates, then permit only a strict original-match contract.
-    final scored = [
-      for (final c in candidates)
-        (
-          track: c,
-          score:
-              scoreCandidate(track, c, plays: _scExtractor.playbackCount(c.id)),
-        ),
-    ]..sort((a, b) => b.score.compareTo(a.score));
+  bool _isBadMatch(MediaTrack track) {
+    final failedAt = _badMatches[_matchKey(track)];
+    return failedAt != null &&
+        DateTime.now().difference(failedAt) < const Duration(minutes: 2);
+  }
 
-    for (final entry in scored) {
-      final candidate = entry.track;
-      if (!isPlayableMatch(track, candidate)) continue;
+  void _markBad(MediaTrack track) {
+    if (_badMatches.length >= 200) _badMatches.remove(_badMatches.keys.first);
+    _badMatches[_matchKey(track)] = DateTime.now();
+  }
 
-      try {
-        final resolved = await resolveStream(candidate);
-        if (resolved != null && !resolved.isEmpty) {
-          _matchCache[matchKey] = candidate.id;
-          return resolved;
-        }
-      } catch (_) {
-        continue;
+  /// Blacklist failed matches briefly, with source-qualified IDs. A transient
+  /// CDN failure must not ban a recording for the lifetime of the app.
+  void forgetMatch(MediaTrack track) {
+    final key = _matchKey(track);
+    _matchGeneration[key] = (_matchGeneration[key] ?? 0) + 1;
+    final previous = _matchCache.remove(key);
+    if (previous != null) _markBad(previous);
+  }
+
+  Future<List<MediaTrack>> _searchSource(
+      TrackSource source, String query) async {
+    if (source == TrackSource.soundcloud) {
+      return _scExtractor.searchTracks(query, limit: 24);
+    }
+    for (final provider in _additionalSources) {
+      if (provider.source == source) {
+        return provider.searchTracks(query, limit: 24);
       }
     }
+    return const [];
+  }
 
-    return null;
+  /// Kept under its historical name for imports/saved catalog records. Each
+  /// provider has its own search + resolve path; a blocked one cannot hold up
+  /// a usable match from another. The winner alone is remembered.
+  Future<ResolvedStream?> resolveSpotifyTrack(MediaTrack track) async {
+    if (_disposed || !track.source.isCatalog) return null;
+    final key = _matchKey(track);
+    final generation = _matchGeneration[key] ?? 0;
+    final completion = Completer<ResolvedStream?>();
+    final sources = {
+      TrackSource.soundcloud,
+      ..._additionalSources.map((s) => s.source)
+    };
+    var remaining = sources.length;
+    bool active() =>
+        !_disposed &&
+        !completion.isCompleted &&
+        (_matchGeneration[key] ?? 0) == generation;
+
+    for (final source in sources) {
+      var finished = false;
+      bool sourceActive() => !finished && active();
+      unawaited(() async {
+        try {
+          final match = await _resolveCatalogAtSource(
+                  track, source, sourceActive)
+              .timeout(_searchTimeout + _resolveTimeout, onTimeout: () => null);
+          if (match != null && active()) {
+            if (_matchCache.length >= 200) {
+              _matchCache.remove(_matchCache.keys.first);
+            }
+            _matchCache[key] = match.track;
+            completion.complete(match.stream);
+          }
+        } catch (_) {
+          // Continue with another independent provider.
+        } finally {
+          finished = true;
+          remaining--;
+          if (remaining == 0 && !completion.isCompleted) {
+            completion.complete(null);
+          }
+        }
+      }());
+    }
+    return completion.future;
+  }
+
+  Future<({MediaTrack track, ResolvedStream stream})?> _resolveCatalogAtSource(
+    MediaTrack target,
+    TrackSource source,
+    bool Function() active,
+  ) async {
+    final tried = <String>{};
+    Future<({MediaTrack track, ResolvedStream stream})?> tryCandidates(
+      Iterable<MediaTrack> candidates,
+    ) async {
+      final ranked = candidates
+          .where((candidate) =>
+              candidate.source == source &&
+              !_isBadMatch(candidate) &&
+              isPlayableMatch(target, candidate))
+          .toList()
+        ..sort((a, b) => scoreCandidate(target, b,
+                plays: source == TrackSource.soundcloud
+                    ? _scExtractor.playbackCount(b.id)
+                    : 0)
+            .compareTo(scoreCandidate(target, a,
+                plays: source == TrackSource.soundcloud
+                    ? _scExtractor.playbackCount(a.id)
+                    : 0)));
+      for (final candidate in ranked.take(3)) {
+        if (!active()) return null;
+        if (!tried.add(_matchKey(candidate))) continue;
+        try {
+          final resolved =
+              await resolveStream(candidate).timeout(_resolveTimeout);
+          if (resolved != null && !resolved.isEmpty && active()) {
+            final duration = resolved.duration;
+            if (duration != null &&
+                !isPlayableMatch(
+                    target, candidate.copyWith(duration: duration))) {
+              continue;
+            }
+            return (track: candidate, stream: resolved);
+          }
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    final known = _matchCache[_matchKey(target)];
+    final cached = await tryCandidates([
+      if (known != null) known,
+      ...?_discoveryCache[_recordingKey(target)],
+    ]);
+    if (cached != null || !active()) return cached;
+
+    final compact =
+        '${_primaryArtist(target.artist)} ${_cleanTitle(target.title)}'.trim();
+    if (compact.isEmpty) return null;
+    final queries = <String>{
+      compact,
+      if (source == TrackSource.youtubeMusic)
+        '$compact audio'
+      else
+        '${target.artist} ${target.title}'.trim(),
+    };
+    final batches = await Future.wait(queries.map((query) async {
+      try {
+        return await _searchSource(source, query).timeout(_searchTimeout);
+      } catch (_) {
+        return <MediaTrack>[];
+      }
+    }));
+    if (!active()) return null;
+    return tryCandidates(batches.expand((batch) => batch));
   }
 
   /// Gets related SoundCloud tracks for a seed, resolving a catalog seed to
@@ -755,8 +784,8 @@ class StreamResolver {
     final query =
         '${_primaryArtist(track.artist)} ${_cleanTitle(track.title)}'.trim();
     final candidates = await _scExtractor.searchTracks(query, limit: 12);
-    final usable =
-        candidates.where((candidate) => !_badMatches.contains(candidate.id));
+    final usable = candidates.where((candidate) =>
+        !_isBadMatch(candidate) && isPlayableMatch(track, candidate));
     MediaTrack? best;
     var bestScore = double.negativeInfinity;
     for (final candidate in usable) {
@@ -774,7 +803,11 @@ class StreamResolver {
   }
 
   void dispose() {
+    _disposed = true;
     _scExtractor.close();
     _spotifyCatalog.close();
+    for (final source in _additionalSources) {
+      source.close();
+    }
   }
 }

@@ -42,10 +42,13 @@ class LyricsClient {
         _lrclib = lrclib ?? LrclibSource();
 
   static final _noise = [
-    RegExp(r'[\(\[]\s*(official\s*)?(music\s*)?(video|audio|clip|visualizer)\s*[\)\]]',
+    RegExp(
+        r'[\(\[]\s*(official\s*)?(music\s*)?(video|audio|clip|visualizer)\s*[\)\]]',
         caseSensitive: false),
-    RegExp(r'[\(\[]\s*(lyrics?|lyric video|текст)\s*[\)\]]', caseSensitive: false),
-    RegExp(r'[\(\[]\s*(hd|hq|4k|ncs( release)?|free (dl|download)|out now)\s*[\)\]]',
+    RegExp(r'[\(\[]\s*(lyrics?|lyric video|текст)\s*[\)\]]',
+        caseSensitive: false),
+    RegExp(
+        r'[\(\[]\s*(hd|hq|4k|ncs( release)?|free (dl|download)|out now)\s*[\)\]]',
         caseSensitive: false),
     RegExp(r'[\(\[]\s*(feat|ft|prod)\b.*?[\)\]]', caseSensitive: false),
     RegExp(r'\s(feat|ft)\.?\s.*$', caseSensitive: false),
@@ -53,7 +56,8 @@ class LyricsClient {
 
   /// Strips "Artist - " prefixes and upload noise from SoundCloud-style titles.
   static String cleanTrackTitle(String rawTitle, String rawArtist) {
-    var title = rawTitle.replaceAll('"', '').replaceAll('«', '').replaceAll('»', '');
+    var title =
+        rawTitle.replaceAll('"', '').replaceAll('«', '').replaceAll('»', '');
     final artist = rawArtist.trim().toLowerCase();
 
     if (title.contains(' - ') || title.contains(' – ')) {
@@ -78,12 +82,15 @@ class LyricsClient {
     required String artistName,
     Duration? duration,
   }) async {
-    final key = '${trackName.trim().toLowerCase()}::${artistName.trim().toLowerCase()}';
+    final key =
+        '${trackName.trim().toLowerCase()}::${artistName.trim().toLowerCase()}::${duration?.inMilliseconds ?? 0}';
     if (_cache.containsKey(key)) return _cache[key];
+    if (_cache.length >= 100) _cache.remove(_cache.keys.first);
 
     final cleaned = cleanTrackTitle(trackName, artistName);
     final title = cleaned.isNotEmpty ? cleaned : trackName;
-    final known = duration != null && duration > Duration.zero ? duration : null;
+    final known =
+        duration != null && duration > Duration.zero ? duration : null;
 
     final neteaseFuture = _netease
         .fetch(title: title, artist: artistName, duration: known)

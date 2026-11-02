@@ -300,7 +300,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               const SizedBox(height: 6),
               Text(
-                'Импортируйте плейлист из Spotify или YouTube Music!',
+                'Импортируйте плейлист из Spotify или список треков!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: colors.textSecondary,

@@ -5,7 +5,7 @@ import '../models/media_track.dart';
 class SoundCloudExtractor {
   final Dio _dio;
   String _clientId;
-  bool _isRefreshingKey = false;
+  Future<String?>? _refreshingKey;
 
   /// Media info captured from search responses, so starting a found track
   /// skips the extra `/tracks/{id}` round-trip.
@@ -16,8 +16,24 @@ class SoundCloudExtractor {
   int playbackCount(String trackId) => _playCounts[trackId] ?? 0;
 
   SoundCloudExtractor({Dio? dio, String? clientId})
-      : _dio = dio ?? Dio(),
+      : _dio = dio ??
+            Dio(BaseOptions(
+              connectTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 8),
+            )),
         _clientId = clientId ?? ApiConstants.soundCloudFallbackClientId;
+
+  static bool isFullTrack(Map<dynamic, dynamic> item) {
+    final policy = item['policy']?.toString().toUpperCase();
+    final tier = item['monetization_model']?.toString().toUpperCase();
+    final duration = (item['duration'] as num?) ?? 0;
+    final full = (item['full_duration'] as num?) ?? duration;
+    return item['streamable'] != false &&
+        policy != 'SNIP' &&
+        policy != 'BLOCK' &&
+        tier != 'SUB_HIGH_TIER' &&
+        !(full > 45000 && duration > 0 && duration <= 35000);
+  }
 
   String get clientId => _clientId;
 
@@ -25,11 +41,11 @@ class SoundCloudExtractor {
     _clientId = newClientId;
   }
 
-  /// Automatically discovers and extracts an active client ID from soundcloud.com.
-  /// This guarantees the player never breaks even if SoundCloud revokes the static ID.
-  Future<String?> refreshClientId() async {
-    if (_isRefreshingKey) return _clientId;
-    _isRefreshingKey = true;
+  /// Concurrent searches share a refresh instead of retrying with the stale ID.
+  Future<String?> refreshClientId() => _refreshingKey ??=
+      _refreshClientId().whenComplete(() => _refreshingKey = null);
+
+  Future<String?> _refreshClientId() async {
     try {
       final res = await _dio
           .get<String>(
@@ -49,7 +65,7 @@ class SoundCloudExtractor {
           scriptRegex.allMatches(body).map((m) => m.group(1)!).toList();
 
       // Check scripts starting from the end where app/vendor bundles typically live
-      for (final scriptUrl in scriptUrls.reversed) {
+      for (final scriptUrl in scriptUrls.reversed.take(4)) {
         try {
           final sRes = await _dio
               .get<String>(
@@ -69,9 +85,7 @@ class SoundCloudExtractor {
         } catch (_) {}
       }
     } catch (_) {
-      // Keep existing client ID on failure
-    } finally {
-      _isRefreshingKey = false;
+      // Keep existing client ID on failure; a refresh is not guaranteed.
     }
     return _clientId;
   }
@@ -113,16 +127,7 @@ class SoundCloudExtractor {
             : user?['username'] as String? ?? 'Unknown Artist';
         final durationMs = item['duration'] as int? ?? 0;
         final fullDurationMs = item['full_duration'] as int? ?? durationMs;
-        final policy = (item['policy'] as String? ?? '').toUpperCase();
-        final monetization =
-            (item['monetization_model'] as String? ?? '').toUpperCase();
-
-        // Filter out SoundCloud Go+ preview-only tracks (30s snippets)
-        if (policy == 'SNIP' ||
-            monetization == 'SUB_HIGH_TIER' ||
-            (fullDurationMs > 45000 && durationMs <= 35000)) {
-          continue;
-        }
+        if (!isFullTrack(item)) continue;
 
         var artworkUrl = item['artwork_url'] as String? ??
             user?['avatar_url'] as String? ??
@@ -142,6 +147,10 @@ class SoundCloudExtractor {
           _mediaCache[id] = {
             'media': media,
             'duration': item['duration'],
+            'full_duration': item['full_duration'],
+            'policy': item['policy'],
+            'monetization_model': item['monetization_model'],
+            'streamable': item['streamable'],
             'track_authorization': item['track_authorization'],
           };
         }
@@ -178,7 +187,7 @@ class SoundCloudExtractor {
   /// endpoint is not available on the current API, so this deliberately uses
   /// the track-specific related endpoint.
   Future<List<MediaTrack>> relatedTracks(String trackId,
-      {int limit = 20}) async {
+      {int limit = 20, bool isRetry = false}) async {
     try {
       final response = await _dio.get(
         '${ApiConstants.soundCloudApiBaseUrl}/tracks/$trackId/related',
@@ -192,7 +201,7 @@ class SoundCloudExtractor {
           : const [];
       final tracks = <MediaTrack>[];
       for (final item in collection) {
-        if (item is! Map<String, dynamic>) continue;
+        if (item is! Map<String, dynamic> || !isFullTrack(item)) continue;
         final id = item['id']?.toString() ?? '';
         final title = item['title']?.toString() ?? '';
         if (id.isEmpty || title.isEmpty) continue;
@@ -217,6 +226,10 @@ class SoundCloudExtractor {
           _mediaCache[id] = {
             'media': media,
             'duration': item['duration'],
+            'full_duration': item['full_duration'],
+            'policy': item['policy'],
+            'monetization_model': item['monetization_model'],
+            'streamable': item['streamable'],
             'track_authorization': item['track_authorization'],
           };
         }
@@ -231,10 +244,10 @@ class SoundCloudExtractor {
       }
       return tracks;
     } on DioException catch (error) {
-      if (error.response?.statusCode == 401) {
+      if (!isRetry && error.response?.statusCode == 401) {
         final key = await refreshClientId();
         if (key != null && key.isNotEmpty) {
-          return relatedTracks(trackId, limit: limit);
+          return relatedTracks(trackId, limit: limit, isRetry: true);
         }
       }
       return const [];
@@ -290,6 +303,7 @@ class SoundCloudExtractor {
   /// URL. Falls through to the next transcoding when one answers 404 (the
   /// `abr_sq` preset does on most tracks).
   Future<String?> _resolveFromTrackData(Map<String, dynamic> trackData) async {
+    if (!isFullTrack(trackData)) return null;
     final media = trackData['media'];
     if (media is! Map) return null;
     final transcodings = media['transcodings'] as List?;
@@ -323,8 +337,9 @@ class SoundCloudExtractor {
           !isDurationSnippet;
     }
 
-    final full = playable.where(isFull).toList();
-    final candidates = full.isNotEmpty ? full : playable;
+    final candidates = playable.where(isFull).toList();
+    // A preview is not a fallback for a full song, including saved Go+ entries.
+    if (candidates.isEmpty) return null;
 
     // Progressive MP3 is one file, so the player starts after a single
     // request. Plain HLS needs a playlist fetch first. `abr_sq` presets

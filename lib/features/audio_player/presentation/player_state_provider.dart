@@ -126,6 +126,16 @@ final playbackErrorProvider = StreamProvider<AudioPlaybackError?>((ref) {
   return service.errorStream;
 });
 
+final _playbackSourceStreamProvider = StreamProvider<TrackSource?>((ref) {
+  return ref.watch(audioPlayerServiceProvider).playbackSourceStream;
+});
+
+/// The provider actually serving audio, which may differ from the catalog.
+final playbackSourceProvider = Provider<TrackSource?>((ref) {
+  ref.watch(_playbackSourceStreamProvider);
+  return ref.watch(audioPlayerServiceProvider).playbackSource;
+});
+
 // State Notifier for Current Track & Queue
 class QueueNotifier extends StateNotifier<List<MediaTrack>> {
   final AudioPlayerService _service;

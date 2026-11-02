@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hook/features/audio_player/data/audio_player_service.dart';
 import 'package:hook/features/extractor/models/media_track.dart';
 
-MediaTrack _track(String id, {TrackSource source = TrackSource.youtube}) {
+MediaTrack _track(String id, {TrackSource source = TrackSource.spotify}) {
   return MediaTrack(
     id: id,
     title: 'Track $id',
@@ -48,7 +48,7 @@ void main() {
 
       expect(
         service.queue.value.map((item) => item.id).toList(),
-        ['youtube:first', 'soundcloud:second'],
+        ['spotify:first', 'soundcloud:second'],
       );
     });
 

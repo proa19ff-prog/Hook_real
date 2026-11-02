@@ -82,8 +82,24 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
     _ticker = createTicker(_onTick);
     _loadShader();
     _updatePalette();
-    // Always start ticker for ambient background motion
-    _ticker.start();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateMotion();
+  }
+
+  void _updateMotion() {
+    final animate = TickerMode.valuesOf(context).enabled &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        widget.theme.styling.shaderMeshEnabled;
+    if (animate && !_ticker.isActive) {
+      _lastFrame = Duration.zero;
+      _ticker.start();
+    } else if (!animate && _ticker.isActive) {
+      _ticker.stop();
+    }
   }
 
   void _onTick(Duration elapsed) {
@@ -96,9 +112,10 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
   void didUpdateWidget(covariant DynamicShaderBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.artworkUrl != widget.artworkUrl ||
-        oldWidget.theme.id != widget.theme.id) {
+        oldWidget.theme != widget.theme) {
       _updatePalette();
     }
+    _updateMotion();
   }
 
   bool get _shaderActive =>
@@ -364,25 +381,16 @@ class _MeshShaderPainter extends CustomPainter {
     _shader.setFloat(1, size.height);
     _shader.setFloat(2, time.value);
 
-    // c1
-    _shader.setFloat(3, c1.r);
-    _shader.setFloat(4, c1.g);
-    _shader.setFloat(5, c1.b);
-
-    // c2
-    _shader.setFloat(6, c2.r);
-    _shader.setFloat(7, c2.g);
-    _shader.setFloat(8, c2.b);
-
-    // c3
-    _shader.setFloat(9, c3.r);
-    _shader.setFloat(10, c3.g);
-    _shader.setFloat(11, c3.b);
-
-    // c4
-    _shader.setFloat(12, c4.r);
-    _shader.setFloat(13, c4.g);
-    _shader.setFloat(14, c4.b);
+    // The GLSL contract declares four vec4s, not RGB triples.
+    final colors = [c1, c2, c3, c4];
+    for (var i = 0; i < colors.length; i++) {
+      final color = colors[i];
+      final offset = 3 + i * 4;
+      _shader.setFloat(offset, color.r);
+      _shader.setFloat(offset + 1, color.g);
+      _shader.setFloat(offset + 2, color.b);
+      _shader.setFloat(offset + 3, color.a);
+    }
 
     final paint = Paint()..shader = _shader;
     canvas.drawRect(Offset.zero & size, paint);

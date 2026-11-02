@@ -176,22 +176,12 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           duration: const Duration(milliseconds: 280),
           curve: Curves.easeOutCubic,
           padding: const EdgeInsets.symmetric(vertical: 7),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? theme.colors.primary.withValues(alpha: 0.13)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isSelected
-                  ? theme.colors.primary.withValues(alpha: 0.28)
-                  : Colors.transparent,
-            ),
-          ),
+          decoration: const BoxDecoration(color: Colors.transparent),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedScale(
-                scale: isSelected ? 1.15 : 1.0,
+                scale: isSelected ? 1.05 : 1.0,
                 duration: const Duration(milliseconds: 220),
                 child: Icon(
                   icon,

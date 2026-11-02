@@ -9,9 +9,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../audio_player/presentation/player_state_provider.dart';
+import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../data/lyrics_client.dart';
 import '../domain/lyric_line.dart';
+import '../domain/lyrics_display_mode.dart';
+import 'lyrics_preferences_provider.dart';
 
 const _easeOut = Cubic(0.23, 1, 0.32, 1);
 
@@ -85,6 +88,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   List<GlobalKey> _keys = const [];
   int _active = -1;
   double _syncOffsetSeconds = 0.0;
+  String? _offsetTrackKey;
   bool _showOffsetControls = false;
 
   DateTime _userScrollUntil = DateTime.fromMillisecondsSinceEpoch(0);
@@ -215,7 +219,19 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   @override
   Widget build(BuildContext context) {
     final lyricsAsync = ref.watch(trackLyricsProvider);
+    final mode = ref.watch(lyricsDisplayModeProvider);
     final colors = widget.theme.colors;
+    final track = ref.watch(currentTrackProvider);
+    final offsetKey = track == null
+        ? null
+        : '${track.source.name}:${track.id}:${track.duration.inMilliseconds}';
+    if (_offsetTrackKey != offsetKey) {
+      _offsetTrackKey = offsetKey;
+      _syncOffsetSeconds = offsetKey == null
+          ? 0
+          : ref.read(localStorageServiceProvider).getLyricsOffset(offsetKey);
+      _showOffsetControls = false;
+    }
 
     return lyricsAsync.when(
       loading: () => Center(
@@ -240,7 +256,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
         if (!result.isRealSync) return _buildStatic(result, colors);
 
         if (!identical(result.lines, _source)) _setLines(result.lines);
-        return _buildSynced(colors);
+        return _buildSynced(colors, mode, result.hasWordSync);
       },
     );
   }
@@ -323,58 +339,76 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     );
   }
 
-  Widget _buildSynced(HookColors colors) {
+  Widget _buildSynced(
+      HookColors colors, LyricsDisplayMode mode, bool hasWordSync) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Stack(
       children: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final h = constraints.maxHeight;
-            return NotificationListener<ScrollNotification>(
-              onNotification: _onScrollNotification,
-              child: _edgeFade(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: EdgeInsets.fromLTRB(24, h * 0.28, 24, h * 0.62),
-                  itemCount: _items.length,
-                  itemBuilder: (context, index) {
-                    final item = _items[index];
-                    final isActive = index == _active;
-                    if (item.isGap) {
+        if (mode == LyricsDisplayMode.focus)
+          _buildFocus(colors, reduceMotion)
+        else
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final h = constraints.maxHeight;
+              return NotificationListener<ScrollNotification>(
+                onNotification: _onScrollNotification,
+                child: _edgeFade(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: EdgeInsets.fromLTRB(24, h * 0.28, 24, h * 0.62),
+                    itemCount: _items.length,
+                    itemBuilder: (context, index) {
+                      final item = _items[index];
+                      final isActive = index == _active;
+                      if (item.isGap) {
+                        return KeyedSubtree(
+                          key: _keys[index],
+                          child: _BreakDots(
+                            item: item,
+                            active: isActive,
+                            clock: _clock,
+                            color: colors.textPrimary,
+                            reduceMotion: reduceMotion,
+                          ),
+                        );
+                      }
+                      final distance =
+                          _active < 0 ? index + 1 : (index - _active).abs();
                       return KeyedSubtree(
                         key: _keys[index],
-                        child: _BreakDots(
-                          item: item,
-                          active: isActive,
+                        child: _LineTile(
+                          line: item.line!,
+                          isActive: isActive,
+                          isPast: _active >= 0 && index < _active,
+                          distance: distance,
                           clock: _clock,
-                          color: colors.textPrimary,
+                          colors: colors,
                           reduceMotion: reduceMotion,
+                          wordSweep: mode == LyricsDisplayMode.karaoke,
+                          onTap: () => _seekTo(item.line!),
                         ),
                       );
-                    }
-                    final distance =
-                        _active < 0 ? index + 1 : (index - _active).abs();
-                    return KeyedSubtree(
-                      key: _keys[index],
-                      child: _LineTile(
-                        line: item.line!,
-                        isActive: isActive,
-                        isPast: _active >= 0 && index < _active,
-                        distance: distance,
-                        clock: _clock,
-                        colors: colors,
-                        reduceMotion: reduceMotion,
-                        onTap: () => _seekTo(item.line!),
-                      ),
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
+        Positioned(
+          top: 8,
+          left: 24,
+          right: 24,
+          child: IgnorePointer(
+              child: Text(
+            hasWordSync
+                ? 'ПОСЛОВНАЯ СИНХРОНИЗАЦИЯ'
+                : 'ПОСТРОЧНАЯ СИНХРОНИЗАЦИЯ',
+            style: TextStyle(
+                color: colors.textSecondary, fontSize: 9, letterSpacing: 1.3),
+          )),
         ),
-        if (_source?.any((line) => line.hasRealWordTimings) ?? false)
+        if (_source?.isNotEmpty ?? false)
           Positioned(
             bottom: 12,
             left: 16,
@@ -405,90 +439,138 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     );
   }
 
-  Widget _buildOffsetBar(HookColors colors) {
-    final offsetStr = _syncOffsetSeconds == 0.0
-        ? 'Сдвиг: 0.0с'
-        : 'Сдвиг: ${_syncOffsetSeconds > 0 ? "+" : ""}${_syncOffsetSeconds.toStringAsFixed(1)}с';
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: colors.surface.withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: colors.border.withValues(alpha: 0.45),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildOffsetBtn('-0.5s', () => _shiftOffset(-0.5)),
-          _buildOffsetBtn('-0.1s', () => _shiftOffset(-0.1)),
-          InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => setState(() => _syncOffsetSeconds = 0.0),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              child: Text(
-                offsetStr,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: _syncOffsetSeconds == 0.0
-                      ? colors.textSecondary
-                      : colors.accent,
+  Widget _buildFocus(HookColors colors, bool reduceMotion) {
+    final current =
+        _active >= 0 && _active < _items.length ? _items[_active] : null;
+    LyricLine? next;
+    for (var i = math.max(0, _active + 1); i < _items.length; i++) {
+      if (_items[i].line != null) {
+        next = _items[i].line;
+        break;
+      }
+    }
+    return LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 44, 28, 84),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : const Duration(milliseconds: 320),
+                          child: Align(
+                            key: ValueKey('focus:$_active'),
+                            alignment: Alignment.centerLeft,
+                            child: current?.line != null
+                                ? GestureDetector(
+                                    onTap: () => _seekTo(current.line!),
+                                    child: Text(current!.line!.text,
+                                        style: TextStyle(
+                                          color: colors.textPrimary,
+                                          fontSize: constraints.maxWidth < 360
+                                              ? 32
+                                              : 38,
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.15,
+                                          letterSpacing: -0.8,
+                                        )),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                        if (current?.isGap == true)
+                                          _BreakDots(
+                                              item: current!,
+                                              active: true,
+                                              clock: _clock,
+                                              color: colors.textPrimary,
+                                              reduceMotion: reduceMotion),
+                                        Text(
+                                            _active < 0
+                                                ? 'Скоро начнётся'
+                                                : 'Музыка продолжается',
+                                            style: TextStyle(
+                                                color: colors.textSecondary,
+                                                fontSize: 24,
+                                                height: 1.3)),
+                                      ]),
+                          ),
+                        ),
+                        if (next != null) ...[
+                          const SizedBox(height: 28),
+                          Text(next.text,
+                              style: TextStyle(
+                                  color: colors.textSecondary
+                                      .withValues(alpha: 0.65),
+                                  fontSize: 18,
+                                  height: 1.4)),
+                        ],
+                      ]),
                 ),
               ),
-            ),
-          ),
-          _buildOffsetBtn('+0.1s', () => _shiftOffset(0.1)),
-          _buildOffsetBtn('+0.5s', () => _shiftOffset(0.5)),
-          IconButton(
-            tooltip: 'Скрыть настройку',
-            constraints: const BoxConstraints.tightFor(width: 28, height: 28),
-            padding: EdgeInsets.zero,
-            iconSize: 16,
-            icon: Icon(
-              MingCuteIcons.mgc_close_line,
-              color: colors.textSecondary,
-            ),
-            onPressed: () => setState(() => _showOffsetControls = false),
-          ),
-        ],
-      ),
+            ));
+  }
+
+  Widget _buildOffsetBar(HookColors colors) {
+    final offset =
+        '${_syncOffsetSeconds > 0 ? '+' : ''}${_syncOffsetSeconds.toStringAsFixed(1)} с';
+    return DecoratedBox(
+      decoration: BoxDecoration(
+          color: colors.surface, borderRadius: BorderRadius.circular(24)),
+      child: Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            IconButton(
+                tooltip: 'Уменьшить сдвиг на 0.1 с',
+                onPressed: () => _shiftOffset(-0.1),
+                icon: Icon(Icons.remove_rounded, color: colors.textPrimary)),
+            TextButton(
+                onPressed: () => _setOffset(0),
+                child: Text('Сдвиг: $offset',
+                    style: TextStyle(color: colors.textPrimary, fontSize: 12))),
+            IconButton(
+                tooltip: 'Увеличить сдвиг на 0.1 с',
+                onPressed: () => _shiftOffset(0.1),
+                icon: Icon(Icons.add_rounded, color: colors.textPrimary)),
+            IconButton(
+                tooltip: 'Скрыть настройку',
+                onPressed: () => setState(() => _showOffsetControls = false),
+                icon: Icon(Icons.close_rounded,
+                    color: colors.textSecondary, size: 18)),
+          ]),
     );
   }
 
-  void _shiftOffset(double delta) {
-    setState(() {
-      _syncOffsetSeconds =
-          double.parse((_syncOffsetSeconds + delta).toStringAsFixed(1));
-    });
-  }
+  void _shiftOffset(double delta) => _setOffset(_syncOffsetSeconds + delta);
 
-  Widget _buildOffsetBtn(String label, VoidCallback onTap) {
-    final colors = widget.theme.colors;
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: colors.textPrimary,
-          ),
-        ),
-      ),
-    );
+  void _setOffset(double value) {
+    setState(() => _syncOffsetSeconds =
+        double.parse(value.clamp(-15.0, 15.0).toStringAsFixed(1)));
+    final key = _offsetTrackKey;
+    if (key == null) return;
+    unawaited(ref
+        .read(localStorageServiceProvider)
+        .saveLyricsOffset(key, _syncOffsetSeconds)
+        .catchError((Object error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось сохранить сдвиг текста.')),
+        );
+      }
+    }));
   }
 }
 
 const _lineStyle = TextStyle(
   fontSize: 27,
-  fontWeight: FontWeight.w800,
+  fontWeight: FontWeight.w700,
   height: 1.22,
   letterSpacing: -0.4,
 );
@@ -501,6 +583,7 @@ class _LineTile extends StatelessWidget {
   final ValueListenable<Duration> clock;
   final HookColors colors;
   final bool reduceMotion;
+  final bool wordSweep;
   final VoidCallback onTap;
 
   const _LineTile({
@@ -512,6 +595,7 @@ class _LineTile extends StatelessWidget {
     required this.colors,
     required this.reduceMotion,
     required this.onTap,
+    this.wordSweep = true,
   });
 
   static double _progress(LyricWord w, Duration pos) {
@@ -542,27 +626,34 @@ class _LineTile extends StatelessWidget {
           };
     final animate = !reduceMotion;
 
-    final body = TweenAnimationBuilder<double>(
-      tween: Tween(end: isActive ? 1.0 : 0.0),
-      duration: animate ? const Duration(milliseconds: 420) : Duration.zero,
-      curve: _easeOut,
-      builder: (context, emphasis, _) {
-        Widget wrap(Duration? pos) => _WordsWrap(
-              words: words,
-              progressOf: (w) =>
-                  pos == null ? (isPast ? 1.0 : 0.0) : _progress(w, pos),
-              emphasis: emphasis,
-              realTimings: line.hasRealWordTimings,
-              colors: colors,
-              reduceMotion: reduceMotion,
-            );
-        if (!isActive) return wrap(null);
-        return ValueListenableBuilder<Duration>(
-          valueListenable: clock,
-          builder: (context, pos, _) => wrap(pos),
-        );
-      },
-    );
+    final body = !wordSweep
+        ? Text(
+            line.text,
+            style: _lineStyle.copyWith(
+                color: isActive ? colors.textPrimary : colors.textSecondary),
+          )
+        : TweenAnimationBuilder<double>(
+            tween: Tween(end: isActive ? 1.0 : 0.0),
+            duration:
+                animate ? const Duration(milliseconds: 420) : Duration.zero,
+            curve: _easeOut,
+            builder: (context, emphasis, _) {
+              Widget wrap(Duration? pos) => _WordsWrap(
+                    words: words,
+                    progressOf: (w) =>
+                        pos == null ? (isPast ? 1.0 : 0.0) : _progress(w, pos),
+                    emphasis: emphasis,
+                    realTimings: line.hasRealWordTimings,
+                    colors: colors,
+                    reduceMotion: reduceMotion,
+                  );
+              if (!isActive) return wrap(null);
+              return ValueListenableBuilder<Duration>(
+                valueListenable: clock,
+                builder: (context, pos, _) => wrap(pos),
+              );
+            },
+          );
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
