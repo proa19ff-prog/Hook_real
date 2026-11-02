@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import '../../core/diagnostics/playback_diagnostics.dart';
 import '../search/domain/search_query_normalizer.dart';
 import 'models/media_track.dart';
 import 'models/resolved_stream.dart';
@@ -23,14 +24,12 @@ class StreamResolver {
     SoundCloudExtractor? scExtractor,
     SpotifyCatalogService? spotifyCatalog,
     List<MusicSource>? additionalSources,
-    Duration searchTimeout = const Duration(seconds: 9),
-    Duration resolveTimeout = const Duration(seconds: 14),
-  })  : _scExtractor = scExtractor ?? SoundCloudExtractor(),
-        _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService(),
-        _additionalSources =
-            additionalSources ?? [YouTubeMusicSource(), AudiusSource()],
-        _searchTimeout = searchTimeout,
-        _resolveTimeout = resolveTimeout;
+    this._searchTimeout = const Duration(seconds: 9),
+    this._resolveTimeout = const Duration(seconds: 14),
+  }) : _scExtractor = scExtractor ?? SoundCloudExtractor(),
+       _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService(),
+       _additionalSources =
+           additionalSources ?? [YouTubeMusicSource(), AudiusSource()];
 
   static String fixKeyboardLayout(String input) =>
       SearchQueryNormalizer.fixKeyboardLayout(input);
@@ -111,12 +110,15 @@ class StreamResolver {
     if (queryWords.isEmpty || textWords.length < queryWords.length) {
       return false;
     }
-    for (var start = 0;
-        start <= textWords.length - queryWords.length;
-        start++) {
-      if (List.generate(queryWords.length,
-              (i) => _fuzzyWordEquals(queryWords[i], textWords[start + i]))
-          .every((value) => value)) {
+    for (
+      var start = 0;
+      start <= textWords.length - queryWords.length;
+      start++
+    ) {
+      if (List.generate(
+        queryWords.length,
+        (i) => _fuzzyWordEquals(queryWords[i], textWords[start + i]),
+      ).every((value) => value)) {
         return true;
       }
     }
@@ -136,7 +138,8 @@ class StreamResolver {
     'mashup': RegExp(r'\bmash ?up\b'),
     'cover': RegExp(r'\b(cover|tribute)\b'),
     'speed': RegExp(
-        r'\b(slowed|reverb|sped|speed ?up|nightcore|8d|bass ?boost(ed)?)\b'),
+      r'\b(slowed|reverb|sped|speed ?up|nightcore|8d|bass ?boost(ed)?)\b',
+    ),
     'live': RegExp(r'\blive\b'),
     'acoustic': RegExp(r'\bacoustic\b'),
     'instrumental': RegExp(r'\b(instrumental|karaoke)\b|минус'),
@@ -246,9 +249,11 @@ class StreamResolver {
       return false;
     }
 
-    final titleMatches = candidateTitle == targetTitle ||
+    final titleMatches =
+        candidateTitle == targetTitle ||
         _hasPhrase(candidateTitle, targetTitle);
-    final artistMatches = _compact(candidateArtist) == _compact(targetArtist) ||
+    final artistMatches =
+        _compact(candidateArtist) == _compact(targetArtist) ||
         _hasPhrase(candidateArtist, targetArtist) ||
         _hasPhrase(candidateFullTitle, targetArtist) ||
         _compact(candidateFullTitle).contains(_compact(targetArtist));
@@ -417,13 +422,15 @@ class StreamResolver {
   /// True when some result contains every query word (as a word prefix) in
   /// its title or artist.
   static bool _hasFullMatch(Iterable<MediaTrack> tracks, String query) {
-    final qWords =
-        _words(_loose(_norm(query))).where((w) => w.length >= 2).toList();
+    final qWords = _words(_loose(_norm(query)))
+        .where((w) => w.length >= 2)
+        .toList();
     if (qWords.isEmpty) return true;
     return tracks.any((t) {
       final words = _words(_loose(_norm('${t.title} ${t.artist}')));
-      return qWords.every((q) =>
-              words.any((w) => w.startsWith(q) || _fuzzyWordEquals(w, q))) ||
+      return qWords.every(
+            (q) => words.any((w) => w.startsWith(q) || _fuzzyWordEquals(w, q)),
+          ) ||
           _hasFuzzyPhrase(_normFull(t.title), _normFull(query));
     });
   }
@@ -435,8 +442,9 @@ class StreamResolver {
       return math.max(0.0, 100.0 - 12.0 * position);
     }
     final plays = _scExtractor.playbackCount(track.id);
-    final popularity =
-        plays > 0 ? math.min(math.log(plays) / math.ln10 * 12.0, 100.0) : 0.0;
+    final popularity = plays > 0
+        ? math.min(math.log(plays) / math.ln10 * 12.0, 100.0)
+        : 0.0;
     return math.max(0.0, 60.0 - 8.0 * position) + popularity;
   }
 
@@ -450,7 +458,8 @@ class StreamResolver {
   }) async {
     final normalizedQuery = SearchQueryNormalizer.normalize(query);
     if (normalizedQuery.isEmpty || _disposed) return const [];
-    final selected = sources ??
+    final selected =
+        sources ??
         {
           if (includeSoundCloud) TrackSource.soundcloud,
           if (includeSpotify) TrackSource.spotify,
@@ -468,41 +477,69 @@ class StreamResolver {
     var hadFailure = false;
 
     Future<void> collect(
-        Future<List<MediaTrack>> request, int queryIndex) async {
+      Future<List<MediaTrack>> request,
+      int queryIndex,
+      TrackSource source,
+    ) async {
       try {
         final list = await request.timeout(_searchTimeout);
+        PlaybackDiagnostics.record(
+          'search.completed',
+          source: source.name,
+          count: list.length,
+        );
         for (var i = 0; i < list.length; i++) {
           final track = list[i];
           if (!selected.contains(track.source)) continue;
           final rank = _rankBonus(track, i) * (queryIndex == 0 ? 1.0 : 0.8);
-          bonus[_matchKey(track)] =
-              math.max(bonus[_matchKey(track)] ?? 0, rank);
+          bonus[_matchKey(track)] = math.max(
+            bonus[_matchKey(track)] ?? 0,
+            rank,
+          );
           rawResults.add(track);
         }
-      } catch (_) {
+      } catch (error) {
         // One blocked source must not discard another source's results.
+        PlaybackDiagnostics.record(
+          'search.failed',
+          source: source.name,
+          error: error,
+        );
         hadFailure = true;
       }
     }
 
     Future<void> retrieve(String q) => Future.wait<void>([
-          if (selected.contains(TrackSource.spotify))
-            collect(
-                _spotifyCatalog.searchTracks(q,
-                    country: _cyrillic.hasMatch(q) ? 'ru' : 'us'),
-                searchQueries.indexOf(q)),
-          if (selected.contains(TrackSource.soundcloud))
-            collect(_scExtractor.searchTracks(q), searchQueries.indexOf(q)),
-          for (final source in _additionalSources)
-            if (selected.contains(source.source))
-              collect(source.searchTracks(q), searchQueries.indexOf(q)),
-        ]).then((_) {});
+      if (selected.contains(TrackSource.spotify))
+        collect(
+          _spotifyCatalog.searchTracks(
+            q,
+            country: _cyrillic.hasMatch(q) ? 'ru' : 'us',
+          ),
+          searchQueries.indexOf(q),
+          TrackSource.spotify,
+        ),
+      if (selected.contains(TrackSource.soundcloud))
+        collect(
+          _scExtractor.searchTracks(q),
+          searchQueries.indexOf(q),
+          TrackSource.soundcloud,
+        ),
+      for (final source in _additionalSources)
+        if (selected.contains(source.source))
+          collect(
+            source.searchTracks(q),
+            searchQueries.indexOf(q),
+            source.source,
+          ),
+    ]).then((_) {});
 
     final layout = fixKeyboardLayout(normalizedQuery);
     // Always retrieve meaningful phonetic variants, even if the original query
     // already returned many irrelevant uploads. Pure layout guessing is last.
-    final primary =
-        searchQueries.where((q) => q == normalizedQuery || q != layout);
+    final primary = searchQueries.where(
+      (q) => q == normalizedQuery || q != layout,
+    );
     await Future.wait(primary.map(retrieve));
     if (layout != normalizedQuery &&
         searchQueries.contains(layout) &&
@@ -539,7 +576,8 @@ class StreamResolver {
         key = '$key|${track.duration.inSeconds}';
         existing = groups[key];
       }
-      final preferNew = existing == null ||
+      final preferNew =
+          existing == null ||
           (!existing.track.source.isCatalog &&
               (track.source.isCatalog || score > existing.score));
       groups[key] = (
@@ -554,8 +592,10 @@ class StreamResolver {
             ? score
             : _matchKey(a.track).compareTo(_matchKey(b.track));
       });
-    final output =
-        ranked.take(40).map((entry) => entry.track).toList(growable: false);
+    final output = ranked
+        .take(40)
+        .map((entry) => entry.track)
+        .toList(growable: false);
     if (!hadFailure) {
       if (_searchCache.length >= 50) {
         _searchCache.remove(_searchCache.keys.first);
@@ -580,11 +620,7 @@ class StreamResolver {
       final url = await _scExtractor.resolveAudioStreamUrl(track.id);
       return url == null || url.isEmpty
           ? null
-          : ResolvedStream(
-              url,
-              source: track.source,
-              duration: track.duration,
-            );
+          : ResolvedStream(url, source: track.source, duration: track.duration);
     }
     for (final source in _additionalSources) {
       if (source.source == track.source) return source.resolveTrack(track);
@@ -638,7 +674,9 @@ class StreamResolver {
   }
 
   Future<List<MediaTrack>> _searchSource(
-      TrackSource source, String query) async {
+    TrackSource source,
+    String query,
+  ) async {
     if (source == TrackSource.soundcloud) {
       return _scExtractor.searchTracks(query, limit: 24);
     }
@@ -660,7 +698,7 @@ class StreamResolver {
     final completion = Completer<ResolvedStream?>();
     final sources = {
       TrackSource.soundcloud,
-      ..._additionalSources.map((s) => s.source)
+      ..._additionalSources.map((s) => s.source),
     };
     var remaining = sources.length;
     bool active() =>
@@ -674,8 +712,10 @@ class StreamResolver {
       unawaited(() async {
         try {
           final match = await _resolveCatalogAtSource(
-                  track, source, sourceActive)
-              .timeout(_searchTimeout + _resolveTimeout, onTimeout: () => null);
+            track,
+            source,
+            sourceActive,
+          ).timeout(_searchTimeout + _resolveTimeout, onTimeout: () => null);
           if (match != null && active()) {
             if (_matchCache.length >= 200) {
               _matchCache.remove(_matchCache.keys.first);
@@ -683,7 +723,12 @@ class StreamResolver {
             _matchCache[key] = match.track;
             completion.complete(match.stream);
           }
-        } catch (_) {
+        } catch (error) {
+          PlaybackDiagnostics.record(
+            'catalog.failed',
+            source: source.name,
+            error: error,
+          );
           // Continue with another independent provider.
         } finally {
           finished = true;
@@ -706,36 +751,57 @@ class StreamResolver {
     Future<({MediaTrack track, ResolvedStream stream})?> tryCandidates(
       Iterable<MediaTrack> candidates,
     ) async {
-      final ranked = candidates
-          .where((candidate) =>
-              candidate.source == source &&
-              !_isBadMatch(candidate) &&
-              isPlayableMatch(target, candidate))
-          .toList()
-        ..sort((a, b) => scoreCandidate(target, b,
-                plays: source == TrackSource.soundcloud
-                    ? _scExtractor.playbackCount(b.id)
-                    : 0)
-            .compareTo(scoreCandidate(target, a,
-                plays: source == TrackSource.soundcloud
-                    ? _scExtractor.playbackCount(a.id)
-                    : 0)));
+      final ranked =
+          candidates
+              .where(
+                (candidate) =>
+                    candidate.source == source &&
+                    !_isBadMatch(candidate) &&
+                    isPlayableMatch(target, candidate),
+              )
+              .toList()
+            ..sort(
+              (a, b) =>
+                  scoreCandidate(
+                    target,
+                    b,
+                    plays: source == TrackSource.soundcloud
+                        ? _scExtractor.playbackCount(b.id)
+                        : 0,
+                  ).compareTo(
+                    scoreCandidate(
+                      target,
+                      a,
+                      plays: source == TrackSource.soundcloud
+                          ? _scExtractor.playbackCount(a.id)
+                          : 0,
+                    ),
+                  ),
+            );
       for (final candidate in ranked.take(3)) {
         if (!active()) return null;
         if (!tried.add(_matchKey(candidate))) continue;
         try {
-          final resolved =
-              await resolveStream(candidate).timeout(_resolveTimeout);
+          final resolved = await resolveStream(candidate)
+              .timeout(_resolveTimeout);
           if (resolved != null && !resolved.isEmpty && active()) {
             final duration = resolved.duration;
             if (duration != null &&
                 !isPlayableMatch(
-                    target, candidate.copyWith(duration: duration))) {
+                  target,
+                  candidate.copyWith(duration: duration),
+                )) {
               continue;
             }
             return (track: candidate, stream: resolved);
           }
-        } catch (_) {}
+        } catch (error) {
+          PlaybackDiagnostics.record(
+            'catalog.resolve.failed',
+            source: source.name,
+            error: error,
+          );
+        }
       }
       return null;
     }
@@ -757,21 +823,30 @@ class StreamResolver {
       else
         '${target.artist} ${target.title}'.trim(),
     };
-    final batches = await Future.wait(queries.map((query) async {
-      try {
-        return await _searchSource(source, query).timeout(_searchTimeout);
-      } catch (_) {
-        return <MediaTrack>[];
-      }
-    }));
+    final batches = await Future.wait(
+      queries.map((query) async {
+        try {
+          return await _searchSource(source, query).timeout(_searchTimeout);
+        } catch (error) {
+          PlaybackDiagnostics.record(
+            'catalog.search.failed',
+            source: source.name,
+            error: error,
+          );
+          return <MediaTrack>[];
+        }
+      }),
+    );
     if (!active()) return null;
     return tryCandidates(batches.expand((batch) => batch));
   }
 
   /// Gets related SoundCloud tracks for a seed, resolving a catalog seed to
   /// the best matching SoundCloud upload when necessary.
-  Future<List<MediaTrack>> relatedTracks(MediaTrack seed,
-      {int limit = 20}) async {
+  Future<List<MediaTrack>> relatedTracks(
+    MediaTrack seed, {
+    int limit = 20,
+  }) async {
     if (seed.source == TrackSource.soundcloud) {
       return _scExtractor.relatedTracks(seed.id, limit: limit);
     }
@@ -781,11 +856,13 @@ class StreamResolver {
   }
 
   Future<MediaTrack?> _findSoundCloudMatch(MediaTrack track) async {
-    final query =
-        '${_primaryArtist(track.artist)} ${_cleanTitle(track.title)}'.trim();
+    final query = '${_primaryArtist(track.artist)} ${_cleanTitle(track.title)}'
+        .trim();
     final candidates = await _scExtractor.searchTracks(query, limit: 12);
-    final usable = candidates.where((candidate) =>
-        !_isBadMatch(candidate) && isPlayableMatch(track, candidate));
+    final usable = candidates.where(
+      (candidate) =>
+          !_isBadMatch(candidate) && isPlayableMatch(track, candidate),
+    );
     MediaTrack? best;
     var bestScore = double.negativeInfinity;
     for (final candidate in usable) {

@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:audio_session/audio_session.dart';
 import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:just_audio/just_audio.dart';
+
+import '../../../core/diagnostics/playback_diagnostics.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
@@ -17,8 +20,11 @@ class AudioPlaybackError {
   final String message;
   final Object? cause;
 
-  const AudioPlaybackError(
-      {required this.track, required this.message, this.cause});
+  const AudioPlaybackError({
+    required this.track,
+    required this.message,
+    this.cause,
+  });
 }
 
 class AudioPlayerService extends audio_service.BaseAudioHandler
@@ -83,12 +89,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     AudioPlayer? player,
     StreamResolver? resolver,
     AudioCacheManager? cacheManager,
-    LocalStorageService? storageService,
-  })  : _player =
-            player ?? AudioPlayer(audioLoadConfiguration: _loadConfiguration),
-        _resolver = resolver ?? StreamResolver(),
-        _cacheManager = cacheManager ?? AudioCacheManager(),
-        _storageService = storageService {
+    this._storageService,
+  }) : _player =
+           player ??
+           AudioPlayer(
+             audioLoadConfiguration: _loadConfiguration,
+             // just_audio 0.9's header proxy overwrites a source User-Agent
+             // with Dart's default. Android supports per-source headers natively.
+             useProxyForRequestHeaders: !Platform.isAndroid,
+           ),
+       _resolver = resolver ?? StreamResolver(),
+       _cacheManager = cacheManager ?? AudioCacheManager() {
     _waveService = TrackWaveService(_resolver);
   }
 
@@ -122,16 +133,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         album: track.album ?? track.artist,
         title: track.title,
         artist: track.artist,
-        artUri:
-            track.artworkUrl.isNotEmpty ? Uri.tryParse(track.artworkUrl) : null,
+        artUri: track.artworkUrl.isNotEmpty
+            ? Uri.tryParse(track.artworkUrl)
+            : null,
         duration: track.duration,
       );
 
   bool _isFavorite(MediaTrack track) =>
       _storageService?.getFavorites().any(
-            (favorite) =>
-                favorite.id == track.id && favorite.source == track.source,
-          ) ??
+        (favorite) =>
+            favorite.id == track.id && favorite.source == track.source,
+      ) ??
       false;
 
   audio_service.AudioProcessingState _toAudioProcessingState(
@@ -216,8 +228,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
             .resolveStream(track)
             .timeout(const Duration(seconds: 25));
         if (resolved != null && !resolved.isEmpty) {
-          if (_urlCache.length >= 100) _urlCache.remove(_urlCache.keys.first);
-          _urlCache[key] = (stream: resolved, resolvedAt: DateTime.now());
+          if (resolved.isReusable) {
+            if (_urlCache.length >= 100) _urlCache.remove(_urlCache.keys.first);
+            _urlCache[key] = (stream: resolved, resolvedAt: DateTime.now());
+          }
           return resolved;
         }
         return null;
@@ -237,14 +251,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       unawaited(_extendWave());
     }
     if (_isShuffle || _currentIndex + 1 >= _queue.length) return;
-    _resolveUrl(_queue[_currentIndex + 1]).ignore();
+    prefetch([_queue[_currentIndex + 1]]);
   }
 
   /// Resolves streams ahead of a tap (e.g. the top search results), so the
   /// tap only has to buffer audio. Failures are ignored; a tap resolves again.
   void prefetch(Iterable<MediaTrack> tracks) {
     for (final track in tracks) {
-      if (track.source == TrackSource.local) continue;
+      if (track.source == TrackSource.local ||
+          track.source == TrackSource.youtubeMusic) {
+        continue;
+      }
       _resolveUrl(track).catchError((_) => null).ignore();
     }
   }
@@ -264,8 +281,9 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     _noisySubscription = session.becomingNoisyEventStream.listen((_) {
       pause();
     });
-    _favoritesSubscription = _storageService?.favoritesChanges
-        .listen((_) => _broadcastPlaybackState());
+    _favoritesSubscription = _storageService?.favoritesChanges.listen(
+      (_) => _broadcastPlaybackState(),
+    );
 
     // Auto-advance to next track when finished
     _playerStateSubscription = _player.playerStateStream.listen((state) {
@@ -285,8 +303,9 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     _waveGeneration++;
     _queue.clear();
     _queue.addAll(tracks);
-    _currentIndex =
-        tracks.isEmpty ? -1 : startIndex.clamp(0, tracks.length - 1);
+    _currentIndex = tracks.isEmpty
+        ? -1
+        : startIndex.clamp(0, tracks.length - 1);
     _notifyQueue();
 
     if (_queue.isNotEmpty) {
@@ -348,9 +367,8 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   }
 
   /// Plays a specific track, checking local cache first, then resolving stream URL.
-  /// On failure it retries with a freshly-resolved URL (signed SoundCloud URLs
-  /// expire → CDN answers 403) and finally falls back to re-matching the song
-  /// via a SoundCloud search before reporting an error.
+  /// On failure refreshes the same recording's signed URL first. Only catalog
+  /// records may then try another matching public source.
   Future<void> playTrack(MediaTrack track) async {
     final requestId = ++_playRequestId;
     if (!_errorController.isClosed) _errorController.add(null);
@@ -366,14 +384,26 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       if (attemptedPlayback) _resolver.forgetMatch(track);
       _player.stop().ignore();
       _setCurrentTrack(null);
+      PlaybackDiagnostics.record(
+        'playback.failed',
+        source: track.source.name,
+        error: cause,
+      );
+      final forbidden =
+          cause != null &&
+          PlaybackDiagnostics.failureLabel(cause) == 'HTTP 403';
       if (!_errorController.isClosed) {
-        _errorController.add(AudioPlaybackError(
-          track: track,
-          message: track.source.isCatalog
-              ? 'Полная версия не найдена в доступных источниках. Проверьте сеть или попробуйте позже.'
-              : 'Источник ${track.source.label} не смог воспроизвести трек. Проверьте сеть или попробуйте позже.',
-          cause: cause,
-        ));
+        _errorController.add(
+          AudioPlaybackError(
+            track: track,
+            message: forbidden
+                ? 'Сервер аудио отклонил доступ (HTTP 403). Трек найден, но поток недоступен. VPN не гарантирует доступ к аудио.'
+                : track.source.isCatalog
+                ? 'Полная версия не найдена в доступных источниках. Проверьте сеть или попробуйте позже.'
+                : 'Источник ${track.source.label} не смог воспроизвести трек. Проверьте сеть или попробуйте позже.',
+            cause: cause,
+          ),
+        );
       }
     }
 
@@ -387,7 +417,8 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
       final isRemote =
           playUrl.startsWith('http://') || playUrl.startsWith('https://');
-      final isLocal = !isRemote &&
+      final isLocal =
+          !isRemote &&
           (playUrl.startsWith('file:') || File(playUrl).existsSync());
       final audioSource = isLocal
           ? AudioSource.file(
@@ -404,9 +435,25 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
                   : stream.headers,
             );
 
-      final actualDuration = await _player
-          .setAudioSource(audioSource)
-          .timeout(const Duration(seconds: 20));
+      PlaybackDiagnostics.record(
+        'native.load',
+        source: (stream?.source ?? track.source).name,
+        url: playUrl,
+      );
+      Duration? actualDuration;
+      try {
+        actualDuration = await _player
+            .setAudioSource(audioSource)
+            .timeout(const Duration(seconds: 20));
+      } catch (error) {
+        PlaybackDiagnostics.record(
+          'native.failed',
+          source: (stream?.source ?? track.source).name,
+          url: playUrl,
+          error: error,
+        );
+        rethrow;
+      }
       if (requestId != _playRequestId) return true;
       // Metadata alone cannot prove a CDN returned the full song. Reject an
       // obvious preview after the native decoder reports its real duration.
@@ -416,10 +463,18 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
                   track.duration.inMilliseconds * 0.8 ||
               (track.source.isCatalog &&
                   !StreamResolver.isPlayableMatch(
-                      track, track.copyWith(duration: actualDuration))))) {
+                    track,
+                    track.copyWith(duration: actualDuration),
+                  )))) {
         await _player.stop();
         return false;
       }
+      PlaybackDiagnostics.record(
+        'native.ready',
+        source: (stream?.source ?? track.source).name,
+        url: playUrl,
+        durationMs: actualDuration?.inMilliseconds,
+      );
       _playbackSource =
           stream?.source ?? (track.source.isCatalog ? null : track.source);
       if (!_sourceController.isClosed) _sourceController.add(_playbackSource);
@@ -427,14 +482,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       // just_audio's play() future completes only when playback pauses or
       // ends, so it must not be awaited with a timeout.
       unawaited(
-          _player.play().catchError((Object error) => reportError(error)));
+        _player.play().catchError((Object error) => reportError(error)),
+      );
       unawaited(_storageService?.addToHistory(track));
       _prefetchNext();
       return true;
     }
 
-    Future<bool> tryStart(Future<ResolvedStream?> Function() resolve,
-        {required Duration timeout}) async {
+    Future<bool> tryStart(
+      Future<ResolvedStream?> Function() resolve, {
+      required Duration timeout,
+    }) async {
       try {
         return await startWith(await resolve().timeout(timeout));
       } catch (error) {
@@ -445,9 +503,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
     try {
       // Resolve while the session finishes initializing instead of after it.
-      // Errors are swallowed here because they could land before tryStart
-      // listens; a failed first attempt is retried below anyway.
-      final firstStream = _resolveStream(track).catchError((Object _) => null);
+      // Handle early errors immediately, but retain their cause: resolution can
+      // fail with HTTP 403 before any native audio load has even been attempted.
+      final firstStream = _resolveStream(track).catchError((Object error) {
+        lastError = error;
+        PlaybackDiagnostics.record(
+          'resolve.failed',
+          source: track.source.name,
+          error: error,
+        );
+        return null;
+      });
       await initialize();
       if (requestId != _playRequestId) return;
 
@@ -457,8 +523,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       await _player.stop();
 
       // Attempt 1: cached, prefetched, or freshly resolved stream.
-      if (await tryStart(() => firstStream,
-          timeout: const Duration(seconds: 25))) {
+      if (await tryStart(
+        () => firstStream,
+        timeout: const Duration(seconds: 25),
+      )) {
         return;
       }
 
@@ -468,8 +536,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         // Refresh only the signed URL first. Banning the matched recording at
         // this point would lose the only original just because its URL expired.
         _urlCache.remove(_cacheKey(track));
-        if (await tryStart(() => _resolveStream(track),
-            timeout: const Duration(seconds: 25))) {
+        if (await tryStart(
+          () => _resolveStream(track),
+          timeout: const Duration(seconds: 25),
+        )) {
           return;
         }
         if (requestId != _playRequestId) return;
@@ -478,8 +548,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         // the original URL failed too. Direct uploads retain their identity.
         if (track.source.isCatalog) {
           _resolver.forgetMatch(track);
-          if (await tryStart(() => _resolver.resolveSpotifyTrack(track),
-              timeout: const Duration(seconds: 25))) {
+          if (await tryStart(
+            () => _resolver.resolveSpotifyTrack(track),
+            timeout: const Duration(seconds: 25),
+          )) {
             return;
           }
         }
@@ -533,15 +605,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       relatedSeed: relatedSeed,
       excluded: _waveSeen,
     );
-    _waveExtension = future.then((tracks) {
-      if (generation != _waveGeneration || !_waveActive || tracks.isEmpty) {
-        return;
-      }
-      _waveSeen.addAll(tracks.map(TrackWaveService.trackKey));
-      _queue.addAll(tracks);
-      _notifyQueue();
-      _prefetchNext();
-    }).whenComplete(() => _waveExtension = null);
+    _waveExtension = future
+        .then((tracks) {
+          if (generation != _waveGeneration || !_waveActive || tracks.isEmpty) {
+            return;
+          }
+          _waveSeen.addAll(tracks.map(TrackWaveService.trackKey));
+          _queue.addAll(tracks);
+          _notifyQueue();
+          _prefetchNext();
+        })
+        .whenComplete(() => _waveExtension = null);
     await _waveExtension;
   }
 

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:hook/core/constants/api_constants.dart';
+
+import '../../../core/diagnostics/playback_diagnostics.dart';
 import '../models/media_track.dart';
 
 class SoundCloudExtractor {
@@ -16,12 +18,15 @@ class SoundCloudExtractor {
   int playbackCount(String trackId) => _playCounts[trackId] ?? 0;
 
   SoundCloudExtractor({Dio? dio, String? clientId})
-      : _dio = dio ??
-            Dio(BaseOptions(
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
               connectTimeout: const Duration(seconds: 5),
               receiveTimeout: const Duration(seconds: 8),
-            )),
-        _clientId = clientId ?? ApiConstants.soundCloudFallbackClientId;
+            ),
+          ),
+      _clientId = clientId ?? ApiConstants.soundCloudFallbackClientId;
 
   static bool isFullTrack(Map<dynamic, dynamic> item) {
     final policy = item['policy']?.toString().toUpperCase();
@@ -42,8 +47,8 @@ class SoundCloudExtractor {
   }
 
   /// Concurrent searches share a refresh instead of retrying with the stale ID.
-  Future<String?> refreshClientId() => _refreshingKey ??=
-      _refreshClientId().whenComplete(() => _refreshingKey = null);
+  Future<String?> refreshClientId() => _refreshingKey ??= _refreshClientId()
+      .whenComplete(() => _refreshingKey = null);
 
   Future<String?> _refreshClientId() async {
     try {
@@ -52,8 +57,7 @@ class SoundCloudExtractor {
             'https://soundcloud.com',
             options: Options(
               headers: {
-                'User-Agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
               },
             ),
           )
@@ -61,8 +65,10 @@ class SoundCloudExtractor {
 
       final body = res.data ?? '';
       final scriptRegex = RegExp(r'<script[^>]+src="([^">]+\.js)"');
-      final scriptUrls =
-          scriptRegex.allMatches(body).map((m) => m.group(1)!).toList();
+      final scriptUrls = scriptRegex
+          .allMatches(body)
+          .map((m) => m.group(1)!)
+          .toList();
 
       // Check scripts starting from the end where app/vendor bundles typically live
       for (final scriptUrl in scriptUrls.reversed.take(4)) {
@@ -91,17 +97,22 @@ class SoundCloudExtractor {
   }
 
   /// Searches tracks on SoundCloud API v2
-  Future<List<MediaTrack>> searchTracks(String query,
-      {int limit = 25, bool isRetry = false}) async {
+  Future<List<MediaTrack>> searchTracks(
+    String query, {
+    int limit = 25,
+    bool isRetry = false,
+  }) async {
     try {
-      final response = await _dio.get(
-        '${ApiConstants.soundCloudApiBaseUrl}/search/tracks',
-        queryParameters: {
-          'q': query,
-          'client_id': _clientId,
-          'limit': limit,
-        },
-      ).timeout(const Duration(seconds: 12));
+      final response = await _dio
+          .get(
+            '${ApiConstants.soundCloudApiBaseUrl}/search/tracks',
+            queryParameters: {
+              'q': query,
+              'client_id': _clientId,
+              'limit': limit,
+            },
+          )
+          .timeout(const Duration(seconds: 12));
 
       final data = response.data;
       if (data == null || data['collection'] == null) {
@@ -129,7 +140,8 @@ class SoundCloudExtractor {
         final fullDurationMs = item['full_duration'] as int? ?? durationMs;
         if (!isFullTrack(item)) continue;
 
-        var artworkUrl = item['artwork_url'] as String? ??
+        var artworkUrl =
+            item['artwork_url'] as String? ??
             user?['avatar_url'] as String? ??
             '';
 
@@ -162,7 +174,8 @@ class SoundCloudExtractor {
             title: title,
             artist: artist,
             duration: Duration(
-                milliseconds: fullDurationMs > 0 ? fullDurationMs : durationMs),
+              milliseconds: fullDurationMs > 0 ? fullDurationMs : durationMs,
+            ),
             artworkUrl: artworkUrl,
             source: TrackSource.soundcloud,
           ),
@@ -177,8 +190,18 @@ class SoundCloudExtractor {
           return searchTracks(query, limit: limit, isRetry: true);
         }
       }
+      PlaybackDiagnostics.record(
+        'soundcloud.search.failed',
+        source: TrackSource.soundcloud.name,
+        error: dioErr,
+      );
       return [];
-    } catch (_) {
+    } catch (error) {
+      PlaybackDiagnostics.record(
+        'soundcloud.search.failed',
+        source: TrackSource.soundcloud.name,
+        error: error,
+      );
       return [];
     }
   }
@@ -186,16 +209,18 @@ class SoundCloudExtractor {
   /// Returns SoundCloud's related-track feed for a known track. The stations
   /// endpoint is not available on the current API, so this deliberately uses
   /// the track-specific related endpoint.
-  Future<List<MediaTrack>> relatedTracks(String trackId,
-      {int limit = 20, bool isRetry = false}) async {
+  Future<List<MediaTrack>> relatedTracks(
+    String trackId, {
+    int limit = 20,
+    bool isRetry = false,
+  }) async {
     try {
-      final response = await _dio.get(
-        '${ApiConstants.soundCloudApiBaseUrl}/tracks/$trackId/related',
-        queryParameters: {
-          'client_id': _clientId,
-          'limit': limit,
-        },
-      ).timeout(const Duration(seconds: 12));
+      final response = await _dio
+          .get(
+            '${ApiConstants.soundCloudApiBaseUrl}/tracks/$trackId/related',
+            queryParameters: {'client_id': _clientId, 'limit': limit},
+          )
+          .timeout(const Duration(seconds: 12));
       final collection = response.data is Map
           ? (response.data['collection'] as List? ?? const [])
           : const [];
@@ -212,10 +237,12 @@ class SoundCloudExtractor {
         final artist = publisher?.trim().isNotEmpty == true
             ? publisher!.trim()
             : user?['username']?.toString() ?? 'Unknown Artist';
-        final duration = (item['full_duration'] as num?)?.toInt() ??
+        final duration =
+            (item['full_duration'] as num?)?.toInt() ??
             (item['duration'] as num?)?.toInt() ??
             0;
-        var artwork = item['artwork_url']?.toString() ??
+        var artwork =
+            item['artwork_url']?.toString() ??
             user?['avatar_url']?.toString() ??
             '';
         artwork = artwork.replaceAll('-large.', '-t500x500.');
@@ -233,14 +260,16 @@ class SoundCloudExtractor {
             'track_authorization': item['track_authorization'],
           };
         }
-        tracks.add(MediaTrack(
-          id: id,
-          title: title,
-          artist: artist,
-          duration: Duration(milliseconds: duration),
-          artworkUrl: artwork,
-          source: TrackSource.soundcloud,
-        ));
+        tracks.add(
+          MediaTrack(
+            id: id,
+            title: title,
+            artist: artist,
+            duration: Duration(milliseconds: duration),
+            artworkUrl: artwork,
+            source: TrackSource.soundcloud,
+          ),
+        );
       }
       return tracks;
     } on DioException catch (error) {
@@ -257,8 +286,10 @@ class SoundCloudExtractor {
   }
 
   /// Resolves the actual streaming URL for a SoundCloud track by track ID.
-  Future<String?> resolveAudioStreamUrl(String trackId,
-      {bool isRetry = false}) async {
+  Future<String?> resolveAudioStreamUrl(
+    String trackId, {
+    bool isRetry = false,
+  }) async {
     // Fast path: transcodings from the search response, one request to start.
     final cached = isRetry ? null : _mediaCache[trackId];
     if (cached != null) {
@@ -272,10 +303,12 @@ class SoundCloudExtractor {
     }
 
     try {
-      final trackDetailsRes = await _dio.get(
-        '${ApiConstants.soundCloudApiBaseUrl}/tracks/$trackId',
-        queryParameters: {'client_id': _clientId},
-      ).timeout(const Duration(seconds: 10));
+      final trackDetailsRes = await _dio
+          .get(
+            '${ApiConstants.soundCloudApiBaseUrl}/tracks/$trackId',
+            queryParameters: {'client_id': _clientId},
+          )
+          .timeout(const Duration(seconds: 10));
 
       final trackData = trackDetailsRes.data;
       if (trackData is! Map<String, dynamic>) return null;
@@ -361,13 +394,16 @@ class SoundCloudExtractor {
       final streamInfoUrl = t['url'] as String?;
       if (streamInfoUrl == null) continue;
       try {
-        final res = await _dio.get(
-          streamInfoUrl,
-          queryParameters: {
-            'client_id': _clientId,
-            if (auth != null && auth.isNotEmpty) 'track_authorization': auth,
-          },
-        ).timeout(const Duration(seconds: 8));
+        final res = await _dio
+            .get(
+              streamInfoUrl,
+              queryParameters: {
+                'client_id': _clientId,
+                if (auth != null && auth.isNotEmpty)
+                  'track_authorization': auth,
+              },
+            )
+            .timeout(const Duration(seconds: 8));
         final data = res.data;
         final url = data is Map ? data['url'] as String? : null;
         if (url != null && url.isNotEmpty) return url;

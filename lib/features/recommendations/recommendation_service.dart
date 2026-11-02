@@ -8,10 +8,9 @@ class RecommendationService {
   final StreamResolver _resolver;
 
   RecommendationService({
-    required LocalStorageService storage,
-    required StreamResolver resolver,
-  })  : _storage = storage,
-        _resolver = resolver;
+    required this._storage,
+    required this._resolver,
+  });
 
   static const List<String> _popularStarters = [
     'The Weeknd',

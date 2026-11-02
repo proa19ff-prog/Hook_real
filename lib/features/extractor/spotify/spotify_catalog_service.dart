@@ -1,5 +1,8 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
+
+import '../../../core/diagnostics/playback_diagnostics.dart';
 import '../models/media_track.dart';
 
 class SpotifyCatalogService {
@@ -39,8 +42,7 @@ class SpotifyCatalogService {
             },
             options: Options(
               headers: {
-                'User-Agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
               },
             ),
           )
@@ -85,7 +87,13 @@ class SpotifyCatalogService {
       if (_cache.length >= 100) _cache.remove(_cache.keys.first);
       _cache[cacheKey] = tracks;
       return List.unmodifiable(tracks);
-    } catch (_) {
+    } catch (error) {
+      PlaybackDiagnostics.record(
+        'catalog.api.failed',
+        source: TrackSource.spotify.name,
+        url: 'https://itunes.apple.com',
+        error: error,
+      );
       return const [];
     }
   }
