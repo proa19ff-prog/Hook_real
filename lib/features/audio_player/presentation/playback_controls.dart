@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../data/audio_player_service.dart';
 import 'player_state_provider.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class PlaybackControls extends ConsumerWidget {
   final HookTheme theme;
 
-  const PlaybackControls({
-    super.key,
-    required this.theme,
-  });
+  const PlaybackControls({super.key, required this.theme});
 
   String _formatDuration(Duration? d) {
     if (d == null) return '0:00';
@@ -22,6 +21,7 @@ class PlaybackControls extends ConsumerWidget {
   }
 
   void _showSpeedPitchSheet(BuildContext context, AudioPlayerService service) {
+    final strings = AppLocalizations.of(context);
     double speed = 1.0;
     double pitch = 1.0;
 
@@ -30,7 +30,8 @@ class PlaybackControls extends ConsumerWidget {
       backgroundColor: theme.colors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-            top: Radius.circular(theme.styling.borderRadius + 4)),
+          top: Radius.circular(theme.styling.borderRadius + 4),
+        ),
       ),
       builder: (ctx) {
         return StatefulBuilder(
@@ -46,14 +47,16 @@ class PlaybackControls extends ConsumerWidget {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: theme.colors.textSecondary.withValues(alpha: 0.35),
+                        color: theme.colors.textSecondary.withValues(
+                          alpha: 0.35,
+                        ),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Скорость и тональность',
+                    strings.speedAndPitch,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -64,14 +67,16 @@ class PlaybackControls extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Скорость: ${speed.toStringAsFixed(2)}x',
-                          style: TextStyle(color: theme.colors.textSecondary)),
+                      Text(
+                        strings.speedValue(speed.toStringAsFixed(2)),
+                        style: TextStyle(color: theme.colors.textSecondary),
+                      ),
                       TextButton(
                         onPressed: () {
                           setModalState(() => speed = 1.0);
                           service.setSpeed(1.0);
                         },
-                        child: const Text('Сброс'),
+                        child: Text(strings.reset),
                       ),
                     ],
                   ),
@@ -91,14 +96,16 @@ class PlaybackControls extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Высота тона: ${pitch.toStringAsFixed(2)}x',
-                          style: TextStyle(color: theme.colors.textSecondary)),
+                      Text(
+                        strings.pitchValue(pitch.toStringAsFixed(2)),
+                        style: TextStyle(color: theme.colors.textSecondary),
+                      ),
                       TextButton(
                         onPressed: () {
                           setModalState(() => pitch = 1.0);
                           service.setPitch(1.0);
                         },
-                        child: const Text('Сброс'),
+                        child: Text(strings.reset),
                       ),
                     ],
                   ),
@@ -128,12 +135,15 @@ class PlaybackControls extends ConsumerWidget {
     final playerService = ref.watch(audioPlayerServiceProvider);
     final isPlaying = ref.watch(isPlayingProvider);
     final isLoading = ref.watch(isTrackLoadingProvider);
+    final strings = AppLocalizations.of(context);
 
     final ambient = AmbientThemeScope.of(context);
     final isLight = ambient?.isLight ?? false;
     final textPrimary = ambient?.textPrimary ?? theme.colors.textPrimary;
     final textSecondary = ambient?.textSecondary ?? theme.colors.textSecondary;
-    final playBtnBg = isLight ? const Color(0xFF141419) : theme.colors.textPrimary;
+    final playBtnBg = isLight
+        ? const Color(0xFF141419)
+        : theme.colors.textPrimary;
     final playBtnFg = isLight ? Colors.white : theme.colors.background;
 
     return Column(
@@ -149,18 +159,21 @@ class PlaybackControls extends ConsumerWidget {
           children: [
             // More options
             PopupMenuButton<String>(
-              tooltip: 'Дополнительные действия',
-              icon: Icon(MingCuteIcons.mgc_more_1_line,
-                  color: textSecondary, size: 24),
+              tooltip: strings.moreActions,
+              icon: Icon(
+                MingCuteIcons.mgc_more_1_line,
+                color: textSecondary,
+                size: 24,
+              ),
               onSelected: (value) {
                 if (value == 'speed_pitch') {
                   _showSpeedPitchSheet(context, playerService);
                 }
               },
-              itemBuilder: (context) => const [
+              itemBuilder: (context) => [
                 PopupMenuItem(
                   value: 'speed_pitch',
-                  child: Text('Скорость и тональность'),
+                  child: Text(strings.speedAndPitch),
                 ),
               ],
             ),
@@ -179,22 +192,7 @@ class PlaybackControls extends ConsumerWidget {
               height: 76,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    playBtnBg,
-                    playBtnBg.withValues(alpha: 0.88),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: playBtnBg.withValues(alpha: isLight ? 0.3 : 0.25),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
+                color: playBtnBg,
               ),
               child: isLoading
                   ? Padding(
@@ -205,7 +203,7 @@ class PlaybackControls extends ConsumerWidget {
                       ),
                     )
                   : IconButton(
-                      tooltip: isPlaying ? 'Пауза' : 'Играть',
+                      tooltip: isPlaying ? strings.pause : strings.play,
                       iconSize: 42,
                       icon: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
@@ -242,8 +240,7 @@ class PlaybackControls extends ConsumerWidget {
                   color: mode != PlayerLoopMode.off
                       ? theme.colors.accent
                       : textSecondary,
-                  onTap: () =>
-                      setLocalState(playerService.toggleLoopMode),
+                  onTap: () => setLocalState(playerService.toggleLoopMode),
                 );
               },
             ),
@@ -310,7 +307,8 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
         ref.watch(durationStreamProvider).valueOrNull ?? Duration.zero;
 
     final totalMs = duration.inMilliseconds.toDouble();
-    final sliderVal = _dragValue ??
+    final sliderVal =
+        _dragValue ??
         (totalMs > 0
             ? position.inMilliseconds.toDouble().clamp(0.0, totalMs)
             : 0.0);

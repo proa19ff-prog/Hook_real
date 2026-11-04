@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
@@ -10,14 +11,12 @@ import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'playlist_detail_screen.dart';
 import 'library_provider.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   final HookTheme theme;
 
-  const LibraryScreen({
-    super.key,
-    required this.theme,
-  });
+  const LibraryScreen({super.key, required this.theme});
 
   @override
   ConsumerState<LibraryScreen> createState() => _LibraryScreenState();
@@ -49,10 +48,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   Widget build(BuildContext context) {
     final favorites = ref.watch(favoritesProvider);
     final history = ref.watch(historyProvider);
-    final cacheSizeAsync = ref.watch(cacheSizeProvider);
     final queueNotifier = ref.read(queueProvider.notifier);
     final currentTrack = ref.watch(currentTrackProvider);
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -60,111 +59,48 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+              padding: const EdgeInsets.fromLTRB(20, 18, 16, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'МЕДИАТЕКА',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                          color: colors.textPrimary,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          strings.library,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.7,
+                            color: colors.textPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Локальная коллекция и плейлисты',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textSecondary,
+                        const SizedBox(height: 4),
+                        Text(
+                          strings.localCollection,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: colors.textSecondary,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Import Link Button
-                      InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () =>
-                            ImportBottomSheet.show(context, widget.theme),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: colors.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: colors.primary.withValues(alpha: 0.35),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(MingCuteIcons.mgc_link_2_line,
-                                  size: 16, color: colors.accent),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Импорт',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-
-                      cacheSizeAsync.when(
-                        data: (bytes) => Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                colors.primary.withValues(alpha: 0.2),
-                                colors.accent.withValues(alpha: 0.15),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: colors.primary.withValues(alpha: 0.3),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(MingCuteIcons.mgc_storage_line,
-                                  size: 14, color: colors.accent),
-                              const SizedBox(width: 5),
-                              Text(
-                                _formatBytes(bytes),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  IconButton(
+                    key: const ValueKey('library-import'),
+                    tooltip: strings.importMusic,
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
+                    ),
+                    icon: Icon(
+                      MingCuteIcons.mgc_download_2_line,
+                      color: colors.textPrimary,
+                    ),
+                    onPressed: () =>
+                        ImportBottomSheet.show(context, widget.theme),
                   ),
                 ],
               ),
@@ -175,10 +111,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: TabBar(
                 controller: _tabController,
-                indicatorColor: colors.primary,
-                indicatorWeight: 3,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: colors.textPrimary,
+                indicatorWeight: 2,
                 indicatorSize: TabBarIndicatorSize.label,
-                labelColor: colors.primary,
+                labelColor: colors.textPrimary,
                 unselectedLabelColor: colors.textSecondary,
                 labelStyle: const TextStyle(
                   fontWeight: FontWeight.w700,
@@ -189,11 +127,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   fontSize: 14,
                 ),
                 dividerColor: colors.border.withValues(alpha: 0.2),
-                tabs: const [
-                  Tab(text: 'Избранное'),
-                  Tab(text: 'Плейлисты'),
-                  Tab(text: 'История'),
-                  Tab(text: 'Офлайн'),
+                tabs: [
+                  Tab(text: strings.favorites),
+                  Tab(text: strings.playlists),
+                  Tab(text: strings.history),
+                  Tab(text: strings.offline),
                 ],
               ),
             ),
@@ -206,8 +144,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   // 1. Favorites Tab
                   _buildTrackList(
                     tracks: favorites,
-                    emptyMessage:
-                        'В избранном пока пусто.\nНажмите ❤️ на треке, чтобы добавить его сюда.',
+                    emptyMessage: strings.favoritesEmpty,
                     emptyIcon: MingCuteIcons.mgc_heart_line,
                     onPlayAll: favorites.isNotEmpty
                         ? () => queueNotifier.playQueue(favorites)
@@ -229,18 +166,20 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   // 3. History Tab
                   _buildTrackList(
                     tracks: history,
-                    emptyMessage:
-                        'История прослушиваний пуста.\nВключайте треки в поиске, чтобы они появились здесь!',
+                    emptyMessage: strings.historyEmpty,
                     emptyIcon: MingCuteIcons.mgc_history_line,
                     onPlayAll: history.isNotEmpty
                         ? () => queueNotifier.playQueue(history)
                         : null,
                     trailingHeaderAction: history.isNotEmpty
                         ? TextButton.icon(
-                            icon: const Icon(MingCuteIcons.mgc_delete_2_line,
-                                size: 16),
-                            label: const Text('Очистить'),
+                            icon: const Icon(
+                              MingCuteIcons.mgc_delete_2_line,
+                              size: 16,
+                            ),
+                            label: Text(strings.clear),
                             style: TextButton.styleFrom(
+                              minimumSize: const Size(48, 48),
                               foregroundColor: colors.textSecondary,
                             ),
                             onPressed: () =>
@@ -264,73 +203,63 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
   Widget _buildPlaylistsTab() {
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
     final playlists = ref.watch(playlistsProvider);
     final queueNotifier = ref.read(queueProvider.notifier);
 
     if (playlists.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: colors.surfaceGlass.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: colors.border.withValues(alpha: 0.25),
-                  ),
-                ),
-                child: Icon(
-                  MingCuteIcons.mgc_playlist_line,
-                  size: 52,
-                  color: colors.textSecondary.withValues(alpha: 0.5),
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
+        child: Column(
+          children: [
+            Icon(
+              MingCuteIcons.mgc_playlist_line,
+              size: 40,
+              color: colors.textSecondary,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              strings.noPlaylists,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              strings.importPlaylistHint,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              icon: const Icon(MingCuteIcons.mgc_download_2_line, size: 20),
+              label: Text(strings.importMusicAction),
+              style: FilledButton.styleFrom(
+                backgroundColor: colors.textPrimary,
+                foregroundColor: colors.background,
+                minimumSize: const Size(48, 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                'У вас пока нет плейлистов',
-                style: TextStyle(
-                  color: colors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Импортируйте плейлист из Spotify или список треков!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colors.textSecondary,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 18),
-              ElevatedButton.icon(
-                icon: const Icon(MingCuteIcons.mgc_link_2_line, size: 18),
-                label: const Text('Импортировать музыку'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.primary,
-                  foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                onPressed: () => ImportBottomSheet.show(context, widget.theme),
-              ),
-            ],
-          ),
+              onPressed: () => ImportBottomSheet.show(context, widget.theme),
+            ),
+          ],
         ),
       );
     }
 
     final entries = playlists.entries.toList();
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
@@ -338,96 +267,77 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         final tracks = entry.value;
         final firstTrackArt = tracks.isNotEmpty ? tracks.first.artworkUrl : '';
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            color: colors.surfaceGlass.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colors.border.withValues(alpha: 0.3),
-            ),
-          ),
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            leading: TrackArtwork(
-              url: firstTrackArt,
-              size: 50,
-              borderRadius: BorderRadius.circular(10),
-              placeholderColor: colors.surface,
-              iconColor: colors.textSecondary,
-            ),
-            title: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Material(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(12),
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 4,
               ),
-            ),
-            subtitle: Text(
-              '${tracks.length} треков',
-              style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: 12,
+              leading: TrackArtwork(
+                url: firstTrackArt,
+                size: 50,
+                borderRadius: BorderRadius.circular(10),
+                placeholderColor: colors.surface,
+                iconColor: colors.textSecondary,
               ),
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  tooltip: 'Слушать плейлист',
-                  icon: Icon(MingCuteIcons.mgc_play_circle_fill,
-                      color: colors.primary, size: 32),
-                  onPressed: () {
-                    queueNotifier.playQueue(tracks);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Включен плейлист "$name" (${tracks.length} треков)'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
+              title: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
-                PopupMenuButton<String>(
-                  icon: Icon(MingCuteIcons.mgc_more_2_line,
-                      color: colors.textSecondary, size: 20),
-                  onSelected: (val) {
-                    if (val == 'delete') {
-                      ref.read(playlistsProvider.notifier).deletePlaylist(name);
-                    }
-                  },
-                  itemBuilder: (ctx) => [
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          Icon(MingCuteIcons.mgc_delete_line,
-                              color: Colors.redAccent, size: 20),
-                          SizedBox(width: 8),
-                          Text('Удалить плейлист',
-                              style: TextStyle(color: Colors.redAccent)),
-                        ],
-                      ),
-                    ),
-                  ],
+              ),
+              subtitle: Text(
+                strings.tracksCount(tracks.length),
+                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+              ),
+              trailing: PopupMenuButton<String>(
+                tooltip: strings.playlistActions,
+                icon: Icon(
+                  MingCuteIcons.mgc_more_2_line,
+                  color: colors.textSecondary,
                 ),
-              ],
-            ),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => PlaylistDetailScreen(
-                    theme: widget.theme,
-                    name: name,
-                    tracks: tracks,
+                onSelected: (value) {
+                  if (value == 'play') queueNotifier.playQueue(tracks);
+                  if (value == 'delete') {
+                    ref.read(playlistsProvider.notifier).deletePlaylist(name);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'play',
+                    enabled: tracks.isNotEmpty,
+                    child: Text(strings.playPlaylist),
                   ),
-                ),
-              );
-            },
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(
+                      strings.deletePlaylist,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => PlaylistDetailScreen(
+                      theme: widget.theme,
+                      name: name,
+                      tracks: tracks,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
         );
       },
@@ -445,28 +355,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     TrackSource? currentTrackSource,
   }) {
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
 
     if (tracks.isEmpty) {
-      return Center(
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colors.surfaceGlass.withValues(alpha: 0.3),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colors.border.withValues(alpha: 0.25),
-                ),
-              ),
-              child: Icon(
-                emptyIcon,
-                size: 52,
-                color: colors.textSecondary.withValues(alpha: 0.5),
-              ),
-            ),
-            const SizedBox(height: 16),
+            Icon(emptyIcon, size: 40, color: colors.textSecondary),
+            const SizedBox(height: 20),
             Text(
               emptyMessage,
               textAlign: TextAlign.center,
@@ -483,70 +380,54 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
     return Column(
       children: [
-        // Action Buttons Row (Play All / Shuffle)
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-          child: Row(
-            children: [
-              if (onPlayAll != null)
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [colors.primary, colors.accent],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.primary.withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ElevatedButton.icon(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (onPlayAll != null)
+                  FilledButton.icon(
                     icon: const Icon(MingCuteIcons.mgc_play_fill, size: 20),
-                    label: const Text('Слушать всё'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
+                    label: Text(strings.playAll),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colors.textPrimary,
+                      foregroundColor: colors.background,
+                      minimumSize: const Size(48, 48),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        horizontal: 16,
+                        vertical: 12,
                       ),
                     ),
                     onPressed: onPlayAll,
                   ),
-                ),
-              const SizedBox(width: 8),
-              if (onShuffle != null)
-                OutlinedButton.icon(
-                  icon: Icon(MingCuteIcons.mgc_shuffle_2_line,
-                      size: 16, color: colors.textPrimary),
-                  label: const Text('Перемешать'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colors.textPrimary,
-                    side:
-                        BorderSide(color: colors.border.withValues(alpha: 0.5)),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                if (onShuffle != null)
+                  IconButton.outlined(
+                    tooltip: strings.shuffle,
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 48,
                     ),
+                    icon: const Icon(
+                      MingCuteIcons.mgc_shuffle_2_line,
+                      size: 22,
+                    ),
+                    color: colors.textPrimary,
+                    onPressed: onShuffle,
                   ),
-                  onPressed: onShuffle,
-                ),
-              const Spacer(),
-              if (trailingHeaderAction != null) trailingHeaderAction,
-            ],
+                if (trailingHeaderAction != null) trailingHeaderAction,
+              ],
+            ),
           ),
         ),
 
         // Track List
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.only(bottom: 160, left: 12, right: 12),
+            padding: const EdgeInsets.only(bottom: 24, left: 12, right: 12),
             itemCount: tracks.length,
             separatorBuilder: (_, __) => Divider(
               height: 1,
@@ -554,7 +435,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
             ),
             itemBuilder: (context, index) {
               final track = tracks[index];
-              final isCurrent = track.id == currentTrackId &&
+              final isCurrent =
+                  track.id == currentTrackId &&
                   track.source == currentTrackSource;
 
               return SpotifyTrackTile(
@@ -562,10 +444,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 track: track,
                 isCurrent: isCurrent,
                 onTap: () {
-                  ref.read(queueProvider.notifier).playQueue(
-                        tracks,
-                        startIndex: index,
-                      );
+                  ref
+                      .read(queueProvider.notifier)
+                      .playQueue(tracks, startIndex: index);
                 },
               );
             },
@@ -578,6 +459,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   Widget _buildCacheTab() {
     final cacheManager = ref.watch(audioCacheManagerProvider);
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
 
     return FutureBuilder<List<CachedTrack>>(
       future: cacheManager.getCachedTracks(),
@@ -589,7 +471,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         );
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 160),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -597,39 +479,24 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: colors.surfaceGlass.withValues(alpha: 0.4),
-                  borderRadius:
-                      BorderRadius.circular(widget.theme.styling.borderRadius),
+                  color: colors.surface,
+                  borderRadius: BorderRadius.circular(
+                    widget.theme.styling.borderRadius,
+                  ),
                   border: Border.all(
                     color: colors.border.withValues(alpha: 0.4),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Column(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            colors.primary.withValues(alpha: 0.2),
-                            colors.accent.withValues(alpha: 0.2),
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(MingCuteIcons.mgc_download_2_fill,
-                          size: 40, color: colors.accent),
+                    Icon(
+                      MingCuteIcons.mgc_download_2_line,
+                      size: 32,
+                      color: colors.textSecondary,
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Локальный аудио-кэш',
+                      strings.localAudioCache,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -638,7 +505,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Прослушанные треки автоматически сохраняются в локальное хранилище для мгновенного повторного воспроизведения без интернета.',
+                      strings.cacheDescription,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -649,7 +516,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: colors.surface,
                         borderRadius: BorderRadius.circular(20),
@@ -658,7 +527,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                         ),
                       ),
                       child: Text(
-                        'Занято на устройстве: ${_formatBytes(bytes)}',
+                        strings.deviceUsage(_formatBytes(bytes)),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -669,10 +538,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
                       icon: const Icon(MingCuteIcons.mgc_delete_line, size: 18),
-                      label: const Text('Очистить весь кэш'),
+                      label: Text(strings.clearCache),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.redAccent.withValues(alpha: 0.15),
+                        minimumSize: const Size(48, 48),
+                        elevation: 0,
+                        backgroundColor: Colors.redAccent.withValues(
+                          alpha: 0.15,
+                        ),
                         foregroundColor: Colors.redAccent,
                         side: const BorderSide(color: Colors.redAccent),
                         shape: RoundedRectangleBorder(
@@ -688,7 +560,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'СОХРАНЁННЫЕ ТРЕКИ (${cachedTracks.length}):',
+                strings.savedTracksUpper(cachedTracks.length),
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -703,14 +575,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 _buildEmptyCacheList()
               else
                 ...cachedTracks.map(
-                  (cachedTrack) => _buildCachedTrackTile(
-                    cachedTrack,
-                    cacheManager,
-                  ),
+                  (cachedTrack) =>
+                      _buildCachedTrackTile(cachedTrack, cacheManager),
                 ),
               const SizedBox(height: 24),
               Text(
-                'СВОЙСТВА КЭША:',
+                strings.cacheFeaturesUpper,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -721,18 +591,18 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               const SizedBox(height: 12),
               _buildFeatureTile(
                 MingCuteIcons.mgc_wifi_off_line,
-                'Полный Offline-First',
-                'При повторном запуске аудио проигрывается напрямую из файловой системы устройства.',
+                strings.offlineFirst,
+                strings.offlineFirstDescription,
               ),
               _buildFeatureTile(
                 MingCuteIcons.mgc_diamond_line,
-                'Максимальный битрейт',
-                'Кэшируются чистые аудиопотоки Opus/M4A 160-256 kbps без перекодирования.',
+                strings.maximumBitrate,
+                strings.maximumBitrateDescription,
               ),
               _buildFeatureTile(
                 MingCuteIcons.mgc_battery_charging_line,
-                'Экономия трафика и батареи',
-                'Отсутствие повторных сетевых запросов продлевает время работы смартфона.',
+                strings.trafficAndBattery,
+                strings.trafficAndBatteryDescription,
               ),
             ],
           ),
@@ -743,11 +613,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
   Widget _buildEmptyCacheList() {
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
-        color: colors.surfaceGlass.withValues(alpha: 0.3),
+        color: colors.surface,
         borderRadius: BorderRadius.circular(widget.theme.styling.borderRadius),
         border: Border.all(color: colors.border.withValues(alpha: 0.3)),
       ),
@@ -760,7 +631,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'Кэш пока пуст',
+            strings.cacheEmpty,
             style: TextStyle(
               color: colors.textPrimary,
               fontWeight: FontWeight.bold,
@@ -768,11 +639,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ),
           const SizedBox(height: 4),
           Text(
-            'Скачанные треки появятся здесь автоматически',
-            style: TextStyle(
-              color: colors.textSecondary,
-              fontSize: 12,
-            ),
+            strings.cachedTracksAppear,
+            style: TextStyle(color: colors.textSecondary, fontSize: 12),
           ),
         ],
       ),
@@ -785,15 +653,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   ) {
     final track = cachedTrack.track;
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.surfaceGlass.withValues(alpha: 0.35),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.border.withValues(alpha: 0.3)),
-        ),
+      child: Material(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
           leading: TrackArtwork(
@@ -816,19 +683,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
             '${track.artist} · ${_formatBytes(cachedTrack.sizeBytes)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: colors.textSecondary,
-              fontSize: 12,
-            ),
+            style: TextStyle(color: colors.textSecondary, fontSize: 12),
           ),
           trailing: IconButton(
-            tooltip: 'Удалить из кэша',
+            tooltip: strings.removeFromCache,
             icon: const Icon(MingCuteIcons.mgc_delete_line),
             color: Colors.redAccent.withValues(alpha: 0.8),
-            onPressed: () => _confirmRemoveCachedTrack(
-              cacheManager,
-              cachedTrack,
-            ),
+            onPressed: () =>
+                _confirmRemoveCachedTrack(cacheManager, cachedTrack),
           ),
           onTap: () {
             ref.read(queueProvider.notifier).playTrack(track);
@@ -842,16 +704,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     AudioCacheManager cacheManager,
     CachedTrack cachedTrack,
   ) async {
+    final strings = AppLocalizations.of(context);
     final shouldRemove = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Удалить трек из кэша?'),
-        content:
-            Text('«${cachedTrack.track.title}» будет удалён с устройства.'),
+        title: Text(strings.removeCachedTrackTitle),
+        content: Text(strings.removeCachedTrackBody(cachedTrack.track.title)),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Отмена'),
+            child: Text(strings.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -859,7 +722,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Удалить'),
+            child: Text(strings.delete),
           ),
         ],
       ),
@@ -871,24 +734,22 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     if (!mounted) return;
     ref.invalidate(cacheSizeProvider);
     setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Трек удалён из кэша')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(strings.trackRemovedFromCache)));
   }
 
   Future<void> _confirmClearCache(AudioCacheManager cacheManager) async {
+    final strings = AppLocalizations.of(context);
     final shouldClear = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Очистить кэш?'),
-        content: const Text(
-          'Все сохранённые аудиофайлы будут удалены с устройства. '
-          'Избранное и история останутся без изменений.',
-        ),
+        title: Text(strings.clearCacheTitle),
+        content: Text(strings.clearCacheBody),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Отмена'),
+            child: Text(strings.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
@@ -896,7 +757,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Удалить'),
+            child: Text(strings.delete),
           ),
         ],
       ),
@@ -908,9 +769,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     if (!mounted) return;
     ref.invalidate(cacheSizeProvider);
     setState(() {});
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Локальный кэш очищен')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(strings.cacheCleared)));
   }
 
   Widget _buildFeatureTile(IconData icon, String title, String subtitle) {
@@ -920,13 +780,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, size: 20, color: colors.primary),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, size: 20, color: colors.textSecondary),
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   
   # State Management
   flutter_riverpod: ^2.6.1
@@ -33,7 +35,7 @@ dependencies:
   # Storage & System
   path_provider: ^2.1.4
   shared_preferences: ^2.3.3
-  intl: ^0.19.0
+  intl: ^0.20.3
   ming_cute_icons: ^0.0.8
 
 dev_dependencies:
@@ -50,12 +52,27 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   # assets/icons/app_logo.png (2 MB) is only the flutter_launcher_icons
   # source, so it is not bundled into the app.
   assets:
     - assets/themes/
     - assets/animations/
+    - assets/icons/app_mark.png
+    - assets/fonts/OFL.txt
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/inter-regular/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/inter-medium/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/inter-semibold/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/inter-bold/Inter-Bold.ttf
+          weight: 700
 
   shaders:
     - assets/shaders/mesh_gradient.frag

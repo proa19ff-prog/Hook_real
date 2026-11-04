@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../features/extractor/models/media_track.dart';
 
 class LocalStorageService {
@@ -40,6 +42,11 @@ class LocalStorageService {
   Future<void> saveCustomThemeJson(String json) =>
       _prefs.setString(_customThemeJsonKey, json);
 
+  // --- LOCALE ---
+  String? getLocaleCode() => _prefs.getString('hook_locale_code');
+  Future<void> saveLocaleCode(String code) =>
+      _prefs.setString('hook_locale_code', code);
+
   // --- LYRICS PRESENTATION ---
   String? getLyricsDisplayMode() =>
       _prefs.getString('hook_lyrics_display_mode');
@@ -48,8 +55,9 @@ class LocalStorageService {
 
   Map<String, dynamic> _lyricsOffsets() {
     try {
-      final decoded =
-          jsonDecode(_prefs.getString('hook_lyrics_offsets') ?? '{}');
+      final decoded = jsonDecode(
+        _prefs.getString('hook_lyrics_offsets') ?? '{}',
+      );
       return decoded is Map<String, dynamic> ? decoded : {};
     } catch (_) {
       return {};
@@ -131,9 +139,7 @@ class LocalStorageService {
 
   Future<void> addToHistory(MediaTrack track) async {
     final history = getHistory();
-    history.removeWhere(
-      (t) => t.id == track.id && t.source == track.source,
-    );
+    history.removeWhere((t) => t.id == track.id && t.source == track.source);
     history.insert(0, track);
     if (history.length > _maxHistoryCount) {
       history.removeLast();

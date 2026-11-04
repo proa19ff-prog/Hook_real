@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
+
 import '../../extractor/models/media_track.dart';
 import '../../extractor/stream_resolver.dart';
 import '../../library/presentation/library_provider.dart';
@@ -16,6 +17,10 @@ final streamResolverProvider = Provider<StreamResolver>((ref) {
   final resolver = StreamResolver();
   ref.onDispose(() => resolver.dispose());
   return resolver;
+});
+
+final youtubeAvailabilityProvider = FutureProvider<bool>((ref) {
+  return ref.watch(streamResolverProvider).checkYouTubeAvailability();
 });
 
 final audioPlayerServiceProvider = Provider<AudioPlayerService>((ref) {
@@ -189,8 +194,9 @@ class QueueNotifier extends StateNotifier<List<MediaTrack>> {
   MediaTrack? get currentTrack => _service.currentTrack;
 }
 
-final queueProvider =
-    StateNotifierProvider<QueueNotifier, List<MediaTrack>>((ref) {
+final queueProvider = StateNotifierProvider<QueueNotifier, List<MediaTrack>>((
+  ref,
+) {
   final service = ref.watch(audioPlayerServiceProvider);
   return QueueNotifier(service);
 });

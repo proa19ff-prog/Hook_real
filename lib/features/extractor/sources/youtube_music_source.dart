@@ -6,7 +6,11 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 import '../models/media_track.dart';
 import '../models/resolved_stream.dart';
+import '../../../core/diagnostics/playback_diagnostics.dart';
 import 'music_source.dart';
+import 'audio_stream_probe.dart';
+import 'youtube_http_client.dart';
+import 'youtube_proxy.dart';
 
 /// Public YouTube audio. No cookies, paid previews, downloader proxy or private
 /// backend. Availability still depends on the video, region and YouTube API.
@@ -17,29 +21,96 @@ class YouTubeMusicSource implements MusicSource {
   @override
   TrackSource get source => TrackSource.youtubeMusic;
 
-  // Keep the CDN User-Agent identical to the player client that issued the URL.
-  static final String _streamUserAgent = YoutubeApiClient
-      .androidSdkless.payload['context']['client']['userAgent'] as String;
-
   Future<T> _request<T>(
-    Future<T> Function(YoutubeExplode client) action,
+    Future<T> Function(YoutubeExplode client, HttpClient transport) action,
     Duration timeout,
   ) async {
     if (_closed) throw StateError('YouTube source is closed');
-    final transport = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 5)
-      ..idleTimeout = const Duration(seconds: 8);
-    final client = YoutubeExplode(
-      httpClient: YoutubeHttpClient(IOClient(transport)),
-    );
-    _clients.add(client);
+    Object? lastError;
+    final elapsed = Stopwatch()..start();
+
+    Future<T> attempt(String? proxy) async {
+      if (_closed) throw StateError('YouTube source is closed');
+      final remaining = timeout - elapsed.elapsed;
+      if (remaining <= Duration.zero) throw TimeoutException('YouTube request');
+      final transport = HttpClient()
+        ..connectionTimeout = const Duration(seconds: 5)
+        ..idleTimeout = const Duration(seconds: 8)
+        // Explicit DIRECT is essential: global overrides may still remember a
+        // desktop proxy that failed after the VPN route changed.
+        ..findProxy = (_) => proxy == null ? 'DIRECT' : 'PROXY $proxy';
+      final client = YoutubeExplode(
+        httpClient: YouTubeRequestClient(IOClient(transport)),
+      );
+      _clients.add(client);
+      try {
+        final result = await action(client, transport).timeout(remaining);
+        YouTubeProxyRegistry.address = proxy;
+        return result;
+      } finally {
+        _clients.remove(client);
+        client.close();
+      }
+    }
+
+    final preferredProxy = YouTubeProxyRegistry.address;
+    if (preferredProxy != null) {
+      try {
+        return await attempt(preferredProxy);
+      } catch (error) {
+        lastError = error;
+        if (YouTubeProxyRegistry.address == preferredProxy) {
+          YouTubeProxyRegistry.address = null;
+        }
+      }
+    }
+
     try {
-      return await action(client).timeout(timeout);
-    } finally {
-      // A Future timeout alone does not cancel network I/O. Closing this
-      // operation's own client also prevents abandoned retries piling up.
-      _clients.remove(client);
-      client.close();
+      return await attempt(null);
+    } catch (error) {
+      lastError = error;
+    }
+
+    // A VPN/proxy is commonly enabled only after the warning appears. Detect
+    // again after every failed direct request instead of caching an empty list.
+    final candidates = !_closed && elapsed.elapsed < timeout
+        ? await LocalProxyDetector.detectCandidates()
+        : const <String>[];
+    for (final proxy in candidates) {
+      if (_closed || elapsed.elapsed >= timeout) break;
+      if (proxy == preferredProxy) continue;
+      try {
+        return await attempt(proxy);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    Error.throwWithStackTrace(
+      lastError ?? const SocketException('YouTube is unavailable'),
+      StackTrace.current,
+    );
+  }
+
+  /// Uses the same manifest path as playback, so the UI never reports a false
+  /// positive merely because youtube.com answered a lightweight HTTP request.
+  Future<bool> checkAvailability() async {
+    try {
+      return await _request((client, transport) async {
+        final manifest = await client.videos.streamsClient.getManifest(
+          'dQw4w9WgXcQ',
+          ytClients: [YoutubeApiClient.androidSdkless],
+          requireWatchPage: false,
+        );
+        return await _selectPlayableAudio(manifest, transport) != null;
+      }, const Duration(seconds: 9));
+    } catch (error) {
+      PlaybackDiagnostics.record(
+        'youtube.availability.failed',
+        source: source.name,
+        error: error,
+      );
+      return false;
     }
   }
 
@@ -58,9 +129,9 @@ class YouTubeMusicSource implements MusicSource {
     );
     final parts = cleaned.split(RegExp(r'\s[-–—]\s'));
     String compact(String value) => value.toLowerCase().replaceAll(
-          RegExp(r'[^\p{L}\p{N}]', unicode: true),
-          '',
-        );
+      RegExp(r'[^\p{L}\p{N}]', unicode: true),
+      '',
+    );
     if (parts.length > 1 &&
         compact(artist).isNotEmpty &&
         compact(parts.first).contains(compact(artist))) {
@@ -90,13 +161,14 @@ class YouTubeMusicSource implements MusicSource {
       duration: duration,
       artworkUrl: music?.image?.toString() ?? video.thumbnails.highResUrl,
       source: TrackSource.youtubeMusic,
+      playbackCount: video.engagement.viewCount,
     );
   }
 
   @override
   Future<List<MediaTrack>> searchTracks(String query, {int limit = 20}) async {
     if (query.trim().isEmpty || limit <= 0) return const [];
-    return _request((client) async {
+    return _request((client, transport) async {
       final results = await client.search.search(query.trim());
       return results
           .map(fromVideo)
@@ -111,7 +183,7 @@ class YouTubeMusicSource implements MusicSource {
     if (track.source != source || !RegExp(r'^[\w-]{11}$').hasMatch(track.id)) {
       return null;
     }
-    return _request((client) async {
+    return _request((client, transport) async {
       // Use the public Android client only. Protected/unavailable videos fail
       // normally rather than being routed through restriction-bypass services.
       final manifest = await client.videos.streamsClient.getManifest(
@@ -119,25 +191,59 @@ class YouTubeMusicSource implements MusicSource {
         ytClients: [YoutubeApiClient.androidSdkless],
         requireWatchPage: false,
       );
-      final streams = manifest.audioOnly
-          .where((stream) =>
-              stream.fragments.isEmpty &&
-              (stream.audioTrack == null || stream.audioTrack!.audioIsDefault))
-          .toList();
-      // AAC in MP4 has broad native decoder support; then take the best bitrate.
-      streams.sort((a, b) {
-        final container = (b.container.name == 'mp4' ? 1 : 0)
-            .compareTo(a.container.name == 'mp4' ? 1 : 0);
-        return container != 0 ? container : b.bitrate.compareTo(a.bitrate);
-      });
-      if (streams.isEmpty) return null;
-      return ResolvedStream(
-        streams.first.url.toString(),
-        headers: {'User-Agent': _streamUserAgent},
-        source: source,
+      return _selectPlayableAudio(
+        manifest,
+        transport,
         duration: track.duration,
       );
     }, const Duration(seconds: 12));
+  }
+
+  Future<ResolvedStream?> _selectPlayableAudio(
+    StreamManifest manifest,
+    HttpClient transport, {
+    Duration? duration,
+  }) async {
+    final streams = manifest.audioOnly
+        .where(
+          (stream) =>
+              stream.fragments.isEmpty &&
+              (stream.audioTrack == null || stream.audioTrack!.audioIsDefault),
+        )
+        .toList();
+    // AAC in MP4 has broad native decoder support; then take the best bitrate.
+    streams.sort((a, b) {
+      final container = (b.container.name == 'mp4' ? 1 : 0).compareTo(
+        a.container.name == 'mp4' ? 1 : 0,
+      );
+      return container != 0 ? container : b.bitrate.compareTo(a.bitrate);
+    });
+    if (streams.isEmpty) return null;
+    final headers = {'User-Agent': YouTubeRequestClient.streamUserAgent};
+    Object? failure;
+    // The library only HEAD-checks a manifest entry, not necessarily this
+    // selected audio. A real initial GET must work before this provider wins
+    // against another catalog source. Check only a few offered audio formats.
+    for (final stream in streams.take(3)) {
+      try {
+        await probeAudioStream(transport, stream.url, headers);
+        return ResolvedStream(
+          stream.url.toString(),
+          headers: headers,
+          source: source,
+          duration: duration,
+        );
+      } catch (error) {
+        failure = error;
+        PlaybackDiagnostics.record(
+          'youtube.audio.failed',
+          source: source.name,
+          url: stream.url.toString(),
+          error: error,
+        );
+      }
+    }
+    Error.throwWithStackTrace(failure!, StackTrace.current);
   }
 
   @override

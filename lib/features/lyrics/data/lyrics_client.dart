@@ -38,26 +38,32 @@ class LyricsClient {
   final Map<String, LyricsResult?> _cache = {};
 
   LyricsClient({NeteaseLyricsSource? netease, LrclibSource? lrclib})
-      : _netease = netease ?? NeteaseLyricsSource(),
-        _lrclib = lrclib ?? LrclibSource();
+    : _netease = netease ?? NeteaseLyricsSource(),
+      _lrclib = lrclib ?? LrclibSource();
 
   static final _noise = [
     RegExp(
-        r'[\(\[]\s*(official\s*)?(music\s*)?(video|audio|clip|visualizer)\s*[\)\]]',
-        caseSensitive: false),
-    RegExp(r'[\(\[]\s*(lyrics?|lyric video|текст)\s*[\)\]]',
-        caseSensitive: false),
+      r'[\(\[]\s*(official\s*)?(music\s*)?(video|audio|clip|visualizer)\s*[\)\]]',
+      caseSensitive: false,
+    ),
     RegExp(
-        r'[\(\[]\s*(hd|hq|4k|ncs( release)?|free (dl|download)|out now)\s*[\)\]]',
-        caseSensitive: false),
+      r'[\(\[]\s*(lyrics?|lyric video|текст)\s*[\)\]]',
+      caseSensitive: false,
+    ),
+    RegExp(
+      r'[\(\[]\s*(hd|hq|4k|ncs( release)?|free (dl|download)|out now)\s*[\)\]]',
+      caseSensitive: false,
+    ),
     RegExp(r'[\(\[]\s*(feat|ft|prod)\b.*?[\)\]]', caseSensitive: false),
     RegExp(r'\s(feat|ft)\.?\s.*$', caseSensitive: false),
   ];
 
   /// Strips "Artist - " prefixes and upload noise from SoundCloud-style titles.
   static String cleanTrackTitle(String rawTitle, String rawArtist) {
-    var title =
-        rawTitle.replaceAll('"', '').replaceAll('«', '').replaceAll('»', '');
+    var title = rawTitle
+        .replaceAll('"', '')
+        .replaceAll('«', '')
+        .replaceAll('»', '');
     final artist = rawArtist.trim().toLowerCase();
 
     if (title.contains(' - ') || title.contains(' – ')) {
@@ -89,8 +95,9 @@ class LyricsClient {
 
     final cleaned = cleanTrackTitle(trackName, artistName);
     final title = cleaned.isNotEmpty ? cleaned : trackName;
-    final known =
-        duration != null && duration > Duration.zero ? duration : null;
+    final known = duration != null && duration > Duration.zero
+        ? duration
+        : null;
 
     final neteaseFuture = _netease
         .fetch(title: title, artist: artistName, duration: known)
@@ -105,7 +112,7 @@ class LyricsClient {
     final yrc = netease?.yrc;
     if (yrc != null && yrc.trim().isNotEmpty) {
       final lines = LrcParser.parseYrc(yrc);
-      if (lines.length >= 3) {
+      if (lines.isNotEmpty && !LrcParser.looksUnsynced(lines)) {
         return _cache[key] = LyricsResult(
           lines: lines,
           isRealSync: true,
@@ -123,7 +130,11 @@ class LyricsClient {
         plainLyrics: lrclib?.plain,
         lines: lines,
         isRealSync: true,
-        hasWordSync: lines.every((l) => l.hasRealWordTimings),
+        hasWordSync: lines.every(
+          (line) =>
+              line.hasRealWordTimings &&
+              line.backingVocals.every((backing) => backing.hasRealWordTimings),
+        ),
       );
     }
 
@@ -132,7 +143,9 @@ class LyricsClient {
       return _cache[key] = LyricsResult(
         plainLyrics: plain,
         lines: LrcParser.synthesizeFromPlainText(
-            plain, known ?? const Duration(minutes: 3)),
+          plain,
+          known ?? const Duration(minutes: 3),
+        ),
       );
     }
 

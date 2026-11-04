@@ -16,14 +16,14 @@ void main() {
   });
 
   test('parses word-level timestamps', () {
-    final lines = LrcParser.parse(
-      '[00:01.00]<00:01.00>Hello <00:01.40>world',
-    );
+    final lines = LrcParser.parse('[00:01.00]<00:01.00>Hello <00:01.40>world');
 
     expect(lines.single.text, 'Hello world');
     expect(lines.single.words, hasLength(2));
     expect(
-        lines.single.words.first.endTime, const Duration(milliseconds: 1400));
+      lines.single.words.first.endTime,
+      const Duration(milliseconds: 1400),
+    );
   });
 
   test('marks lines without word tags as NOT real word timings', () {
@@ -35,9 +35,7 @@ void main() {
       expect(line.hasRealWordTimings, isFalse);
     }
     expect(
-      LrcParser.parse('[00:01.00]<00:01.20>Hola')
-          .single
-          .hasRealWordTimings,
+      LrcParser.parse('[00:01.00]<00:01.20>Hola').single.hasRealWordTimings,
       isTrue,
     );
   });
@@ -66,7 +64,7 @@ void main() {
     expect(lines[0].text, 'All I am');
     expect(lines[0].words[1].startTime, const Duration(milliseconds: 1500));
     expect(lines[0].words[1].endTime, const Duration(milliseconds: 2200));
-    expect(lines[0].endTime, const Duration(milliseconds: 4000));
+    expect(lines[0].endTime, const Duration(milliseconds: 3000));
   });
 
   test('parse skips credits and keeps multi-timestamp lines', () {
@@ -88,13 +86,13 @@ void main() {
 
   test('LyricsMatch rejects remixes and other songs', () {
     double? score(String title, String artist, int sec) => LyricsMatch.score(
-          wantTitle: 'Sweater Weather',
-          wantArtist: 'The Neighbourhood',
-          wantDuration: const Duration(seconds: 240),
-          title: title,
-          artists: [artist],
-          duration: Duration(seconds: sec),
-        );
+      wantTitle: 'Sweater Weather',
+      wantArtist: 'The Neighbourhood',
+      wantDuration: const Duration(seconds: 240),
+      title: title,
+      artists: [artist],
+      duration: Duration(seconds: sec),
+    );
 
     expect(score('Sweater Weather', 'The Neighbourhood', 240), isNotNull);
     expect(score('Sweater Weather (Remix)', 'The Neighbourhood', 238), isNull);

@@ -132,6 +132,52 @@ class StreamResolver {
   /// Spaces removed, so the uploader "theneighbourhood" equals "The Neighbourhood".
   static String _compact(String s) => s.replaceAll(' ', '');
 
+  // Permit joined stage names (PostMalone), not substrings in another artist
+  // (MadKid inside NotMadKid). Uploader titles may carry the performer credit.
+  static bool _hasArtist(String text, String artist) {
+    final wanted = _compact(_loose(_norm(artist)));
+    if (wanted.isEmpty) return false;
+    final words = _words(_loose(_normFull(text)));
+    for (var start = 0; start < words.length; start++) {
+      var phrase = '';
+      for (var end = start; end < words.length; end++) {
+        phrase += words[end];
+        if (phrase == wanted) return true;
+        if (phrase.length >= wanted.length) break;
+      }
+    }
+    return false;
+  }
+
+  static List<String> _artists(String value) => value
+      .split(
+        RegExp(
+          r'\s*(?:[,;&]|\bfeat\.?|\bft\.?)\s*|\s+(?:and|x)\s+',
+          caseSensitive: false,
+        ),
+      )
+      .map((part) => part.trim())
+      .where((part) => part.isNotEmpty)
+      .toList();
+
+  /// Importing catalog metadata is not a free-text search: keep the exact
+  /// song and every supplied performer. A title-only hit must not replace a
+  /// precise export just because it scored above a generic search threshold.
+  static bool isCatalogMetadataMatch(MediaTrack target, MediaTrack candidate) {
+    if (_loose(_norm(_cleanTitle(target.title))) !=
+        _loose(_norm(_cleanTitle(candidate.title)))) {
+      return false;
+    }
+    final wantedTags = _variantTags(target.title);
+    final foundTags = _variantTags(candidate.title);
+    if (wantedTags.length != foundTags.length ||
+        !wantedTags.containsAll(foundTags)) {
+      return false;
+    }
+    return _artists(target.artist)
+        .every((artist) => _hasArtist(candidate.artist, artist));
+  }
+
   static final Map<String, RegExp> _variantPatterns = {
     'remix': RegExp(r'\b(remix|rmx|rework|vip)\b'),
     'edit': RegExp(r'\b(edit|bootleg|flip)\b'),
@@ -230,8 +276,9 @@ class StreamResolver {
       }
     }
 
-    if (plays > 0) {
-      s += math.min(math.log(plays) / math.ln10 * 15.0, 120.0);
+    final count = plays > 0 ? plays : candidate.playbackCount;
+    if (count > 0) {
+      s += math.min(math.log(count) / math.ln10 * 15.0, 120.0);
     }
     return s;
   }
@@ -240,7 +287,6 @@ class StreamResolver {
     final primaryArtist = _primaryArtist(target.artist);
     final targetArtist = _loose(_norm(primaryArtist));
     final targetTitle = _loose(_norm(_cleanTitle(target.title)));
-    final candidateArtist = _loose(_norm(candidate.artist));
     final candidateFullTitle = _loose(_norm(candidate.title));
     final candidateTitle = _stripArtist(candidateFullTitle, targetArtist);
     if (targetArtist.isEmpty ||
@@ -252,11 +298,13 @@ class StreamResolver {
     final titleMatches =
         candidateTitle == targetTitle ||
         _hasPhrase(candidateTitle, targetTitle);
-    final artistMatches =
-        _compact(candidateArtist) == _compact(targetArtist) ||
-        _hasPhrase(candidateArtist, targetArtist) ||
-        _hasPhrase(candidateFullTitle, targetArtist) ||
-        _compact(candidateFullTitle).contains(_compact(targetArtist));
+    final artistMatches = _artists(target.artist).every((artist) {
+      final credit = _primaryArtist(artist);
+      // Credits inside '(feat. ...)' are identity evidence too. Title matching
+      // above still ignores decorations; alternate-version checks stay strict.
+      return _hasArtist(candidate.artist, credit) ||
+          _hasArtist(candidate.title, credit);
+    });
     if (!titleMatches || !artistMatches) return false;
 
     final targetTags = _variantTags(target.title);
@@ -280,11 +328,10 @@ class StreamResolver {
     return true;
   }
 
-  static String _primaryArtist(String artist) => artist
-      .split(RegExp(r'[,&]'))
-      .first
-      .replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '')
-      .trim();
+  static String _primaryArtist(String artist) =>
+      (_artists(artist).firstOrNull ?? '')
+          .replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '')
+          .trim();
 
   static String _cleanTitle(String title) =>
       title.replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '').trim();
@@ -358,6 +405,9 @@ class StreamResolver {
         score -= 120.0;
       } else if (qWords.length >= 2 && matched == qWords.length) {
         score += 80.0;
+      } else if (qWords.length >= 2) {
+        // Popularity never compensates for missing the explicitly typed artist.
+        score -= (qWords.length - matched) * 100.0;
       }
     }
 
@@ -437,15 +487,20 @@ class StreamResolver {
 
   /// Popularity signal from the source's own ordering. The catalog orders by
   /// popularity; SoundCloud ordering is noisier, so its play count weighs in.
+  int _playCount(MediaTrack track) => track.playbackCount > 0
+      ? track.playbackCount
+      : track.source == TrackSource.soundcloud
+      ? _scExtractor.playbackCount(track.id)
+      : 0;
+
   double _rankBonus(MediaTrack track, int position) {
-    if (track.source != TrackSource.soundcloud) {
-      return math.max(0.0, 100.0 - 12.0 * position);
+    final plays = _playCount(track);
+    if (plays > 0) {
+      // Comparable matches use the source's real views/plays, not just the
+      // opaque search position. Bounded below one missing query-word penalty.
+      return math.min(math.log(plays) / math.ln10 * 12.0, 90.0);
     }
-    final plays = _scExtractor.playbackCount(track.id);
-    final popularity = plays > 0
-        ? math.min(math.log(plays) / math.ln10 * 12.0, 100.0)
-        : 0.0;
-    return math.max(0.0, 60.0 - 8.0 * position) + popularity;
+    return math.max(0.0, 30.0 - 4.0 * position);
   }
 
   /// Searches independent sources in parallel. An explicit [sources] filter is
@@ -631,6 +686,14 @@ class StreamResolver {
   Future<String?> resolveStreamUrl(MediaTrack track) async =>
       (await resolveStream(track))?.url;
 
+  Future<bool> checkYouTubeAvailability() {
+    if (_disposed) return Future.value(false);
+    for (final source in _additionalSources) {
+      if (source is YouTubeMusicSource) return source.checkAvailability();
+    }
+    return Future.value(false);
+  }
+
   final Map<String, MediaTrack> _matchCache = {};
   final Map<String, int> _matchGeneration = {};
   final Map<String, DateTime> _badMatches = {};
@@ -691,7 +754,10 @@ class StreamResolver {
   /// Kept under its historical name for imports/saved catalog records. Each
   /// provider has its own search + resolve path; a blocked one cannot hold up
   /// a usable match from another. The winner alone is remembered.
-  Future<ResolvedStream?> resolveSpotifyTrack(MediaTrack track) async {
+  Future<ResolvedStream?> resolveSpotifyTrack(
+    MediaTrack track, {
+    Set<TrackSource> excludedSources = const {},
+  }) async {
     if (_disposed || !track.source.isCatalog) return null;
     final key = _matchKey(track);
     final generation = _matchGeneration[key] ?? 0;
@@ -699,7 +765,8 @@ class StreamResolver {
     final sources = {
       TrackSource.soundcloud,
       ..._additionalSources.map((s) => s.source),
-    };
+    }.difference(excludedSources);
+    if (sources.isEmpty) return null;
     var remaining = sources.length;
     bool active() =>
         !_disposed &&
@@ -761,22 +828,11 @@ class StreamResolver {
               )
               .toList()
             ..sort(
-              (a, b) =>
-                  scoreCandidate(
-                    target,
-                    b,
-                    plays: source == TrackSource.soundcloud
-                        ? _scExtractor.playbackCount(b.id)
-                        : 0,
-                  ).compareTo(
-                    scoreCandidate(
-                      target,
-                      a,
-                      plays: source == TrackSource.soundcloud
-                          ? _scExtractor.playbackCount(a.id)
-                          : 0,
-                    ),
-                  ),
+              (a, b) => scoreCandidate(
+                target,
+                b,
+                plays: _playCount(b),
+              ).compareTo(scoreCandidate(target, a, plays: _playCount(a))),
             );
       for (final candidate in ranked.take(3)) {
         if (!active()) return null;
@@ -818,10 +874,8 @@ class StreamResolver {
     if (compact.isEmpty) return null;
     final queries = <String>{
       compact,
-      if (source == TrackSource.youtubeMusic)
-        '$compact audio'
-      else
-        '${target.artist} ${target.title}'.trim(),
+      '${target.artist} ${target.title}'.trim(),
+      if (source == TrackSource.youtubeMusic) '$compact audio',
     };
     final batches = await Future.wait(
       queries.map((query) async {
@@ -838,7 +892,24 @@ class StreamResolver {
       }),
     );
     if (!active()) return null;
-    return tryCandidates(batches.expand((batch) => batch));
+    final candidates = batches.expand((batch) => batch).toList();
+    PlaybackDiagnostics.record(
+      'catalog.candidates',
+      source: source.name,
+      count: candidates.length,
+    );
+    PlaybackDiagnostics.record(
+      'catalog.matches',
+      source: source.name,
+      count: candidates
+          .where(
+            (candidate) =>
+                candidate.source == source &&
+                isPlayableMatch(target, candidate),
+          )
+          .length,
+    );
+    return tryCandidates(candidates);
   }
 
   /// Gets related SoundCloud tracks for a seed, resolving a catalog seed to

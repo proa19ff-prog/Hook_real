@@ -41,7 +41,9 @@ void main() {
     await storage.toggleFavorite(catalogTrack);
     await storage.toggleFavorite(soundCloudTrack);
     expect(
-        storage.getFavorites(), containsAll([catalogTrack, soundCloudTrack]));
+      storage.getFavorites(),
+      containsAll([catalogTrack, soundCloudTrack]),
+    );
 
     await storage.addToHistory(catalogTrack);
     await storage.addToHistory(soundCloudTrack);
@@ -71,5 +73,11 @@ void main() {
 
     await storage.deletePlaylist('Favorites mix');
     expect(storage.getPlaylists(), isEmpty);
+  });
+
+  test('selected locale persists', () async {
+    expect(storage.getLocaleCode(), isNull);
+    await storage.saveLocaleCode('en');
+    expect(storage.getLocaleCode(), 'en');
   });
 }

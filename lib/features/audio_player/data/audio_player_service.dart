@@ -15,13 +15,17 @@ import '../../recommendations/track_wave_service.dart';
 
 enum PlayerLoopMode { off, all, one }
 
+enum AudioPlaybackErrorKind { forbidden, catalogUnavailable, sourceUnavailable }
+
 class AudioPlaybackError {
   final MediaTrack track;
+  final AudioPlaybackErrorKind kind;
   final String message;
   final Object? cause;
 
   const AudioPlaybackError({
     required this.track,
+    required this.kind,
     required this.message,
     this.cause,
   });
@@ -34,6 +38,13 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   final AudioCacheManager _cacheManager;
   final LocalStorageService? _storageService;
   late final TrackWaveService _waveService;
+
+  bool get _usesRussian {
+    final selected = _storageService?.getLocaleCode();
+    if (selected == 'ru') return true;
+    if (selected == 'en') return false;
+    return Platform.localeName.toLowerCase().startsWith('ru');
+  }
 
   MediaTrack? _currentTrack;
   final List<MediaTrack> _queue = [];
@@ -172,7 +183,9 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
           androidIcon: _isFavorite(track)
               ? 'drawable/ic_notification_favorite'
               : 'drawable/ic_notification_favorite_border',
-          label: _isFavorite(track) ? 'Убрать из избранного' : 'В избранное',
+          label: _isFavorite(track)
+              ? (_usesRussian ? 'Убрать из избранного' : 'Remove favorite')
+              : (_usesRussian ? 'В избранное' : 'Add favorite'),
           name: _toggleFavoriteAction,
         ),
       _player.playing
@@ -376,6 +389,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     // Show the tapped track right away; the stream resolves in the background.
     _setCurrentTrack(track);
     var attemptedPlayback = false;
+    TrackSource? attemptedSource;
     Object? lastError;
 
     void reportError(Object? cause) {
@@ -396,6 +410,11 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         _errorController.add(
           AudioPlaybackError(
             track: track,
+            kind: forbidden
+                ? AudioPlaybackErrorKind.forbidden
+                : track.source.isCatalog
+                ? AudioPlaybackErrorKind.catalogUnavailable
+                : AudioPlaybackErrorKind.sourceUnavailable,
             message: forbidden
                 ? 'Сервер аудио отклонил доступ (HTTP 403). Трек найден, но поток недоступен. VPN не гарантирует доступ к аудио.'
                 : track.source.isCatalog
@@ -414,6 +433,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       final playUrl = stream?.url;
       if (playUrl == null || playUrl.isEmpty) return false;
       attemptedPlayback = true;
+      attemptedSource = stream?.source;
 
       final isRemote =
           playUrl.startsWith('http://') || playUrl.startsWith('https://');
@@ -547,12 +567,27 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         // Only a catalog entry may switch recordings, and only after refreshing
         // the original URL failed too. Direct uploads retain their identity.
         if (track.source.isCatalog) {
-          _resolver.forgetMatch(track);
-          if (await tryStart(
-            () => _resolver.resolveSpotifyTrack(track),
-            timeout: const Duration(seconds: 25),
-          )) {
-            return;
+          // A fast manifest is not proof that Android can read the audio. After
+          // refreshing failed, stop racing the same unusable provider against
+          // slower working ones. Exclusions last for this play request only.
+          final failedSources = <TrackSource>{
+            if (attemptedSource != null) attemptedSource!,
+          };
+          for (var attempt = 0; attempt < 3; attempt++) {
+            if (requestId != _playRequestId) return;
+            _resolver.forgetMatch(track);
+            attemptedSource = null;
+            if (await tryStart(
+              () => _resolver.resolveSpotifyTrack(
+                track,
+                excludedSources: Set.unmodifiable(failedSources),
+              ),
+              timeout: const Duration(seconds: 25),
+            )) {
+              return;
+            }
+            final failedSource = attemptedSource;
+            if (failedSource == null || !failedSources.add(failedSource)) break;
           }
         }
       }
@@ -574,7 +609,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     final currentIsSeed = _currentTrack?.id == seed.id && _player.playing;
     _waveActive = true;
     _waveSeed = seed;
-    _playbackContext = 'Волна: ${seed.title}';
+    _playbackContext = '${_usesRussian ? 'Волна' : 'Wave'}: ${seed.title}';
     _waveGeneration++;
     _waveSeen
       ..clear()

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 
+import '../../../core/localization/localized_labels.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'player_state_provider.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Spotify-inspired, reusable track row used by discovery, collections and the
 /// play queue. One visual language also means a long press exposes the same
@@ -45,8 +47,10 @@ class SpotifyTrackTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = theme.colors;
+    final strings = AppLocalizations.of(context);
     final playing = ref.watch(currentTrackProvider);
-    final isPlayingTrack = isCurrent ||
+    final isPlayingTrack =
+        isCurrent ||
         (playing?.id == track.id && playing?.source == track.source);
     final isFavorite = ref.watch(
       favoritesProvider.select(
@@ -59,7 +63,7 @@ class SpotifyTrackTile extends ConsumerWidget {
 
     return Semantics(
       button: true,
-      label: 'Трек ${track.title}, ${track.artist}',
+      label: strings.trackSemantics(track.title, track.artist),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: onTap,
@@ -125,8 +129,9 @@ class SpotifyTrackTile extends ConsumerWidget {
                             : colors.textPrimary,
                         fontSize: 15,
                         height: 1.15,
-                        fontWeight:
-                            isPlayingTrack ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isPlayingTrack
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -134,7 +139,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                       [
                         track.artist,
                         if (showSource)
-                          track.source.label
+                          track.source.labelFor(strings)
                         else if (track.album?.isNotEmpty == true)
                           track.album!,
                       ].where((part) => part.isNotEmpty).join(' • '),
@@ -167,7 +172,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                   ),
                 ),
               IconButton(
-                tooltip: 'Действия с треком',
+                tooltip: strings.trackActions,
                 visualDensity: VisualDensity.compact,
                 icon: Icon(
                   MingCuteIcons.mgc_more_2_line,
@@ -198,9 +203,10 @@ Future<void> showSpotifyTrackActions(
   VoidCallback? onFindArtist,
 }) async {
   final colors = theme.colors;
-  final isFavorite = ref.read(favoritesProvider).any(
-        (item) => item.id == track.id && item.source == track.source,
-      );
+  final strings = AppLocalizations.of(context);
+  final isFavorite = ref
+      .read(favoritesProvider)
+      .any((item) => item.id == track.id && item.source == track.source);
   await showModalBottomSheet<void>(
     context: context,
     backgroundColor: colors.surface,
@@ -261,7 +267,7 @@ Future<void> showSpotifyTrackActions(
             const SizedBox(height: 10),
             _TrackAction(
               icon: MingCuteIcons.mgc_sound_line_fill,
-              label: 'Запустить волну по треку',
+              label: strings.startWaveFromTrack,
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 ref.read(queueProvider.notifier).startWave(track);
@@ -269,13 +275,13 @@ Future<void> showSpotifyTrackActions(
             ),
             _TrackAction(
               icon: MingCuteIcons.mgc_playlist_line,
-              label: 'Добавить в очередь',
+              label: strings.addToQueue,
               onTap: () {
                 ref.read(queueProvider.notifier).addToQueue(track);
                 Navigator.of(sheetContext).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Добавлено в очередь: ${track.title}'),
+                    content: Text(strings.addedToQueue(track.title)),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -285,8 +291,7 @@ Future<void> showSpotifyTrackActions(
               icon: isFavorite
                   ? MingCuteIcons.mgc_heart_fill
                   : MingCuteIcons.mgc_heart_line,
-              label:
-                  isFavorite ? 'Убрать из избранного' : 'Добавить в избранное',
+              label: isFavorite ? strings.removeFavorite : strings.addFavorite,
               color: isFavorite ? colors.primary : null,
               onTap: () {
                 ref.read(favoritesProvider.notifier).toggleFavorite(track);
@@ -295,7 +300,7 @@ Future<void> showSpotifyTrackActions(
             ),
             _TrackAction(
               icon: MingCuteIcons.mgc_playlist_2_line,
-              label: 'Добавить в плейлист',
+              label: strings.addToPlaylist,
               onTap: () async {
                 Navigator.of(sheetContext).pop();
                 await _choosePlaylist(context, ref, theme, track);
@@ -303,7 +308,7 @@ Future<void> showSpotifyTrackActions(
             ),
             _TrackAction(
               icon: MingCuteIcons.mgc_user_3_line,
-              label: 'Перейти к исполнителю',
+              label: strings.goToArtist,
               onTap: () {
                 Navigator.of(sheetContext).pop();
                 onFindArtist?.call();
@@ -324,38 +329,41 @@ Future<void> _choosePlaylist(
 ) async {
   final playlists = ref.read(playlistsProvider);
   final colors = theme.colors;
+  final strings = AppLocalizations.of(context);
   if (playlists.isEmpty) {
-    final nameController = TextEditingController(text: 'Мой плейлист');
+    final nameController = TextEditingController(text: strings.myPlaylist);
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: colors.surface,
-        title:
-            Text('Новый плейлист', style: TextStyle(color: colors.textPrimary)),
+        title: Text(
+          strings.newPlaylist,
+          style: TextStyle(color: colors.textPrimary),
+        ),
         content: TextField(
           controller: nameController,
           autofocus: true,
           style: TextStyle(color: colors.textPrimary),
-          decoration: const InputDecoration(hintText: 'Название'),
+          decoration: InputDecoration(hintText: strings.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Отмена'),
+            child: Text(strings.cancel),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.of(dialogContext).pop(nameController.text),
-            child: const Text('Создать'),
+            child: Text(strings.create),
           ),
         ],
       ),
     );
     nameController.dispose();
     if (name == null || name.trim().isEmpty) return;
-    await ref
-        .read(playlistsProvider.notifier)
-        .savePlaylist(name.trim(), [track]);
+    await ref.read(playlistsProvider.notifier).savePlaylist(name.trim(), [
+      track,
+    ]);
     return;
   }
 
@@ -370,7 +378,7 @@ Future<void> _choosePlaylist(
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: Text(
-              'Добавить в плейлист',
+              strings.addToPlaylist,
               style: TextStyle(
                 color: colors.textPrimary,
                 fontSize: 18,
@@ -380,12 +388,16 @@ Future<void> _choosePlaylist(
           ),
           for (final entry in playlists.entries)
             ListTile(
-              leading:
-                  Icon(MingCuteIcons.mgc_playlist_line, color: colors.primary),
-              title:
-                  Text(entry.key, style: TextStyle(color: colors.textPrimary)),
+              leading: Icon(
+                MingCuteIcons.mgc_playlist_line,
+                color: colors.primary,
+              ),
+              title: Text(
+                entry.key,
+                style: TextStyle(color: colors.textPrimary),
+              ),
               subtitle: Text(
-                '${entry.value.length} треков',
+                strings.tracksCount(entry.value.length),
                 style: TextStyle(color: colors.textSecondary),
               ),
               onTap: () async {
@@ -393,9 +405,10 @@ Future<void> _choosePlaylist(
                   (item) => item.id == track.id && item.source == track.source,
                 );
                 if (!alreadyAdded) {
-                  await ref
-                      .read(playlistsProvider.notifier)
-                      .savePlaylist(entry.key, [...entry.value, track]);
+                  await ref.read(playlistsProvider.notifier).savePlaylist(
+                    entry.key,
+                    [...entry.value, track],
+                  );
                 }
                 if (sheetContext.mounted) Navigator.of(sheetContext).pop();
               },

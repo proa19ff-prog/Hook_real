@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'core/localization/localized_labels.dart';
+import 'core/localization/locale_provider.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/mini_player.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/extractor/models/media_track.dart';
 import 'features/library/presentation/library_screen.dart';
 import 'features/search/presentation/search_screen.dart';
 import 'features/theme_engine/domain/hook_theme.dart';
 import 'features/theme_engine/presentation/dynamic_shader_background.dart';
+import 'l10n/generated/app_localizations.dart';
 
 class HookApp extends ConsumerWidget {
   const HookApp({super.key});
@@ -16,11 +22,20 @@ class HookApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: 'Hook',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: theme.toThemeData(),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const MainNavigationShell(),
     );
   }
@@ -39,6 +54,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
 
   int _currentIndex = 0;
   int _searchFocusRequest = 0;
+  bool _youtubeWarningDismissed = false;
 
   void _openSearch() {
     setState(() {
@@ -51,11 +67,24 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
   Widget build(BuildContext context) {
     final theme = ref.watch(themeProvider);
     final currentTrack = ref.watch(currentTrackProvider);
+    final strings = AppLocalizations.of(context);
+    final youtubeAvailable = ref.watch(youtubeAvailabilityProvider);
+    final youtubeLoaded =
+        ref.watch(playbackSourceProvider) == TrackSource.youtubeMusic;
 
-    ref.listen<AsyncValue<AudioPlaybackError?>>(playbackErrorProvider,
-        (_, next) {
+    ref.listen<AsyncValue<AudioPlaybackError?>>(playbackErrorProvider, (
+      _,
+      next,
+    ) {
       final error = next.valueOrNull;
       if (error == null || !context.mounted) return;
+      final message = switch (error.kind) {
+        AudioPlaybackErrorKind.forbidden => strings.audioForbidden,
+        AudioPlaybackErrorKind.catalogUnavailable =>
+          strings.fullVersionUnavailable,
+        AudioPlaybackErrorKind.sourceUnavailable =>
+          strings.sourcePlaybackFailed(error.track.source.labelFor(strings)),
+      };
 
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -63,12 +92,15 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           SnackBar(
             content: Row(
               children: [
-                Icon(MingCuteIcons.mgc_alert_line,
-                    color: Colors.white, size: 20),
+                Icon(
+                  MingCuteIcons.mgc_alert_line,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    '${error.message}: ${error.track.title}',
+                    '$message: ${error.track.title}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -77,13 +109,13 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
             ),
             backgroundColor: Colors.redAccent.shade700.withValues(alpha: 0.9),
             behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
-              label: 'Повторить',
+              label: strings.retry,
               textColor: Colors.white,
               onPressed: () =>
                   ref.read(audioPlayerServiceProvider).playTrack(error.track),
@@ -93,20 +125,16 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     });
 
     final screens = [
-      HomeScreen(
-        theme: theme,
-        onOpenSearch: _openSearch,
-      ),
-      SearchScreen(
-        theme: theme,
-        focusRequestId: _searchFocusRequest,
-      ),
+      HomeScreen(theme: theme, onOpenSearch: _openSearch),
+      SearchScreen(theme: theme, focusRequestId: _searchFocusRequest),
       LibraryScreen(theme: theme),
     ];
-    final navigationHeight =
-        _navigationHeight + MediaQuery.paddingOf(context).bottom;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
+      bottomNavigationBar: keyboardOpen
+          ? null
+          : PlaybackDock(theme: theme, navigation: _buildNavigationBar(theme)),
       body: DynamicShaderBackground(
         theme: theme,
         artworkUrl: currentTrack?.artworkUrl,
@@ -115,96 +143,184 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
             Positioned.fill(
               child: IndexedStack(
                 index: _currentIndex,
-                children: screens,
+                children: [
+                  for (var index = 0; index < screens.length; index++)
+                    TickerMode(
+                      enabled: index == _currentIndex,
+                      child: screens[index],
+                    ),
+                ],
               ),
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: navigationHeight,
-              child: MiniPlayer(theme: theme),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: _buildGlassNavigationBar(theme),
-            ),
+            if (!_youtubeWarningDismissed &&
+                !youtubeLoaded &&
+                youtubeAvailable.valueOrNull == false)
+              Positioned(
+                top: MediaQuery.paddingOf(context).top + 8,
+                left: 12,
+                right: 12,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 620),
+                    child: _YouTubeVpnBanner(
+                      theme: theme,
+                      onRetry: () {
+                        setState(() => _youtubeWarningDismissed = false);
+                        ref.invalidate(youtubeAvailabilityProvider);
+                      },
+                      onDismiss: () =>
+                          setState(() => _youtubeWarningDismissed = true),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildGlassNavigationBar(HookTheme theme) {
+  Widget _buildNavigationBar(HookTheme theme) {
+    final strings = AppLocalizations.of(context);
     final colors = theme.colors;
-    return SizedBox(
-      height: _navigationHeight + MediaQuery.paddingOf(context).bottom,
-      child: Container(
-        decoration: BoxDecoration(
-          color: colors.surface.withValues(alpha: 0.98),
-          border: Border(
-            top: BorderSide(color: colors.border.withValues(alpha: 0.8)),
+    return NavigationBarTheme(
+      data: NavigationBarThemeData(
+        backgroundColor: colors.background,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: colors.surface,
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            color: states.contains(WidgetState.selected)
+                ? colors.textPrimary
+                : colors.textSecondary,
+            fontSize: 12,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w400,
           ),
         ),
-        padding: EdgeInsets.fromLTRB(
-          8,
-          7,
-          8,
-          7 + MediaQuery.paddingOf(context).bottom,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? colors.textPrimary
+                : colors.textSecondary,
+            size: 24,
+          ),
+        ),
+      ),
+      child: NavigationBar(
+        height: _navigationHeight,
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          setState(() => _currentIndex = index);
+        },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(MingCuteIcons.mgc_compass_line),
+            label: strings.home,
+          ),
+          NavigationDestination(
+            icon: const Icon(MingCuteIcons.mgc_search_2_line),
+            label: strings.search,
+          ),
+          NavigationDestination(
+            icon: const Icon(MingCuteIcons.mgc_disc_line),
+            label: strings.library,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _YouTubeVpnBanner extends StatelessWidget {
+  const _YouTubeVpnBanner({
+    required this.theme,
+    required this.onRetry,
+    required this.onDismiss,
+  });
+
+  final HookTheme theme;
+  final VoidCallback onRetry;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = theme.colors;
+    final strings = AppLocalizations.of(context);
+    return Material(
+      color: colors.surface,
+      elevation: 10,
+      shadowColor: Colors.black.withValues(alpha: 0.38),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(15, 13, 8, 13),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: colors.accent.withValues(alpha: 0.48)),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _navItem(0, MingCuteIcons.mgc_compass_line, 'Главная', theme),
-            _navItem(1, MingCuteIcons.mgc_search_2_line, 'Поиск', theme),
-            _navItem(2, MingCuteIcons.mgc_disc_line, 'Медиатека', theme),
+            Container(
+              width: 34,
+              height: 34,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: colors.accent.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.shield_outlined,
+                color: colors.accent,
+                size: 19,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    strings.youtubeUnavailableTitle,
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    strings.youtubeUnavailableBody,
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      height: 1.3,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 7),
+                  TextButton(
+                    onPressed: onRetry,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(0, 34),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      foregroundColor: colors.accent,
+                    ),
+                    child: Text(strings.checkAgain),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              tooltip: strings.dismiss,
+              onPressed: onDismiss,
+              icon: const Icon(Icons.close_rounded, size: 19),
+              color: colors.textSecondary,
+            ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _navItem(int index, IconData icon, String label, HookTheme theme) {
-    final isSelected = _currentIndex == index;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _currentIndex = index),
-        behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 7),
-          decoration: const BoxDecoration(color: Colors.transparent),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedScale(
-                scale: isSelected ? 1.05 : 1.0,
-                duration: const Duration(milliseconds: 220),
-                child: Icon(
-                  icon,
-                  color: isSelected
-                      ? theme.colors.primary
-                      : theme.colors.textSecondary.withValues(alpha: 0.75),
-                  size: 22,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected
-                      ? theme.colors.primary
-                      : theme.colors.textSecondary.withValues(alpha: 0.75),
-                  fontSize: 10.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: isSelected ? 0.5 : 0.0,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

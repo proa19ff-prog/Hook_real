@@ -1,15 +1,28 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../extractor/models/media_track.dart';
 import '../extractor/spotify/spotify_catalog_service.dart';
 import '../extractor/stream_resolver.dart';
 
-enum ImportPlatform {
-  spotify,
-  text,
-  unknown,
+enum ImportPlatform { spotify, text, csv, unknown }
+
+enum ImportFileError {
+  tooLarge,
+  unsupported,
+  invalidEncoding,
+  invalidCsv,
+  missingColumns,
+  empty,
+  tooManyTracks,
+}
+
+class MusicImportFileException implements Exception {
+  final ImportFileError kind;
+
+  const MusicImportFileException(this.kind);
 }
 
 class ImportedCollection {
@@ -43,28 +56,77 @@ class MusicImportService {
   final SpotifyCatalogService _catalog;
 
   MusicImportService({Dio? dio, SpotifyCatalogService? catalog})
-      : _dio = dio ?? Dio(),
-        _catalog = catalog ?? SpotifyCatalogService();
+    : _dio = dio ?? Dio(),
+      _catalog = catalog ?? SpotifyCatalogService();
+
+  static const maxFileBytes = 10 * 1024 * 1024;
+  static const maxTracks = 10000;
+  static const _titleColumns = {'track name', 'title', 'track title', 'name'};
+  static const _artistColumns = {
+    'artist name(s)',
+    'artist names',
+    'artist name',
+    'artist',
+    'artists',
+  };
 
   static ImportPlatform detectPlatform(String input) {
-    final value = input.trim();
-    final lower = value.toLowerCase();
-    if (lower.contains('spotify.com') ||
-        lower.contains('spotify.link') ||
-        lower.startsWith('spotify:')) {
-      return ImportPlatform.spotify;
-    }
+    final value = input.replaceFirst('﻿', '').trim();
+    if (_csvDelimiter(value) != null) return ImportPlatform.csv;
     if (value.contains('\n') ||
         RegExp(r'\S+\s+(?:—|–|-)\s+\S+').hasMatch(value)) {
       return ImportPlatform.text;
     }
+    final uri = Uri.tryParse(value);
+    if (value.startsWith('spotify:') ||
+        uri != null &&
+            const {'https', 'http'}.contains(uri.scheme) &&
+            const {
+              'open.spotify.com',
+              'spotify.com',
+              'www.spotify.com',
+              'spotify.link',
+            }.contains(uri.host.toLowerCase())) {
+      return ImportPlatform.spotify;
+    }
     return ImportPlatform.unknown;
+  }
+
+  static String decodeFile(List<int> bytes, String fileName) {
+    if (bytes.length > maxFileBytes) {
+      throw const MusicImportFileException(ImportFileError.tooLarge);
+    }
+    final extension = fileName.split('.').last.toLowerCase();
+    if (extension != 'csv' && extension != 'txt') {
+      throw const MusicImportFileException(ImportFileError.unsupported);
+    }
+    try {
+      final text = utf8.decode(bytes).replaceFirst('﻿', '');
+      if (text.contains('\u0000')) {
+        throw const MusicImportFileException(ImportFileError.invalidEncoding);
+      }
+      return text;
+    } on FormatException {
+      throw const MusicImportFileException(ImportFileError.invalidEncoding);
+    }
+  }
+
+  Future<ImportedCollection> importFromCsv(String csv, {String? title}) async {
+    final tracks = await compute(parseCsv, csv);
+    return ImportedCollection(
+      title: title?.trim().isNotEmpty == true ? title!.trim() : 'Exportify',
+      author: 'CSV',
+      artworkUrl: '',
+      tracks: tracks,
+      platform: ImportPlatform.csv,
+    );
   }
 
   Future<ImportedCollection> importFromUrl(String url) async {
     if (detectPlatform(url) != ImportPlatform.spotify) {
       throw ArgumentError(
-          'Неподдерживаемая ссылка. Вставьте ссылку на Spotify.');
+        'Неподдерживаемая ссылка. Вставьте ссылку на Spotify.',
+      );
     }
     return _importSpotify(url.trim());
   }
@@ -74,16 +136,22 @@ class MusicImportService {
     String? title,
     bool resolveTracks = true,
   }) async {
+    if (detectPlatform(text) == ImportPlatform.csv) {
+      return importFromCsv(text, title: title);
+    }
     final parsedTracks = parseTrackList(text);
     if (parsedTracks.isEmpty) {
       throw const FormatException(
-          'Не удалось найти треки в вставленном тексте.');
+        'Не удалось найти треки в вставленном тексте.',
+      );
     }
-    final tracks =
-        resolveTracks ? await _resolveTextTracks(parsedTracks) : parsedTracks;
+    final tracks = resolveTracks
+        ? await _resolveTextTracks(parsedTracks)
+        : parsedTracks;
     return ImportedCollection(
-      title:
-          title?.trim().isNotEmpty == true ? title!.trim() : 'Импорт из текста',
+      title: title?.trim().isNotEmpty == true
+          ? title!.trim()
+          : 'Импорт из текста',
       author: 'Импорт',
       artworkUrl: tracks
           .firstWhere(
@@ -115,15 +183,23 @@ class MusicImportService {
             _catalog.searchTracks(query, country: 'us'),
             _catalog.searchTracks(query, country: 'ru'),
           ]);
-          final candidates = <MediaTrack>[...results[0], ...results[1]];
+          final candidates = <MediaTrack>[...results[0], ...results[1]]
+              .where(
+                (candidate) =>
+                    StreamResolver.isCatalogMetadataMatch(source, candidate),
+              )
+              .toList();
           if (candidates.isNotEmpty) {
-            final scored = candidates
-                .map((candidate) => (
-                      track: candidate,
-                      score: StreamResolver.scoreTrack(candidate, query),
-                    ))
-                .toList()
-              ..sort((a, b) => b.score.compareTo(a.score));
+            final scored =
+                candidates
+                    .map(
+                      (candidate) => (
+                        track: candidate,
+                        score: StreamResolver.scoreTrack(candidate, query),
+                      ),
+                    )
+                    .toList()
+                  ..sort((a, b) => b.score.compareTo(a.score));
             // Do not replace a precise pasted title with a vague catalog hit.
             if (scored.first.score >= 220) resolved[index] = scored.first.track;
           }
@@ -147,11 +223,10 @@ class MusicImportService {
 
   /// Parses plain `Артист — Трек` lines and common Exportify/TuneMyMusic CSV.
   static List<MediaTrack> parseTrackList(String input) {
-    final source = input.replaceAll('\r\n', '\n').trim();
+    final source = input.replaceFirst('﻿', '').replaceAll('\r\n', '\n').trim();
     if (source.isEmpty) return const [];
+    if (_csvDelimiter(source) != null) return parseCsv(source);
     final lines = source.split('\n');
-    final csv = _parseCsv(lines);
-    if (csv != null) return csv;
 
     final tracks = <MediaTrack>[];
     final seen = <String>{};
@@ -175,69 +250,157 @@ class MusicImportService {
       final key = '${artist.toLowerCase()}|${title.toLowerCase()}';
       if (!seen.add(key)) continue;
       tracks.add(_textTrack(artist, title, tracks.length));
-      if (tracks.length >= 500) break;
+      if (tracks.length > maxTracks) {
+        throw const MusicImportFileException(ImportFileError.tooManyTracks);
+      }
     }
     return tracks;
   }
 
-  static List<MediaTrack>? _parseCsv(List<String> lines) {
-    final headerIndex = lines.indexWhere((line) {
-      final lower = line.toLowerCase();
-      return lower.contains('track name') ||
-          (lower.contains('title') && lower.contains('artist'));
-    });
-    if (headerIndex < 0) return null;
-    final header =
-        _csvRow(lines[headerIndex]).map((e) => e.toLowerCase()).toList();
-    final titleIndex = header.indexWhere(
-      (h) => h.contains('track name') || h == 'title' || h.contains('track'),
+  static List<MediaTrack> parseCsv(String input) {
+    if (utf8.encode(input).length > maxFileBytes) {
+      throw const MusicImportFileException(ImportFileError.tooLarge);
+    }
+    final source = input
+        .replaceFirst('﻿', '')
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .trim();
+    if (source.isEmpty) {
+      throw const MusicImportFileException(ImportFileError.empty);
+    }
+    final delimiter = _csvDelimiter(source);
+    if (delimiter == null) {
+      throw const MusicImportFileException(ImportFileError.missingColumns);
+    }
+    final records = _csvRecords(source, delimiter).iterator;
+    records.moveNext();
+    final header = records.current
+        .map((cell) => cell.trim().toLowerCase())
+        .toList();
+    final titleIndex = header.indexWhere(_titleColumns.contains);
+    final artistIndex = header.indexWhere(_artistColumns.contains);
+    final uriIndex = header.indexWhere(
+      (cell) => cell == 'track uri' || cell == 'track url',
     );
-    final artistIndex = header.indexWhere(
-      (h) => h.contains('artist name') || h == 'artist' || h.contains('artist'),
+    final albumIndex = header.indexWhere(
+      (cell) => cell == 'album name' || cell == 'album',
     );
-    if (titleIndex < 0) return null;
-
+    final durationIndex = header.indexWhere(
+      (cell) => cell == 'duration (ms)' || cell == 'duration_ms',
+    );
     final tracks = <MediaTrack>[];
-    final seen = <String>{};
-    for (final line in lines.skip(headerIndex + 1)) {
-      if (line.trim().isEmpty) continue;
-      final row = _csvRow(line);
-      if (titleIndex >= row.length) continue;
+    while (records.moveNext()) {
+      final row = records.current;
+      if (row.every((cell) => cell.trim().isEmpty)) continue;
+      if (row.length != header.length || row[titleIndex].trim().isEmpty) {
+        throw const MusicImportFileException(ImportFileError.invalidCsv);
+      }
       final title = row[titleIndex].trim();
-      final artist = artistIndex >= 0 && artistIndex < row.length
-          ? row[artistIndex].replaceAll(';', ',').trim()
-          : '';
-      if (title.isEmpty) continue;
-      final key = '${artist.toLowerCase()}|${title.toLowerCase()}';
-      if (!seen.add(key)) continue;
-      tracks.add(_textTrack(artist, title, tracks.length));
-      if (tracks.length >= 500) break;
+      final artist = row[artistIndex]
+          .split(';')
+          .map((name) => name.trim())
+          .where((name) => name.isNotEmpty)
+          .join(', ');
+      final uri = uriIndex < 0 ? '' : row[uriIndex].trim();
+      final id =
+          RegExp(r'^spotify:track:([A-Za-z0-9]+)$').firstMatch(uri)?.group(1) ??
+          RegExp(
+            r'^https?://open\.spotify\.com/track/([A-Za-z0-9]+)(?:[?#].*)?$',
+          ).firstMatch(uri)?.group(1);
+      final duration = durationIndex < 0 || row[durationIndex].trim().isEmpty
+          ? 0
+          : int.tryParse(row[durationIndex].trim());
+      if (duration == null || duration < 0) {
+        throw const MusicImportFileException(ImportFileError.invalidCsv);
+      }
+      tracks.add(
+        _textTrack(artist, title, tracks.length).copyWith(
+          id: id == null ? null : 'sp_$id',
+          album: albumIndex < 0 ? null : row[albumIndex].trim(),
+          duration: Duration(milliseconds: duration),
+        ),
+      );
+      if (tracks.length > maxTracks) {
+        throw const MusicImportFileException(ImportFileError.tooManyTracks);
+      }
+    }
+    if (tracks.isEmpty) {
+      throw const MusicImportFileException(ImportFileError.empty);
     }
     return tracks;
   }
 
-  static List<String> _csvRow(String line) {
-    final values = <String>[];
+  static String? _csvDelimiter(String source) {
+    final header = source.split('\n').first;
+    for (final delimiter in const [',', ';', '\t']) {
+      try {
+        final cells = _csvRecords(
+          header,
+          delimiter,
+        ).firstOrNull?.map((cell) => cell.trim().toLowerCase()).toSet();
+        if (cells != null &&
+            cells.any(_titleColumns.contains) &&
+            cells.any(_artistColumns.contains)) {
+          return delimiter;
+        }
+      } on MusicImportFileException {
+        continue;
+      }
+    }
+    return null;
+  }
+
+  static Iterable<List<String>> _csvRecords(
+    String source,
+    String delimiter,
+  ) sync* {
+    var row = <String>[];
     final value = StringBuffer();
     var quoted = false;
-    for (var i = 0; i < line.length; i++) {
-      final char = line[i];
-      if (char == '"') {
-        if (quoted && i + 1 < line.length && line[i + 1] == '"') {
-          value.write('"');
-          i++;
+    var afterQuote = false;
+    for (var i = 0; i < source.length; i++) {
+      final char = source[i];
+      if (quoted) {
+        if (char == '"') {
+          if (i + 1 < source.length && source[i + 1] == '"') {
+            value.write('"');
+            i++;
+          } else {
+            quoted = false;
+            afterQuote = true;
+          }
         } else {
-          quoted = !quoted;
+          value.write(char);
         }
-      } else if (char == ',' && !quoted) {
-        values.add(value.toString());
+      } else if (char == delimiter || char == '\n') {
+        row.add(value.toString());
         value.clear();
+        afterQuote = false;
+        if (char == '\n') {
+          yield row;
+          row = <String>[];
+        }
+      } else if (afterQuote) {
+        if (char != ' ' && char != '\t' && char != '\r') {
+          throw const MusicImportFileException(ImportFileError.invalidCsv);
+        }
+      } else if (char == '"') {
+        if (value.toString().trim().isNotEmpty) {
+          throw const MusicImportFileException(ImportFileError.invalidCsv);
+        }
+        value.clear();
+        quoted = true;
       } else {
         value.write(char);
       }
     }
-    values.add(value.toString());
-    return values;
+    if (quoted) {
+      throw const MusicImportFileException(ImportFileError.invalidCsv);
+    }
+    if (value.isNotEmpty || row.isNotEmpty || afterQuote) {
+      yield [...row, value.toString()];
+    }
   }
 
   static bool _isHeader(String line) {
@@ -272,7 +435,8 @@ class MusicImportService {
     final id = parsed.$2;
     if (id.isEmpty) {
       throw const FormatException(
-          'Не удалось распознать идентификатор Spotify.');
+        'Не удалось распознать идентификатор Spotify.',
+      );
     }
 
     final response = await _dio
@@ -281,15 +445,15 @@ class MusicImportService {
           options: Options(
             validateStatus: (_) => true,
             headers: {
-              'User-Agent':
-                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36',
               'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
             },
           ),
         )
         .timeout(const Duration(seconds: 15));
     final html = response.data ?? '';
-    final blocked = response.statusCode == 451 ||
+    final blocked =
+        response.statusCode == 451 ||
         RegExp(
           r'(451|not available in your country|unavailable in your region)',
           caseSensitive: false,
@@ -326,8 +490,10 @@ class MusicImportService {
       final response = await _dio
           .get<String>(
             rawUrl,
-            options:
-                Options(followRedirects: true, validateStatus: (_) => true),
+            options: Options(
+              followRedirects: true,
+              validateStatus: (_) => true,
+            ),
           )
           .timeout(const Duration(seconds: 8));
       return response.realUri.toString();
@@ -341,7 +507,7 @@ class MusicImportService {
       final parts = rawUrl.split(':');
       return (
         parts.length > 2 ? parts[1] : 'playlist',
-        parts.length > 2 ? parts[2] : ''
+        parts.length > 2 ? parts[2] : '',
       );
     }
     final uri = Uri.tryParse(rawUrl);
@@ -381,11 +547,13 @@ class MusicImportService {
       final track = _map(item['track']) ?? item;
       final trackTitle = _string(track, ['title', 'name']);
       if (trackTitle == null || trackTitle.isEmpty) continue;
-      final artist = _author(track) ??
+      final artist =
+          _author(track) ??
           _author(item) ??
           _string(item, ['subtitle', 'artist']) ??
           author;
-      final trackId = _spotifyId(track['uri']) ??
+      final trackId =
+          _spotifyId(track['uri']) ??
           _spotifyId(item['uri']) ??
           _string(track, ['uid', 'id']) ??
           _string(item, ['uid', 'id']) ??
@@ -393,27 +561,31 @@ class MusicImportService {
       final key =
           '$trackId|${trackTitle.toLowerCase()}|${artist.toLowerCase()}';
       if (!seen.add(key)) continue;
-      tracks.add(MediaTrack(
-        id: trackId.startsWith('sp_') ? trackId : 'sp_$trackId',
-        title: trackTitle,
-        artist: artist,
-        album: _string(track, ['album', 'albumName']) ?? title,
-        duration: _duration(track['duration'] ?? item['duration']),
-        artworkUrl: _image(track) ?? _image(item) ?? cover,
-        source: TrackSource.spotify,
-      ));
+      tracks.add(
+        MediaTrack(
+          id: trackId.startsWith('sp_') ? trackId : 'sp_$trackId',
+          title: trackTitle,
+          artist: artist,
+          album: _string(track, ['album', 'albumName']) ?? title,
+          duration: _duration(track['duration'] ?? item['duration']),
+          artworkUrl: _image(track) ?? _image(item) ?? cover,
+          source: TrackSource.spotify,
+        ),
+      );
     }
 
     if (tracks.isEmpty && type == 'track') {
       final trackTitle = _string(root, ['name', 'title']) ?? title;
-      tracks.add(MediaTrack(
-        id: 'sp_$id',
-        title: trackTitle,
-        artist: author,
-        duration: _duration(root['duration']),
-        artworkUrl: cover,
-        source: TrackSource.spotify,
-      ));
+      tracks.add(
+        MediaTrack(
+          id: 'sp_$id',
+          title: trackTitle,
+          artist: author,
+          duration: _duration(root['duration']),
+          artworkUrl: cover,
+          source: TrackSource.spotify,
+        ),
+      );
     }
     return ImportedCollection(
       title: title,

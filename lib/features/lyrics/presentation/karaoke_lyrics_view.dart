@@ -8,6 +8,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -40,22 +42,19 @@ List<_Item> _buildItems(List<LyricLine> lines) {
   if (lines.first.startTime >= _breakThreshold) {
     items.add(_Item.gap(Duration.zero, lines.first.startTime));
   }
+  var singingUntil = Duration.zero;
   for (var i = 0; i < lines.length; i++) {
     final line = lines[i];
     final next = i + 1 < lines.length ? lines[i + 1] : null;
-    if (next == null) {
-      final end = line.endTime ?? line.vocalEnd + const Duration(seconds: 4);
-      items.add(_Item.line(line, line.startTime, end));
-      continue;
+    var vocalEnd = line.vocalEnd;
+    for (final backing in line.backingVocals) {
+      if (backing.vocalEnd > vocalEnd) vocalEnd = backing.vocalEnd;
     }
-    // The line stays lit briefly after its last word, then the break starts.
-    var lineEnd = line.vocalEnd + const Duration(milliseconds: 700);
-    if (next.startTime - lineEnd >= _breakThreshold) {
-      if (lineEnd < line.startTime) lineEnd = line.startTime;
-      items.add(_Item.line(line, line.startTime, lineEnd));
-      items.add(_Item.gap(lineEnd, next.startTime));
-    } else {
-      items.add(_Item.line(line, line.startTime, next.startTime));
+    if (vocalEnd > singingUntil) singingUntil = vocalEnd;
+    final gapStart = singingUntil + const Duration(milliseconds: 700);
+    items.add(_Item.line(line, line.startTime, line.groupEnd));
+    if (next != null && next.startTime - gapStart >= _breakThreshold) {
+      items.add(_Item.gap(gapStart, next.startTime));
     }
   }
   return items;
@@ -64,10 +63,7 @@ List<_Item> _buildItems(List<LyricLine> lines) {
 class KaraokeLyricsView extends ConsumerStatefulWidget {
   final HookTheme theme;
 
-  const KaraokeLyricsView({
-    super.key,
-    required this.theme,
-  });
+  const KaraokeLyricsView({super.key, required this.theme});
 
   @override
   ConsumerState<KaraokeLyricsView> createState() => _KaraokeLyricsViewState();
@@ -140,15 +136,22 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
         hi = mid - 1;
       }
     }
-    if (lo == _items.length - 1 && pos >= _items[lo].end) return _items.length;
-    return lo;
+    for (var i = lo; i >= 0; i--) {
+      final item = _items[i];
+      if (pos < item.end && item.line?.isBacking != true) return i;
+    }
+    for (var i = lo; i >= 0; i--) {
+      if (pos < _items[i].end) return i;
+    }
+    return lo == _items.length - 1 ? _items.length : lo;
   }
 
   void _setLines(List<LyricLine> lines) {
     _source = lines;
     _items = _buildItems(lines);
     _keys = List.generate(_items.length, (_) => GlobalKey());
-    _active = _indexAt(_position());
+    _clock.value = _position();
+    _active = _indexAt(_clock.value);
     _userScrollUntil = DateTime.fromMillisecondsSinceEpoch(0);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -187,7 +190,9 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     final estimate = (index * 72.0).clamp(0.0, position.maxScrollExtent);
     _scrollController.jumpTo(estimate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = mounted ? _keys[index].currentContext : null;
+      final ctx = mounted && index < _keys.length
+          ? _keys[index].currentContext
+          : null;
       if (ctx != null) {
         Scrollable.ensureVisible(ctx, alignment: 0.3, duration: Duration.zero);
       }
@@ -221,6 +226,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     final lyricsAsync = ref.watch(trackLyricsProvider);
     final mode = ref.watch(lyricsDisplayModeProvider);
     final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
     final track = ref.watch(currentTrackProvider);
     final offsetKey = track == null
         ? null
@@ -234,20 +240,19 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     }
 
     return lyricsAsync.when(
-      loading: () => Center(
-        child: CircularProgressIndicator(color: colors.primary),
-      ),
+      loading: () =>
+          Center(child: CircularProgressIndicator(color: colors.primary)),
       error: (_, __) => _buildMessage(
         colors,
         MingCuteIcons.mgc_forbid_circle_line,
-        'Текст песни не найден',
+        strings.lyricsNotFound,
       ),
       data: (LyricsResult? result) {
         if (result == null || result.isEmpty) {
           return _buildMessage(
             colors,
             MingCuteIcons.mgc_mic_line,
-            'Текст караоке отсутствует для этого трека',
+            strings.karaokeUnavailable,
           );
         }
 
@@ -266,8 +271,11 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon,
-              size: 48, color: colors.textSecondary.withValues(alpha: 0.5)),
+          Icon(
+            icon,
+            size: 48,
+            color: colors.textSecondary.withValues(alpha: 0.5),
+          ),
           const SizedBox(height: 12),
           Text(
             text,
@@ -303,6 +311,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
 
   Widget _buildStatic(LyricsResult result, HookColors colors) {
     final lines = result.lines;
+    final strings = AppLocalizations.of(context);
     return _edgeFade(
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(28, 24, 28, 48),
@@ -312,7 +321,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
-                'Текст без синхронизации',
+                strings.unsyncedLyrics,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -340,8 +349,12 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   }
 
   Widget _buildSynced(
-      HookColors colors, LyricsDisplayMode mode, bool hasWordSync) {
+    HookColors colors,
+    LyricsDisplayMode mode,
+    bool hasWordSync,
+  ) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final strings = AppLocalizations.of(context);
 
     return Stack(
       children: [
@@ -373,20 +386,19 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
                           ),
                         );
                       }
-                      final distance =
-                          _active < 0 ? index + 1 : (index - _active).abs();
+                      final distance = _active < 0
+                          ? index + 1
+                          : (index - _active).abs();
                       return KeyedSubtree(
                         key: _keys[index],
-                        child: _LineTile(
+                        child: VocalLyricGroup(
                           line: item.line!,
-                          isActive: isActive,
-                          isPast: _active >= 0 && index < _active,
                           distance: distance,
                           clock: _clock,
                           colors: colors,
                           reduceMotion: reduceMotion,
                           wordSweep: mode == LyricsDisplayMode.karaoke,
-                          onTap: () => _seekTo(item.line!),
+                          onSeek: _seekTo,
                         ),
                       );
                     },
@@ -400,13 +412,15 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
           left: 24,
           right: 24,
           child: IgnorePointer(
-              child: Text(
-            hasWordSync
-                ? 'ПОСЛОВНАЯ СИНХРОНИЗАЦИЯ'
-                : 'ПОСТРОЧНАЯ СИНХРОНИЗАЦИЯ',
-            style: TextStyle(
-                color: colors.textSecondary, fontSize: 9, letterSpacing: 1.3),
-          )),
+            child: Text(
+              hasWordSync ? strings.wordSyncUpper : strings.lineSyncUpper,
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: 9,
+                letterSpacing: 1.3,
+              ),
+            ),
+          ),
         ),
         if (_source?.isNotEmpty ?? false)
           Positioned(
@@ -420,7 +434,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
               child: _showOffsetControls
                   ? _buildOffsetBar(colors)
                   : IconButton(
-                      tooltip: 'Настроить синхронизацию текста',
+                      tooltip: strings.adjustLyricsSync,
                       style: IconButton.styleFrom(
                         backgroundColor: colors.surface.withValues(alpha: 0.88),
                         foregroundColor: colors.textSecondary,
@@ -440,8 +454,19 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   }
 
   Widget _buildFocus(HookColors colors, bool reduceMotion) {
-    final current =
-        _active >= 0 && _active < _items.length ? _items[_active] : null;
+    final strings = AppLocalizations.of(context);
+    final current = _active >= 0 && _active < _items.length
+        ? _items[_active]
+        : null;
+    final position = _clock.value;
+    final overlapping = _items
+        .where(
+          (item) =>
+              item.line != null &&
+              position >= item.start &&
+              position < item.end,
+        )
+        .toList();
     LyricLine? next;
     for (var i = math.max(0, _active + 1); i < _items.length; i++) {
       if (_items[i].line != null) {
@@ -450,121 +475,153 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
       }
     }
     return LayoutBuilder(
-        builder: (context, constraints) => SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 44, 28, 84),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AnimatedSwitcher(
-                          duration: reduceMotion
-                              ? Duration.zero
-                              : const Duration(milliseconds: 320),
-                          child: Align(
-                            key: ValueKey('focus:$_active'),
-                            alignment: Alignment.centerLeft,
-                            child: current?.line != null
-                                ? GestureDetector(
-                                    onTap: () => _seekTo(current.line!),
-                                    child: Text(current!.line!.text,
-                                        style: TextStyle(
-                                          color: colors.textPrimary,
-                                          fontSize: constraints.maxWidth < 360
-                                              ? 32
-                                              : 38,
-                                          fontWeight: FontWeight.w700,
-                                          height: 1.15,
-                                          letterSpacing: -0.8,
-                                        )),
-                                  )
-                                : Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                        if (current?.isGap == true)
-                                          _BreakDots(
-                                              item: current!,
-                                              active: true,
-                                              clock: _clock,
-                                              color: colors.textPrimary,
-                                              reduceMotion: reduceMotion),
-                                        Text(
-                                            _active < 0
-                                                ? 'Скоро начнётся'
-                                                : 'Музыка продолжается',
-                                            style: TextStyle(
-                                                color: colors.textSecondary,
-                                                fontSize: 24,
-                                                height: 1.3)),
-                                      ]),
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(28, 44, 28, 84),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedSwitcher(
+                  duration: reduceMotion
+                      ? Duration.zero
+                      : const Duration(milliseconds: 320),
+                  child: Align(
+                    key: ValueKey('focus:$_active'),
+                    alignment: Alignment.centerLeft,
+                    child: current?.line != null
+                        ? Column(
+                            children: [
+                              for (final item
+                                  in overlapping.isEmpty
+                                      ? [current!]
+                                      : overlapping)
+                                VocalLyricGroup(
+                                  line: item.line!,
+                                  distance: 0,
+                                  clock: _clock,
+                                  colors: colors,
+                                  reduceMotion: reduceMotion,
+                                  onSeek: _seekTo,
+                                ),
+                            ],
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (current?.isGap == true)
+                                _BreakDots(
+                                  item: current!,
+                                  active: true,
+                                  clock: _clock,
+                                  color: colors.textPrimary,
+                                  reduceMotion: reduceMotion,
+                                ),
+                              Text(
+                                _active < 0
+                                    ? strings.startsSoon
+                                    : strings.musicContinues,
+                                style: TextStyle(
+                                  color: colors.textSecondary,
+                                  fontSize: 24,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        if (next != null) ...[
-                          const SizedBox(height: 28),
-                          Text(next.text,
-                              style: TextStyle(
-                                  color: colors.textSecondary
-                                      .withValues(alpha: 0.65),
-                                  fontSize: 18,
-                                  height: 1.4)),
-                        ],
-                      ]),
+                  ),
                 ),
-              ),
-            ));
+                if (next != null) ...[
+                  const SizedBox(height: 28),
+                  Text(
+                    next.text,
+                    style: TextStyle(
+                      color: colors.textSecondary.withValues(alpha: 0.65),
+                      fontSize: 18,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildOffsetBar(HookColors colors) {
+    final strings = AppLocalizations.of(context);
     final offset =
-        '${_syncOffsetSeconds > 0 ? '+' : ''}${_syncOffsetSeconds.toStringAsFixed(1)} с';
+        '${_syncOffsetSeconds > 0 ? '+' : ''}${_syncOffsetSeconds.toStringAsFixed(1)}';
     return DecoratedBox(
       decoration: BoxDecoration(
-          color: colors.surface, borderRadius: BorderRadius.circular(24)),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            IconButton(
-                tooltip: 'Уменьшить сдвиг на 0.1 с',
-                onPressed: () => _shiftOffset(-0.1),
-                icon: Icon(Icons.remove_rounded, color: colors.textPrimary)),
-            TextButton(
-                onPressed: () => _setOffset(0),
-                child: Text('Сдвиг: $offset',
-                    style: TextStyle(color: colors.textPrimary, fontSize: 12))),
-            IconButton(
-                tooltip: 'Увеличить сдвиг на 0.1 с',
-                onPressed: () => _shiftOffset(0.1),
-                icon: Icon(Icons.add_rounded, color: colors.textPrimary)),
-            IconButton(
-                tooltip: 'Скрыть настройку',
-                onPressed: () => setState(() => _showOffsetControls = false),
-                icon: Icon(Icons.close_rounded,
-                    color: colors.textSecondary, size: 18)),
-          ]),
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          IconButton(
+            tooltip: strings.decreaseLyricsOffset,
+            onPressed: () => _shiftOffset(-0.1),
+            icon: Icon(Icons.remove_rounded, color: colors.textPrimary),
+          ),
+          TextButton(
+            onPressed: () => _setOffset(0),
+            child: Text(
+              strings.lyricsOffset(offset),
+              style: TextStyle(color: colors.textPrimary, fontSize: 12),
+            ),
+          ),
+          IconButton(
+            tooltip: strings.increaseLyricsOffset,
+            onPressed: () => _shiftOffset(0.1),
+            icon: Icon(Icons.add_rounded, color: colors.textPrimary),
+          ),
+          IconButton(
+            tooltip: strings.hideSetting,
+            onPressed: () => setState(() => _showOffsetControls = false),
+            icon: Icon(
+              Icons.close_rounded,
+              color: colors.textSecondary,
+              size: 18,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   void _shiftOffset(double delta) => _setOffset(_syncOffsetSeconds + delta);
 
   void _setOffset(double value) {
-    setState(() => _syncOffsetSeconds =
-        double.parse(value.clamp(-15.0, 15.0).toStringAsFixed(1)));
+    setState(
+      () => _syncOffsetSeconds = double.parse(
+        value.clamp(-15.0, 15.0).toStringAsFixed(1),
+      ),
+    );
     final key = _offsetTrackKey;
     if (key == null) return;
-    unawaited(ref
-        .read(localStorageServiceProvider)
-        .saveLyricsOffset(key, _syncOffsetSeconds)
-        .catchError((Object error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Не удалось сохранить сдвиг текста.')),
-        );
-      }
-    }));
+    unawaited(
+      ref
+          .read(localStorageServiceProvider)
+          .saveLyricsOffset(key, _syncOffsetSeconds)
+          .catchError((Object error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    AppLocalizations.of(context).lyricsOffsetSaveFailed,
+                  ),
+                ),
+              );
+            }
+          }),
+    );
   }
 }
 
@@ -574,6 +631,59 @@ const _lineStyle = TextStyle(
   height: 1.22,
   letterSpacing: -0.4,
 );
+
+class VocalLyricGroup extends StatelessWidget {
+  final LyricLine line;
+  final int distance;
+  final ValueListenable<Duration> clock;
+  final HookColors colors;
+  final bool reduceMotion;
+  final bool wordSweep;
+  final ValueChanged<LyricLine> onSeek;
+
+  const VocalLyricGroup({
+    super.key,
+    required this.line,
+    required this.distance,
+    required this.clock,
+    required this.colors,
+    required this.reduceMotion,
+    required this.onSeek,
+    this.wordSweep = true,
+  });
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<Duration>(
+    valueListenable: clock,
+    builder: (context, position, _) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final part in [line, ...line.backingVocals])
+          _LineTile(
+            line: part,
+            isActive:
+                part.isActiveAt(position) &&
+                (part.hasRealWordTimings ||
+                    position <
+                        part.vocalEnd + const Duration(milliseconds: 700)),
+            isPast: position >= (part.endTime ?? part.vocalEnd),
+            distance: distance,
+            clock: clock,
+            colors: colors,
+            reduceMotion: reduceMotion,
+            wordSweep: wordSweep,
+            onTap: () => onSeek(part),
+          ),
+      ],
+    ),
+  );
+}
+
+Alignment _lineAlignment(LyricLine line) => switch (line.placement) {
+  LyricPlacement.left => Alignment.centerLeft,
+  LyricPlacement.right => Alignment.centerRight,
+  LyricPlacement.center => Alignment.center,
+};
 
 class _LineTile extends StatelessWidget {
   final LyricLine line;
@@ -617,36 +727,45 @@ class _LineTile extends StatelessWidget {
               endTime: line.endTime ?? line.startTime,
             ),
           ];
-    final opacity = isActive
-        ? 1.0
-        : switch (distance) {
-            1 => 0.85,
-            2 => 0.65,
-            _ => 0.45,
-          };
+    final opacity = isActive || distance <= 1 ? 1.0 : 0.85;
     final animate = !reduceMotion;
+    final alignment = _lineAlignment(line);
+    final style = _lineStyle.copyWith(
+      fontSize: line.isBacking ? 18 : 27,
+      fontWeight: line.isBacking ? FontWeight.w500 : FontWeight.w700,
+      height: line.isBacking ? 1.35 : 1.22,
+    );
 
     final body = !wordSweep
         ? Text(
             line.text,
-            style: _lineStyle.copyWith(
-                color: isActive ? colors.textPrimary : colors.textSecondary),
+            textAlign: switch (line.placement) {
+              LyricPlacement.left => TextAlign.left,
+              LyricPlacement.right => TextAlign.right,
+              LyricPlacement.center => TextAlign.center,
+            },
+            style: style.copyWith(
+              color: isActive ? colors.textPrimary : colors.textSecondary,
+            ),
           )
         : TweenAnimationBuilder<double>(
             tween: Tween(end: isActive ? 1.0 : 0.0),
-            duration:
-                animate ? const Duration(milliseconds: 420) : Duration.zero,
+            duration: animate
+                ? const Duration(milliseconds: 420)
+                : Duration.zero,
             curve: _easeOut,
             builder: (context, emphasis, _) {
               Widget wrap(Duration? pos) => _WordsWrap(
-                    words: words,
-                    progressOf: (w) =>
-                        pos == null ? (isPast ? 1.0 : 0.0) : _progress(w, pos),
-                    emphasis: emphasis,
-                    realTimings: line.hasRealWordTimings,
-                    colors: colors,
-                    reduceMotion: reduceMotion,
-                  );
+                words: words,
+                style: style,
+                placement: line.placement,
+                progressOf: (w) =>
+                    pos == null ? (isPast ? 1.0 : 0.0) : _progress(w, pos),
+                emphasis: emphasis,
+                realTimings: line.hasRealWordTimings,
+                colors: colors,
+                reduceMotion: reduceMotion,
+              );
               if (!isActive) return wrap(null);
               return ValueListenableBuilder<Duration>(
                 valueListenable: clock,
@@ -655,22 +774,41 @@ class _LineTile extends StatelessWidget {
             },
           );
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return Semantics(
+      key: ValueKey('vocal:${line.startTime.inMicroseconds}:${line.text}'),
+      label: line.singer == null ? line.text : '${line.singer}: ${line.text}',
+      selected: isActive,
+      button: true,
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: AnimatedOpacity(
-          opacity: opacity,
-          duration: animate ? const Duration(milliseconds: 350) : Duration.zero,
-          curve: _easeOut,
-          child: AnimatedScale(
-            scale: isActive || !animate ? 1.0 : 0.94,
-            alignment: Alignment.centerLeft,
-            duration:
-                animate ? const Duration(milliseconds: 450) : Duration.zero,
-            curve: _easeOut,
-            child: body,
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.only(top: line.isBacking ? 0 : 12, bottom: 12),
+          child: Align(
+            alignment: alignment,
+            child: FractionallySizedBox(
+              widthFactor: line.isBacking
+                  ? 0.78
+                  : (line.singer == null ? 1 : 0.9),
+              child: AnimatedOpacity(
+                opacity: opacity,
+                duration: animate
+                    ? const Duration(milliseconds: 350)
+                    : Duration.zero,
+                curve: _easeOut,
+                child: AnimatedScale(
+                  scale: isActive || !animate ? 1.0 : 0.96,
+                  alignment: alignment,
+                  duration: animate
+                      ? const Duration(milliseconds: 450)
+                      : Duration.zero,
+                  curve: _easeOut,
+                  child: body,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -680,6 +818,8 @@ class _LineTile extends StatelessWidget {
 
 class _WordsWrap extends StatelessWidget {
   final List<LyricWord> words;
+  final TextStyle style;
+  final LyricPlacement placement;
   final double Function(LyricWord) progressOf;
 
   /// 1 while the line is the current one, easing to 0 as it ends.
@@ -690,6 +830,8 @@ class _WordsWrap extends StatelessWidget {
 
   const _WordsWrap({
     required this.words,
+    required this.style,
+    required this.placement,
     required this.progressOf,
     required this.emphasis,
     required this.realTimings,
@@ -699,26 +841,34 @@ class _WordsWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dim = colors.textPrimary.withValues(alpha: 0.32);
+    final dim = colors.textSecondary;
     final sung = Color.lerp(dim, colors.textPrimary, emphasis)!;
-    const spaceWidth = 27 * 0.27;
+    final spaceWidth = (style.fontSize ?? 27) * 0.27;
 
     return Wrap(
+      alignment: switch (placement) {
+        LyricPlacement.left => WrapAlignment.start,
+        LyricPlacement.right => WrapAlignment.end,
+        LyricPlacement.center => WrapAlignment.center,
+      },
       runSpacing: 2,
       children: [
         for (var i = 0; i < words.length; i++)
           () {
             final w = words[i];
             final text = w.text.trim();
-            final spaced = w.text.endsWith(' ') ||
+            final spaced =
+                w.text.endsWith(' ') ||
                 (i + 1 < words.length && words[i + 1].text.startsWith(' '));
             final p = progressOf(w);
-            final longNote = realTimings &&
+            final longNote =
+                realTimings &&
                 w.endTime - w.startTime >= const Duration(milliseconds: 900);
             return Padding(
               padding: EdgeInsets.only(right: spaced ? spaceWidth : 0),
               child: _SweepWord(
                 text: text,
+                style: style,
                 progress: p,
                 sung: sung,
                 dim: dim,
@@ -736,6 +886,7 @@ class _WordsWrap extends StatelessWidget {
 /// A word filled left to right as it is sung, with a soft leading edge.
 class _SweepWord extends StatelessWidget {
   final String text;
+  final TextStyle style;
   final double progress;
   final Color sung;
   final Color dim;
@@ -747,6 +898,7 @@ class _SweepWord extends StatelessWidget {
 
   const _SweepWord({
     required this.text,
+    required this.style,
     required this.progress,
     required this.sung,
     required this.dim,
@@ -759,27 +911,25 @@ class _SweepWord extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget painted;
     if (progress <= 0) {
-      painted = Text(text, style: _lineStyle.copyWith(color: dim));
+      painted = Text(text, style: style.copyWith(color: dim));
     } else if (progress >= 1 && glow <= 0) {
-      painted = Text(text, style: _lineStyle.copyWith(color: sung));
+      painted = Text(text, style: style.copyWith(color: sung));
     } else {
       painted = ShaderMask(
         blendMode: BlendMode.srcIn,
         shaderCallback: (rect) {
-          final f =
-              rect.width <= 0 ? 0.2 : (feather / rect.width).clamp(0.02, 0.45);
+          final f = rect.width <= 0
+              ? 0.2
+              : (feather / rect.width).clamp(0.02, 0.45);
           final edge = -f + progress * (1 + 2 * f);
           return LinearGradient(
             colors: [sung, dim],
-            stops: [
-              (edge - f).clamp(0.0, 1.0),
-              (edge + f).clamp(0.0, 1.0),
-            ],
+            stops: [(edge - f).clamp(0.0, 1.0), (edge + f).clamp(0.0, 1.0)],
           ).createShader(rect);
         },
         child: Text(
           text,
-          style: _lineStyle.copyWith(
+          style: style.copyWith(
             color: Colors.white,
             shadows: glow > 0.01
                 ? [
@@ -820,8 +970,9 @@ class _BreakDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration:
-          reduceMotion ? Duration.zero : const Duration(milliseconds: 300),
+      duration: reduceMotion
+          ? Duration.zero
+          : const Duration(milliseconds: 300),
       curve: _easeOut,
       alignment: Alignment.topLeft,
       child: !active
@@ -834,16 +985,21 @@ class _BreakDots extends StatelessWidget {
                   final totalMs = (item.end - item.start).inMilliseconds;
                   final p = totalMs <= 0
                       ? 1.0
-                      : ((pos - item.start).inMilliseconds / totalMs)
-                          .clamp(0.0, 1.0);
+                      : ((pos - item.start).inMilliseconds / totalMs).clamp(
+                          0.0,
+                          1.0,
+                        );
                   final remainingMs = (item.end - pos).inMilliseconds;
-                  final exit =
-                      _easeOut.transform((remainingMs / 450).clamp(0.0, 1.0));
+                  final exit = _easeOut.transform(
+                    (remainingMs / 450).clamp(0.0, 1.0),
+                  );
                   final breathe = reduceMotion
                       ? 1.0
                       : 1.0 +
-                          0.08 *
-                              math.sin(pos.inMilliseconds / 2400 * 2 * math.pi);
+                            0.08 *
+                                math.sin(
+                                  pos.inMilliseconds / 2400 * 2 * math.pi,
+                                );
                   return Align(
                     alignment: Alignment.centerLeft,
                     child: Opacity(
@@ -862,7 +1018,8 @@ class _BreakDots extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: color.withValues(
-                                    alpha: 0.25 +
+                                    alpha:
+                                        0.25 +
                                         0.75 * (p * 3 - i).clamp(0.0, 1.0),
                                   ),
                                 ),

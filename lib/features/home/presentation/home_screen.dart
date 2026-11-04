@@ -1,8 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
+import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -19,221 +23,238 @@ class HomeScreen extends ConsumerWidget {
     required this.onOpenSearch,
   });
 
-  String get _greeting {
-    final hour = DateTime.now().hour;
-    if (hour < 6) return 'Доброй ночи';
-    if (hour < 12) return 'Доброе утро';
-    if (hour < 18) return 'Добрый день';
-    return 'Добрый вечер';
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = theme.colors;
+    final strings = AppLocalizations.of(context);
     final favorites = ref.watch(favoritesProvider);
     final history = ref.watch(historyProvider);
     final currentTrack = ref.watch(currentTrackProvider);
-    final recent = <MediaTrack>[];
     final seen = <String>{};
-    for (final track in [
-      if (currentTrack != null) currentTrack,
-      ...history,
-      ...favorites,
-    ]) {
-      final key = '${track.source.name}:${track.id}';
-      if (seen.add(key)) recent.add(track);
-      if (recent.length == 8) break;
-    }
+    final recent =
+        [if (currentTrack != null) currentTrack, ...history, ...favorites]
+            .where((track) => seen.add('${track.source.name}:${track.id}'))
+            .take(8)
+            .toList();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 0),
-                child: Row(
-                  children: [
-                    Expanded(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          'assets/icons/app_mark.png',
+                          width: 28,
+                          height: 36,
+                          color: colors.textPrimary,
+                          excludeFromSemantics: true,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Hook',
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -1,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: strings.themeSettings,
+                          icon: Icon(
+                            MingCuteIcons.mgc_palette_line,
+                            color: colors.textSecondary,
+                          ),
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => ThemeSettingsScreen(theme: theme),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Material(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: onOpenSearch,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Icon(
+                                MingCuteIcons.mgc_search_2_line,
+                                color: colors.textSecondary,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  strings.homeSearchHint,
+                                  style: TextStyle(
+                                    color: colors.textSecondary,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _WaveField(
+                    theme: theme,
+                    seed: recent.firstOrNull,
+                    onOpenSearch: onOpenSearch,
+                  ),
+                ),
+                if (recent.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: _SectionHeading(
+                      title: strings.onYourAir,
+                      detail: strings.recentSignals(recent.length),
+                      theme: theme,
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height:
+                          144 +
+                          MediaQuery.textScalerOf(context).scale(14) * 3.6,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: recent.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        itemBuilder: (context, index) {
+                          final track = recent[index];
+                          return SizedBox(
+                            width: 144,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () => ref
+                                    .read(queueProvider.notifier)
+                                    .playQueue(recent, startIndex: index),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TrackArtwork(
+                                      url: track.artworkUrl,
+                                      size: 144,
+                                      borderRadius: BorderRadius.circular(12),
+                                      placeholderColor: colors.surface,
+                                      iconColor: colors.textSecondary,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      track.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: colors.textPrimary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      track.artist,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: colors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+                SliverToBoxAdapter(
+                  child: _SectionHeading(
+                    title: favorites.isEmpty
+                        ? strings.collectionWaiting
+                        : strings.saved,
+                    detail: favorites.isEmpty
+                        ? strings.collectionEmptyDetail
+                        : strings.tracksCount(favorites.length),
+                    theme: theme,
+                  ),
+                ),
+                if (favorites.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'HOOK / LIVE',
+                            strings.favoriteWaveHint,
                             style: TextStyle(
-                              color: colors.accent,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.8,
+                              color: colors.textSecondary,
+                              fontSize: 14,
+                              height: 1.5,
                             ),
                           ),
-                          const SizedBox(height: 5),
-                          Text(
-                            _greeting,
-                            style: TextStyle(
-                              color: colors.textPrimary,
-                              fontSize: 30,
-                              letterSpacing: -1.1,
-                              fontWeight: FontWeight.w800,
+                          const SizedBox(height: 16),
+                          OutlinedButton.icon(
+                            onPressed: onOpenSearch,
+                            icon: const Icon(
+                              MingCuteIcons.mgc_search_2_line,
+                              size: 20,
                             ),
+                            label: Text(strings.openSearch),
                           ),
                         ],
                       ),
                     ),
-                    IconButton(
-                      tooltip: 'Настройки темы',
-                      style: IconButton.styleFrom(
-                        foregroundColor: colors.textSecondary,
-                        side: BorderSide(
-                          color: colors.border.withValues(alpha: 0.8),
-                        ),
-                      ),
-                      icon: const Icon(MingCuteIcons.mgc_palette_line),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => ThemeSettingsScreen(theme: theme),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-                child: _SearchLaunch(
-                  theme: theme,
-                  onTap: onOpenSearch,
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _WaveField(
-                theme: theme,
-                seed: recent.isNotEmpty ? recent.first : null,
-                onOpenSearch: onOpenSearch,
-              ),
-            ),
-            if (recent.isNotEmpty) ...[
-              SliverToBoxAdapter(
-                child: _SectionHeading(
-                  title: 'В вашем эфире',
-                  detail: '${recent.length} последних сигналов',
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 206,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: recent.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) => _RecentSignalCard(
+                  )
+                else
+                  SliverList.builder(
+                    itemCount: math.min(favorites.length, 6),
+                    itemBuilder: (context, index) => SpotifyTrackTile(
                       theme: theme,
-                      track: recent[index],
-                      index: index,
+                      track: favorites[index],
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       onTap: () => ref
                           .read(queueProvider.notifier)
-                          .playQueue(recent, startIndex: index),
+                          .playQueue(favorites, startIndex: index),
                     ),
                   ),
-                ),
-              ),
-            ],
-            SliverToBoxAdapter(
-              child: _SectionHeading(
-                title: favorites.isEmpty ? 'Коллекция ждёт' : 'Сохранённые',
-                detail: favorites.isEmpty
-                    ? 'Здесь останется то, к чему хочется вернуться'
-                    : '${favorites.length} треков',
-              ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
             ),
-            if (favorites.isEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 164),
-                  child: _CollectionPrompt(
-                    theme: theme,
-                    onOpenSearch: onOpenSearch,
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 166),
-                sliver: SliverList.separated(
-                  itemCount: favorites.length > 6 ? 6 : favorites.length,
-                  separatorBuilder: (_, __) => Divider(
-                    height: 1,
-                    color: colors.border.withValues(alpha: 0.45),
-                  ),
-                  itemBuilder: (context, index) => _SavedTrackRow(
-                    theme: theme,
-                    track: favorites[index],
-                    index: index,
-                    onTap: () => ref
-                        .read(queueProvider.notifier)
-                        .playQueue(favorites, startIndex: index),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchLaunch extends StatelessWidget {
-  final HookTheme theme;
-  final VoidCallback onTap;
-
-  const _SearchLaunch({required this.theme, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = theme.colors;
-    return Material(
-      color: colors.surface.withValues(alpha: 0.82),
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-          child: Row(
-            children: [
-              Icon(
-                MingCuteIcons.mgc_search_2_line,
-                color: colors.accent,
-                size: 22,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Трек, артист или слова песни',
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              Text(
-                'ПОИСК',
-                style: TextStyle(
-                  color: colors.textPrimary.withValues(alpha: 0.48),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.1,
-                ),
-              ),
-            ],
           ),
         ),
       ),
@@ -255,130 +276,103 @@ class _WaveField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = theme.colors;
-    final hasSeed = seed != null;
-    final title = hasSeed ? seed!.title : 'Найдите первый трек';
-    final subtitle = hasSeed
-        ? 'Продолжение после ${seed!.artist}'
-        : 'Выберите трек — и соберём волну в его настроении.';
-
+    final strings = AppLocalizations.of(context);
+    final active = ref.watch(waveActiveProvider);
+    final playing = ref.watch(isPlayingProvider);
+    final loading = ref.watch(isTrackLoadingProvider);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
       child: Container(
-        height: 228,
-        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: colors.border.withValues(alpha: 0.8)),
+          borderRadius: BorderRadius.circular(24),
         ),
-        child: Stack(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Positioned.fill(
-              child: _WaveBackdrop(theme: theme, artworkUrl: seed?.artworkUrl),
-            ),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    stops: const [0, 0.52, 1],
-                    colors: [
-                      colors.surface.withValues(alpha: 0.92),
-                      colors.surface.withValues(alpha: 0.56),
-                      colors.background.withValues(alpha: 0.94),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 18,
-              right: 18,
-              child: Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: colors.background.withValues(alpha: 0.48),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: colors.textPrimary.withValues(alpha: 0.16),
-                  ),
-                ),
-                child: Icon(
-                  MingCuteIcons.mgc_radar_2_line,
-                  color: colors.accent,
-                  size: 22,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    hasSeed ? 'ПРОДОЛЖИМ / 01' : 'ВАША ВОЛНА / 01',
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    strings.yourWaveLabel,
                     style: TextStyle(
-                      color: colors.accent,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.65,
+                      color: colors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const Spacer(),
-                  SizedBox(
-                    width: 235,
-                    child: Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textPrimary,
-                        fontSize: 24,
-                        height: 1.05,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.8,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  SizedBox(
-                    width: 240,
-                    child: Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textSecondary,
-                        height: 1.25,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colors.accent,
-                      foregroundColor: colors.background,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 10,
-                      ),
-                    ),
-                    onPressed: hasSeed
-                        ? () =>
-                            ref.read(queueProvider.notifier).startWave(seed!)
-                        : onOpenSearch,
-                    icon: Icon(
-                      hasSeed
-                          ? MingCuteIcons.mgc_play_fill
-                          : MingCuteIcons.mgc_search_line,
-                      size: 17,
-                    ),
-                    label: Text(hasSeed ? 'Продолжить волну' : 'Выбрать трек'),
+                ),
+                if (seed != null) ...[
+                  const SizedBox(width: 12),
+                  TrackArtwork(
+                    url: seed!.artworkUrl,
+                    size: 40,
+                    borderRadius: BorderRadius.circular(8),
+                    placeholderColor: colors.background,
+                    iconColor: colors.textSecondary,
                   ),
                 ],
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: WaveRibbon(
+                color: colors.accent,
+                animate: active && playing && !loading,
+              ),
+            ),
+            Text(
+              seed?.title ?? strings.findFirstTrack,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: colors.textPrimary,
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.7,
+                height: 1.15,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              seed == null
+                  ? strings.chooseTrackWaveDetail
+                  : strings.continuationAfter(seed!.artist),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              key: const ValueKey('home-wave-button'),
+              onPressed: loading
+                  ? null
+                  : seed == null
+                  ? onOpenSearch
+                  : () => ref.read(queueProvider.notifier).startWave(seed!),
+              style: FilledButton.styleFrom(
+                backgroundColor: colors.textPrimary,
+                foregroundColor: colors.background,
+              ),
+              icon: loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(
+                      seed == null
+                          ? MingCuteIcons.mgc_search_2_line
+                          : MingCuteIcons.mgc_play_fill,
+                      size: 20,
+                    ),
+              label: Text(
+                seed == null ? strings.chooseTrack : strings.continueWave,
               ),
             ),
           ],
@@ -388,342 +382,135 @@ class _WaveField extends ConsumerWidget {
   }
 }
 
-class _WaveBackdrop extends StatelessWidget {
-  final HookTheme theme;
-  final String? artworkUrl;
-
-  const _WaveBackdrop({required this.theme, required this.artworkUrl});
+class WaveRibbon extends StatefulWidget {
+  const WaveRibbon({super.key, required this.color, required this.animate});
+  final Color color;
+  final bool animate;
 
   @override
-  Widget build(BuildContext context) {
-    final url = artworkUrl ?? '';
-    if (url.isEmpty) return _WaveFallback(theme: theme);
-
-    return Image.network(
-      TrackArtwork.getHighResUrl(url),
-      fit: BoxFit.cover,
-      opacity: const AlwaysStoppedAnimation(0.5),
-      filterQuality: FilterQuality.medium,
-      errorBuilder: (_, __, ___) => _WaveFallback(theme: theme),
-    );
-  }
+  State<WaveRibbon> createState() => _WaveRibbonState();
 }
 
-class _WaveFallback extends StatelessWidget {
-  final HookTheme theme;
+class _WaveRibbonState extends State<WaveRibbon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 6),
+  );
 
-  const _WaveFallback({required this.theme});
+  void _updateMotion() {
+    final enabled =
+        widget.animate &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    if (enabled && !_motion.isAnimating) {
+      _motion.repeat();
+    } else if (!enabled) {
+      _motion.stop();
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
-    final colors = theme.colors;
-    const heights = [34.0, 62.0, 92.0, 54.0, 112.0, 72.0, 42.0, 84.0, 56.0];
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0.8, -0.25),
-          radius: 1.1,
-          colors: [
-            colors.primary.withValues(alpha: 0.42),
-            colors.surface,
-          ],
-        ),
-      ),
-      child: Align(
-        alignment: const Alignment(0.72, -0.12),
-        child: Transform.rotate(
-          angle: -0.14,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              for (var index = 0; index < heights.length; index++)
-                Container(
-                  width: 7,
-                  height: heights[index],
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: index.isEven
-                        ? colors.accent.withValues(alpha: 0.9)
-                        : colors.textPrimary.withValues(alpha: 0.42),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.accent.withValues(alpha: 0.2),
-                        blurRadius: 14,
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateMotion();
   }
+
+  @override
+  void didUpdateWidget(covariant WaveRibbon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateMotion();
+  }
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: RepaintBoundary(
+      child: SizedBox(
+        height: 84,
+        width: double.infinity,
+        child: CustomPaint(painter: _WavePainter(_motion, widget.color)),
+      ),
+    ),
+  );
+}
+
+class _WavePainter extends CustomPainter {
+  _WavePainter(this.motion, this.color) : super(repaint: motion);
+  final Animation<double> motion;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final phase = motion.value * math.pi * 2;
+    for (var layer = 0; layer < 4; layer++) {
+      final path = Path();
+      for (var x = 0.0; x <= size.width; x += 2) {
+        final t = x / math.max(1, size.width);
+        final envelope = math.pow(math.sin(t * math.pi), 1.4);
+        final y =
+            size.height / 2 +
+            math.sin(t * math.pi * 3 + phase + layer * 0.5) *
+                envelope *
+                (30 - layer * 4);
+        if (x == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+      canvas.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = layer == 0 ? 2.5 : 1.5
+          ..strokeCap = StrokeCap.round
+          ..color = color.withValues(alpha: 1 - layer * 0.22),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _WavePainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.motion != motion;
 }
 
 class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({
+    required this.title,
+    required this.detail,
+    required this.theme,
+  });
   final String title;
   final String detail;
-
-  const _SectionHeading({required this.title, required this.detail});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 30, 20, 13),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: colors.onSurface,
-              fontSize: 22,
-              letterSpacing: -0.7,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            detail,
-            style: TextStyle(
-              color: colors.onSurface.withValues(alpha: 0.54),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RecentSignalCard extends StatelessWidget {
   final HookTheme theme;
-  final MediaTrack track;
-  final int index;
-  final VoidCallback onTap;
-
-  const _RecentSignalCard({
-    required this.theme,
-    required this.track,
-    required this.index,
-    required this.onTap,
-  });
 
   @override
-  Widget build(BuildContext context) {
-    final colors = theme.colors;
-    return SizedBox(
-      width: 132,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 3),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    TrackArtwork(
-                      url: track.artworkUrl,
-                      size: 132,
-                      borderRadius: BorderRadius.circular(18),
-                      placeholderColor: colors.surface,
-                      iconColor: colors.textSecondary,
-                    ),
-                    Positioned(
-                      left: 9,
-                      top: 9,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: colors.background.withValues(alpha: 0.72),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          '${index + 1}'.padLeft(2, '0'),
-                          style: TextStyle(
-                            color: colors.textPrimary,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 9),
-                Text(
-                  track.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  track.artist,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            color: theme.colors.textPrimary,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            letterSpacing: -0.5,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SavedTrackRow extends StatelessWidget {
-  final HookTheme theme;
-  final MediaTrack track;
-  final int index;
-  final VoidCallback onTap;
-
-  const _SavedTrackRow({
-    required this.theme,
-    required this.track,
-    required this.index,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = theme.colors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 9),
-          child: Row(
-            children: [
-              Text(
-                '${index + 1}'.padLeft(2, '0'),
-                style: TextStyle(
-                  color: colors.accent,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(width: 12),
-              TrackArtwork(
-                url: track.artworkUrl,
-                size: 48,
-                borderRadius: BorderRadius.circular(13),
-                placeholderColor: colors.surface,
-                iconColor: colors.textSecondary,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      track.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      track.artist,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                MingCuteIcons.mgc_play_fill,
-                size: 19,
-                color: colors.textSecondary.withValues(alpha: 0.7),
-              ),
-            ],
-          ),
+        const SizedBox(height: 4),
+        Text(
+          detail,
+          style: TextStyle(color: theme.colors.textSecondary, fontSize: 13),
         ),
-      ),
-    );
-  }
-}
-
-class _CollectionPrompt extends StatelessWidget {
-  final HookTheme theme;
-  final VoidCallback onOpenSearch;
-
-  const _CollectionPrompt({required this.theme, required this.onOpenSearch});
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = theme.colors;
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: colors.surface.withValues(alpha: 0.82),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: colors.border.withValues(alpha: 0.7)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            MingCuteIcons.mgc_bookmark_line,
-            size: 30,
-            color: colors.accent,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Оставьте здесь первый след',
-            style: TextStyle(
-              color: colors.textPrimary,
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.45,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Добавляйте любимые треки — и ваша волна станет точнее.',
-            style: TextStyle(
-              color: colors.textSecondary,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 18),
-          OutlinedButton.icon(
-            onPressed: onOpenSearch,
-            icon: const Icon(MingCuteIcons.mgc_search_2_line, size: 18),
-            label: const Text('Открыть поиск'),
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }

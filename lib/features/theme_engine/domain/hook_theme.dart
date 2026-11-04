@@ -247,7 +247,8 @@ class HookTheme {
       colorScheme: ColorScheme(
         brightness: isDark ? Brightness.dark : Brightness.light,
         primary: colors.primary,
-        onPrimary: colors.textPrimary,
+        onPrimary: ThemeData.estimateBrightnessForColor(colors.primary) == Brightness.light
+            ? Colors.black : Colors.white,
         secondary: colors.secondary,
         onSecondary: colors.textPrimary,
         surface: colors.surface,
@@ -260,6 +261,28 @@ class HookTheme {
         bodyColor: colors.textPrimary,
         displayColor: colors.textPrimary,
       ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: colors.textPrimary,
+          foregroundColor: colors.background,
+          minimumSize: const Size(48, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colors.textPrimary,
+          minimumSize: const Size(48, 48),
+          side: BorderSide(color: colors.border),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        ),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(minimumSize: const Size(48, 48), foregroundColor: colors.textPrimary),
+      ),
+      dividerColor: colors.border,
+      splashFactory: InkRipple.splashFactory,
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colors.surfaceGlass,

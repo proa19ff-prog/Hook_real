@@ -1,3 +1,5 @@
+enum LyricPlacement { left, right, center }
+
 class LyricWord {
   final String text;
   final Duration startTime;
@@ -9,9 +11,8 @@ class LyricWord {
     required this.endTime,
   });
 
-  bool isActiveAt(Duration position) {
-    return position >= startTime && position < endTime;
-  }
+  bool isActiveAt(Duration position) =>
+      position >= startTime && position < endTime;
 }
 
 class LyricLine {
@@ -19,11 +20,11 @@ class LyricLine {
   final Duration? endTime;
   final String text;
   final List<LyricWord> words;
-
-  /// True when [words] carry real per-word timestamps (NetEase YRC or
-  /// `<mm:ss.xx>` LRC tags). False when they were estimated from the line
-  /// timing, so the UI draws a softer, less precise sweep.
   final bool hasRealWordTimings;
+  final String? singer;
+  final LyricPlacement placement;
+  final bool isBacking;
+  final List<LyricLine> backingVocals;
 
   const LyricLine({
     required this.startTime,
@@ -31,19 +32,42 @@ class LyricLine {
     required this.text,
     this.words = const [],
     this.hasRealWordTimings = false,
+    this.singer,
+    this.placement = LyricPlacement.left,
+    this.isBacking = false,
+    this.backingVocals = const [],
   });
 
   bool get hasWordTimings => words.isNotEmpty;
 
-  /// When the singer finishes this line. A long gap before the next line
-  /// after this point is an instrumental break.
-  Duration get vocalEnd =>
-      words.isNotEmpty ? words.last.endTime : (endTime ?? startTime);
+  Duration get vocalEnd => words.isNotEmpty
+      ? words.fold(
+          startTime,
+          (end, word) => word.endTime > end ? word.endTime : end,
+        )
+      : (endTime ?? startTime);
 
-  bool isActiveAt(Duration position) {
-    if (endTime != null) {
-      return position >= startTime && position < endTime!;
-    }
-    return position >= startTime;
-  }
+  Duration get groupEnd => backingVocals.fold(
+    endTime ?? vocalEnd,
+    (end, line) => line.groupEnd > end ? line.groupEnd : end,
+  );
+
+  bool isActiveAt(Duration position) =>
+      position >= startTime && (endTime == null || position < endTime!);
+
+  LyricLine copyWith({
+    List<LyricLine>? backingVocals,
+    String? singer,
+    LyricPlacement? placement,
+  }) => LyricLine(
+    startTime: startTime,
+    endTime: endTime,
+    text: text,
+    words: words,
+    hasRealWordTimings: hasRealWordTimings,
+    singer: singer ?? this.singer,
+    placement: placement ?? this.placement,
+    isBacking: isBacking,
+    backingVocals: backingVocals ?? this.backingVocals,
+  );
 }

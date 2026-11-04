@@ -3,18 +3,21 @@ import 'dart:math' as math;
 import 'lyric_line.dart';
 
 class LrcParser {
-  static final RegExp _timeTag =
-      RegExp(r'\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]');
-  static final RegExp _wordTokenRegex =
-      RegExp(r'<(\d{1,3}):(\d{1,2})[.:](\d{1,3})>([^<]*)');
+  static final RegExp _timeTag = RegExp(
+    r'\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]',
+  );
+  static final RegExp _wordTokenRegex = RegExp(
+    r'<(\d{1,3}):(\d{1,2})[.:](\d{1,3})>([^<]*)',
+  );
   static final RegExp _yrcLine = RegExp(r'^\[(\d+),(\d+)\](.*)$');
   static final RegExp _yrcToken = RegExp(r'\((\d+),(\d+),-?\d+\)');
   static final RegExp _credit = RegExp(
     r'^\s*(作词|作曲|编曲|制作人|制作|混音|母带|和声|监制|出品|发行|录音|吉他|贝斯|鼓|弦乐|策划|统筹|词|曲|op|sp)\s*[:：]',
     caseSensitive: false,
   );
-  static final RegExp _vowelGroup =
-      RegExp(r'[aeiouyаеёиоуыэюяàáâäéèêëíîïóôöúûüœæ]+');
+  static final RegExp _vowelGroup = RegExp(
+    r'[aeiouyаеёиоуыэюяàáâäéèêëíîïóôöúûüœæ]+',
+  );
   static final RegExp _spaces = RegExp(r'\s+');
 
   /// Average sung syllable, plus a short tail for the last note.
@@ -45,7 +48,9 @@ class LrcParser {
   static List<LyricLine> parse(String rawLrc) {
     if (rawLrc.trim().isEmpty) return [];
 
-    final entries = <({Duration start, String text, List<LyricWord> words})>[];
+    final entries = <_VocalEntry>[];
+    final placements = <String, LyricPlacement>{};
+    _VocalMarkup section = const _VocalMarkup('');
 
     for (final rawLine in rawLrc.split('\n')) {
       var rest = rawLine.trim();
@@ -56,33 +61,35 @@ class LrcParser {
         starts.add(_time(m.group(1)!, m.group(2)!, m.group(3)));
         rest = rest.substring(m.end);
       }
-      if (starts.isEmpty) continue;
-
-      final body = rest.trim();
-      final wordMatches = _wordTokenRegex.allMatches(body).toList();
-      final words = <LyricWord>[];
-      var text = body;
-
-      if (wordMatches.isNotEmpty) {
-        final buffer = StringBuffer();
-        for (var i = 0; i < wordMatches.length; i++) {
-          final m = wordMatches[i];
-          final start = _time(m.group(1)!, m.group(2)!, m.group(3));
-          final wordText = m.group(4) ?? '';
-          buffer.write(wordText);
-          // The last word's end is fixed up once the next line is known.
-          final end = i + 1 < wordMatches.length
-              ? _time(wordMatches[i + 1].group(1)!,
-                  wordMatches[i + 1].group(2)!, wordMatches[i + 1].group(3))
-              : start + const Duration(milliseconds: 600);
-          if (wordText.isEmpty) continue;
-          words.add(LyricWord(text: wordText, startTime: start, endTime: end));
-        }
-        text = buffer.toString().trim();
+      if (starts.isEmpty) {
+        final marker = _markup(rest.trim(), placements);
+        if (marker.text.isEmpty && marker.singer != null) section = marker;
+        continue;
       }
 
+      final inlineBacking = <String>[];
+      final body = rest.trim().replaceAllMapped(
+        RegExp(r'\[bg:(.*?)\]', caseSensitive: false),
+        (match) {
+          inlineBacking.add(match.group(1)!);
+          return '';
+        },
+      );
+      final markup = _markup(body, placements, section: section);
       for (final start in starts) {
-        entries.add((start: start, text: text, words: words));
+        final shift = start - starts.first;
+        entries.add(_enhancedEntry(markup, start, shift, placements));
+        for (final backing in inlineBacking) {
+          final part = _markup(backing, placements, section: markup);
+          final entry = _enhancedEntry(
+            part,
+            start,
+            shift,
+            placements,
+            backing: true,
+          );
+          entries.add(entry);
+        }
       }
     }
 
@@ -95,15 +102,20 @@ class LrcParser {
 
       Duration? nextStart;
       for (var j = i + 1; j < entries.length; j++) {
-        if (entries[j].start > current.start) {
-          nextStart = entries[j].start;
+        final next = entries[j];
+        if (next.start > current.start &&
+            next.isBacking == current.isBacking &&
+            (current.words.isEmpty ||
+                next.singer == current.singer ||
+                next.text.isEmpty)) {
+          nextStart = next.start;
           break;
         }
       }
 
       var words = current.words;
       final hasReal = words.isNotEmpty;
-      if (hasReal) {
+      if (hasReal && !current.hasExplicitEnd) {
         final last = words.last;
         final cap = last.startTime + const Duration(milliseconds: 1500);
         var end = nextStart ?? cap;
@@ -115,41 +127,48 @@ class LrcParser {
           ...words.take(words.length - 1),
           LyricWord(text: last.text, startTime: last.startTime, endTime: end),
         ];
-      } else {
+      } else if (!hasReal) {
         words = estimateWords(current.text, current.start, nextStart);
       }
-
-      final endTime = nextStart ??
-          _maxDuration(
-            current.start + const Duration(seconds: 5),
-            words.isNotEmpty ? words.last.endTime : current.start,
-          );
-
-      result.add(
-        LyricLine(
-          startTime: current.start,
-          endTime: endTime,
-          text: current.text,
-          words: words,
-          hasRealWordTimings: hasReal,
+      final endTime = hasReal
+          ? words.fold(current.start, (end, w) => _maxDuration(end, w.endTime))
+          : nextStart ??
+                _maxDuration(
+                  current.start + const Duration(seconds: 5),
+                  words.isNotEmpty ? words.last.endTime : current.start,
+                );
+      result.addAll(
+        _splitTimedBacking(
+          LyricLine(
+            startTime: current.start,
+            endTime: endTime,
+            text: current.text,
+            words: words,
+            hasRealWordTimings: hasReal,
+            singer: current.singer,
+            placement: current.placement,
+            isBacking: current.isBacking,
+          ),
         ),
       );
     }
 
-    return result;
+    return _groupBacking(result);
   }
 
   /// Parses NetEase YRC: `[lineStart,lineDur](wordStart,wordDur,0)word...`,
   /// all in milliseconds. Every word carries its own sung time.
   static List<LyricLine> parseYrc(String rawYrc) {
     final parsed = <LyricLine>[];
+    final placements = <String, LyricPlacement>{};
 
     for (final rawLine in rawYrc.split('\n')) {
       final m = _yrcLine.firstMatch(rawLine.trim());
       if (m == null) continue;
       final lineStart = Duration(milliseconds: int.parse(m.group(1)!));
       final lineDur = Duration(milliseconds: int.parse(m.group(2)!));
-      final body = m.group(3)!;
+      final marker = _markup(m.group(3)!, placements);
+      final body = marker.text;
 
       final tokens = _yrcToken.allMatches(body).toList();
       if (tokens.isEmpty) continue;
@@ -162,36 +181,260 @@ class LrcParser {
         if (text.isEmpty) continue;
         final start = Duration(milliseconds: int.parse(t.group(1)!));
         final dur = Duration(milliseconds: int.parse(t.group(2)!));
-        words.add(LyricWord(text: text, startTime: start, endTime: start + dur));
+        words.add(
+          LyricWord(text: text, startTime: start, endTime: start + dur),
+        );
       }
 
-      final text = words.map((w) => w.text).join().trim();
-      if (text.isEmpty || _isCredit(text)) continue;
-
-      parsed.add(LyricLine(
-        startTime: lineStart,
-        endTime: lineStart + lineDur,
-        text: text,
-        words: words,
-        hasRealWordTimings: true,
-      ));
+      final rawText = words.map((w) => w.text).join();
+      final content = _markup(rawText, placements, section: marker);
+      if (content.text.isEmpty || _isCredit(content.text)) continue;
+      final cleanWords = _trimWordPrefix(
+        words,
+        rawText.length - content.text.length,
+      );
+      parsed.addAll(
+        _splitTimedBacking(
+          LyricLine(
+            startTime: lineStart,
+            endTime: _maxDuration(
+              lineStart + lineDur,
+              cleanWords.fold(
+                lineStart,
+                (end, w) => _maxDuration(end, w.endTime),
+              ),
+            ),
+            text: content.text.trim(),
+            words: cleanWords,
+            hasRealWordTimings: true,
+            singer: content.singer,
+            placement: content.placement,
+            isBacking: content.isBacking,
+          ),
+        ),
+      );
     }
 
-    parsed.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return _groupBacking(parsed);
+  }
 
-    return [
-      for (var i = 0; i < parsed.length; i++)
-        LyricLine(
-          startTime: parsed[i].startTime,
-          endTime: i + 1 < parsed.length &&
-                  parsed[i + 1].startTime > parsed[i].startTime
-              ? parsed[i + 1].startTime
-              : parsed[i].endTime,
-          text: parsed[i].text,
-          words: parsed[i].words,
-          hasRealWordTimings: true,
+  static _VocalMarkup _markup(
+    String raw,
+    Map<String, LyricPlacement> placements, {
+    _VocalMarkup? section,
+  }) {
+    var text = raw.trimLeft();
+    var singer = section?.singer;
+    var placement = section?.placement ?? LyricPlacement.left;
+    var backing = section?.isBacking ?? false;
+    final marker = RegExp(
+      r'^(?:\[(v\d+|both|duet|bg|background)\]|(v\d+|both|duet|bg|background)\s*[:：]|\[(?:voice|singer)\s*:\s*([^\]]+)\])\s*',
+      caseSensitive: false,
+    );
+    while (true) {
+      final match = marker.firstMatch(text);
+      if (match == null) break;
+      final name = (match.group(1) ?? match.group(2) ?? match.group(3)!).trim();
+      final key = name.toLowerCase();
+      if (key == 'bg' || key == 'background') {
+        backing = true;
+      } else {
+        singer = name;
+        placement = switch (key) {
+          'v1' => LyricPlacement.left,
+          'v2' => LyricPlacement.right,
+          'both' || 'duet' => LyricPlacement.center,
+          _ => placements.putIfAbsent(
+            key,
+            () => placements.length.isEven
+                ? LyricPlacement.left
+                : LyricPlacement.right,
+          ),
+        };
+      }
+      text = text.substring(match.end);
+    }
+    return _VocalMarkup(
+      text,
+      singer: singer,
+      placement: placement,
+      isBacking: backing,
+    );
+  }
+
+  static _VocalEntry _enhancedEntry(
+    _VocalMarkup markup,
+    Duration lineStart,
+    Duration shift,
+    Map<String, LyricPlacement> placements, {
+    bool backing = false,
+  }) {
+    final matches = _wordTokenRegex.allMatches(markup.text).toList();
+    final words = <LyricWord>[];
+    for (var i = 0; i < matches.length; i++) {
+      final match = matches[i];
+      final start =
+          _time(match.group(1)!, match.group(2)!, match.group(3)) + shift;
+      final text = match.group(4)!;
+      final end = i + 1 < matches.length
+          ? _time(
+                  matches[i + 1].group(1)!,
+                  matches[i + 1].group(2)!,
+                  matches[i + 1].group(3),
+                ) +
+                shift
+          : start + const Duration(milliseconds: 600);
+      if (text.trim().isEmpty || end <= start) continue;
+      words.add(LyricWord(text: text, startTime: start, endTime: end));
+    }
+    final rawText = matches.isEmpty
+        ? markup.text
+        : words.map((w) => w.text).join();
+    final content = _markup(rawText, placements, section: markup);
+    final cleanWords = _trimWordPrefix(
+      words,
+      rawText.length - content.text.length,
+    );
+    final isBacking = backing || content.isBacking;
+    return _VocalEntry(
+      start: isBacking && cleanWords.isNotEmpty
+          ? cleanWords.first.startTime
+          : lineStart,
+      text: content.text.trim(),
+      words: cleanWords,
+      hasExplicitEnd:
+          matches.isNotEmpty && matches.last.group(4)!.trim().isEmpty,
+      singer: content.singer,
+      placement: content.placement,
+      isBacking: isBacking,
+    );
+  }
+
+  static List<LyricWord> _trimWordPrefix(List<LyricWord> words, int count) {
+    final clean = <LyricWord>[];
+    for (final word in words) {
+      if (count >= word.text.length) {
+        count -= word.text.length;
+        continue;
+      }
+      clean.add(
+        LyricWord(
+          text: word.text.substring(count),
+          startTime: word.startTime,
+          endTime: word.endTime,
         ),
+      );
+      count = 0;
+    }
+    return clean;
+  }
+
+  static List<LyricLine> _splitTimedBacking(LyricLine line) {
+    if (!line.hasRealWordTimings || line.isBacking) return [line];
+    final lead = <LyricWord>[];
+    final backing = <LyricLine>[];
+    for (var i = 0; i < line.words.length; i++) {
+      final word = line.words[i];
+      if (!word.text.trimLeft().startsWith('(')) {
+        lead.add(word);
+        continue;
+      }
+      var last = i;
+      while (last < line.words.length &&
+          !line.words[last].text.trimRight().endsWith(')')) {
+        last++;
+      }
+      if (last >= line.words.length) {
+        lead.add(word);
+        continue;
+      }
+      final words = <LyricWord>[];
+      for (var j = i; j <= last; j++) {
+        var text = line.words[j].text;
+        if (j == i) text = text.replaceFirst('(', '');
+        if (j == last) text = text.replaceFirst(RegExp(r'\)\s*$'), '');
+        if (text.isNotEmpty) {
+          words.add(
+            LyricWord(
+              text: text,
+              startTime: line.words[j].startTime,
+              endTime: line.words[j].endTime,
+            ),
+          );
+        }
+      }
+      if (words.isNotEmpty) {
+        backing.add(
+          LyricLine(
+            startTime: words.first.startTime,
+            endTime: words.last.endTime,
+            text: words.map((w) => w.text).join().trim(),
+            words: words,
+            hasRealWordTimings: true,
+            singer: line.singer,
+            placement: line.placement,
+            isBacking: true,
+          ),
+        );
+      }
+      i = last;
+    }
+    if (backing.isEmpty) return [line];
+    return [
+      if (lead.isNotEmpty)
+        LyricLine(
+          startTime: line.startTime,
+          endTime: line.endTime,
+          text: lead.map((w) => w.text).join().trim(),
+          words: lead,
+          hasRealWordTimings: true,
+          singer: line.singer,
+          placement: line.placement,
+        ),
+      ...backing,
     ];
+  }
+
+  static List<LyricLine> _groupBacking(List<LyricLine> lines) {
+    lines.sort((a, b) => a.startTime.compareTo(b.startTime));
+    final leads = lines.where((line) => !line.isBacking).toList();
+    final orphaned = <LyricLine>[];
+    final backing = <int, List<LyricLine>>{};
+    for (final line in lines.where((line) => line.isBacking)) {
+      var best = -1;
+      for (var i = 0; i < leads.length; i++) {
+        final lead = leads[i];
+        if (lead.startTime > line.startTime) break;
+        if ((lead.endTime ?? lead.vocalEnd) > line.startTime) {
+          if (best < 0 ||
+              lead.singer == line.singer ||
+              leads[best].singer != line.singer) {
+            best = i;
+          }
+        }
+      }
+      if (best < 0) {
+        orphaned.add(line);
+      } else {
+        backing
+            .putIfAbsent(best, () => [])
+            .add(
+              line.singer == null
+                  ? line.copyWith(
+                      singer: leads[best].singer,
+                      placement: leads[best].placement,
+                    )
+                  : line,
+            );
+      }
+    }
+    final grouped = [
+      for (var i = 0; i < leads.length; i++)
+        leads[i].copyWith(backingVocals: backing[i] ?? const []),
+      ...orphaned,
+    ];
+    grouped.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return grouped;
   }
 
   /// True when every line has the same timestamp: the text is not synced.
@@ -220,8 +463,7 @@ class LrcParser {
     weights[weights.length - 1] += 0.8;
     final totalWeight = weights.fold<double>(0, (a, b) => a + b);
 
-    final estimateMs =
-        (totalWeight - 0.8) * _msPerSyllable + _lineTailMs;
+    final estimateMs = (totalWeight - 0.8) * _msPerSyllable + _lineTailMs;
     var sungMs = estimateMs * 1.15;
     if (nextStart != null) {
       final gapMs = (nextStart - start).inMilliseconds;
@@ -236,11 +478,13 @@ class LrcParser {
       final len = sungMs * weights[i] / totalWeight;
       final wordStart = cursor.round();
       cursor += len;
-      words.add(LyricWord(
-        text: i < tokens.length - 1 ? '${tokens[i]} ' : tokens[i],
-        startTime: Duration(milliseconds: wordStart),
-        endTime: Duration(milliseconds: cursor.round()),
-      ));
+      words.add(
+        LyricWord(
+          text: i < tokens.length - 1 ? '${tokens[i]} ' : tokens[i],
+          startTime: Duration(milliseconds: wordStart),
+          endTime: Duration(milliseconds: cursor.round()),
+        ),
+      );
     }
     return words;
   }
@@ -264,8 +508,10 @@ class LrcParser {
         ? totalDuration.inMilliseconds - 15000
         : totalDuration.inMilliseconds;
 
-    final lineIntervalMs =
-        (totalMs / rawLines.length).round().clamp(2000, 6000);
+    final lineIntervalMs = (totalMs / rawLines.length).round().clamp(
+      2000,
+      6000,
+    );
     final result = <LyricLine>[];
 
     var currentLineStart = startOffsetMs;
@@ -285,4 +531,38 @@ class LrcParser {
 
     return result;
   }
+}
+
+class _VocalMarkup {
+  final String text;
+  final String? singer;
+  final LyricPlacement placement;
+  final bool isBacking;
+
+  const _VocalMarkup(
+    this.text, {
+    this.singer,
+    this.placement = LyricPlacement.left,
+    this.isBacking = false,
+  });
+}
+
+class _VocalEntry {
+  final Duration start;
+  final String text;
+  final List<LyricWord> words;
+  final bool hasExplicitEnd;
+  final String? singer;
+  final LyricPlacement placement;
+  final bool isBacking;
+
+  const _VocalEntry({
+    required this.start,
+    required this.text,
+    required this.words,
+    required this.hasExplicitEnd,
+    required this.singer,
+    required this.placement,
+    required this.isBacking,
+  });
 }

@@ -178,6 +178,7 @@ class SoundCloudExtractor {
             ),
             artworkUrl: artworkUrl,
             source: TrackSource.soundcloud,
+            playbackCount: _playCounts[id] ?? 0,
           ),
         );
       }
@@ -268,6 +269,7 @@ class SoundCloudExtractor {
             duration: Duration(milliseconds: duration),
             artworkUrl: artwork,
             source: TrackSource.soundcloud,
+            playbackCount: _playCounts[id] ?? 0,
           ),
         );
       }

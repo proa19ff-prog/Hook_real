@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
-import '../../theme_engine/presentation/track_artwork.dart';
+import '../import_file_picker.dart';
 import '../music_import_service.dart';
+
+enum _ImportInput { link, text, file }
 
 class ImportBottomSheet extends ConsumerStatefulWidget {
   final HookTheme theme;
 
-  const ImportBottomSheet({
-    super.key,
-    required this.theme,
-  });
+  const ImportBottomSheet({super.key, required this.theme});
 
   static Future<void> show(BuildContext context, HookTheme theme) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: 640),
       builder: (context) => ImportBottomSheet(theme: theme),
     );
   }
@@ -31,521 +34,632 @@ class ImportBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
-  final TextEditingController _urlController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
+  final _inputController = TextEditingController();
+  final _nameController = TextEditingController();
+  _ImportInput _mode = _ImportInput.link;
   bool _isLoading = false;
-  bool _textMode = false;
+  bool _isSaving = false;
+  String? _fileName;
   String? _errorMessage;
   ImportedCollection? _importedResult;
 
+  bool get _busy => _isLoading || _isSaving;
+
   @override
   void dispose() {
-    _urlController.dispose();
+    _inputController.dispose();
     _nameController.dispose();
     super.dispose();
   }
 
+  String _fileError(ImportFileError kind, AppLocalizations strings) =>
+      switch (kind) {
+        ImportFileError.tooLarge => strings.importFileTooLarge,
+        ImportFileError.unsupported => strings.importFileUnsupported,
+        ImportFileError.invalidEncoding => strings.importFileEncoding,
+        ImportFileError.invalidCsv => strings.importCsvInvalid,
+        ImportFileError.missingColumns => strings.importCsvMissingColumns,
+        ImportFileError.empty => strings.importFileEmpty,
+        ImportFileError.tooManyTracks => strings.importTooManyTracks,
+      };
+
+  void _setError(Object error, {bool fromFile = false}) {
+    if (!mounted) return;
+    final strings = AppLocalizations.of(context);
+    setState(() {
+      _isLoading = false;
+      _isSaving = false;
+      _errorMessage = switch (error) {
+        MusicImportFileException() => _fileError(error.kind, strings),
+        MusicImportException(blocked: true) => strings.importSpotifyBlocked,
+        FormatException() when _mode != _ImportInput.link =>
+          strings.importFileEmpty,
+        _ => fromFile ? strings.importFileReadFailed : strings.importError,
+      };
+    });
+  }
+
   Future<void> _pasteFromClipboard() async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data?.text != null && data!.text!.trim().isNotEmpty) {
+    if (_busy) return;
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      if (!mounted || _busy || data?.text == null) return;
       setState(() {
-        _urlController.text = data.text!.trim();
+        _inputController.text = data!.text!.trim();
+        final platform = MusicImportService.detectPlatform(
+          _inputController.text,
+        );
+        if (platform == ImportPlatform.csv || platform == ImportPlatform.text) {
+          _mode = _ImportInput.text;
+        }
         _errorMessage = null;
       });
+    } catch (error) {
+      _setError(error);
+    }
+  }
+
+  void _setResult(ImportedCollection result) {
+    if (!mounted) return;
+    if (result.tracks.isEmpty) {
+      throw const MusicImportFileException(ImportFileError.empty);
+    }
+    setState(() {
+      _isLoading = false;
+      _importedResult = result;
+      if (_nameController.text.trim().isEmpty) {
+        _nameController.text = result.title;
+      }
+    });
+  }
+
+  Future<void> _chooseFile() async {
+    if (_busy) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final file = await ImportFilePicker.pick();
+      if (!mounted) return;
+      if (file == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+      final service = ref.read(musicImportServiceProvider);
+      final name = _nameController.text.trim().isNotEmpty
+          ? _nameController.text.trim()
+          : file.name.replaceFirst(
+              RegExp(r'\.(csv|txt)$', caseSensitive: false),
+              '',
+            );
+      final csv = file.name.toLowerCase().endsWith('.csv');
+      final result = csv
+          ? await service.importFromCsv(file.text, title: name)
+          : await service.importFromText(
+              file.text,
+              title: name,
+              resolveTracks: false,
+            );
+      if (!mounted) return;
+      _fileName = file.name;
+      _setResult(result);
+    } catch (error) {
+      _setError(error, fromFile: true);
     }
   }
 
   Future<void> _startImport() async {
-    final url = _urlController.text.trim();
-    if (url.isEmpty) {
-      setState(() => _errorMessage =
-          _textMode ? 'Вставьте список треков' : 'Вставьте ссылку для импорта');
+    if (_busy) return;
+    final strings = AppLocalizations.of(context);
+    final input = _inputController.text.trim();
+    if (input.isEmpty) {
+      setState(
+        () => _errorMessage = _mode == _ImportInput.link
+            ? strings.pasteImportLink
+            : strings.pasteTrackList,
+      );
       return;
     }
-
-    final inferredTextMode = _textMode ||
-        MusicImportService.detectPlatform(url) == ImportPlatform.text;
-
+    FocusScope.of(context).unfocus();
     setState(() {
       _isLoading = true;
-      _textMode = inferredTextMode;
       _errorMessage = null;
-      _importedResult = null;
     });
-
     try {
-      final importService = ref.read(musicImportServiceProvider);
-      final result = inferredTextMode
-          ? await importService.importFromText(
-              url,
-              title: _nameController.text,
+      final service = ref.read(musicImportServiceProvider);
+      final platform = MusicImportService.detectPlatform(input);
+      final name = _nameController.text.trim().isEmpty
+          ? strings.importedPlaylistName(platform.name)
+          : _nameController.text.trim();
+      final result = platform == ImportPlatform.csv
+          ? await service.importFromCsv(input, title: name)
+          : _mode == _ImportInput.text || platform == ImportPlatform.text
+          ? await service.importFromText(
+              input,
+              title: name,
+              resolveTracks: false,
             )
-          : await importService.importFromUrl(url);
-
-      if (!mounted) return;
-
-      if (result.tracks.isEmpty) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'Не удалось найти треки по указанной ссылке.';
-        });
-        return;
-      }
-
-      setState(() {
-        _isLoading = false;
-        _importedResult = result;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = e is MusicImportException ||
-                e is FormatException ||
-                e is ArgumentError
-            ? e.toString().replaceFirst(RegExp(r'^[A-Za-z]+Exception:\s*'), '')
-            : 'Ошибка импорта: Проверьте ссылку и интернет-соединение.';
-        if (e is MusicImportException && e.blocked) {
-          _textMode = true;
-          _urlController.clear();
-        }
-      });
+          : await service.importFromUrl(input);
+      _setResult(result);
+    } catch (error) {
+      _setError(error);
     }
   }
 
   void _playImported(List<MediaTrack> tracks) {
+    if (_busy) return;
+    final strings = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     ref.read(queueProvider.notifier).playQueue(tracks, startIndex: 0);
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
-        content:
-            Text('Включен импортированный плейлист (${tracks.length} треков)'),
+        content: Text(strings.importedPlaylistStarted(tracks.length)),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  Future<void> _saveToPlaylists(ImportedCollection collection) async {
-    final playlistName = collection.title.isNotEmpty
-        ? collection.title
-        : 'Импорт (${collection.platform.name})';
-
-    await ref
-        .read(playlistsProvider.notifier)
-        .savePlaylist(playlistName, collection.tracks);
-
-    if (!mounted) return;
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Плейлист "$playlistName" сохранен в медиатеку!'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  Future<void> _saveToPlaylists() async {
+    final collection = _importedResult;
+    if (_busy || collection == null) return;
+    final strings = AppLocalizations.of(context);
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      setState(() => _errorMessage = strings.importNameRequired);
+      return;
+    }
+    if (ref.read(playlistsProvider).containsKey(name)) {
+      setState(() => _errorMessage = strings.importNameExists);
+      return;
+    }
+    setState(() {
+      _isSaving = true;
+      _errorMessage = null;
+    });
+    try {
+      await ref
+          .read(playlistsProvider.notifier)
+          .savePlaylist(name, collection.tracks);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.of(context).pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(strings.playlistSaved(name)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+        _errorMessage = strings.importSaveFailed;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = widget.theme.colors;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final currentInput = _urlController.text;
-    final detectedPlatform = MusicImportService.detectPlatform(currentInput);
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + bottomInset),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border.all(
-          color: colors.border.withValues(alpha: 0.35),
-          width: 1,
+    final strings = AppLocalizations.of(context);
+    final result = _importedResult;
+    final sourceLabel = switch (result?.platform) {
+      ImportPlatform.spotify => strings.importedFromSpotify,
+      ImportPlatform.csv => strings.importedFromCsv,
+      _ => strings.importedFromText,
+    };
+    final buttonStyle = FilledButton.styleFrom(
+      backgroundColor: colors.textPrimary,
+      foregroundColor: colors.surface,
+      minimumSize: const Size(double.infinity, 48),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    );
+    return PopScope(
+      canPop: !_isSaving,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colors.textSecondary.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Title
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    MingCuteIcons.mgc_link_2_line,
-                    color: colors.primary,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Импорт музыки',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.4,
-                          color: colors.textPrimary,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.92,
+          ),
+          child: Material(
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            clipBehavior: Clip.antiAlias,
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colors.border,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      Text(
-                        'Spotify • Плейлисты, альбомы и треки',
-                        style: TextStyle(
-                          fontSize: 12,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            strings.importMusic,
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.6,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: strings.close,
+                          onPressed: _isSaving
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.close_rounded),
                           color: colors.textSecondary,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            if (_importedResult == null) ...[
-              // Input field
-              Container(
-                decoration: BoxDecoration(
-                  color: colors.surfaceGlass.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(16),
-                  border:
-                      Border.all(color: colors.border.withValues(alpha: 0.4)),
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 14),
-                    Icon(
-                      _textMode
-                          ? MingCuteIcons.mgc_list_check_line
-                          : detectedPlatform == ImportPlatform.spotify
-                              ? MingCuteIcons.mgc_music_3_fill
-                              : MingCuteIcons.mgc_link_line,
-                      color: detectedPlatform == ImportPlatform.spotify ||
-                              _textMode
-                          ? const Color(0xFF1DB954)
-                          : colors.textSecondary,
-                      size: 22,
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        controller: _urlController,
-                        maxLines: _textMode ? 5 : 1,
-                        onChanged: (_) => setState(() => _errorMessage = null),
-                        style:
-                            TextStyle(color: colors.textPrimary, fontSize: 14),
-                        decoration: InputDecoration(
-                          hintText: _textMode
-                              ? 'Артист — Трек или CSV из Exportify'
-                              : 'Вставьте ссылку на плейлист или трек',
-                          hintStyle: TextStyle(
-                            color: colors.textSecondary.withValues(alpha: 0.6),
+                    const SizedBox(height: 4),
+                    Text(
+                      result == null ? strings.importIntro : sourceLabel,
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (result == null) ...[
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final mode in _ImportInput.values)
+                            if (mode != _ImportInput.file ||
+                                ImportFilePicker.isSupported)
+                              ChoiceChip(
+                                key: ValueKey('import-mode-${mode.name}'),
+                                label: Text(switch (mode) {
+                                  _ImportInput.link => strings.link,
+                                  _ImportInput.text => strings.importTextTab,
+                                  _ImportInput.file => strings.importFileTab,
+                                }),
+                                selected: _mode == mode,
+                                selectedColor: colors.background,
+                                backgroundColor: colors.surface,
+                                labelStyle: TextStyle(
+                                  color: colors.textPrimary,
+                                ),
+                                side: BorderSide(color: colors.border),
+                                onSelected: _busy
+                                    ? null
+                                    : (_) => setState(() {
+                                        _mode = mode;
+                                        _errorMessage = null;
+                                      }),
+                              ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      if (_mode == _ImportInput.file) ...[
+                        Text(
+                          strings.importFileHint,
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          key: const ValueKey('import-choose-file'),
+                          onPressed: _busy ? null : _chooseFile,
+                          style: buttonStyle,
+                          icon: const Icon(
+                            MingCuteIcons.mgc_folder_open_line,
+                            size: 20,
+                          ),
+                          label: Text(strings.importChooseFile),
+                        ),
+                      ] else ...[
+                        Text(
+                          _mode == _ImportInput.link
+                              ? strings.link
+                              : strings.trackList,
+                          style: TextStyle(
+                            color: colors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          key: const ValueKey('import-input'),
+                          controller: _inputController,
+                          enabled: !_busy,
+                          minLines: _mode == _ImportInput.text ? 4 : 1,
+                          maxLines: _mode == _ImportInput.text ? 6 : 2,
+                          keyboardType: _mode == _ImportInput.link
+                              ? TextInputType.url
+                              : TextInputType.multiline,
+                          autocorrect: false,
+                          style: TextStyle(
+                            color: colors.textPrimary,
                             fontSize: 14,
                           ),
-                          border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 14),
+                          onChanged: (_) =>
+                              setState(() => _errorMessage = null),
+                          decoration: InputDecoration(
+                            hintText: _mode == _ImportInput.link
+                                ? strings.pastePlaylistOrTrackLink
+                                : strings.artistTrackOrCsv,
+                            fillColor: colors.background,
+                            suffixIcon: IconButton(
+                              tooltip: strings.pasteFromClipboard,
+                              onPressed: _busy ? null : _pasteFromClipboard,
+                              icon: const Icon(
+                                MingCuteIcons.mgc_paste_line,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_mode == _ImportInput.text) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            strings.importTextHint,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                        if (!ImportFilePicker.isSupported) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                            strings.importFileAndroidOnly,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        FilledButton(
+                          key: const ValueKey('import-preview'),
+                          onPressed: _busy ? null : _startImport,
+                          style: buttonStyle,
+                          child: Text(strings.importPreview),
+                        ),
+                      ],
+                    ] else ...[
+                      Text(
+                        strings.tracksCount(result.tracks.length),
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Вставить из буфера',
-                      icon: Icon(MingCuteIcons.mgc_paste_line,
-                          color: colors.primary, size: 20),
-                      onPressed: _pasteFromClipboard,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: ChoiceChip(
-                      label: const Text('Ссылка'),
-                      selected: !_textMode,
-                      onSelected: (_) => setState(() => _textMode = false),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ChoiceChip(
-                      label: const Text('Список треков'),
-                      selected: _textMode,
-                      onSelected: (_) => setState(() => _textMode = true),
-                    ),
-                  ),
-                ],
-              ),
-              if (_textMode) ...[
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _nameController,
-                  style: TextStyle(color: colors.textPrimary),
-                  decoration: InputDecoration(
-                    labelText: 'Название плейлиста',
-                    labelStyle: TextStyle(color: colors.textSecondary),
-                    filled: true,
-                    fillColor: colors.surfaceGlass.withValues(alpha: 0.4),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ],
-
-              // Supported badges
-              Padding(
-                padding: const EdgeInsets.only(top: 10, left: 4),
-                child: Row(
-                  children: [
-                    _buildPlatformBadge(
-                      'Spotify',
-                      const Color(0xFF1DB954),
-                      detectedPlatform == ImportPlatform.spotify,
-                    ),
-                  ],
-                ),
-              ),
-
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.redAccent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.redAccent.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(MingCuteIcons.mgc_alert_line,
-                          color: Colors.redAccent, size: 18),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.redAccent,
+                      if (_fileName != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          _fileName!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colors.textSecondary,
                             fontSize: 12,
                           ),
                         ),
+                      ],
+                      const SizedBox(height: 12),
+                      for (var i = 0; i < result.tracks.length && i < 4; i++)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 28,
+                                child: Text(
+                                  '${i + 1}',
+                                  style: TextStyle(
+                                    color: colors.textSecondary,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      result.tracks[i].title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: colors.textPrimary,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    if (result.tracks[i].artist.isNotEmpty)
+                                      Text(
+                                        result.tracks[i].artist,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: colors.textSecondary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (result.tracks.length > 4)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            strings.importMoreTracks(result.tracks.length - 4),
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      Text(
+                        strings.playlistName,
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        key: const ValueKey('import-playlist-name'),
+                        controller: _nameController,
+                        enabled: !_busy,
+                        maxLength: 120,
+                        style: TextStyle(color: colors.textPrimary),
+                        decoration: InputDecoration(
+                          fillColor: colors.background,
+                          counterText: '',
+                        ),
+                        onChanged: (_) => setState(() => _errorMessage = null),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        strings.importMetadataHint,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      FilledButton.icon(
+                        key: const ValueKey('import-save'),
+                        onPressed: _busy ? null : _saveToPlaylists,
+                        style: buttonStyle,
+                        icon: const Icon(
+                          MingCuteIcons.mgc_list_check_line,
+                          size: 20,
+                        ),
+                        label: Text(strings.addToPlaylists),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _busy
+                              ? null
+                              : () => _playImported(result.tracks),
+                          icon: const Icon(
+                            MingCuteIcons.mgc_play_fill,
+                            size: 20,
+                          ),
+                          label: Text(strings.listen),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colors.textPrimary,
+                            minimumSize: const Size(0, 48),
+                            side: BorderSide(color: colors.border),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () => setState(() {
+                                  _importedResult = null;
+                                  _fileName = null;
+                                  _nameController.clear();
+                                  _errorMessage = null;
+                                }),
+                          child: Text(strings.importAnother),
+                        ),
                       ),
                     ],
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 20),
-
-              // Import action button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _startImport,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                    if (_busy) ...[
+                      const SizedBox(height: 16),
+                      Semantics(
+                        liveRegion: true,
+                        child: Row(
                           children: [
-                            Icon(MingCuteIcons.mgc_download_2_line, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              'Начать импорт',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: colors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _isSaving
+                                    ? strings.importSaving
+                                    : strings.importReading,
+                                style: TextStyle(
+                                  color: colors.textSecondary,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                ),
-              ),
-            ] else ...[
-              // Success result card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colors.surfaceGlass.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: colors.primary.withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    TrackArtwork(
-                      url: _importedResult!.artworkUrl,
-                      size: 64,
-                      borderRadius: BorderRadius.circular(14),
-                      placeholderColor: colors.background,
-                      iconColor: colors.textSecondary,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _importedResult!.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: colors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            '${_importedResult!.author} • ${_importedResult!.tracks.length} треков',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: colors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Импортировано из Spotify',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: _importedResult!.platform ==
-                                      ImportPlatform.spotify
-                                  ? const Color(0xFF1DB954)
-                                  : Colors.redAccent,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
+                    ],
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 16),
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          _errorMessage!,
+                          key: const ValueKey('import-error'),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-
-              const SizedBox(height: 18),
-
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      icon: const Icon(MingCuteIcons.mgc_play_fill, size: 20),
-                      label: const Text('Слушать'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () => _playImported(_importedResult!.tracks),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(MingCuteIcons.mgc_list_check_line,
-                          size: 20),
-                      label: const Text('В плейлисты'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: colors.textPrimary,
-                        side: BorderSide(
-                          color: colors.border.withValues(alpha: 0.6),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () => _saveToPlaylists(_importedResult!),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlatformBadge(String label, Color color, bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isActive
-            ? color.withValues(alpha: 0.18)
-            : widget.theme.colors.surfaceGlass.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isActive
-              ? color.withValues(alpha: 0.6)
-              : widget.theme.colors.border.withValues(alpha: 0.25),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive
-                  ? widget.theme.colors.textPrimary
-                  : widget.theme.colors.textSecondary,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

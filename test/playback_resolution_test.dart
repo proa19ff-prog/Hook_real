@@ -14,6 +14,7 @@ class RecordingPlayer extends AudioPlayer {
   final urls = <String>[];
   final requestHeaders = <Map<String, String>?>[];
   Duration Function(int load)? durationForLoad;
+  Object? Function(int load)? errorForLoad;
   int plays = 0;
   @override
   Future<Duration?> setAudioSource(
@@ -25,6 +26,8 @@ class RecordingPlayer extends AudioPlayer {
     final uri = source as UriAudioSource;
     urls.add(uri.uri.toString());
     requestHeaders.add(uri.headers);
+    final error = errorForLoad?.call(urls.length);
+    if (error != null) throw error;
     return durationForLoad?.call(urls.length) ?? const Duration(seconds: 158);
   }
 
@@ -55,14 +58,17 @@ class ControlledResolver extends StreamResolver {
   Future<ResolvedStream?> resolveStream(MediaTrack track) async =>
       onResolve(track);
   @override
-  Future<ResolvedStream?> resolveSpotifyTrack(MediaTrack track) async {
+  Future<ResolvedStream?> resolveSpotifyTrack(
+    MediaTrack track, {
+    Set<TrackSource> excludedSources = const {},
+  }) async {
     catalogResolves++;
     return onResolve(track);
   }
 }
 
 class TestPlayerService extends AudioPlayerService {
-  TestPlayerService(RecordingPlayer player, ControlledResolver resolver)
+  TestPlayerService(RecordingPlayer player, StreamResolver resolver)
     : super(player: player, resolver: resolver, cacheManager: NoFileCache());
   @override
   Future<void> initialize() async {}
@@ -228,6 +234,65 @@ void main() {
       expect(service.currentTrack, isNull);
     },
   );
+
+  test('catalog playback stops retrying an unreadable fast provider', () async {
+    final youtube = FakeMusicSource(
+      TrackSource.youtubeMusic,
+      onSearch: (_) => [
+        track.copyWith(id: 'video', source: TrackSource.youtubeMusic),
+      ],
+      onResolve: (_) => const ResolvedStream(
+        'https://audio.example/youtube',
+        source: TrackSource.youtubeMusic,
+      ),
+    );
+    final soundcloud = FakeSoundCloud(
+      onSearch: (_) async {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        return [track.copyWith(id: 'sc', source: TrackSource.soundcloud)];
+      },
+      onResolve: (_) => 'https://audio.example/soundcloud',
+    );
+    final resolver = StreamResolver(
+      scExtractor: soundcloud,
+      spotifyCatalog: FakeCatalog(),
+      additionalSources: [youtube],
+    );
+    final player = RecordingPlayer()
+      ..errorForLoad = (load) => load <= 2
+          ? PlayerException(0, 'Source error: Response code: 403')
+          : null;
+    final service = TestPlayerService(player, resolver);
+    addTearDown(service.dispose);
+    await service.playTrack(track);
+    expect(player.urls, [
+      'https://audio.example/youtube',
+      'https://audio.example/youtube',
+      'https://audio.example/soundcloud',
+    ]);
+    expect(youtube.resolved, hasLength(2));
+    expect(service.currentTrack, track); // Catalog identity is not rewritten.
+    expect(service.playbackSource, TrackSource.soundcloud);
+    expect(player.plays, 1);
+  });
+
+  test('excluding exhausted providers completes without hanging', () async {
+    final youtube = FakeMusicSource(TrackSource.youtubeMusic);
+    final resolver = StreamResolver(
+      scExtractor: FakeSoundCloud(),
+      spotifyCatalog: FakeCatalog(),
+      additionalSources: [youtube],
+    );
+    addTearDown(resolver.dispose);
+    expect(
+      await resolver.resolveSpotifyTrack(
+        track,
+        excludedSources: {TrackSource.soundcloud, TrackSource.youtubeMusic},
+      ),
+      isNull,
+    );
+    expect(youtube.queries, isEmpty);
+  });
 
   test('stopping while a URL resolves prevents delayed autoplay', () async {
     final pending = Completer<ResolvedStream?>();
