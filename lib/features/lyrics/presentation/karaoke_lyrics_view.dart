@@ -17,6 +17,7 @@ import '../data/lyrics_client.dart';
 import '../domain/lyric_line.dart';
 import '../domain/lyrics_display_mode.dart';
 import 'lyrics_preferences_provider.dart';
+import 'lyrics_translation_panel.dart';
 
 const _easeOut = Cubic(0.23, 1, 0.32, 1);
 
@@ -237,6 +238,10 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
           ? 0
           : ref.read(localStorageServiceProvider).getLyricsOffset(offsetKey);
       _showOffsetControls = false;
+      _source = null;
+      _items = const [];
+      _keys = const [];
+      _active = -1;
     }
 
     return lyricsAsync.when(
@@ -256,12 +261,26 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
           );
         }
 
-        // Unsynced lyrics have invented timings that never match the audio,
-        // so they are shown as calm static text.
-        if (!result.isRealSync) return _buildStatic(result, colors);
-
-        if (!identical(result.lines, _source)) _setLines(result.lines);
-        return _buildSynced(colors, mode, result.hasWordSync);
+        if (result.isRealSync && !identical(result.lines, _source)) {
+          _setLines(result.lines);
+        }
+        return LyricsTranslationPanel(
+          key: ValueKey((
+            offsetKey,
+            result,
+            Localizations.localeOf(context).languageCode,
+          )),
+          lyrics: result,
+          theme: widget.theme,
+          caption: !result.isRealSync
+              ? strings.unsyncedLyrics
+              : result.hasWordSync
+              ? strings.wordSyncUpper
+              : strings.lineSyncUpper,
+          builder: (translations) => result.isRealSync
+              ? _buildSynced(colors, mode, translations)
+              : _buildStatic(result, colors, translations),
+        );
       },
     );
   }
@@ -309,38 +328,39 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     );
   }
 
-  Widget _buildStatic(LyricsResult result, HookColors colors) {
-    final lines = result.lines;
-    final strings = AppLocalizations.of(context);
+  Widget _buildStatic(
+    LyricsResult result,
+    HookColors colors,
+    Map<String, String> translations,
+  ) {
+    final lines = result.lines.isNotEmpty
+        ? result.lines.map((line) => line.text).toList()
+        : (result.plainLyrics ?? '').split('\n');
     return _edgeFade(
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(28, 24, 28, 48),
-        itemCount: lines.length + 1,
+        itemCount: lines.length,
         itemBuilder: (context, index) {
-          if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(
-                strings.unsyncedLyrics,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.4,
-                  color: colors.textSecondary,
-                ),
-              ),
-            );
-          }
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              lines[index - 1].text,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                height: 1.3,
-                color: colors.textPrimary.withValues(alpha: 0.78),
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  lines[index],
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                    color: colors.textPrimary.withValues(alpha: 0.78),
+                  ),
+                ),
+                if (translations[lines[index]] case final String translation)
+                  _TranslationText(
+                    text: translation,
+                    color: colors.textSecondary,
+                  ),
+              ],
             ),
           );
         },
@@ -351,7 +371,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   Widget _buildSynced(
     HookColors colors,
     LyricsDisplayMode mode,
-    bool hasWordSync,
+    Map<String, String> translations,
   ) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final strings = AppLocalizations.of(context);
@@ -359,7 +379,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     return Stack(
       children: [
         if (mode == LyricsDisplayMode.focus)
-          _buildFocus(colors, reduceMotion)
+          _buildFocus(colors, reduceMotion, translations)
         else
           LayoutBuilder(
             builder: (context, constraints) {
@@ -399,6 +419,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
                           reduceMotion: reduceMotion,
                           wordSweep: mode == LyricsDisplayMode.karaoke,
                           onSeek: _seekTo,
+                          translations: translations,
                         ),
                       );
                     },
@@ -407,21 +428,6 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
               );
             },
           ),
-        Positioned(
-          top: 8,
-          left: 24,
-          right: 24,
-          child: IgnorePointer(
-            child: Text(
-              hasWordSync ? strings.wordSyncUpper : strings.lineSyncUpper,
-              style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: 9,
-                letterSpacing: 1.3,
-              ),
-            ),
-          ),
-        ),
         if (_source?.isNotEmpty ?? false)
           Positioned(
             bottom: 12,
@@ -453,7 +459,11 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     );
   }
 
-  Widget _buildFocus(HookColors colors, bool reduceMotion) {
+  Widget _buildFocus(
+    HookColors colors,
+    bool reduceMotion,
+    Map<String, String> translations,
+  ) {
     final strings = AppLocalizations.of(context);
     final current = _active >= 0 && _active < _items.length
         ? _items[_active]
@@ -505,6 +515,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
                                   colors: colors,
                                   reduceMotion: reduceMotion,
                                   onSeek: _seekTo,
+                                  translations: translations,
                                 ),
                             ],
                           )
@@ -632,6 +643,32 @@ const _lineStyle = TextStyle(
   letterSpacing: -0.4,
 );
 
+/// Translation follows its original line; it has no invented word timings.
+class _TranslationText extends StatelessWidget {
+  const _TranslationText({
+    required this.text,
+    required this.color,
+    this.alignment = TextAlign.left,
+  });
+  final String text;
+  final Color color;
+  final TextAlign alignment;
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: Text(
+      text,
+      textAlign: alignment,
+      style: TextStyle(
+        color: color,
+        fontSize: 16,
+        height: 1.4,
+        fontWeight: FontWeight.w400,
+      ),
+    ),
+  );
+}
+
 class VocalLyricGroup extends StatelessWidget {
   final LyricLine line;
   final int distance;
@@ -640,6 +677,7 @@ class VocalLyricGroup extends StatelessWidget {
   final bool reduceMotion;
   final bool wordSweep;
   final ValueChanged<LyricLine> onSeek;
+  final Map<String, String> translations;
 
   const VocalLyricGroup({
     super.key,
@@ -649,6 +687,7 @@ class VocalLyricGroup extends StatelessWidget {
     required this.colors,
     required this.reduceMotion,
     required this.onSeek,
+    this.translations = const {},
     this.wordSweep = true,
   });
 
@@ -661,6 +700,7 @@ class VocalLyricGroup extends StatelessWidget {
         for (final part in [line, ...line.backingVocals])
           _LineTile(
             line: part,
+            translation: translations[part.text],
             isActive:
                 part.isActiveAt(position) &&
                 (part.hasRealWordTimings ||
@@ -687,6 +727,7 @@ Alignment _lineAlignment(LyricLine line) => switch (line.placement) {
 
 class _LineTile extends StatelessWidget {
   final LyricLine line;
+  final String? translation;
   final bool isActive;
   final bool isPast;
   final int distance;
@@ -698,6 +739,7 @@ class _LineTile extends StatelessWidget {
 
   const _LineTile({
     required this.line,
+    this.translation,
     required this.isActive,
     required this.isPast,
     required this.distance,
@@ -776,7 +818,8 @@ class _LineTile extends StatelessWidget {
 
     return Semantics(
       key: ValueKey('vocal:${line.startTime.inMicroseconds}:${line.text}'),
-      label: line.singer == null ? line.text : '${line.singer}: ${line.text}',
+      label:
+          '${line.singer == null ? line.text : '${line.singer}: ${line.text}'}${translation == null ? '' : '\n$translation'}',
       selected: isActive,
       button: true,
       onTap: onTap,
@@ -805,7 +848,22 @@ class _LineTile extends StatelessWidget {
                       ? const Duration(milliseconds: 450)
                       : Duration.zero,
                   curve: _easeOut,
-                  child: body,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      body,
+                      if (translation != null)
+                        _TranslationText(
+                          text: translation!,
+                          color: colors.textSecondary,
+                          alignment: switch (line.placement) {
+                            LyricPlacement.left => TextAlign.left,
+                            LyricPlacement.right => TextAlign.right,
+                            LyricPlacement.center => TextAlign.center,
+                          },
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

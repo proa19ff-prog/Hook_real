@@ -11,12 +11,15 @@ import java.io.ByteArrayOutputStream
 import java.util.concurrent.Executors
 
 class MainActivity : AudioServiceActivity() {
+    private var lyricsTranslation: LyricsTranslationChannel? = null
     private var importChannel: MethodChannel? = null
     private var pendingImport: MethodChannel.Result? = null
     private val importExecutor = Executors.newSingleThreadExecutor()
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        lyricsTranslation?.close()
+        lyricsTranslation = LyricsTranslationChannel(flutterEngine.dartExecutor.binaryMessenger)
         importChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "hook/import_file")
         importChannel?.setMethodCallHandler { call, result ->
             if (call.method != "pickTextFile") {
@@ -103,6 +106,8 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        lyricsTranslation?.close()
+        lyricsTranslation = null
         importChannel?.setMethodCallHandler(null)
         pendingImport?.error("cancelled", "The activity was closed.", null)
         pendingImport = null
