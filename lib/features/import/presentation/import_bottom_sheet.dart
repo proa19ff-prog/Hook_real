@@ -16,16 +16,27 @@ enum _ImportInput { link, text, file }
 class ImportBottomSheet extends ConsumerStatefulWidget {
   final HookTheme theme;
 
-  const ImportBottomSheet({super.key, required this.theme});
+  final ImportedCollection? initialCollection;
 
-  static Future<void> show(BuildContext context, HookTheme theme) {
+  const ImportBottomSheet({
+    super.key,
+    required this.theme,
+    this.initialCollection,
+  });
+
+  static Future<void> show(
+    BuildContext context,
+    HookTheme theme, {
+    ImportedCollection? initialCollection,
+  }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       constraints: const BoxConstraints(maxWidth: 640),
-      builder: (context) => ImportBottomSheet(theme: theme),
+      builder: (context) =>
+          ImportBottomSheet(theme: theme, initialCollection: initialCollection),
     );
   }
 
@@ -44,6 +55,13 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
   ImportedCollection? _importedResult;
 
   bool get _busy => _isLoading || _isSaving;
+
+  @override
+  void initState() {
+    super.initState();
+    _importedResult = widget.initialCollection;
+    _nameController.text = widget.initialCollection?.title ?? '';
+  }
 
   @override
   void dispose() {
@@ -249,6 +267,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
     final sourceLabel = switch (result?.platform) {
       ImportPlatform.spotify => strings.importedFromSpotify,
       ImportPlatform.csv => strings.importedFromCsv,
+      ImportPlatform.youtube => strings.importedFromYouTube,
       _ => strings.importedFromText,
     };
     final buttonStyle = FilledButton.styleFrom(

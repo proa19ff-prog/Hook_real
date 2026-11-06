@@ -1,7 +1,9 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
+
 import '../../features/extractor/models/media_track.dart';
 
 class CachedTrack {
@@ -18,136 +20,263 @@ class CachedTrack {
 
 class AudioCacheManager {
   final Dio _dio;
+  final Directory? _directory;
+  final Map<String, ({Future<File?> future, CancelToken token})> _downloads =
+      {};
+  static const _extensions = [
+    'm4a',
+    'webm',
+    'mp3',
+    'ogg',
+    'flac',
+    'wav',
+    'aac',
+  ];
+  static const _maxDownloadBytes = 250 * 1024 * 1024;
+  int _temporarySequence = 0;
 
-  AudioCacheManager({Dio? dio}) : _dio = dio ?? Dio();
+  AudioCacheManager({Dio? dio, this._directory}) : _dio = dio ?? Dio();
 
   Future<String> _getCacheDirectoryPath() async {
-    final appDir = await getApplicationSupportDirectory();
-    final cacheDir = Directory('${appDir.path}/hook_audio_cache');
-    if (!await cacheDir.exists()) {
-      await cacheDir.create(recursive: true);
-    }
+    final cacheDir =
+        _directory ??
+        Directory(
+          '${(await getApplicationSupportDirectory()).path}/hook_audio_cache',
+        );
+    if (!await cacheDir.exists()) await cacheDir.create(recursive: true);
     return cacheDir.path;
   }
 
-  String _sanitizeFileName(String trackId) {
-    return trackId.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
-  }
+  String _sanitizeFileName(String trackId) =>
+      trackId.replaceAll(RegExp(r'[^a-zA-Z0-9_\-]'), '_');
 
   Future<File> getCachedFile(String trackId) async {
     final dir = await _getCacheDirectoryPath();
-    return File('$dir/${_sanitizeFileName(trackId)}.m4a');
+    final stem = '$dir/${_sanitizeFileName(trackId)}';
+    // Read old .m4a caches as well as original WebM/MP3/etc. containers.
+    for (final extension in _extensions) {
+      final file = File('$stem.$extension');
+      if (await file.exists() && await file.length() > 1024) return file;
+    }
+    return File('$stem.m4a');
   }
 
-  Future<File> _getMetadataFile(String trackId) async {
-    final file = await getCachedFile(trackId);
-    return File('${file.path}.json');
-  }
-
-  Future<bool> isTrackCached(String trackId) async {
-    final file = await getCachedFile(trackId);
-    return await file.exists() && (await file.length()) > 1024;
-  }
+  Future<bool> isTrackCached(String trackId) async =>
+      await getLocalCachedUrl(trackId) != null;
 
   Future<String?> getLocalCachedUrl(String trackId) async {
     final file = await getCachedFile(trackId);
-    if (await file.exists() && (await file.length()) > 1024) {
+    if (await file.exists() && await file.length() > 1024) {
       return file.uri.toString();
     }
     return null;
   }
 
+  /// Save provider bytes verbatim; never turn a playlist/error page into audio.
+  /// Same-key callers share a transfer, and only a completed file is published.
   Future<File?> downloadTrack(
     MediaTrack track,
     String streamUrl, {
     String? cacheKey,
     Map<String, String>? headers,
+    String? fileExtension,
+    CancelToken? cancelToken,
     void Function(double progress)? onProgress,
-  }) async {
-    File? temporaryFile;
-    try {
-      final key = cacheKey ?? track.id;
-      final file = await getCachedFile(key);
-      temporaryFile = File('${file.path}.part');
-      if (await temporaryFile.exists()) await temporaryFile.delete();
-
-      await _dio.download(
-        streamUrl,
-        temporaryFile.path,
-        options: headers == null ? null : Options(headers: headers),
-        onReceiveProgress: (received, total) {
-          if (total > 0 && onProgress != null) {
-            onProgress(received / total);
-          }
-        },
-      );
-
-      if (await temporaryFile.exists() &&
-          (await temporaryFile.length()) > 1024) {
-        if (await file.exists()) await file.delete();
-        await temporaryFile.rename(file.path);
-
-        final metadataFile = await _getMetadataFile(key);
-        final temporaryMetadataFile = File('${metadataFile.path}.part');
-        if (await temporaryMetadataFile.exists()) {
-          await temporaryMetadataFile.delete();
-        }
-        await temporaryMetadataFile.writeAsString(jsonEncode(track.toJson()));
-        if (await metadataFile.exists()) await metadataFile.delete();
-        await temporaryMetadataFile.rename(metadataFile.path);
-        return file;
+  }) {
+    final key = cacheKey ?? track.id;
+    final pending = _downloads[key];
+    if (pending != null && !pending.token.isCancelled) return pending.future;
+    final token = cancelToken ?? CancelToken();
+    late final Future<File?> future;
+    future = () async {
+      try {
+        return await _download(
+          track,
+          streamUrl,
+          key,
+          headers,
+          fileExtension,
+          token,
+          onProgress,
+        );
+      } finally {
+        // A cancelled old transfer must not remove a newer transfer's entry.
+        if (identical(_downloads[key]?.future, future)) _downloads.remove(key);
       }
-      return null;
+    }();
+    _downloads[key] = (future: future, token: token);
+    return future;
+  }
+
+  Future<File?> _download(
+    MediaTrack track,
+    String streamUrl,
+    String key,
+    Map<String, String>? headers,
+    String? fileExtension,
+    CancelToken? cancelToken,
+    void Function(double progress)? onProgress,
+  ) async {
+    File? temporaryFile;
+    File? temporaryMetadata;
+    final token = cancelToken ?? CancelToken();
+    try {
+      final existing = await getLocalCachedUrl(key);
+      if (existing != null) return File(Uri.parse(existing).toFilePath());
+      final uri = Uri.tryParse(streamUrl);
+      if (uri == null ||
+          !['http', 'https'].contains(uri.scheme) ||
+          uri.path.toLowerCase().endsWith('.m3u8')) {
+        return null;
+      }
+
+      final dir = await _getCacheDirectoryPath();
+      final stem = '$dir/${_sanitizeFileName(key)}';
+      final nonce =
+          '${DateTime.now().microsecondsSinceEpoch}_${_temporarySequence++}';
+      temporaryFile = File('$stem.$nonce.part');
+      final response = await _dio
+          .download(
+            streamUrl,
+            temporaryFile.path,
+            cancelToken: token,
+            options: Options(
+              headers: {
+                for (final entry in (headers ?? <String, String>{}).entries)
+                  if (entry.key.toLowerCase() != 'range')
+                    entry.key: entry.value,
+              },
+              // A download is a whole-file GET, not a partial/probe response.
+              validateStatus: (status) => status == 200,
+              receiveTimeout: const Duration(seconds: 20),
+              sendTimeout: const Duration(seconds: 10),
+            ),
+            onReceiveProgress: (received, total) {
+              if (received > _maxDownloadBytes || total > _maxDownloadBytes) {
+                token.cancel('Audio download exceeds cache limit');
+                return;
+              }
+              if (total > 0) {
+                onProgress?.call((received / total).clamp(0.0, 1.0));
+              }
+            },
+          )
+          .timeout(
+            const Duration(minutes: 2),
+            onTimeout: () {
+              token.cancel('Audio download timed out');
+              throw const HttpException('Audio download timed out');
+            },
+          );
+      if (token.isCancelled || !await temporaryFile.exists()) return null;
+      final size = await temporaryFile.length();
+      if (size <= 1024 || size > _maxDownloadBytes) return null;
+      final expected = int.tryParse(
+        response.headers.value('content-length') ?? '',
+      );
+      final encoding = response.headers.value('content-encoding');
+      if (expected != null &&
+          (encoding == null || encoding == 'identity') &&
+          size != expected) {
+        return null;
+      }
+
+      final input = await temporaryFile.open();
+      late final List<int> prefix;
+      try {
+        prefix = await input.read(64);
+      } finally {
+        await input.close();
+      }
+      final extension = _audioExtension(
+        prefix,
+        fileExtension,
+        response.headers.value('content-type') ?? '',
+      );
+      if (extension == null) return null;
+      final file = File('$stem.$extension');
+      final metadataFile = File('${file.path}.json');
+      temporaryMetadata = File('${metadataFile.path}.$nonce.part');
+      await temporaryMetadata.writeAsString(
+        jsonEncode(track.toJson()),
+        flush: true,
+      );
+      if (token.isCancelled) return null;
+      // No transcoding or renamed playlist: the extension matches the bytes.
+      // Publish metadata first: a visible audio entry must already retain the
+      // recording's source/id/title, never fall back to an invented local ID.
+      await temporaryMetadata.rename(metadataFile.path);
+      if (token.isCancelled) return null;
+      await temporaryFile.rename(file.path);
+      return file;
     } catch (_) {
       return null;
     } finally {
-      if (temporaryFile != null && await temporaryFile.exists()) {
-        await temporaryFile.delete();
+      for (final file in [temporaryFile, temporaryMetadata]) {
+        if (file != null && await file.exists()) await file.delete();
       }
     }
   }
 
-  Future<void> removeCachedTrack(String trackId) async {
-    final file = await getCachedFile(trackId);
-    if (await file.exists()) {
-      await file.delete();
+  static String? _audioExtension(List<int> bytes, String? hint, String mime) {
+    if (bytes.length < 12) return null;
+    bool starts(List<int> signature) => List.generate(
+      signature.length,
+      (i) => bytes[i] == signature[i],
+    ).every((same) => same);
+    if (ascii.decode(bytes.sublist(4, 8), allowInvalid: true) == 'ftyp') {
+      return 'm4a';
     }
-    final metadataFile = await _getMetadataFile(trackId);
-    if (await metadataFile.exists()) {
-      await metadataFile.delete();
+    if (starts([0x1a, 0x45, 0xdf, 0xa3])) return 'webm';
+    if (starts(ascii.encode('OggS'))) return 'ogg';
+    if (starts(ascii.encode('fLaC'))) return 'flac';
+    if (starts(ascii.encode('RIFF')) &&
+        ascii.decode(bytes.sublist(8, 12), allowInvalid: true) == 'WAVE') {
+      return 'wav';
+    }
+    if (starts(ascii.encode('ID3'))) return 'mp3';
+    if (bytes[0] == 0xff && (bytes[1] & 0xe0) == 0xe0) {
+      return hint == 'aac' || mime.contains('aac') ? 'aac' : 'mp3';
+    }
+    // In particular, reject #EXTM3U, HTML and JSON even with audio MIME types.
+    return null;
+  }
+
+  Future<void> removeCachedTrack(String trackId) async {
+    final dir = await _getCacheDirectoryPath();
+    final stem = '$dir/${_sanitizeFileName(trackId)}';
+    for (final extension in _extensions) {
+      for (final file in [
+        File('$stem.$extension'),
+        File('$stem.$extension.json'),
+      ]) {
+        if (await file.exists()) await file.delete();
+      }
     }
   }
 
+  bool _isAudioFile(File file) =>
+      _extensions.any((ext) => file.path.endsWith('.$ext'));
+
   Future<List<CachedTrack>> getCachedTracks() async {
-    final dir = await _getCacheDirectoryPath();
-    final cacheDir = Directory(dir);
+    final cacheDir = Directory(await _getCacheDirectoryPath());
     final tracks = <CachedTrack>[];
-
-    if (!await cacheDir.exists()) return tracks;
-
     await for (final entity in cacheDir.list(recursive: false)) {
-      if (entity is! File || !entity.path.endsWith('.m4a')) continue;
+      if (entity is! File || !_isAudioFile(entity)) continue;
       final size = await entity.length();
       if (size <= 1024) continue;
-
-      final cacheKey = entity.path
-          .split(Platform.pathSeparator)
-          .last
-          .replaceFirst(RegExp(r'\.m4a$'), '');
+      final filename = entity.path.split(Platform.pathSeparator).last;
+      final cacheKey = filename.substring(0, filename.lastIndexOf('.'));
       final metadataFile = File('${entity.path}.json');
       MediaTrack? track;
-
       if (await metadataFile.exists()) {
         try {
           final json = jsonDecode(await metadataFile.readAsString());
-          if (json is Map<String, dynamic>) {
-            track = MediaTrack.fromJson(json);
-          }
+          if (json is Map<String, dynamic>) track = MediaTrack.fromJson(json);
         } catch (_) {
           // A damaged sidecar should not hide an otherwise valid audio file.
         }
       }
-
       track ??= MediaTrack(
         id: cacheKey,
         title: 'Сохранённый трек',
@@ -156,39 +285,30 @@ class AudioCacheManager {
         artworkUrl: '',
         source: TrackSource.local,
       );
-
-      tracks.add(CachedTrack(
-        cacheKey: cacheKey,
-        track: track,
-        sizeBytes: size,
-      ));
+      tracks.add(
+        CachedTrack(cacheKey: cacheKey, track: track, sizeBytes: size),
+      );
     }
-
-    tracks.sort((a, b) => a.track.title.toLowerCase().compareTo(
-          b.track.title.toLowerCase(),
-        ));
+    tracks.sort(
+      (a, b) =>
+          a.track.title.toLowerCase().compareTo(b.track.title.toLowerCase()),
+    );
     return tracks;
   }
 
   Future<int> getTotalCacheSize() async {
-    final dir = await _getCacheDirectoryPath();
-    final cacheDir = Directory(dir);
-    int total = 0;
-    if (await cacheDir.exists()) {
-      await for (final entity in cacheDir.list(recursive: false)) {
-        if (entity is File && entity.path.endsWith('.m4a')) {
-          total += await entity.length();
-        }
+    final cacheDir = Directory(await _getCacheDirectoryPath());
+    var total = 0;
+    await for (final entity in cacheDir.list(recursive: false)) {
+      if (entity is File && _isAudioFile(entity)) {
+        total += await entity.length();
       }
     }
     return total;
   }
 
   Future<void> clearAllCache() async {
-    final dir = await _getCacheDirectoryPath();
-    final cacheDir = Directory(dir);
-    if (await cacheDir.exists()) {
-      await cacheDir.delete(recursive: true);
-    }
+    final cacheDir = Directory(await _getCacheDirectoryPath());
+    if (await cacheDir.exists()) await cacheDir.delete(recursive: true);
   }
 }

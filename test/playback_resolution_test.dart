@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hook/core/storage/audio_cache_manager.dart';
 import 'package:hook/features/audio_player/data/audio_player_service.dart';
@@ -41,8 +43,22 @@ class RecordingPlayer extends AudioPlayer {
 }
 
 class NoFileCache extends AudioCacheManager {
+  final downloadUrls = <String>[];
   @override
   Future<String?> getLocalCachedUrl(String cacheKey) async => null;
+  @override
+  Future<File?> downloadTrack(
+    MediaTrack track,
+    String streamUrl, {
+    String? cacheKey,
+    Map<String, String>? headers,
+    String? fileExtension,
+    CancelToken? cancelToken,
+    void Function(double progress)? onProgress,
+  }) async {
+    downloadUrls.add(streamUrl);
+    return null;
+  }
 }
 
 class ControlledResolver extends StreamResolver {
@@ -68,8 +84,15 @@ class ControlledResolver extends StreamResolver {
 }
 
 class TestPlayerService extends AudioPlayerService {
-  TestPlayerService(RecordingPlayer player, StreamResolver resolver)
-    : super(player: player, resolver: resolver, cacheManager: NoFileCache());
+  TestPlayerService(
+    RecordingPlayer player,
+    StreamResolver resolver, {
+    NoFileCache? cache,
+  }) : super(
+         player: player,
+         resolver: resolver,
+         cacheManager: cache ?? NoFileCache(),
+       );
   @override
   Future<void> initialize() async {}
 }
@@ -262,7 +285,8 @@ void main() {
       ..errorForLoad = (load) => load <= 2
           ? PlayerException(0, 'Source error: Response code: 403')
           : null;
-    final service = TestPlayerService(player, resolver);
+    final cache = NoFileCache();
+    final service = TestPlayerService(player, resolver, cache: cache);
     addTearDown(service.dispose);
     await service.playTrack(track);
     expect(player.urls, [
@@ -270,7 +294,10 @@ void main() {
       'https://audio.example/youtube',
       'https://audio.example/soundcloud',
     ]);
-    expect(youtube.resolved, hasLength(2));
+    // Two streaming resolutions, then one whole-file attempt of the original
+    // before catalog fallback excludes the unreadable provider.
+    expect(youtube.resolved, hasLength(3));
+    expect(cache.downloadUrls, ['https://audio.example/youtube']);
     expect(service.currentTrack, track); // Catalog identity is not rewritten.
     expect(service.playbackSource, TrackSource.soundcloud);
     expect(player.plays, 1);

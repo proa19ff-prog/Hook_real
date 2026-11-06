@@ -6,6 +6,7 @@ import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../data/audio_player_service.dart';
 import 'player_state_provider.dart';
+import 'equalizer_sheet.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 class PlaybackControls extends ConsumerWidget {
@@ -166,11 +167,21 @@ class PlaybackControls extends ConsumerWidget {
                 size: 24,
               ),
               onSelected: (value) {
-                if (value == 'speed_pitch') {
+                if (value == 'equalizer') {
+                  showEqualizerSheet(
+                    context,
+                    theme: theme,
+                    controller: playerService.equalizer,
+                  );
+                } else if (value == 'speed_pitch') {
                   _showSpeedPitchSheet(context, playerService);
                 }
               },
               itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'equalizer',
+                  child: Text(strings.equalizer),
+                ),
                 PopupMenuItem(
                   value: 'speed_pitch',
                   child: Text(strings.speedAndPitch),

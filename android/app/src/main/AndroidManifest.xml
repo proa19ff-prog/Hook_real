@@ -3,8 +3,16 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <queries>
+        <package android:name="com.google.android.gms" />
+        <package android:name="app.revanced.android.gms" />
+        <package android:name="app.revanced.android.apps.youtube.music" />
+        <package android:name="com.google.android.apps.youtube.music" />
+    </queries>
 
     <application
         android:label="Hook"

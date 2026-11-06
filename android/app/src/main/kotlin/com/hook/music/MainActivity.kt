@@ -12,14 +12,20 @@ import java.util.concurrent.Executors
 
 class MainActivity : AudioServiceActivity() {
     private var lyricsTranslation: LyricsTranslationChannel? = null
+    private var youtubeAccount: YouTubeAccountChannel? = null
     private var importChannel: MethodChannel? = null
     private var pendingImport: MethodChannel.Result? = null
     private val importExecutor = Executors.newSingleThreadExecutor()
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        if (!flutterEngine.plugins.has(EqualizerPlugin::class.java)) {
+            flutterEngine.plugins.add(EqualizerPlugin())
+        }
         lyricsTranslation?.close()
         lyricsTranslation = LyricsTranslationChannel(flutterEngine.dartExecutor.binaryMessenger)
+        youtubeAccount?.close()
+        youtubeAccount = YouTubeAccountChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         importChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "hook/import_file")
         importChannel?.setMethodCallHandler { call, result ->
             if (call.method != "pickTextFile") {
@@ -51,6 +57,7 @@ class MainActivity : AudioServiceActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (youtubeAccount?.onActivityResult(requestCode, resultCode, data) == true) return
         if (requestCode != IMPORT_REQUEST) return
         val result = pendingImport ?: return
         val uri = data?.data
@@ -106,6 +113,8 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        youtubeAccount?.close()
+        youtubeAccount = null
         lyricsTranslation?.close()
         lyricsTranslation = null
         importChannel?.setMethodCallHandler(null)

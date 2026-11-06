@@ -8,11 +8,15 @@ class ResolvedStream {
   final TrackSource? source;
   final Duration? duration;
 
+  /// Container hint for an unchanged audio-only download (never transcoded).
+  final String? fileExtension;
+
   const ResolvedStream(
     this.url, {
     this.headers = const {},
     this.source,
     this.duration,
+    this.fileExtension,
   });
 
   bool get isEmpty => url.isEmpty;

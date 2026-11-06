@@ -62,6 +62,8 @@ flutter {
 
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
+    // Official Google Identity authorization for the read-only YouTube Data API.
+    implementation 'com.google.android.gms:play-services-auth:22.0.0'
     // Bundled language identification; translation runs on the device.
     implementation 'com.google.mlkit:language-id:17.0.6'
     implementation 'com.google.mlkit:translate:17.0.3'

@@ -199,6 +199,42 @@ class YouTubeMusicSource implements MusicSource {
     }, const Duration(seconds: 12));
   }
 
+  /// Download the same video without relying on a Range probe. This does not
+  /// bypass an unavailable/blocked source: the full GET must still succeed.
+  Future<ResolvedStream?> resolveDownloadTrack(MediaTrack track) async {
+    if (track.source != source || !RegExp(r'^[\w-]{11}$').hasMatch(track.id)) {
+      return null;
+    }
+    return _request((client, transport) async {
+      final manifest = await client.videos.streamsClient.getManifest(
+        track.id,
+        ytClients: [YoutubeApiClient.androidSdkless],
+        requireWatchPage: false,
+      );
+      final streams =
+          manifest.audioOnly
+              .where(
+                (stream) =>
+                    stream.fragments.isEmpty &&
+                    (stream.audioTrack == null ||
+                        stream.audioTrack!.audioIsDefault),
+              )
+              .toList()
+            ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+      if (streams.isEmpty) return null;
+      final stream = streams.first;
+      return ResolvedStream(
+        stream.url.toString(),
+        headers: {'User-Agent': YouTubeRequestClient.streamUserAgent},
+        source: source,
+        duration: track.duration,
+        fileExtension: stream.container.name == 'mp4'
+            ? 'm4a'
+            : stream.container.name,
+      );
+    }, const Duration(seconds: 12));
+  }
+
   Future<ResolvedStream?> _selectPlayableAudio(
     StreamManifest manifest,
     HttpClient transport, {

@@ -9,6 +9,7 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../domain/hook_theme.dart';
+import '../../youtube_account/presentation/youtube_account_screen.dart';
 
 class ThemeSettingsScreen extends ConsumerStatefulWidget {
   final HookTheme theme;
@@ -204,6 +205,23 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  ListTile(
+                    key: const ValueKey('youtube-account-settings'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.account_circle_outlined,
+                      color: colors.textPrimary,
+                    ),
+                    title: Text(strings.youtubeAccount),
+                    subtitle: Text(strings.youtubeAccountSubtitle),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => YouTubeAccountScreen(theme: theme),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   _sectionTitle(strings.language, colors),
                   const SizedBox(height: 8),
                   Text(

@@ -10,6 +10,7 @@ import '../../import/presentation/import_bottom_sheet.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'playlist_detail_screen.dart';
+import '../../youtube_account/presentation/youtube_account_screen.dart';
 import 'library_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
@@ -88,6 +89,20 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     ),
                   ),
                   const SizedBox(width: 8),
+                  IconButton(
+                    key: const ValueKey('library-youtube-account'),
+                    tooltip: strings.youtubeAccount,
+                    icon: Icon(
+                      Icons.account_circle_outlined,
+                      color: colors.textSecondary,
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            YouTubeAccountScreen(theme: widget.theme),
+                      ),
+                    ),
+                  ),
                   IconButton(
                     key: const ValueKey('library-import'),
                     tooltip: strings.importMusic,

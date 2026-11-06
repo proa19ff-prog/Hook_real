@@ -7,7 +7,7 @@ import '../extractor/models/media_track.dart';
 import '../extractor/spotify/spotify_catalog_service.dart';
 import '../extractor/stream_resolver.dart';
 
-enum ImportPlatform { spotify, text, csv, unknown }
+enum ImportPlatform { spotify, text, csv, youtube, unknown }
 
 enum ImportFileError {
   tooLarge,

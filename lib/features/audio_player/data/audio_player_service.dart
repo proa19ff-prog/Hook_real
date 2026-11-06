@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:audio_session/audio_session.dart';
 import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:just_audio/just_audio.dart';
+import 'package:dio/dio.dart';
 
 import '../../../core/diagnostics/playback_diagnostics.dart';
 import '../../../core/storage/audio_cache_manager.dart';
@@ -12,6 +13,8 @@ import '../../extractor/models/media_track.dart';
 import '../../extractor/models/resolved_stream.dart';
 import '../../extractor/stream_resolver.dart';
 import '../../recommendations/track_wave_service.dart';
+import 'equalizer_controller.dart';
+import '../../lyrics/data/lyrics_client.dart';
 
 enum PlayerLoopMode { off, all, one }
 
@@ -34,6 +37,7 @@ class AudioPlaybackError {
 class AudioPlayerService extends audio_service.BaseAudioHandler
     with audio_service.QueueHandler, audio_service.SeekHandler {
   final AudioPlayer _player;
+  late final EqualizerController equalizer;
   final StreamResolver _resolver;
   final AudioCacheManager _cacheManager;
   final LocalStorageService? _storageService;
@@ -83,6 +87,12 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   int _currentIndex = -1;
   int _playRequestId = 0;
   Future<void>? _initialization;
+  StreamSubscription<PlaybackEvent>? _playbackErrorSubscription;
+  Future<void> Function(Object error)? _runtimeErrorHandler;
+  CancelToken? _fallbackDownloadToken;
+  final LyricsClient _offlineLyrics = LyricsClient();
+  bool _wantsPlayback = false;
+  Duration? _pendingFallbackPosition;
 
   PlayerLoopMode _loopMode = PlayerLoopMode.off;
   bool _isShuffle = false;
@@ -101,6 +111,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     StreamResolver? resolver,
     AudioCacheManager? cacheManager,
     this._storageService,
+    EqualizerController? equalizerController,
   }) : _player =
            player ??
            AudioPlayer(
@@ -111,6 +122,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
            ),
        _resolver = resolver ?? StreamResolver(),
        _cacheManager = cacheManager ?? AudioCacheManager() {
+    equalizer = equalizerController ?? EqualizerController();
     _waveService = TrackWaveService(_resolver);
   }
 
@@ -224,17 +236,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   /// requests so a prefetch and a tap never resolve the same track twice.
   Future<ResolvedStream?> _resolveStream(MediaTrack track) {
     final key = _cacheKey(track);
-    final cached = _urlCache[key];
-    if (cached != null &&
-        DateTime.now().difference(cached.resolvedAt) < _urlTtl) {
-      return Future.value(cached.stream);
-    }
-
     return _pendingStreams[key] ??= () async {
       try {
+        // A downloaded file wins over a still-valid remote URL on every replay.
         final local = await _cacheManager.getLocalCachedUrl(key);
         if (local != null) {
           return ResolvedStream(local, source: TrackSource.local);
+        }
+        final cached = _urlCache[key];
+        if (cached != null &&
+            DateTime.now().difference(cached.resolvedAt) < _urlTtl) {
+          return cached.stream;
         }
 
         final resolved = await _resolver
@@ -289,6 +301,8 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   Future<void> _initialize() async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
+    // Effects are optional; their hardware availability never gates playback.
+    unawaited(equalizer.attachPlayer(_player));
 
     // Auto-pause if headphones are unplugged
     _noisySubscription = session.becomingNoisyEventStream.listen((_) {
@@ -296,6 +310,15 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     });
     _favoritesSubscription = _storageService?.favoritesChanges.listen(
       (_) => _broadcastPlaybackState(),
+    );
+
+    // Native errors may happen after setAudioSource returned successfully.
+    _playbackErrorSubscription = _player.playbackEventStream.listen(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {
+        final recover = _runtimeErrorHandler;
+        if (recover != null) unawaited(recover(error));
+      },
     );
 
     // Auto-advance to next track when finished
@@ -384,6 +407,11 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   /// records may then try another matching public source.
   Future<void> playTrack(MediaTrack track) async {
     final requestId = ++_playRequestId;
+    _fallbackDownloadToken?.cancel('Track changed');
+    _fallbackDownloadToken = null;
+    _runtimeErrorHandler = null;
+    _pendingFallbackPosition = null;
+    _wantsPlayback = true;
     if (!_errorController.isClosed) _errorController.add(null);
 
     // Show the tapped track right away; the stream resolves in the background.
@@ -391,10 +419,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     var attemptedPlayback = false;
     TrackSource? attemptedSource;
     Object? lastError;
+    ResolvedStream? downloadCandidate;
+    var downloadAttempted = false;
+    var recovering = false;
+    var loadGeneration = 0;
+    Object? failedLocalPlayback;
+    Future<void> Function(Object error)? runtimeRecovery;
 
     void reportError(Object? cause) {
       if (requestId != _playRequestId) return;
       _urlCache.remove(_cacheKey(track));
+      _runtimeErrorHandler = null;
       if (attemptedPlayback) _resolver.forgetMatch(track);
       _player.stop().ignore();
       _setCurrentTrack(null);
@@ -426,12 +461,16 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       }
     }
 
-    Future<bool> startWith(ResolvedStream? stream) async {
+    Future<bool> startWith(
+      ResolvedStream? stream, {
+      Duration initialPosition = Duration.zero,
+    }) async {
       // Check before touching the native player, not only after setAudioSource:
       // a slow previous tap must never replace the newly selected song.
       if (requestId != _playRequestId) return true;
       final playUrl = stream?.url;
       if (playUrl == null || playUrl.isEmpty) return false;
+      final generation = ++loadGeneration;
       attemptedPlayback = true;
       attemptedSource = stream?.source;
 
@@ -440,6 +479,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       final isLocal =
           !isRemote &&
           (playUrl.startsWith('file:') || File(playUrl).existsSync());
+      if (isRemote) downloadCandidate = stream;
+      // Load failures are handled by the synchronous retry path below, not by
+      // the native event listener as well (which would start two recoveries).
+      _runtimeErrorHandler = null;
       final audioSource = isLocal
           ? AudioSource.file(
               playUrl.startsWith('file:')
@@ -463,7 +506,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       Duration? actualDuration;
       try {
         actualDuration = await _player
-            .setAudioSource(audioSource)
+            .setAudioSource(audioSource, initialPosition: initialPosition)
             .timeout(const Duration(seconds: 20));
       } catch (error) {
         PlaybackDiagnostics.record(
@@ -501,9 +544,16 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
       // just_audio's play() future completes only when playback pauses or
       // ends, so it must not be awaited with a timeout.
-      unawaited(
-        _player.play().catchError((Object error) => reportError(error)),
-      );
+      _runtimeErrorHandler = runtimeRecovery;
+      if (_wantsPlayback) {
+        unawaited(
+          _player.play().catchError((Object error) async {
+            if (requestId == _playRequestId && generation == loadGeneration) {
+              await runtimeRecovery?.call(error);
+            }
+          }),
+        );
+      }
       unawaited(_storageService?.addToHistory(track));
       _prefetchNext();
       return true;
@@ -520,6 +570,103 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         return false;
       }
     }
+
+    Future<bool> tryDownloadAndStart({
+      Duration position = Duration.zero,
+    }) async {
+      if (requestId != _playRequestId) return true;
+      if (downloadAttempted || track.source == TrackSource.local) return false;
+      downloadAttempted = true;
+      final token = CancelToken();
+      _fallbackDownloadToken = token;
+      _pendingFallbackPosition = position;
+      try {
+        // A broken cached file must not keep winning every subsequent attempt.
+        if (attemptedSource == TrackSource.local) {
+          await _cacheManager.removeCachedTrack(_cacheKey(track));
+        }
+        ResolvedStream? stream;
+        try {
+          stream = await _resolver
+              .resolveDownloadStream(track)
+              .timeout(const Duration(seconds: 25));
+        } catch (error) {
+          lastError = error;
+        }
+        // Refresh manifests first; if refresh failed but a native stream URL
+        // exists, a full GET of that same recording is still worth one try.
+        stream ??= downloadCandidate;
+        if (requestId != _playRequestId || token.isCancelled) return true;
+        if (stream == null || stream.isEmpty) return false;
+        PlaybackDiagnostics.record(
+          'download.fallback.started',
+          source: track.source.name,
+          url: stream.url,
+        );
+        unawaited(_cacheOfflineLyrics(track));
+        final file = await _cacheManager.downloadTrack(
+          track,
+          stream.url,
+          cacheKey: _cacheKey(track),
+          headers: stream.headers,
+          fileExtension: stream.fileExtension,
+          cancelToken: token,
+        );
+        if (requestId != _playRequestId || token.isCancelled) return true;
+        if (file == null) return false;
+        _urlCache.remove(_cacheKey(track));
+        final loaded = await startWith(
+          ResolvedStream(file.uri.toString(), source: TrackSource.local),
+          initialPosition: _pendingFallbackPosition ?? position,
+        );
+        if (!loaded && requestId == _playRequestId) {
+          await _cacheManager.removeCachedTrack(_cacheKey(track));
+        }
+        if (loaded) {
+          PlaybackDiagnostics.record(
+            'download.fallback.ready',
+            source: track.source.name,
+          );
+        }
+        return loaded;
+      } catch (error) {
+        lastError = error;
+        return false;
+      } finally {
+        if (identical(_fallbackDownloadToken, token)) {
+          _fallbackDownloadToken = null;
+          _pendingFallbackPosition = null;
+        }
+      }
+    }
+
+    runtimeRecovery = (Object error) async {
+      if (requestId != _playRequestId) return;
+      if (recovering) {
+        // A local decoder/play() failure may arrive before recovery's finally
+        // block. Do not silently drop it or start another download loop.
+        if (_playbackSource == TrackSource.local) failedLocalPlayback = error;
+        return;
+      }
+      recovering = true;
+      final position = _player.position;
+      _runtimeErrorHandler = null;
+      lastError = error;
+      try {
+        // Keep currentTrack and the queue untouched: lyrics, offsets, artwork
+        // and favorites remain associated with the original source-qualified ID.
+        await _player.stop();
+        if (await tryDownloadAndStart(position: position)) return;
+        reportError(lastError);
+      } catch (failure) {
+        reportError(failure);
+      } finally {
+        recovering = false;
+        final localFailure = failedLocalPlayback;
+        failedLocalPlayback = null;
+        if (localFailure != null) reportError(localFailure);
+      }
+    };
 
     try {
       // Resolve while the session finishes initializing instead of after it.
@@ -564,6 +711,11 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         }
         if (requestId != _playRequestId) return;
 
+        // Before changing providers, try a whole-file GET of the original.
+        // This is useful for native streaming/Range issues, not network blocks.
+        if (await tryDownloadAndStart()) return;
+        if (requestId != _playRequestId) return;
+
         // Only a catalog entry may switch recordings, and only after refreshing
         // the original URL failed too. Direct uploads retain their identity.
         if (track.source.isCatalog) {
@@ -591,8 +743,9 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
           }
         }
       }
-      // No stream at all: don't repeat the same expensive multi-source search
-      // three times. The listener can explicitly retry when their network changes.
+      // A Range probe may have failed before handing us a native stream. The
+      // download resolver can still supply a full-file URL for the same video.
+      if (!downloadAttempted && await tryDownloadAndStart()) return;
       reportError(lastError);
     } catch (error) {
       reportError(error);
@@ -658,35 +811,72 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     MediaTrack track, {
     void Function(double progress)? onProgress,
   }) async {
-    final stream = await _resolveStream(track);
-    final streamUrl = stream?.url;
-    if (streamUrl == null || streamUrl.isEmpty) return null;
-    if (streamUrl.startsWith('file:')) {
-      return File(Uri.parse(streamUrl).toFilePath());
+    unawaited(_cacheOfflineLyrics(track));
+    try {
+      final local = await _cacheManager.getLocalCachedUrl(_cacheKey(track));
+      if (local != null) return File(Uri.parse(local).toFilePath());
+      final stream = await _resolver
+          .resolveDownloadStream(track)
+          .timeout(const Duration(seconds: 25));
+      if (stream == null || stream.isEmpty) return null;
+      if (stream.url.startsWith('file:')) {
+        return File(Uri.parse(stream.url).toFilePath());
+      }
+      return await _cacheManager.downloadTrack(
+        track,
+        stream.url,
+        cacheKey: _cacheKey(track),
+        headers: stream.headers,
+        fileExtension: stream.fileExtension,
+        onProgress: onProgress,
+      );
+    } catch (_) {
+      return null;
     }
-    return _cacheManager.downloadTrack(
-      track,
-      streamUrl,
-      cacheKey: '${track.source.name}_${track.id}',
-      headers: stream!.headers.isEmpty ? null : stream.headers,
-      onProgress: onProgress,
-    );
+  }
+
+  Future<void> _cacheOfflineLyrics(MediaTrack track) async {
+    try {
+      await _offlineLyrics.fetchLyrics(
+        trackName: track.title,
+        artistName: track.artist,
+        duration: track.duration,
+        trackKey: '${track.source.name}:${track.id}',
+      );
+    } catch (_) {
+      // Missing lyrics must not block original audio from being saved/played.
+    }
   }
 
   @override
-  Future<void> play() async => await _player.play();
+  Future<void> play() async {
+    _wantsPlayback = true;
+    if (_fallbackDownloadToken != null) return;
+    await _player.play();
+  }
 
   @override
-  Future<void> pause() async => await _player.pause();
+  Future<void> pause() async {
+    _wantsPlayback = false;
+    await _player.pause();
+  }
 
   @override
   Future<void> stop() async {
     _playRequestId++;
+    _wantsPlayback = false;
+    _runtimeErrorHandler = null;
+    _fallbackDownloadToken?.cancel('Playback stopped');
+    _fallbackDownloadToken = null;
+    _pendingFallbackPosition = null;
     await _player.stop();
   }
 
   @override
-  Future<void> seek(Duration position) async => await _player.seek(position);
+  Future<void> seek(Duration position) async {
+    if (_fallbackDownloadToken != null) _pendingFallbackPosition = position;
+    await _player.seek(position);
+  }
 
   @override
   Future<void> setSpeed(double speed) async =>
@@ -694,7 +884,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   Future<void> setPitch(double pitch) async =>
       await _player.setPitch(pitch.clamp(0.5, 2.0));
   Future<void> setVolume(double volume) async =>
-      await _player.setVolume(volume.clamp(0.0, 1.0));
+      await equalizer.setVolume(volume);
 
   void toggleLoopMode() {
     switch (_loopMode) {
@@ -799,6 +989,10 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
   Future<void> dispose() async {
     _playRequestId++;
+    _runtimeErrorHandler = null;
+    _fallbackDownloadToken?.cancel('Player disposed');
+    _offlineLyrics.close();
+    await _playbackErrorSubscription?.cancel();
     await _noisySubscription?.cancel();
     await _favoritesSubscription?.cancel();
     await _playerStateSubscription?.cancel();
@@ -806,6 +1000,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     await _trackController.close();
     await _sourceController.close();
     await _queueController.close();
+    equalizer.dispose();
     await _player.dispose();
     _resolver.dispose();
   }

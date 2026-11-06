@@ -683,6 +683,23 @@ class StreamResolver {
     return null;
   }
 
+  /// Resolve the selected recording for an unchanged, full-file download.
+  /// YouTube's native playback probe uses Range; a full GET can still work
+  /// when that probe or the device's streaming decoder fails.
+  Future<ResolvedStream?> resolveDownloadStream(MediaTrack track) async {
+    if (_disposed) return null;
+    if (track.source == TrackSource.youtubeMusic) {
+      for (final provider in _additionalSources) {
+        if (provider is YouTubeMusicSource) {
+          return provider.resolveDownloadTrack(track);
+        }
+      }
+    }
+    // A catalog entry still goes through the strict recording matcher. Direct
+    // uploads must never become a similarly named upload from another provider.
+    return resolveStream(track);
+  }
+
   Future<String?> resolveStreamUrl(MediaTrack track) async =>
       (await resolveStream(track))?.url;
 

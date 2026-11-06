@@ -1,33 +1,12 @@
 import 'dart:async';
 
 import '../domain/lrc_parser.dart';
-import '../domain/lyric_line.dart';
 import 'lrclib_client.dart';
 import 'netease_lyrics_source.dart';
+import 'lyrics_disk_cache.dart';
+import 'lyrics_result.dart';
 
-class LyricsResult {
-  final String? plainLyrics;
-  final List<LyricLine> lines;
-
-  /// True when [lines] carry real timestamps from a synced source. False when
-  /// lines were synthesized from plain text; those timings are guesses and
-  /// must not drive karaoke highlighting or auto-scroll.
-  final bool isRealSync;
-
-  /// True when every word has its own timestamp from the source.
-  final bool hasWordSync;
-
-  const LyricsResult({
-    this.plainLyrics,
-    this.lines = const [],
-    this.isRealSync = false,
-    this.hasWordSync = false,
-  });
-
-  bool get hasSynced => lines.isNotEmpty;
-  bool get isEmpty =>
-      !hasSynced && (plainLyrics == null || plainLyrics!.isEmpty);
-}
+export 'lyrics_result.dart';
 
 /// Finds lyrics in this order: word-synced (NetEase YRC), line-synced
 /// (LRCLIB, then NetEase LRC; words are timed by estimate), plain text.
@@ -36,10 +15,15 @@ class LyricsClient {
   final NeteaseLyricsSource _netease;
   final LrclibSource _lrclib;
   final Map<String, LyricsResult?> _cache = {};
+  final LyricsDiskCache _diskCache;
 
-  LyricsClient({NeteaseLyricsSource? netease, LrclibSource? lrclib})
-    : _netease = netease ?? NeteaseLyricsSource(),
-      _lrclib = lrclib ?? LrclibSource();
+  LyricsClient({
+    NeteaseLyricsSource? netease,
+    LrclibSource? lrclib,
+    LyricsDiskCache? diskCache,
+  }) : _netease = netease ?? NeteaseLyricsSource(),
+       _lrclib = lrclib ?? LrclibSource(),
+       _diskCache = diskCache ?? LyricsDiskCache();
 
   static final _noise = [
     RegExp(
@@ -87,11 +71,21 @@ class LyricsClient {
     required String trackName,
     required String artistName,
     Duration? duration,
+    String? trackKey,
   }) async {
-    final key =
+    final metadataKey =
         '${trackName.trim().toLowerCase()}::${artistName.trim().toLowerCase()}::${duration?.inMilliseconds ?? 0}';
+    final key = trackKey == null ? metadataKey : '$trackKey::$metadataKey';
     if (_cache.containsKey(key)) return _cache[key];
     if (_cache.length >= 100) _cache.remove(_cache.keys.first);
+    final saved = await _diskCache.read(key);
+    if (saved != null) return _cache[key] = saved;
+
+    Future<LyricsResult> remember(LyricsResult result) async {
+      _cache[key] = result;
+      await _diskCache.write(key, result);
+      return result;
+    }
 
     final cleaned = cleanTrackTitle(trackName, artistName);
     final title = cleaned.isNotEmpty ? cleaned : trackName;
@@ -113,10 +107,8 @@ class LyricsClient {
     if (yrc != null && yrc.trim().isNotEmpty) {
       final lines = LrcParser.parseYrc(yrc);
       if (lines.isNotEmpty && !LrcParser.looksUnsynced(lines)) {
-        return _cache[key] = LyricsResult(
-          lines: lines,
-          isRealSync: true,
-          hasWordSync: true,
+        return remember(
+          LyricsResult(lines: lines, isRealSync: true, hasWordSync: true),
         );
       }
     }
@@ -126,25 +118,31 @@ class LyricsClient {
       if (synced == null || synced.trim().isEmpty) continue;
       final lines = LrcParser.parse(synced);
       if (lines.isEmpty || LrcParser.looksUnsynced(lines)) continue;
-      return _cache[key] = LyricsResult(
-        plainLyrics: lrclib?.plain,
-        lines: lines,
-        isRealSync: true,
-        hasWordSync: lines.every(
-          (line) =>
-              line.hasRealWordTimings &&
-              line.backingVocals.every((backing) => backing.hasRealWordTimings),
+      return remember(
+        LyricsResult(
+          plainLyrics: lrclib?.plain,
+          lines: lines,
+          isRealSync: true,
+          hasWordSync: lines.every(
+            (line) =>
+                line.hasRealWordTimings &&
+                line.backingVocals.every(
+                  (backing) => backing.hasRealWordTimings,
+                ),
+          ),
         ),
       );
     }
 
     final plain = lrclib?.plain ?? _plainFromLrc(netease?.lrc);
     if (plain != null && plain.trim().isNotEmpty) {
-      return _cache[key] = LyricsResult(
-        plainLyrics: plain,
-        lines: LrcParser.synthesizeFromPlainText(
-          plain,
-          known ?? const Duration(minutes: 3),
+      return remember(
+        LyricsResult(
+          plainLyrics: plain,
+          lines: LrcParser.synthesizeFromPlainText(
+            plain,
+            known ?? const Duration(minutes: 3),
+          ),
         ),
       );
     }

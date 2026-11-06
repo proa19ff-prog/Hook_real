@@ -256,5 +256,6 @@ final trackLyricsProvider = FutureProvider<LyricsResult?>((ref) async {
     trackName: track.title,
     artistName: track.artist,
     duration: track.duration,
+    trackKey: '${track.source.name}:${track.id}',
   );
 });
