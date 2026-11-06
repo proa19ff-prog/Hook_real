@@ -11,8 +11,15 @@ import '../../../l10n/generated/app_localizations.dart';
 
 class PlaybackControls extends ConsumerWidget {
   final HookTheme theme;
+  final VoidCallback? onNext;
+  final VoidCallback? onPrevious;
 
-  const PlaybackControls({super.key, required this.theme});
+  const PlaybackControls({
+    super.key,
+    required this.theme,
+    this.onNext,
+    this.onPrevious,
+  });
 
   String _formatDuration(Duration? d) {
     if (d == null) return '0:00';
@@ -194,7 +201,7 @@ class PlaybackControls extends ConsumerWidget {
               icon: MingCuteIcons.mgc_skip_previous_fill,
               size: 36,
               color: textPrimary,
-              onTap: playerService.previous,
+              onTap: onPrevious ?? playerService.previous,
             ),
 
             // Play / Pause — Grand central button
@@ -236,7 +243,7 @@ class PlaybackControls extends ConsumerWidget {
               icon: MingCuteIcons.mgc_skip_forward_fill,
               size: 36,
               color: textPrimary,
-              onTap: playerService.next,
+              onTap: onNext ?? playerService.next,
             ),
 
             // Loop Toggle
