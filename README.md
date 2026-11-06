@@ -11,6 +11,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/proa19ff-prog/Hook_real/releases">Релизы</a> ·
+  <a href="#скриншоты">Скриншоты</a> ·
   <a href="#возможности">Возможности</a> ·
   <a href="#сборка-и-установка">Сборка и установка</a> ·
   <a href="https://github.com/proa19ff-prog/Hook_real/issues">Сообщить об ошибке</a>
@@ -20,7 +21,35 @@
 
 > Доступность музыки, обложек и текстов зависит от внешних сервисов, сети и региона. Наличие трека в поиске не гарантирует, что доступна полная запись.
 
-Скриншоты интерфейса будут добавлены в будущих релизах.
+## Скриншоты
+
+<table>
+  <tr>
+    <td width="33%" align="center" valign="top">
+      <a href="assets/screens/Main.jpg">
+        <img src="assets/screens/Main.jpg" alt="Hook — главный экран приложения" width="260">
+      </a>
+      <br><br>
+      <strong>Главный экран</strong>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <a href="assets/screens/Search.jpg">
+        <img src="assets/screens/Search.jpg" alt="Hook — экран поиска музыки" width="260">
+      </a>
+      <br><br>
+      <strong>Поиск музыки</strong>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <a href="assets/screens/Lyrics.jpg">
+        <img src="assets/screens/Lyrics.jpg" alt="Hook — экран текстов песен" width="260">
+      </a>
+      <br><br>
+      <strong>Тексты песен</strong>
+    </td>
+  </tr>
+</table>
+
+<p align="center"><sub>Нажмите на скриншот, чтобы открыть его в полном размере.</sub></p>
 
 ## Возможности
 
