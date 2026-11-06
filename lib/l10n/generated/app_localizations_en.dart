@@ -998,6 +998,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceAudius => 'Audius';
 
   @override
+  String get sourceServer => 'Server';
+
+  @override
+  String get serverResolver => 'Resolver server';
+
+  @override
+  String get serverResolverCaption =>
+      'Optional self-hosted server that resolves full audio streams. The app sends a search query or track ID; the server returns a playback URL. The contract and a reference implementation live in docs/REMOTE_RESOLVER.md.';
+
+  @override
+  String get serverResolverHint => 'https://hook-resolver.example.com';
+
+  @override
+  String get serverResolverDisabled => 'Not configured';
+
+  @override
+  String get serverSave => 'Save';
+
+  @override
+  String get serverDisable => 'Disable';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to Hook';
+
+  @override
+  String get onboardingWelcomeCaption =>
+      'Music, lyrics and your own visual style. Pick a language to begin — you can change it later in settings.';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Continue';
+
+  @override
+  String get onboardingStart => 'Start listening';
+
+  @override
+  String get onboardingMicrogTitle => 'MicroG and the Google account';
+
+  @override
+  String get onboardingMicrogBody =>
+      'MicroG re-creates Google services on custom Android ROMs that ship without them. Hook uses those services only for one optional feature: connecting a YouTube account to import your playlists. Music playback never requires MicroG or any Google service.';
+
+  @override
+  String get onboardingMicrogNote =>
+      'Playback does not depend on MicroG. Connecting an account is optional.';
+
+  @override
+  String get onboardingMicrogDownload => 'Download MicroG';
+
+  @override
+  String get onboardingMicrogStatusChecking => 'Checking Google services…';
+
+  @override
+  String onboardingMicrogStatusOk(String version) {
+    return 'Google services are present on this device ($version). Account import will work out of the box.';
+  }
+
+  @override
+  String onboardingMicrogStatusReVanced(String version) {
+    return 'ReVanced GmsCore detected ($version). The official Google sign-in SDK is not compatible with it, so account connection may not work. Playback is unaffected.';
+  }
+
+  @override
+  String get onboardingMicrogStatusMissing =>
+      'Google services were not found. To import playlists from a YouTube account, install MicroG first — or skip this and use Hook without an account.';
+
+  @override
   String lyricsView(String mode) {
     return 'Lyrics view · $mode';
   }

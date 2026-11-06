@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "Pengaturan",
+  "settingsCaption": "Perubahan disimpan di perangkat ini.",
+  "playerSettings": "Pemutar",
+  "lyricsAutoHide": "Sembunyikan kontrol saat membaca lirik",
+  "lyricsAutoHideDescription": "Setelah 10 detik tanpa interaksi, panel pemutar menghilang dari layar. Gunakan tombol pulihkan untuk mengembalikannya.",
+  "showPlayerControls": "Tampilkan kontrol pemutar",
+  "equalizer": "Ekualiser",
+  "equalizerEnabled": "Pemrosesan suara",
+  "equalizerPresets": "Profil suara",
+  "equalizerFlat": "Asli",
+  "equalizerBass": "Bass dalam",
+  "equalizerVocal": "Vokal",
+  "equalizerRock": "Rock",
+  "equalizerElectronic": "Elektronik",
+  "equalizerSoft": "Lembut",
+  "equalizerCustom": "Kustom",
+  "equalizerBands": "Pita frekuensi",
+  "equalizerBassBoost": "Penguatan bass",
+  "equalizerBassUnsupported": "Penguatan bass tambahan tidak didukung. Gunakan pita frekuensi rendah.",
+  "equalizerPreamp": "Preamp",
+  "equalizerHeadroom": "Ruang kepala otomatis",
+  "equalizerHeadroomDescription": "Menurunkan level keluaran saat menaikkan frekuensi untuk memberi ruang bagi puncak. Bukan pembatas.",
+  "equalizerWaiting": "Putar sebuah lagu untuk menghubungkan ekualiser ke sesi audionya.",
+  "equalizerUnsupported": "Pemrosesan suara saat ini hanya tersedia di Android.",
+  "equalizerFailed": "Perangkat ini tidak dapat mengaktifkan efek audio. Musik tetap bisa diputar tanpanya.",
+  "equalizerRetry": "Sambungkan ulang efek",
+  "equalizerLive": "Perubahan langsung diterapkan dan disimpan di perangkat ini.",
+  "youtubeAccount": "YouTube & MicroG",
+  "youtubeAccountReadOnly": "Akses baca-saja ke playlist. Masuk tidak menjamin ketersediaan audio.",
+  "youtubeAccountCompatibility": "Kompatibilitas dan privasi",
+  "youtubeAccountSubtitle": "Penyambungan akun dan impor playlist",
+  "youtubeAccountPrivacy": "Hook meminta akses YouTube baca-saja. Masukkan kata sandi hanya di dialog sistem Google, tidak pernah di Hook. Token tidak dikirim ke server Hook mana pun dan hanya disimpan di memori. Sambungkan ulang setelah memulai ulang aplikasi.",
+  "youtubeAccountPlaybackNotice": "Masuk memberi akses ke data akun, bukan ke aliran audio. Ini tidak menjamin perbaikan HTTP 403. Impor mempertahankan rekaman YouTube tanpa menggantinya dengan sumber lain.",
+  "youtubeAccountConnect": "Sambungkan akun",
+  "youtubeAccountDisconnect": "Putuskan di Hook",
+  "youtubeAccountDisconnected": "Tidak ada akun tersambung",
+  "youtubeAccountDisconnectNotice": "Putuskan akun ini hanya di Hook? Playlist tersimpan tetap ada. Akun Google dan MicroG di ponsel tidak ikut keluar.",
+  "youtubeAccountSystem": "API Google sistem",
+  "youtubeAccountServicesMissing": "API Google sistem yang kompatibel tidak tersedia. Instalasi ReVanced GmsCore terpisah tidak menggantikannya untuk masuk Hook.",
+  "youtubeAccountMicrogNotice": "Terdeteksi instalasi ReVanced GmsCore terpisah. Hook tidak memakai akun atau token ReVanced. MicroG sistem bisa menyediakan API Google yang kompatibel, tetapi kompatibilitas dengan metode masuk ini tidak dijamin.",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced terpasang",
+  "youtubeAccountPlaylists": "Playlist akun",
+  "youtubeAccountNoPlaylists": "Tidak ada playlist yang bisa diakses. Beberapa koleksi otomatis YouTube Music tidak tersedia melalui YouTube Data API.",
+  "youtubeAccountMore": "Muat lebih banyak",
+  "youtubeAccountPreview": "Siapkan impor",
+  "youtubeAccountProgress": "Lagu diperoleh: {count}",
+  "youtubeAccountUnavailableTracks": "Entri tak tersedia dilewati: {count}. Semuanya tidak digantikan lagu lain.",
+  "youtubeAccountSetup": "Penyiapan masuk",
+  "youtubeAccountSetupBody": "Pengembang harus mengaktifkan YouTube Data API v3 di Google Cloud, mendaftarkan klien OAuth Android untuk com.hook.music dan SHA-1 penandatanganan build terpasang, serta mengonfigurasi layar persetujuan. Tambahkan pengguna yang diizinkan dalam mode uji. Lihat docs/YOUTUBE_ACCOUNT_SETUP.md. Jangan pernah menambahkan kata sandi, rahasia klien, atau token dari aplikasi lain.",
+  "youtubeAccountConfigError": "Masuk belum dikonfigurasi untuk build ini. Periksa klien OAuth Android, nama paket, SHA-1, dan pengguna uji yang diizinkan di Google Cloud.",
+  "youtubeAccountPermissionError": "Akses baca ke data YouTube tidak diberikan.",
+  "youtubeAccountExpired": "Sesi Anda berakhir. Sambungkan ulang akun.",
+  "youtubeAccountNoChannel": "Akun yang dipilih tidak punya kanal YouTube yang bisa diakses.",
+  "youtubeAccountQuota": "Kuota API YouTube terlampaui. Coba lagi nanti.",
+  "youtubeAccountFailed": "Tidak dapat mengambil data YouTube. Periksa koneksi Anda dan coba lagi.",
+  "youtubeAccountUnsupported": "Penyambungan akun membutuhkan Android dengan API Google sistem yang kompatibel.",
+  "importedFromYouTube": "Diimpor dari akun YouTube",
+  "translateLyrics": "Terjemahkan lirik",
+  "hideTranslation": "Sembunyikan terjemahan",
+  "cancelTranslation": "Batalkan terjemahan",
+  "translationLoading": "Menyiapkan terjemahan…",
+  "translationAttribution": "Diterjemahkan otomatis oleh Google Translate",
+  "translationNotice": "Terjemahan mungkin tidak menangkap makna lagu secara akurat. Penyorotan kata hanya berlaku pada lirik asli.",
+  "translationModelTitle": "Unduh model bahasa?",
+  "translationModelBody": "Terjemahan berjalan di ponsel Anda: lirik tidak dikirim ke server. Terjemahan pertama membutuhkan model Google ML Kit yang berukuran puluhan megabita. Unduhan memakai koneksi Anda saat ini, termasuk data seluler. Membatalkan menyembunyikan hasil, tetapi unduhan model yang sudah mulai bisa selesai di latar belakang.",
+  "translationDownload": "Unduh dan terjemahkan",
+  "translationUnavailable": "Terjemahan gagal. Periksa akses ke unduhan model dan coba lagi.",
+  "translationUnsupported": "Terjemahan di perangkat saat ini hanya tersedia di Android.",
+  "translationUnknownLanguage": "Tidak dapat mengidentifikasi bahasa yang didukung untuk lagu ini.",
+  "translationSameLanguage": "Lirik sudah dalam bahasa yang dipilih.",
+  "translationTooLarge": "Lirik ini terlalu panjang untuk terjemahan di perangkat.",
+  "translationRussian": "Ke bahasa Rusia",
+  "translationEnglish": "Ke bahasa Inggris",
+  "translationTarget": "Bahasa terjemahan",
+  "retry": "Coba lagi",
+  "home": "Beranda",
+  "search": "Cari",
+  "library": "Pustaka",
+  "youtubeUnavailableTitle": "YouTube sedang tidak tersedia",
+  "youtubeUnavailableBody": "Tidak bisa mendapatkan aliran audio. Periksa jaringan dan rute VPN Anda: YouTube bisa menolak permintaan bahkan dengan VPN.",
+  "checkAgain": "Periksa lagi",
+  "dismiss": "Tutup",
+  "goodNight": "Selamat malam",
+  "goodMorning": "Selamat pagi",
+  "goodAfternoon": "Selamat siang",
+  "goodEvening": "Selamat sore",
+  "themeSettings": "Pengaturan tampilan",
+  "onYourAir": "Di udara Anda",
+  "recentSignals": "{count, plural, =0{Tidak ada sinyal terkini} =1{1 sinyal terkini} other{{count} sinyal terkini}}",
+  "collectionWaiting": "Koleksi Anda menanti",
+  "saved": "Tersimpan",
+  "collectionEmptyDetail": "Musik yang ingin Anda kembali akan tetap di sini",
+  "tracksCount": "{count, plural, =1{1 lagu} other{{count} lagu}}",
+  "homeSearchHint": "Lagu, artis, atau lirik",
+  "searchUpper": "CARI",
+  "findFirstTrack": "Temukan lagu pertama Anda",
+  "continuationAfter": "Musik lainnya setelah {artist}",
+  "chooseTrackWaveDetail": "Pilih sebuah lagu dan kami akan membangun gelombang sesuai suasananya.",
+  "continueWaveLabel": "LANJUT / 01",
+  "yourWaveLabel": "GELOMBANG ANDA / 01",
+  "continueWave": "Lanjutkan gelombang",
+  "chooseTrack": "Pilih lagu",
+  "firstTrace": "Tinggalkan jejak pertama Anda di sini",
+  "favoriteWaveHint": "Simpan favorit, dan gelombang Anda akan makin akurat.",
+  "openSearch": "Buka pencarian",
+  "findYourMusic": "Temukan suaramu.",
+  "importMusic": "Impor musik",
+  "rememberedLyricsHint": "Kata-kata yang Anda ingat…",
+  "trackArtistHint": "Lagu atau artis — bahasa apa pun",
+  "clear": "Bersihkan",
+  "music": "Musik",
+  "byLyrics": "Dari lirik",
+  "allSources": "Semua sumber",
+  "lyricsSearchCaption": "Cari frasa dalam lagu, bukan hanya judulnya.",
+  "searchingLyrics": "Mencari baris yang familiar…",
+  "searchingSources": "Mencari di sumber musik…",
+  "connectionFailed": "Tidak bisa terhubung",
+  "noMatches": "Belum ada kecocokan",
+  "lyricsUnavailable": "Pencarian lirik sedang tidak tersedia. Coba nanti atau cari berdasarkan judul.",
+  "searchUnavailable": "Pencarian gagal. Periksa koneksi Anda dan coba lagi.",
+  "lyricsNoMatches": "Coba baris lain. Tidak semua lirik terindeks.",
+  "trackNoMatches": "Tambahkan artis atau pilih sumber lain. Beberapa layanan mungkin tidak tersedia di jaringan Anda.",
+  "repeatSearch": "Cari lagi",
+  "lyricMatchesUpper": "KECOCOKAN LIRIK",
+  "tracksUpper": "LAGU",
+  "playTrack": "Putar {title}, {artist}",
+  "familiarLinesUpper": "BARIS FAMILIAR",
+  "bestMatchUpper": "KECOCOKAN TERBAIK",
+  "fullVersionOnPlayback": "Kami akan mencari versi lengkap saat pemutaran dimulai.",
+  "forgotTitle": "Lupa judulnya.\nBukan musiknya.",
+  "startAsYouRemember": "Nama, judul, atau satu baris lagu.\nMulai dari apa pun yang Anda ingat.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "Cari nama sebagaimana terdengar",
+  "rememberOnlyLine": "Saya hanya ingat satu baris",
+  "findSongByWords": "Temukan lagu dari kata-katanya",
+  "yourArtistsUpper": "ARTIS ANDA",
+  "language": "Bahasa",
+  "languageCaption": "Antarmuka langsung mengikuti pilihan Anda",
+  "systemLanguage": "Sistem",
+  "russian": "Rusia",
+  "english": "Inggris",
+  "themesAndShaders": "Tema dan efek",
+  "themesSubtitle": "Tampilan, bahasa, dan gerakan latar",
+  "invalidThemeJson": "Tema tidak bisa dibaca. Periksa format JSON dan nilai kolom.",
+  "exportJson": "Ekspor JSON",
+  "importJson": "Impor JSON",
+  "readyThemes": "Preset tema",
+  "gpuShaders": "Efek latar",
+  "meshGradient": "Gradien GPU halus dari warna lagu",
+  "vinylNoise": "Butiran piringan analog (Noise)",
+  "glassBlur": "Buram kaca (Backdrop Blur)",
+  "cornerRadius": "Radius sudut antarmuka",
+  "importThemeTitle": "Impor tema dari JSON",
+  "pasteThemeJson": "Tempel konfigurasi JSON tema:",
+  "cancel": "Batal",
+  "apply": "Terapkan",
+  "themeApplied": "Tema berhasil diterapkan!",
+  "exportThemeTitle": "Ekspor tema (JSON)",
+  "close": "Tutup",
+  "copyJson": "Salin JSON",
+  "jsonCopied": "JSON tema tersalin ke papan klip!",
+  "libraryUpper": "PUSTAKA",
+  "localCollection": "Koleksi lokal dan playlist",
+  "importShort": "Impor",
+  "favorites": "Favorit",
+  "playlists": "Playlist",
+  "history": "Riwayat",
+  "offline": "Luring",
+  "favoritesEmpty": "Favorit Anda masih kosong.\nKetuk hati pada lagu untuk menambahkannya di sini.",
+  "historyEmpty": "Riwayat dengar Anda kosong.\nPutar musik dari pencarian dan akan muncul di sini.",
+  "noPlaylists": "Anda belum punya playlist",
+  "importPlaylistHint": "Impor playlist Spotify atau tempel daftar lagu.",
+  "importMusicAction": "Impor musik",
+  "playPlaylist": "Putar playlist",
+  "playlistStarted": "Memutar «{name}» ({count} lagu)",
+  "deletePlaylist": "Hapus playlist",
+  "playAll": "Putar semua",
+  "shuffle": "Acak",
+  "localAudioCache": "Cache audio lokal",
+  "cacheDescription": "Lagu yang diputar disimpan lokal untuk diputar ulang tanpa koneksi internet.",
+  "deviceUsage": "Di perangkat ini: {size}",
+  "clearCache": "Bersihkan semua cache",
+  "savedTracksUpper": "LAGU TERSIMPAN ({count}):",
+  "cacheFeaturesUpper": "FITUR CACHE:",
+  "offlineFirst": "Prioritas luring penuh",
+  "offlineFirstDescription": "Saat diputar ulang, audio dimuat langsung dari sistem berkas perangkat.",
+  "maximumBitrate": "Bitrate maksimum",
+  "maximumBitrateDescription": "Aliran Opus/M4A bersih 160–256 kbps disimpan tanpa transkoding.",
+  "trafficAndBattery": "Hemat data dan baterai",
+  "trafficAndBatteryDescription": "Menghindari permintaan jaringan berulang membantu ponsel Anda bertahan lebih lama.",
+  "cacheEmpty": "Cache kosong",
+  "cachedTracksAppear": "Lagu yang diunduh akan muncul di sini otomatis",
+  "removeFromCache": "Hapus dari cache",
+  "removeCachedTrackTitle": "Hapus lagu dari cache?",
+  "removeCachedTrackBody": "«{title}» akan dihapus dari perangkat ini.",
+  "delete": "Hapus",
+  "trackRemovedFromCache": "Lagu dihapus dari cache",
+  "clearCacheTitle": "Bersihkan cache?",
+  "clearCacheBody": "Semua berkas audio tersimpan akan dihapus dari perangkat ini. Favorit dan riwayat tidak berubah.",
+  "cacheCleared": "Cache lokal dibersihkan",
+  "back": "Kembali",
+  "playlistActions": "Tindakan playlist",
+  "playlistUpper": "PLAYLIST",
+  "playlistEmpty": "Belum ada lagu di playlist ini",
+  "pasteTrackList": "Tempel daftar lagu",
+  "pasteImportLink": "Tempel tautan untuk diimpor",
+  "tracksNotFound": "Tidak ada lagu ditemukan pada tautan itu.",
+  "importError": "Impor gagal. Periksa tautan dan koneksi internet Anda.",
+  "importedPlaylistStarted": "Memutar playlist terimpor ({count} lagu)",
+  "importedPlaylistName": "Impor ({platform})",
+  "playlistSaved": "Playlist «{name}» tersimpan di pustaka Anda!",
+  "spotifyImportSubtitle": "Spotify • Playlist, album, dan lagu",
+  "artistTrackOrCsv": "Artis — Lagu, atau CSV Exportify",
+  "pastePlaylistOrTrackLink": "Tempel tautan playlist atau lagu",
+  "pasteFromClipboard": "Tempel dari papan klip",
+  "link": "Tautan",
+  "trackList": "Daftar lagu",
+  "playlistName": "Nama playlist",
+  "startImport": "Mulai impor",
+  "importedCollectionMeta": "{author} • {count} lagu",
+  "importedFromSpotify": "Diimpor dari Spotify",
+  "importIntro": "Bawa playlist Anda. Gunakan tautan Spotify, daftar lagu, atau berkas Exportify.",
+  "importTextTab": "Teks",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "Pilih berkas",
+  "importFileHint": "Pilih CSV yang diekspor Exportify atau daftar lagu TXT. UTF-8, hingga 10 MB dan 10.000 lagu.",
+  "importFileAndroidOnly": "Pemilihan berkas tersedia di Android. Di sini Anda bisa menempel isi CSV atau daftar lagu.",
+  "importTextHint": "Satu baris Artis — Lagu. Anda juga bisa menempel CSV lengkap termasuk tajuknya.",
+  "importPreview": "Pratinjau lagu",
+  "importedFromCsv": "Diimpor dari CSV",
+  "importedFromText": "Diimpor dari daftar lagu",
+  "importMoreTracks": "Dan {count} lainnya",
+  "importMetadataHint": "Playlist disimpan di perangkat ini. Audio dicari saat lagu diputar; impor tidak mengunduh lagu.",
+  "importAnother": "Impor yang lain",
+  "importReading": "Membaca playlist Anda…",
+  "importSaving": "Menyimpan ke pustaka Anda…",
+  "importNameRequired": "Masukkan nama playlist.",
+  "importNameExists": "Playlist dengan nama ini sudah ada. Pilih nama lain agar keduanya tersimpan.",
+  "importSaveFailed": "Playlist tidak bisa disimpan. Pratinjau Anda masih ada — coba lagi.",
+  "importFileTooLarge": "Berkas ini lebih dari 10 MB. Bagi playlist menjadi ekspor yang lebih kecil.",
+  "importFileUnsupported": "Pilih berkas .csv atau .txt.",
+  "importFileEncoding": "Pengodean teks tidak bisa dibaca. Simpan berkas sebagai UTF-8 dan coba lagi.",
+  "importCsvInvalid": "CSV tidak lengkap atau rusak. Ekspor ulang tanpa mengubah kolom atau tanda kutipnya.",
+  "importCsvMissingColumns": "CSV membutuhkan kolom Track Name dan Artist Name(s), atau Title dan Artist. Gunakan ekspor Exportify asli.",
+  "importFileEmpty": "Tidak ada lagu ditemukan. Pilih ekspor yang berisi atau tempel daftar Artis — Lagu.",
+  "importTooManyTracks": "Satu impor maksimal 10.000 lagu. Bagi playlist ini; belum ada yang tersimpan.",
+  "importFileReadFailed": "Berkas ini tidak bisa dibuka. Pastikan tersedia di perangkat Anda dan pilih lagi.",
+  "importSpotifyBlocked": "Spotify tidak membagikan playlist ini di wilayah Anda. Ekspor dengan Exportify dan pilih berkas CSV.",
+  "listen": "Putar",
+  "addToPlaylists": "Tambahkan ke playlist",
+  "trackSemantics": "Lagu {title}, {artist}",
+  "trackActions": "Tindakan lagu",
+  "startWaveFromTrack": "Mulai gelombang dari lagu ini",
+  "addToQueue": "Tambahkan ke antrean",
+  "addedToQueue": "Ditambahkan ke antrean: {title}",
+  "removeFavorite": "Hapus dari favorit",
+  "addFavorite": "Tambahkan ke favorit",
+  "addToPlaylist": "Tambahkan ke playlist",
+  "goToArtist": "Ke artis",
+  "myPlaylist": "Playlist saya",
+  "newPlaylist": "Playlist baru",
+  "name": "Nama",
+  "create": "Buat",
+  "loading": "Memuat…",
+  "pause": "Jeda",
+  "play": "Putar",
+  "next": "Berikutnya",
+  "speedAndPitch": "Kecepatan dan nada",
+  "speedValue": "Kecepatan: {value}x",
+  "pitchValue": "Nada: {value}x",
+  "reset": "Setel ulang",
+  "moreActions": "Tindakan lainnya",
+  "playbackQueue": "Antrean pemutaran",
+  "queueEmpty": "Antrean kosong",
+  "selectingSource": "Memilih sumber",
+  "collapsePlayer": "Ciutkan pemutar",
+  "nowPlayingUpper": "SEDANG DIPUTAR",
+  "queue": "Antrean",
+  "startWave": "Mulai gelombang",
+  "cover": "Sampul",
+  "karaokeLyrics": "Lirik karaoke",
+  "findMusicStart": "Temukan musik dan mulai memutar",
+  "playbackNotStarted": "Pemutaran belum dimulai",
+  "openSearchFirstTrack": "Buka pencarian untuk menemukan lagu pertama Anda",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "Di perangkat",
+  "sourceCatalog": "Katalog",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "Server",
+  "serverResolver": "Server resolusi",
+  "serverResolverCaption": "Server mandiri opsional yang menyelesaikan aliran audio penuh. Aplikasi mengirim pencarian atau ID lagu; server mengembalikan URL pemutaran. Kontrak dan implementasi acuan ada di docs/REMOTE_RESOLVER.md.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "Belum dikonfigurasi",
+  "serverSave": "Simpan",
+  "serverDisable": "Nonaktifkan",
+  "onboardingWelcomeTitle": "Selamat datang di Hook",
+  "onboardingWelcomeCaption": "Musik, lirik, dan gaya visual Anda sendiri. Pilih bahasa untuk memulai — bisa diubah nanti di pengaturan.",
+  "onboardingSkip": "Lewati",
+  "onboardingNext": "Lanjut",
+  "onboardingStart": "Mulai mendengarkan",
+  "onboardingMicrogTitle": "MicroG dan akun Google",
+  "onboardingMicrogBody": "MicroG menghadirkan kembali layanan Google pada ROM Android kustom yang lahir tanpanya. Hook memakainya hanya untuk satu fitur opsional: menyambungkan akun YouTube untuk mengimpor playlist. Memutar musik tidak pernah butuh MicroG atau layanan Google mana pun.",
+  "onboardingMicrogNote": "Pemutaran tidak bergantung pada MicroG. Menyambungkan akun itu opsional.",
+  "onboardingMicrogDownload": "Unduh MicroG",
+  "onboardingMicrogStatusChecking": "Memeriksa layanan Google…",
+  "onboardingMicrogStatusOk": "Layanan Google tersedia di perangkat ini ({version}). Impor akun akan langsung berfungsi.",
+  "onboardingMicrogStatusReVanced": "Terdeteksi ReVanced GmsCore ({version}). SDK masuk resmi Google tidak kompatibel dengannya, jadi penyambungan akun mungkin tidak berfungsi. Pemutaran tidak terpengaruh.",
+  "onboardingMicrogStatusMissing": "Layanan Google tidak ditemukan. Untuk mengimpor playlist dari akun YouTube, instal MicroG terlebih dahulu — atau lewati ini dan pakai Hook tanpa akun.",
+  "lyricsView": "Tampilan lirik · {mode}",
+  "lyricsReadingRhythm": "Irama baca Anda",
+  "lyricsModeSubtitle": "Tiga cara mendekati lagu.",
+  "lyricsModeLines": "Baris",
+  "lyricsModeKaraoke": "Karaoke",
+  "lyricsModeFocus": "Fokus",
+  "lyricsModeLinesDescription": "Lirik tenang dengan baris saat ini disorot",
+  "lyricsModeKaraokeDescription": "Kata-kata menyala lembut mengikuti vokal",
+  "lyricsModeFocusDescription": "Satu baris besar. Tidak ada lagi",
+  "lyricsModeSaveFailed": "Tampilan lirik tidak bisa disimpan.",
+  "lyricsModeFootnote": "Pilihan Anda tersimpan untuk lagu berikutnya. Akurasi karaoke bergantung pada data sumber: penyorotan kata perkiraan tanpa pewaktuan per kata, dan lirik diam tanpa penanda waktu.",
+  "lyricsNotFound": "Lirik tidak ditemukan",
+  "karaokeUnavailable": "Lirik karaoke tidak tersedia untuk lagu ini",
+  "unsyncedLyrics": "Lirik tanpa sinkronisasi",
+  "wordSyncUpper": "SINKRON KATA PER KATA",
+  "lineSyncUpper": "SINKRON BARIS PER BARIS",
+  "adjustLyricsSync": "Sesuaikan sinkronisasi lirik",
+  "startsSoon": "Segera dimulai",
+  "musicContinues": "Musik berlanjut",
+  "decreaseLyricsOffset": "Kurangi offset 0,1 dtk",
+  "lyricsOffset": "Offset: {value} dtk",
+  "increaseLyricsOffset": "Naikkan offset 0,1 dtk",
+  "hideSetting": "Sembunyikan pengaturan",
+  "lyricsOffsetSaveFailed": "Offset lirik tidak bisa disimpan.",
+  "audioForbidden": "Server audio menolak akses (HTTP 403). Lagu ditemukan, tetapi alirannya tidak tersedia. VPN tidak menjamin akses audio.",
+  "fullVersionUnavailable": "Tidak ada versi lengkap di sumber yang tersedia. Periksa koneksi atau coba nanti.",
+  "sourcePlaybackFailed": "{source} tidak bisa memutar lagu ini. Periksa koneksi atau coba nanti.",
+  "@@locale": "id",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

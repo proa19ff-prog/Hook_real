@@ -47,6 +47,19 @@ class LocalStorageService {
   Future<void> saveLocaleCode(String code) =>
       _prefs.setString('hook_locale_code', code);
 
+  // --- REMOTE RESOLVER ---
+  String? getRemoteResolverUrl() =>
+      _prefs.getString('hook_remote_resolver_url');
+  Future<void> saveRemoteResolverUrl(String? url) =>
+      url == null || url.trim().isEmpty
+      ? _prefs.remove('hook_remote_resolver_url')
+      : _prefs.setString('hook_remote_resolver_url', url.trim());
+
+  // --- ONBOARDING ---
+  bool getOnboardingDone() => _prefs.getBool('hook_onboarding_done') ?? false;
+  Future<void> saveOnboardingDone() =>
+      _prefs.setBool('hook_onboarding_done', true);
+
   // --- LYRICS PRESENTATION ---
   bool getLyricsAutoHide() => _prefs.getBool('hook_lyrics_auto_hide') ?? true;
   Future<void> saveLyricsAutoHide(bool enabled) =>

@@ -1,9 +1,14 @@
 package com.hook.music
 
+import android.Manifest
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.provider.OpenableColumns
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -19,6 +24,7 @@ class MainActivity : AudioServiceActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        requestNotificationPermissionIfNeeded()
         if (!flutterEngine.plugins.has(EqualizerPlugin::class.java)) {
             flutterEngine.plugins.add(EqualizerPlugin())
         }
@@ -126,8 +132,23 @@ class MainActivity : AudioServiceActivity() {
 
     private class FileTooLargeException : Exception()
 
+    /// Android 13+ requires a runtime grant for POST_NOTIFICATIONS; the media
+    /// notification (and its favorite button) depends on it. Asked once at
+    /// startup; the system remembers both grants and denials.
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED) return
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            NOTIFICATIONS_REQUEST
+        )
+    }
+
     companion object {
         private const val IMPORT_REQUEST = 7318
+        private const val NOTIFICATIONS_REQUEST = 7319
         private const val MAX_IMPORT_BYTES = 10 * 1024 * 1024
     }
 }

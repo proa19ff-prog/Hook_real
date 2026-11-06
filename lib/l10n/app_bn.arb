@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "সেটিংস",
+  "settingsCaption": "পরিবর্তনগুলি এই ডিভাইসে সংরক্ষিত হয়।",
+  "playerSettings": "প্লেয়ার",
+  "lyricsAutoHide": "গান পড়ার সময় নিয়ন্ত্রণ লুকান",
+  "lyricsAutoHideDescription": "১০ সেকেন্ড কোনো ইন্টারঅ্যাকশন না থাকলে প্লেয়ারের প্যানেলগুলি সরে যায়। ফিরিয়ে আনতে রিস্টোর বোতাম ব্যবহার করুন।",
+  "showPlayerControls": "প্লেয়ার নিয়ন্ত্রণ দেখান",
+  "equalizer": "ইকুয়ালাইজার",
+  "equalizerEnabled": "শব্দ প্রসেসিং",
+  "equalizerPresets": "শব্দ প্রোফাইল",
+  "equalizerFlat": "মূল",
+  "equalizerBass": "গভীর বেস",
+  "equalizerVocal": "ভোকাল",
+  "equalizerRock": "রক",
+  "equalizerElectronic": "ইলেকট্রনিক",
+  "equalizerSoft": "মৃদু",
+  "equalizerCustom": "কাস্টম",
+  "equalizerBands": "ফ্রিকোয়েন্সি ব্যান্ড",
+  "equalizerBassBoost": "বেস বুস্ট",
+  "equalizerBassUnsupported": "অতিরিক্ত বেস বুস্ট সমর্থিত নয়। নিম্ন-ফ্রিকোয়েন্সি ব্যান্ড ব্যবহার করুন।",
+  "equalizerPreamp": "প্রি-অ্যাম্প",
+  "equalizerHeadroom": "স্বয়ংক্রিয় হেডরুম",
+  "equalizerHeadroomDescription": "শিখরগুলির জন্য জায়গা রাখতে ফ্রিকোয়েন্সি বাড়ানোর সময় আউটপুট স্তর কমায়। এটি লিমিটার নয়।",
+  "equalizerWaiting": "ইকুয়ালাইজারকে তার অডিও সেশনের সঙ্গে যুক্ত করতে একটি ট্র্যাক চালান।",
+  "equalizerUnsupported": "শব্দ প্রসেসিং এখন শুধু অ্যান্ড্রয়েডে উপলব্ধ।",
+  "equalizerFailed": "এই ডিভাইস অডিও ইফেক্ট চালু করতে পারেনি। এগুলি ছাড়াও সংগীত বাজতে পারে।",
+  "equalizerRetry": "ইফেক্ট আবার সংযোগ করুন",
+  "equalizerLive": "পরিবর্তন সঙ্গে সঙ্গে প্রয়োগ হয় এবং এই ডিভাইসে সংরক্ষিত হয়।",
+  "youtubeAccount": "YouTube ও MicroG",
+  "youtubeAccountReadOnly": "প্লেলিস্টে শুধুমাত্র-পাঠের অ্যাক্সেস। সাইন ইন করলেই অডিওর প্রাপ্যতা নিশ্চিত হয় না।",
+  "youtubeAccountCompatibility": "সামঞ্জস্য ও গোপনীয়তা",
+  "youtubeAccountSubtitle": "অ্যাকাউন্ট সংযোগ ও প্লেলিস্ট আমদানি",
+  "youtubeAccountPrivacy": "Hook YouTube-এ শুধুমাত্র-পাঠের অ্যাক্সেস চায়। পাসওয়ার্ড কেবল Google-এর সিস্টেম ডায়ালগে দিন, কখনও Hook-এ নয়। টোকেন কোনো Hook সার্ভারে পাঠানো হয় না এবং শুধু মেমোরিতে থাকে। অ্যাপ আবার চালু করার পর পুনরায় সংযোগ করুন।",
+  "youtubeAccountPlaybackNotice": "সাইন ইন করলে অ্যাকাউন্টের ডেটায় অ্যাক্সেস মেলে, অডিও স্ট্রিমে নয়। এটি HTTP 403 সমাধানের গ্যারান্টি দেয় না। আমদানি YouTube রেকর্ডিং অক্ষুণ্ণ রাখে, অন্য উৎসে বদলায় না।",
+  "youtubeAccountConnect": "অ্যাকাউন্ট সংযোগ করুন",
+  "youtubeAccountDisconnect": "Hook-এ সংযোগ বিচ্ছিন্ন করুন",
+  "youtubeAccountDisconnected": "কোনো অ্যাকাউন্ট সংযুক্ত নেই",
+  "youtubeAccountDisconnectNotice": "এই অ্যাকাউন্ট শুধু Hook থেকে বিচ্ছিন্ন করবেন? সংরক্ষিত প্লেলিস্ট থেকে যাবে। ফোনের Google ও MicroG অ্যাকাউন্ট সাইন আউট হবে না।",
+  "youtubeAccountSystem": "সিস্টেম Google API",
+  "youtubeAccountServicesMissing": "সামঞ্জস্যপূর্ণ সিস্টেম Google API নেই। আলাদা ইনস্টল করা ReVanced GmsCore Hook-এর সাইন-ইনের জন্য তাদের বদলে দেয় না।",
+  "youtubeAccountMicrogNotice": "আলাদা ReVanced GmsCore ইনস্টল শনাক্ত হয়েছে। Hook ReVanced অ্যাকাউন্ট বা টোকেন ব্যবহার করে না। সিস্টেম MicroG সামঞ্জস্যপূর্ণ Google API দিতে পারে, তবে এই সাইন-ইন পদ্ধতির সঙ্গে সামঞ্জস্য নিশ্চিত নয়।",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced ইনস্টল আছে",
+  "youtubeAccountPlaylists": "অ্যাকাউন্টের প্লেলিস্ট",
+  "youtubeAccountNoPlaylists": "কোনো প্রবেশযোগ্য প্লেলিস্ট নেই। YouTube Music-এর কিছু স্বয়ংক্রিয় সংগ্রহ YouTube Data API দিয়ে পাওয়া যায় না।",
+  "youtubeAccountMore": "আরও লোড করুন",
+  "youtubeAccountPreview": "আমদানি প্রস্তুত করুন",
+  "youtubeAccountProgress": "প্রাপ্ত ট্র্যাক: {count}",
+  "youtubeAccountUnavailableTracks": "বাদ পড়া অপ্রাপ্য এন্ট্রি: {count}। এগুলি অন্য ট্র্যাকে বদলানো হয় না।",
+  "youtubeAccountSetup": "সাইন-ইন সেটআপ",
+  "youtubeAccountSetupBody": "ডেভেলপারকে Google Cloud-এ YouTube Data API v3 চালু করতে হবে, com.hook.music ও ইনস্টল করা বিল্ডের স্বাক্ষর SHA-1-এর জন্য Android OAuth ক্লায়েন্ট নিবন্ধন করতে হবে এবং সম্মতি স্ক্রিন কনফিগার করতে হবে। টেস্ট মোডে অনুমোদিত ব্যবহারকারী যোগ করুন। দেখুন docs/YOUTUBE_ACCOUNT_SETUP.md। কখনও পাসওয়ার্ড, ক্লায়েন্ট সিক্রেট বা অন্য অ্যাপের টোকেন যোগ করবেন না।",
+  "youtubeAccountConfigError": "এই বিল্ডের জন্য সাইন-ইন কনফিগার করা নেই। Google Cloud-এ Android OAuth ক্লায়েন্ট, প্যাকেজ নাম, SHA-1 ও অনুমোদিত টেস্ট ব্যবহারকারী পরীক্ষা করুন।",
+  "youtubeAccountPermissionError": "YouTube ডেটায় পাঠের অ্যাক্সেস দেওয়া হয়নি।",
+  "youtubeAccountExpired": "আপনার সেশনের মেয়াদ শেষ। অ্যাকাউন্ট পুনরায় সংযোগ করুন।",
+  "youtubeAccountNoChannel": "নির্বাচিত অ্যাকাউন্টের কোনো প্রবেশযোগ্য YouTube চ্যানেল নেই।",
+  "youtubeAccountQuota": "YouTube API কোটা শেষ। পরে চেষ্টা করুন।",
+  "youtubeAccountFailed": "YouTube ডেটা আনা গেল না। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "youtubeAccountUnsupported": "অ্যাকাউন্ট সংযোগের জন্য সামঞ্জস্যপূর্ণ সিস্টেম Google API-যুক্ত অ্যান্ড্রয়েড দরকার।",
+  "importedFromYouTube": "YouTube অ্যাকাউন্ট থেকে আমদানিকৃত",
+  "translateLyrics": "গান অনুবাদ করুন",
+  "hideTranslation": "অনুবাদ লুকান",
+  "cancelTranslation": "অনুবাদ বাতিল করুন",
+  "translationLoading": "অনুবাদ প্রস্তুত হচ্ছে…",
+  "translationAttribution": "Google Translate দ্বারা স্বয়ংক্রিয়ভাবে অনূদিত",
+  "translationNotice": "অনুবাদ গানের অর্থ সঠিকভাবে ধরতে নাও পারে। শব্দ-হাইলাইটিং শুধু মূলে প্রযোজ্য।",
+  "translationModelTitle": "ভাষার মডেল ডাউনলোড করবেন?",
+  "translationModelBody": "অনুবাদ আপনার ফোনেই চলে: গান কোনো সার্ভারে যায় না। প্রথম অনুবাদের জন্য Google ML Kit মডেল লাগে, যা কয়েক ডজন মেগাবাইট নেয়। ডাউনলোড আপনার বর্তমান সংযোগ ব্যবহার করে, মোবাইল ডেটা সহ। বাতিল করলে ফল লুকায়, তবে শুরু হওয়া মডেল ডাউনলোড ব্যাকগ্রাউন্ডে শেষ হতে পারে।",
+  "translationDownload": "ডাউনলোড করে অনুবাদ করুন",
+  "translationUnavailable": "অনুবাদ ব্যর্থ। মডেল ডাউনলোডের অ্যাক্সেস পরীক্ষা করে আবার চেষ্টা করুন।",
+  "translationUnsupported": "ডিভাইসে অনুবাদ এখন শুধু অ্যান্ড্রয়েডে উপলব্ধ।",
+  "translationUnknownLanguage": "এই গানের কোনো সমর্থিত ভাষা শনাক্ত করা গেল না।",
+  "translationSameLanguage": "গানটি ইতিমধ্যেই নির্বাচিত ভাষায়।",
+  "translationTooLarge": "এই গানটি ডিভাইসে অনুবাদের জন্য অতিরিক্ত দীর্ঘ।",
+  "translationRussian": "রুশ ভাষায়",
+  "translationEnglish": "ইংরেজিতে",
+  "translationTarget": "অনুবাদের ভাষা",
+  "retry": "আবার চেষ্টা করুন",
+  "home": "হোম",
+  "search": "খোঁজ",
+  "library": "লাইব্রেরি",
+  "youtubeUnavailableTitle": "YouTube এই মুহূর্তে অপ্রাপ্য",
+  "youtubeUnavailableBody": "অডিও স্ট্রিম পাওয়া যায়নি। আপনার নেটওয়ার্ক ও VPN রুট পরীক্ষা করুন: YouTube VPN-সহও অনুরোধ ফেরাতে পারে।",
+  "checkAgain": "আবার পরীক্ষা করুন",
+  "dismiss": "বন্ধ করুন",
+  "goodNight": "শুভ রাত্রি",
+  "goodMorning": "শুভ সকাল",
+  "goodAfternoon": "শুভ অপরাহ্ন",
+  "goodEvening": "শুভ সন্ধ্যা",
+  "themeSettings": "চেহারার সেটিংস",
+  "onYourAir": "আপনার সম্প্রচারে",
+  "recentSignals": "{count, plural, =0{কোনো সাম্প্রতিক সংকেত নেই} =1{1 টি সাম্প্রতিক সংকেত} other{{count} টি সাম্প্রতিক সংকেত}}",
+  "collectionWaiting": "আপনার সংগ্রহ অপেক্ষা করছে",
+  "saved": "সংরক্ষিত",
+  "collectionEmptyDetail": "যে সংগীতে ফিরতে চান, সেটি এখানেই থাকবে",
+  "tracksCount": "{count, plural, =1{1 ট্র্যাক} other{{count} টি ট্র্যাক}}",
+  "homeSearchHint": "ট্র্যাক, শিল্পী বা গান",
+  "searchUpper": "খোঁজ",
+  "findFirstTrack": "আপনার প্রথম ট্র্যাক খুঁজুন",
+  "continuationAfter": "{artist}-এর পরে আরও সংগীত",
+  "chooseTrackWaveDetail": "একটি ট্র্যাক বেছে নিন, তার মেজাজ ঘিরে আমরা ঢেউ তৈরি করব।",
+  "continueWaveLabel": "চালিয়ে যান / 01",
+  "yourWaveLabel": "আপনার ঢেউ / 01",
+  "continueWave": "ঢেউ চালিয়ে যান",
+  "chooseTrack": "ট্র্যাক বাছুন",
+  "firstTrace": "আপনার প্রথম চিহ্ন এখানে রাখুন",
+  "favoriteWaveHint": "পছন্দ সংরক্ষণ করুন, আপনার ঢেউ আরও নিখুঁত হবে।",
+  "openSearch": "খোঁজ খুলুন",
+  "findYourMusic": "আপনার সুর খুঁজুন।",
+  "importMusic": "সংগীত আমদানি করুন",
+  "rememberedLyricsHint": "যে শব্দগুলি মনে আছে…",
+  "trackArtistHint": "ট্র্যাক বা শিল্পী — যে কোনো ভাষায়",
+  "clear": "মুছুন",
+  "music": "সংগীত",
+  "byLyrics": "গান দিয়ে",
+  "allSources": "সব উৎস",
+  "lyricsSearchCaption": "গানের শিরোনাম নয়, তার একটি লাইন খুঁজুন।",
+  "searchingLyrics": "চেনা লাইনগুলি খোঁজা হচ্ছে…",
+  "searchingSources": "সংগীতের উৎসে খোঁজা হচ্ছে…",
+  "connectionFailed": "সংযোগ করা গেল না",
+  "noMatches": "এখনও কোনো মিল নেই",
+  "lyricsUnavailable": "গান খোঁজা এখন অপ্রাপ্য। পরে চেষ্টা করুন বা শিরোনাম দিয়ে খুঁজুন।",
+  "searchUnavailable": "খোঁজ ব্যর্থ। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+  "lyricsNoMatches": "অন্য লাইন চেষ্টা করুন। সব গান সূচিবদ্ধ নয়।",
+  "trackNoMatches": "শিল্পী যোগ করুন বা অন্য উৎস বাছুন। কিছু সেবা আপনার নেটওয়ার্কে অপ্রাপ্য হতে পারে।",
+  "repeatSearch": "আবার খুঁজুন",
+  "lyricMatchesUpper": "গানের মিল",
+  "tracksUpper": "ট্র্যাক",
+  "playTrack": "চালান {title}, {artist}",
+  "familiarLinesUpper": "চেনা লাইন",
+  "bestMatchUpper": "সর্বোত্তম মিল",
+  "fullVersionOnPlayback": "প্লেব্যাক শুরু হলেই পূর্ণ সংস্করণ খুঁজে দেব।",
+  "forgotTitle": "শিরোনাম ভুলে গেছেন।\nসংগীত নয়।",
+  "startAsYouRemember": "নাম, শিরোনাম বা গানের একটি লাইন।\nযা মনে আছে তা দিয়েই শুরু করুন।",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "নাম যেমন শোনায় তেমনই খুঁজুন",
+  "rememberOnlyLine": "শুধু একটি লাইন মনে আছে",
+  "findSongByWords": "গানের শব্দ দিয়ে গান খুঁজুন",
+  "yourArtistsUpper": "আপনার শিল্পীরা",
+  "language": "ভাষা",
+  "languageCaption": "ইন্টারফেস সঙ্গে সঙ্গে আপনার পছন্দ মানে",
+  "systemLanguage": "সিস্টেম",
+  "russian": "রুশ",
+  "english": "ইংরেজি",
+  "themesAndShaders": "থিম ও ইফেক্ট",
+  "themesSubtitle": "চেহারা, ভাষা ও পটভূমির গতি",
+  "invalidThemeJson": "থিম পড়া গেল না। JSON ফরম্যাট ও ফিল্ডের মান পরীক্ষা করুন।",
+  "exportJson": "JSON রপ্তানি করুন",
+  "importJson": "JSON আমদানি করুন",
+  "readyThemes": "প্রস্তুত থিম",
+  "gpuShaders": "পটভূমির ইফেক্ট",
+  "meshGradient": "ট্র্যাকের রঙে নরম GPU গ্রেডিয়েন্ট",
+  "vinylNoise": "অ্যানালগ ভিনাইল দানা (শোর)",
+  "glassBlur": "কাচের মতো ঝাপসা (Backdrop Blur)",
+  "cornerRadius": "ইন্টারফেস কোণের ব্যাসার্ধ",
+  "importThemeTitle": "JSON থেকে থিম আমদানি করুন",
+  "pasteThemeJson": "থিমের JSON কনফিগারেশন পেস্ট করুন:",
+  "cancel": "বাতিল",
+  "apply": "প্রয়োগ করুন",
+  "themeApplied": "থিম সফলভাবে প্রয়োগ হয়েছে!",
+  "exportThemeTitle": "থিম রপ্তানি (JSON)",
+  "close": "বন্ধ",
+  "copyJson": "JSON কপি করুন",
+  "jsonCopied": "থিমের JSON ক্লিপবোর্ডে কপি হয়েছে!",
+  "libraryUpper": "লাইব্রেরি",
+  "localCollection": "স্থানীয় সংগ্রহ ও প্লেলিস্ট",
+  "importShort": "আমদানি",
+  "favorites": "পছন্দ",
+  "playlists": "প্লেলিস্ট",
+  "history": "ইতিহাস",
+  "offline": "অফলাইন",
+  "favoritesEmpty": "আপনার পছন্দগুলি খালি।\nট্র্যাকের হৃদয়ে ট্যাপ করে সেটি এখানে যোগ করুন।",
+  "historyEmpty": "আপনার শোনার ইতিহাস খালি।\nখোঁজ থেকে সংগীত চালান, এখানে দেখা যাবে।",
+  "noPlaylists": "আপনার এখনও কোনো প্লেলিস্ট নেই",
+  "importPlaylistHint": "স্পটিফাই প্লেলিস্ট আমদানি করুন বা ট্র্যাক তালিকা পেস্ট করুন।",
+  "importMusicAction": "সংগীত আমদানি করুন",
+  "playPlaylist": "প্লেলিস্ট চালান",
+  "playlistStarted": "«{name}» বাজছে ({count} ট্র্যাক)",
+  "deletePlaylist": "প্লেলিস্ট মুছুন",
+  "playAll": "সব চালান",
+  "shuffle": "এলোমেলো",
+  "localAudioCache": "স্থানীয় অডিও ক্যাশ",
+  "cacheDescription": "বাজানো ট্র্যাক স্থানীয়ভাবে জমা হয়, যাতে ইন্টারনেট ছাড়াই আবার শোনা যায়।",
+  "deviceUsage": "এই ডিভাইসে: {size}",
+  "clearCache": "সব ক্যাশ মুছুন",
+  "savedTracksUpper": "সংরক্ষিত ট্র্যাক ({count}):",
+  "cacheFeaturesUpper": "ক্যাশের সুবিধা:",
+  "offlineFirst": "সম্পূর্ণ অফলাইন-প্রথম",
+  "offlineFirstDescription": "আবার শোনার সময় অডিও সরাসরি ডিভাইসের ফাইল সিস্টেম থেকে লোড হয়।",
+  "maximumBitrate": "সর্বোচ্চ বিটরেট",
+  "maximumBitrateDescription": "160–256 kbps-এর পরিচ্ছন্ন Opus/M4A স্ট্রিম ট্রান্সকোডিং ছাড়া জমা হয়।",
+  "trafficAndBattery": "ডেটা ও ব্যাটারি বাঁচান",
+  "trafficAndBatteryDescription": "বারবার নেটওয়ার্ক অনুরোধ এড়ালে ফোন বেশি দিন চলে।",
+  "cacheEmpty": "ক্যাশ খালি",
+  "cachedTracksAppear": "ডাউনলোড করা ট্র্যাক এখানে স্বয়ংক্রিয়ভাবে দেখা যাবে",
+  "removeFromCache": "ক্যাশ থেকে সরান",
+  "removeCachedTrackTitle": "ট্র্যাক ক্যাশ থেকে সরাবেন?",
+  "removeCachedTrackBody": "«{title}» এই ডিভাইস থেকে সরে যাবে।",
+  "delete": "মুছুন",
+  "trackRemovedFromCache": "ট্র্যাক ক্যাশ থেকে সরানো হয়েছে",
+  "clearCacheTitle": "ক্যাশ মুছবেন?",
+  "clearCacheBody": "জমা সব অডিও ফাইল এই ডিভাইস থেকে সরে যাবে। পছন্দ ও ইতিহাস অপরিবর্তিত থাকবে।",
+  "cacheCleared": "স্থানীয় ক্যাশ মুছে গেছে",
+  "back": "ফিরুন",
+  "playlistActions": "প্লেলিস্ট অ্যাকশন",
+  "playlistUpper": "প্লেলিস্ট",
+  "playlistEmpty": "এই প্লেলিস্টে এখনও কোনো ট্র্যাক নেই",
+  "pasteTrackList": "ট্র্যাক তালিকা পেস্ট করুন",
+  "pasteImportLink": "আমদানির জন্য লিংক পেস্ট করুন",
+  "tracksNotFound": "ওই লিংকে কোনো ট্র্যাক পাওয়া যায়নি।",
+  "importError": "আমদানি ব্যর্থ। লিংক ও ইন্টারনেট সংযোগ পরীক্ষা করুন।",
+  "importedPlaylistStarted": "আমদানিকৃত প্লেলিস্ট বাজছে ({count} ট্র্যাক)",
+  "importedPlaylistName": "আমদানি ({platform})",
+  "playlistSaved": "প্লেলিস্ট «{name}» আপনার লাইব্রেরিতে সংরক্ষিত হয়েছে!",
+  "spotifyImportSubtitle": "স্পটিফাই • প্লেলিস্ট, অ্যালবাম ও ট্র্যাক",
+  "artistTrackOrCsv": "শিল্পী — ট্র্যাক, বা Exportify CSV",
+  "pastePlaylistOrTrackLink": "প্লেলিস্ট বা ট্র্যাকের লিংক পেস্ট করুন",
+  "pasteFromClipboard": "ক্লিপবোর্ড থেকে পেস্ট করুন",
+  "link": "লিংক",
+  "trackList": "ট্র্যাক তালিকা",
+  "playlistName": "প্লেলিস্টের নাম",
+  "startImport": "আমদানি শুরু করুন",
+  "importedCollectionMeta": "{author} • {count} ট্র্যাক",
+  "importedFromSpotify": "স্পটিফাই থেকে আমদানিকৃত",
+  "importIntro": "আপনার প্লেলিস্ট সঙ্গে আনুন। স্পটিফাই লিংক, ট্র্যাক তালিকা বা Exportify ফাইল ব্যবহার করুন।",
+  "importTextTab": "টেক্সট",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "ফাইল বাছুন",
+  "importFileHint": "Exportify থেকে রপ্তানি করা CSV বা TXT ট্র্যাক তালিকা বাছুন। UTF-8, সর্বোচ্চ 10 MB ও 10,000 ট্র্যাক।",
+  "importFileAndroidOnly": "ফাইল নির্বাচন অ্যান্ড্রয়েডে উপলব্ধ। এখানে CSV বা ট্র্যাক তালিকার বিষয়বস্তু পেস্ট করতে পারেন।",
+  "importTextHint": "প্রতি লাইনে এক শিল্পী — ট্র্যাক। শিরোনাম-সহ পুরো CSV-ও পেস্ট করতে পারেন।",
+  "importPreview": "ট্র্যাক প্রিভিউ",
+  "importedFromCsv": "CSV থেকে আমদানিকৃত",
+  "importedFromText": "ট্র্যাক তালিকা থেকে আমদানিকৃত",
+  "importMoreTracks": "আরও {count} টি",
+  "importMetadataHint": "প্লেলিস্ট এই ডিভাইসে সংরক্ষিত হয়। ট্র্যাক বাজানোর সময় অডিও খোঁজা হয়; আমদানি গান ডাউনলোড করে না।",
+  "importAnother": "অন্য কিছু আমদানি করুন",
+  "importReading": "আপনার প্লেলিস্ট পড়া হচ্ছে…",
+  "importSaving": "লাইব্রেরিতে সংরক্ষণ হচ্ছে…",
+  "importNameRequired": "প্লেলিস্টের নাম লিখুন।",
+  "importNameExists": "এই নামে প্লেলিস্ট আগেই আছে। দুটিই রাখতে অন্য নাম বাছুন।",
+  "importSaveFailed": "প্লেলিস্ট সংরক্ষণ করা গেল না। প্রিভিউ এখনও এখানেই — আবার চেষ্টা করুন।",
+  "importFileTooLarge": "ফাইলটি 10 MB-এর বেশি। প্লেলিস্ট ছোট রপ্তানিতে ভাগ করুন।",
+  "importFileUnsupported": ".csv বা .txt ফাইল বাছুন।",
+  "importFileEncoding": "টেক্সট এনকোডিং পড়া গেল না। ফাইল UTF-8-এ সংরক্ষণ করে আবার চেষ্টা করুন।",
+  "importCsvInvalid": "CSV অসম্পূর্ণ বা ত্রুটিপূর্ণ। কলাম বা উদ্ধৃতি না বদলে আবার রপ্তানি করুন।",
+  "importCsvMissingColumns": "CSV-তে Track Name ও Artist Name(s), বা Title ও Artist কলাম দরকার। মূল Exportify রপ্তানি বাছুন।",
+  "importFileEmpty": "কোনো ট্র্যাক পাওয়া যায়নি। ভরা রপ্তানি বাছুন বা শিল্পী — ট্র্যাক তালিকা পেস্ট করুন।",
+  "importTooManyTracks": "এক আমদানিতে সর্বোচ্চ 10,000 ট্র্যাক। এই প্লেলিস্ট ভাগ করুন; এখনও কিছু সংরক্ষিত হয়নি।",
+  "importFileReadFailed": "ফাইলটি খোলা গেল না। ডিভাইসে উপলব্ধ কিনা দেখে আবার বাছুন।",
+  "importSpotifyBlocked": "স্পটিফাই এই প্লেলিস্ট আপনার অঞ্চলে ভাগ করেনি। Exportify দিয়ে রপ্তানি করে CSV ফাইল বাছুন।",
+  "listen": "চালান",
+  "addToPlaylists": "প্লেলিস্টে যোগ করুন",
+  "trackSemantics": "ট্র্যাক {title}, {artist}",
+  "trackActions": "ট্র্যাক অ্যাকশন",
+  "startWaveFromTrack": "এই ট্র্যাক থেকে ঢেউ শুরু করুন",
+  "addToQueue": "সারিতে যোগ করুন",
+  "addedToQueue": "সারিতে যোগ হয়েছে: {title}",
+  "removeFavorite": "পছন্দ থেকে সরান",
+  "addFavorite": "পছন্দে যোগ করুন",
+  "addToPlaylist": "প্লেলিস্টে যোগ করুন",
+  "goToArtist": "শিল্পীর কাছে যান",
+  "myPlaylist": "আমার প্লেলিস্ট",
+  "newPlaylist": "নতুন প্লেলিস্ট",
+  "name": "নাম",
+  "create": "তৈরি করুন",
+  "loading": "লোড হচ্ছে…",
+  "pause": "বিরতি",
+  "play": "চালান",
+  "next": "পরবর্তী",
+  "speedAndPitch": "গতি ও পিচ",
+  "speedValue": "গতি: {value}x",
+  "pitchValue": "পিচ: {value}x",
+  "reset": "রিসেট",
+  "moreActions": "আরও অ্যাকশন",
+  "playbackQueue": "প্লেব্যাক সারি",
+  "queueEmpty": "সারি খালি",
+  "selectingSource": "উৎস নির্বাচিত হচ্ছে",
+  "collapsePlayer": "প্লেয়ার ভাঁজ করুন",
+  "nowPlayingUpper": "এখন বাজছে",
+  "queue": "সারি",
+  "startWave": "ঢেউ শুরু করুন",
+  "cover": "প্রচ্ছদ",
+  "karaokeLyrics": "কারাওকে গান",
+  "findMusicStart": "সংগীত খুঁজে প্লেব্যাক শুরু করুন",
+  "playbackNotStarted": "প্লেব্যাক এখনও শুরু হয়নি",
+  "openSearchFirstTrack": "প্রথম ট্র্যাক খুঁজতে খোঁজ খুলুন",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "ডিভাইসে",
+  "sourceCatalog": "ক্যাটালগ",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "সার্ভার",
+  "serverResolver": "রিজলভার সার্ভার",
+  "serverResolverCaption": "পূর্ণ অডিও স্ট্রিম খুঁজে দেওয়া ঐচ্ছিক নিজস্ব সার্ভার। অ্যাপ খোঁজ বা ট্র্যাক ID পাঠায়; সার্ভার প্লেব্যাক URL দেয়। চুক্তি ও রেফারেন্স বাস্তবায়ন docs/REMOTE_RESOLVER.md-তে।",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "কনফিগার করা নেই",
+  "serverSave": "সংরক্ষণ",
+  "serverDisable": "নিষ্ক্রিয় করুন",
+  "onboardingWelcomeTitle": "Hook-এ স্বাগতম",
+  "onboardingWelcomeCaption": "সংগীত, গান ও আপনার নিজের ভিজ্যুয়াল স্টাইল। শুরু করতে ভাষা বাছুন — পরে সেটিংস থেকে বদলাতে পারবেন।",
+  "onboardingSkip": "এড়িয়ে যান",
+  "onboardingNext": "পরবর্তী",
+  "onboardingStart": "শোনা শুরু করুন",
+  "onboardingMicrogTitle": "MicroG ও Google অ্যাকাউন্ট",
+  "onboardingMicrogBody": "Google সেবা ছাড়া আসা কাস্টম Android ROM-এ MicroG সেবাগুলি আবার তৈরি করে। Hook এগুলি শুধু একটি ঐচ্ছিক সুবিধার জন্য ব্যবহার করে: প্লেলিস্ট আমদানির জন্য YouTube অ্যাকাউন্ট সংযোগ। সংগীত বাজাতে MicroG বা কোনো Google সেবার প্রয়োজন নেই।",
+  "onboardingMicrogNote": "প্লেব্যাক MicroG-এর উপর নির্ভর করে না। অ্যাকাউন্ট সংযোগ ঐচ্ছিক।",
+  "onboardingMicrogDownload": "MicroG ডাউনলোড করুন",
+  "onboardingMicrogStatusChecking": "Google সেবা পরীক্ষা করা হচ্ছে…",
+  "onboardingMicrogStatusOk": "এই ডিভাইসে Google সেবা আছে ({version})। অ্যাকাউন্ট আমদানি সঙ্গে সঙ্গে কাজ করবে।",
+  "onboardingMicrogStatusReVanced": "ReVanced GmsCore শনাক্ত ({version})। সরকারি Google সাইন-ইন SDK এর সঙ্গে অসামঞ্জস্যপূর্ণ, তাই অ্যাকাউন্ট সংযোগ কাজ নাও করতে পারে। প্লেব্যাক প্রভাবিত হয় না।",
+  "onboardingMicrogStatusMissing": "Google সেবা পাওয়া যায়নি। YouTube অ্যাকাউন্ট থেকে প্লেলিস্ট আমদানি করতে আগে MicroG ইনস্টল করুন — বা এড়িয়ে Hook অ্যাকাউন্ট ছাড়া চালান।",
+  "lyricsView": "গানের ভিউ · {mode}",
+  "lyricsReadingRhythm": "আপনার পড়ার ছন্দ",
+  "lyricsModeSubtitle": "গানের কাছে পৌঁছানোর তিন পথ।",
+  "lyricsModeLines": "লাইন",
+  "lyricsModeKaraoke": "কারাওকে",
+  "lyricsModeFocus": "ফোকাস",
+  "lyricsModeLinesDescription": "শান্ত গান, বর্তমান লাইন হাইলাইট",
+  "lyricsModeKaraokeDescription": "শব্দগুলি ভোকালের সঙ্গে মৃদু জ্বলে ওঠে",
+  "lyricsModeFocusDescription": "একটি বড় লাইন। আর কিছু নয়",
+  "lyricsModeSaveFailed": "গানের ভিউ সংরক্ষণ করা গেল না।",
+  "lyricsModeFootnote": "আপনার পছন্দ পরের গানের জন্য জমা থাকে। কারাওকের নিখুঁততা উৎসের ডেটার উপর: শব্দ-সময় ছাড়া হাইলাইট আন্দাজে, আর সময়-চিহ্ন ছাড়া গান থেমে থাকে।",
+  "lyricsNotFound": "গান পাওয়া যায়নি",
+  "karaokeUnavailable": "এই ট্র্যাকের কারাওকে গান অপ্রাপ্য",
+  "unsyncedLyrics": "অসমলয় গান",
+  "wordSyncUpper": "শব্দ-পর-শব্দ সিঙ্ক",
+  "lineSyncUpper": "লাইন-পর-লাইন সিঙ্ক",
+  "adjustLyricsSync": "গানের সিঙ্ক সমন্বয় করুন",
+  "startsSoon": "শীঘ্রই শুরু",
+  "musicContinues": "সংগীত চলছে",
+  "decreaseLyricsOffset": "অফসেট ০.১ সে কমান",
+  "lyricsOffset": "অফসেট: {value} সে",
+  "increaseLyricsOffset": "অফসেট ০.১ সে বাড়ান",
+  "hideSetting": "সেটিং লুকান",
+  "lyricsOffsetSaveFailed": "গানের অফসেট সংরক্ষণ করা গেল না।",
+  "audioForbidden": "অডিও সার্ভার প্রবেশ অস্বীকার করেছে (HTTP 403)। ট্র্যাক পাওয়া গেছে, কিন্তু তার স্ট্রিম অপ্রাপ্য। VPN অডিও অ্যাক্সেসের গ্যারান্টি দেয় না।",
+  "fullVersionUnavailable": "উপলব্ধ উৎসে পূর্ণ সংস্করণ পাওয়া যায়নি। সংযোগ পরীক্ষা করুন বা পরে চেষ্টা করুন।",
+  "sourcePlaybackFailed": "{source} এই ট্র্যাক বাজাতে পারেনি। সংযোগ পরীক্ষা করুন বা পরে চেষ্টা করুন।",
+  "@@locale": "bn",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

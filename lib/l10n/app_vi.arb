@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "Cài đặt",
+  "settingsCaption": "Các thay đổi được lưu trên thiết bị này.",
+  "playerSettings": "Trình phát",
+  "lyricsAutoHide": "Ẩn điều khiển khi đọc lời bài hát",
+  "lyricsAutoHideDescription": "Sau 10 giây không tương tác, các bảng điều khiển sẽ trượt khỏi màn hình. Dùng nút khôi phục để đưa chúng trở lại.",
+  "showPlayerControls": "Hiện điều khiển trình phát",
+  "equalizer": "Bộ chỉnh âm",
+  "equalizerEnabled": "Xử lý âm thanh",
+  "equalizerPresets": "Hồ sơ âm thanh",
+  "equalizerFlat": "Nguyên bản",
+  "equalizerBass": "Trầm sâu",
+  "equalizerVocal": "Giọng hát",
+  "equalizerRock": "Rock",
+  "equalizerElectronic": "Điện tử",
+  "equalizerSoft": "Nhẹ nhàng",
+  "equalizerCustom": "Tùy chỉnh",
+  "equalizerBands": "Dải tần số",
+  "equalizerBassBoost": "Tăng cường trầm",
+  "equalizerBassUnsupported": "Tăng cường trầm bổ sung không được hỗ trợ. Hãy dùng các dải tần thấp.",
+  "equalizerPreamp": "Khuếch đại trước",
+  "equalizerHeadroom": "Đầu vào dự phòng tự động",
+  "equalizerHeadroomDescription": "Giảm mức đầu ra khi tăng cường tần số để chừa chỗ cho đỉnh âm. Không phải bộ giới hạn.",
+  "equalizerWaiting": "Phát một bài hát để kết nối bộ chỉnh âm với phiên âm thanh của nó.",
+  "equalizerUnsupported": "Xử lý âm thanh hiện chỉ khả dụng trên Android.",
+  "equalizerFailed": "Thiết bị này không thể bật hiệu ứng âm thanh. Nhạc vẫn phát bình thường mà không cần chúng.",
+  "equalizerRetry": "Kết nối lại hiệu ứng",
+  "equalizerLive": "Thay đổi áp dụng ngay và được lưu trên thiết bị này.",
+  "youtubeAccount": "YouTube & MicroG",
+  "youtubeAccountReadOnly": "Truy cập danh sách phát chỉ để đọc. Đăng nhập không đảm bảo có âm thanh.",
+  "youtubeAccountCompatibility": "Tương thích và quyền riêng tư",
+  "youtubeAccountSubtitle": "Kết nối tài khoản và nhập danh sách phát",
+  "youtubeAccountPrivacy": "Hook chỉ yêu cầu quyền đọc YouTube. Chỉ nhập mật khẩu trong hộp thoại hệ thống của Google, không bao giờ nhập trong Hook. Mã thông báo không được gửi tới bất kỳ máy chủ Hook nào và chỉ lưu trong bộ nhớ. Kết nối lại sau khi khởi động lại ứng dụng.",
+  "youtubeAccountPlaybackNotice": "Đăng nhập cấp quyền truy cập dữ liệu tài khoản, không phải luồng âm thanh. Không đảm bảo sửa lỗi HTTP 403. Việc nhập giữ nguyên bản ghi YouTube thay vì thay bằng nguồn khác.",
+  "youtubeAccountConnect": "Kết nối tài khoản",
+  "youtubeAccountDisconnect": "Ngắt kết nối trong Hook",
+  "youtubeAccountDisconnected": "Chưa kết nối tài khoản",
+  "youtubeAccountDisconnectNotice": "Ngắt tài khoản này chỉ trong Hook? Danh sách phát đã lưu vẫn giữ nguyên. Tài khoản Google và MicroG trên điện thoại không bị đăng xuất.",
+  "youtubeAccountSystem": "API Google hệ thống",
+  "youtubeAccountServicesMissing": "Thiếu API Google hệ thống tương thích. Bản cài đặt ReVanced GmsCore riêng không thay thế chúng cho đăng nhập của Hook.",
+  "youtubeAccountMicrogNotice": "Phát hiện bản cài đặt ReVanced GmsCore riêng. Hook không dùng tài khoản hay mã thông báo ReVanced. MicroG hệ thống có thể cung cấp API Google tương thích, nhưng tính tương thích với phương thức đăng nhập này không được đảm bảo.",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced đã được cài đặt",
+  "youtubeAccountPlaylists": "Danh sách phát của tài khoản",
+  "youtubeAccountNoPlaylists": "Không có danh sách phát nào truy cập được. Một số bộ sưu tập tự động của YouTube Music không có sẵn qua YouTube Data API.",
+  "youtubeAccountMore": "Tải thêm",
+  "youtubeAccountPreview": "Chuẩn bị nhập",
+  "youtubeAccountProgress": "Đã lấy được bản nhạc: {count}",
+  "youtubeAccountUnavailableTracks": "Đã bỏ qua mục không khả dụng: {count}. Chúng không bị thay bằng bản nhạc khác.",
+  "youtubeAccountSetup": "Thiết lập đăng nhập",
+  "youtubeAccountSetupBody": "Nhà phát triển cần bật YouTube Data API v3 trong Google Cloud, đăng ký ứng dụng OAuth Android cho com.hook.music với SHA-1 ký của bản cài đặt, và cấu hình màn hình đồng ý. Thêm người dùng được phép ở chế độ kiểm thử. Xem docs/YOUTUBE_ACCOUNT_SETUP.md. Không bao giờ thêm mật khẩu, bí mật ứng dụng hay mã thông báo từ ứng dụng khác.",
+  "youtubeAccountConfigError": "Đăng nhập chưa được cấu hình cho bản dựng này. Hãy kiểm tra ứng dụng OAuth Android, tên gói, SHA-1 và người dùng kiểm thử được phép trong Google Cloud.",
+  "youtubeAccountPermissionError": "Quyền đọc dữ liệu YouTube chưa được cấp.",
+  "youtubeAccountExpired": "Phiên của bạn đã hết hạn. Kết nối lại tài khoản.",
+  "youtubeAccountNoChannel": "Tài khoản đã chọn không có kênh YouTube nào truy cập được.",
+  "youtubeAccountQuota": "Đã vượt hạn mức API YouTube. Thử lại sau.",
+  "youtubeAccountFailed": "Không lấy được dữ liệu YouTube. Kiểm tra kết nối và thử lại.",
+  "youtubeAccountUnsupported": "Kết nối tài khoản yêu cầu Android có API Google hệ thống tương thích.",
+  "importedFromYouTube": "Đã nhập từ tài khoản YouTube",
+  "translateLyrics": "Dịch lời bài hát",
+  "hideTranslation": "Ẩn bản dịch",
+  "cancelTranslation": "Hủy dịch",
+  "translationLoading": "Đang chuẩn bị bản dịch…",
+  "translationAttribution": "Tự động dịch bởi Google Dịch",
+  "translationNotice": "Bản dịch có thể không nắm trọn ý nghĩa bài hát. Việc tô sáng từng từ chỉ áp dụng cho bản gốc.",
+  "translationModelTitle": "Tải xuống mô hình ngôn ngữ?",
+  "translationModelBody": "Bản dịch chạy ngay trên điện thoại của bạn: lời bài hát không được gửi tới máy chủ. Lần dịch đầu tiên cần các mô hình Google ML Kit, chiếm hàng chục megabyte. Tải xuống dùng kết nối hiện tại của bạn, kể cả dữ liệu di động. Hủy sẽ ẩn kết quả, nhưng bản tải đã bắt đầu có thể hoàn tất dưới nền.",
+  "translationDownload": "Tải xuống và dịch",
+  "translationUnavailable": "Dịch thất bại. Kiểm tra quyền tải mô hình và thử lại.",
+  "translationUnsupported": "Dịch trên thiết bị hiện chỉ khả dụng trên Android.",
+  "translationUnknownLanguage": "Không xác định được ngôn ngữ được hỗ trợ của bài hát này.",
+  "translationSameLanguage": "Lời bài hát đã ở ngôn ngữ đã chọn.",
+  "translationTooLarge": "Lời bài hát này quá dài để dịch trên thiết bị.",
+  "translationRussian": "Sang tiếng Nga",
+  "translationEnglish": "Sang tiếng Anh",
+  "translationTarget": "Ngôn ngữ dịch",
+  "retry": "Thử lại",
+  "home": "Trang chủ",
+  "search": "Tìm kiếm",
+  "library": "Thư viện",
+  "youtubeUnavailableTitle": "YouTube hiện không khả dụng",
+  "youtubeUnavailableBody": "Không lấy được luồng âm thanh. Kiểm tra mạng và đường VPN của bạn: YouTube có thể từ chối yêu cầu kể cả khi có VPN.",
+  "checkAgain": "Kiểm tra lại",
+  "dismiss": "Đóng",
+  "goodNight": "Chúc ngủ ngon",
+  "goodMorning": "Chào buổi sáng",
+  "goodAfternoon": "Chào buổi chiều",
+  "goodEvening": "Chào buổi tối",
+  "themeSettings": "Cài đặt giao diện",
+  "onYourAir": "Trên sóng của bạn",
+  "recentSignals": "{count, plural, other{{count} tín hiệu gần đây}}",
+  "collectionWaiting": "Bộ sưu tập của bạn đang chờ",
+  "saved": "Đã lưu",
+  "collectionEmptyDetail": "Âm nhạc bạn muốn quay lại sẽ ở lại đây",
+  "tracksCount": "{count, plural, other{{count} bản nhạc}}",
+  "homeSearchHint": "Bản nhạc, nghệ sĩ hoặc lời hát",
+  "searchUpper": "TÌM KIẾM",
+  "findFirstTrack": "Tìm bản nhạc đầu tiên của bạn",
+  "continuationAfter": "Thêm nhạc sau {artist}",
+  "chooseTrackWaveDetail": "Chọn một bản nhạc, chúng tôi sẽ dệt một làn sóng quanh cảm xúc của nó.",
+  "continueWaveLabel": "TIẾP TỤC / 01",
+  "yourWaveLabel": "LÀN SÓNG CỦA BẠN / 01",
+  "continueWave": "Tiếp tục làn sóng",
+  "chooseTrack": "Chọn bản nhạc",
+  "firstTrace": "Để lại dấu vết đầu tiên của bạn tại đây",
+  "favoriteWaveHint": "Lưu yêu thích, làn sóng của bạn sẽ chuẩn hơn.",
+  "openSearch": "Mở tìm kiếm",
+  "findYourMusic": "Tìm âm thanh của riêng bạn.",
+  "importMusic": "Nhập nhạc",
+  "rememberedLyricsHint": "Những từ bạn còn nhớ…",
+  "trackArtistHint": "Bản nhạc hoặc nghệ sĩ — ngôn ngữ nào cũng được",
+  "clear": "Xóa",
+  "music": "Nhạc",
+  "byLyrics": "Theo lời hát",
+  "allSources": "Tất cả nguồn",
+  "lyricsSearchCaption": "Tìm một câu trong bài hát, chứ không chỉ tiêu đề.",
+  "searchingLyrics": "Đang tìm những câu quen thuộc…",
+  "searchingSources": "Đang tìm trong các nguồn nhạc…",
+  "connectionFailed": "Không thể kết nối",
+  "noMatches": "Chưa có kết quả khớp",
+  "lyricsUnavailable": "Tìm kiếm lời hát hiện không khả dụng. Thử lại sau hoặc tìm theo tiêu đề.",
+  "searchUnavailable": "Tìm kiếm thất bại. Kiểm tra kết nối và thử lại.",
+  "lyricsNoMatches": "Thử câu khác. Không phải lời bài hát nào cũng được đánh chỉ mục.",
+  "trackNoMatches": "Thêm tên nghệ sĩ hoặc chọn nguồn khác. Một số dịch vụ có thể không truy cập được trên mạng của bạn.",
+  "repeatSearch": "Tìm lại",
+  "lyricMatchesUpper": "KHỚP LỜI HÁT",
+  "tracksUpper": "BẢN NHẠC",
+  "playTrack": "Phát {title}, {artist}",
+  "familiarLinesUpper": "CÂU QUEN THUỘC",
+  "bestMatchUpper": "KHỚP TỐT NHẤT",
+  "fullVersionOnPlayback": "Chúng tôi sẽ tìm bản đầy đủ khi phát bắt đầu.",
+  "forgotTitle": "Quên tiêu đề.\nNhưng không quên giai điệu.",
+  "startAsYouRemember": "Tên, tiêu đề hay một câu trong bài.\nBắt đầu từ điều bạn còn nhớ.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "Tìm tên theo cách chúng nghe",
+  "rememberOnlyLine": "Tôi chỉ nhớ một câu",
+  "findSongByWords": "Tìm bài hát qua lời của nó",
+  "yourArtistsUpper": "NGHỆ SĨ CỦA BẠN",
+  "language": "Ngôn ngữ",
+  "languageCaption": "Giao diện theo lựa chọn của bạn ngay lập tức",
+  "systemLanguage": "Hệ thống",
+  "russian": "Tiếng Nga",
+  "english": "Tiếng Anh",
+  "themesAndShaders": "Chủ đề và hiệu ứng",
+  "themesSubtitle": "Diện mạo, ngôn ngữ và chuyển động nền",
+  "invalidThemeJson": "Không đọc được chủ đề. Kiểm tra định dạng JSON và giá trị các trường.",
+  "exportJson": "Xuất JSON",
+  "importJson": "Nhập JSON",
+  "readyThemes": "Chủ đề dựng sẵn",
+  "gpuShaders": "Hiệu ứng nền",
+  "meshGradient": "Dải màu GPU mượt dựa trên màu bản nhạc",
+  "vinylNoise": "Hạt đĩa than analog (tiếng ồn)",
+  "glassBlur": "Làm mờ kính (Backdrop Blur)",
+  "cornerRadius": "Bo góc giao diện",
+  "importThemeTitle": "Nhập chủ đề từ JSON",
+  "pasteThemeJson": "Dán cấu hình JSON của chủ đề:",
+  "cancel": "Hủy",
+  "apply": "Áp dụng",
+  "themeApplied": "Đã áp dụng chủ đề thành công!",
+  "exportThemeTitle": "Xuất chủ đề (JSON)",
+  "close": "Đóng",
+  "copyJson": "Sao chép JSON",
+  "jsonCopied": "Đã sao chép JSON chủ đề vào bộ nhớ tạm!",
+  "libraryUpper": "THƯ VIỆN",
+  "localCollection": "Bộ sưu tập tại máy và danh sách phát",
+  "importShort": "Nhập",
+  "favorites": "Yêu thích",
+  "playlists": "Danh sách phát",
+  "history": "Lịch sử",
+  "offline": "Ngoại tuyến",
+  "favoritesEmpty": "Mục yêu thích đang trống.\nChạm trái tim trên bản nhạc để thêm vào đây.",
+  "historyEmpty": "Lịch sử nghe của bạn đang trống.\nPhát nhạc từ tìm kiếm, nó sẽ xuất hiện ở đây.",
+  "noPlaylists": "Bạn chưa có danh sách phát nào",
+  "importPlaylistHint": "Nhập danh sách phát Spotify hoặc dán danh sách bản nhạc.",
+  "importMusicAction": "Nhập nhạc",
+  "playPlaylist": "Phát danh sách",
+  "playlistStarted": "Đang phát «{name}» ({count} bản nhạc)",
+  "deletePlaylist": "Xóa danh sách phát",
+  "playAll": "Phát tất cả",
+  "shuffle": "Phát ngẫu nhiên",
+  "localAudioCache": "Bộ nhớ đệm âm thanh cục bộ",
+  "cacheDescription": "Bản nhạc đã phát được lưu cục bộ để nghe lại ngay không cần mạng.",
+  "deviceUsage": "Trên thiết bị này: {size}",
+  "clearCache": "Xóa toàn bộ bộ nhớ đệm",
+  "savedTracksUpper": "BẢN NHẠC ĐÃ LƯU ({count}):",
+  "cacheFeaturesUpper": "TÍNH NĂNG BỘ ĐỆM:",
+  "offlineFirst": "Ưu tiên ngoại tuyến trọn vẹn",
+  "offlineFirstDescription": "Khi nghe lại, âm thanh tải thẳng từ hệ thống tệp của thiết bị.",
+  "maximumBitrate": "Bitrate tối đa",
+  "maximumBitrateDescription": "Luồng Opus/M4A sạch 160–256 kbps được lưu không chuyển mã.",
+  "trafficAndBattery": "Tiết kiệm dữ liệu và pin",
+  "trafficAndBatteryDescription": "Tránh các yêu cầu mạng lặp lại giúp điện thoại của bạn dùng bền hơn.",
+  "cacheEmpty": "Bộ nhớ đệm trống",
+  "cachedTracksAppear": "Bản nhạc đã tải sẽ tự động xuất hiện ở đây",
+  "removeFromCache": "Xóa khỏi bộ nhớ đệm",
+  "removeCachedTrackTitle": "Xóa bản nhạc khỏi bộ nhớ đệm?",
+  "removeCachedTrackBody": "«{title}» sẽ bị xóa khỏi thiết bị này.",
+  "delete": "Xóa",
+  "trackRemovedFromCache": "Đã xóa bản nhạc khỏi bộ nhớ đệm",
+  "clearCacheTitle": "Xóa bộ nhớ đệm?",
+  "clearCacheBody": "Toàn bộ tệp âm thanh đã lưu sẽ bị xóa khỏi thiết bị. Yêu thích và lịch sử không đổi.",
+  "cacheCleared": "Đã xóa bộ nhớ đệm cục bộ",
+  "back": "Quay lại",
+  "playlistActions": "Thao tác danh sách phát",
+  "playlistUpper": "DANH SÁCH PHÁT",
+  "playlistEmpty": "Danh sách phát này chưa có bản nhạc nào",
+  "pasteTrackList": "Dán danh sách bản nhạc",
+  "pasteImportLink": "Dán liên kết để nhập",
+  "tracksNotFound": "Không tìm thấy bản nhạc nào tại liên kết đó.",
+  "importError": "Nhập thất bại. Kiểm tra liên kết và kết nối internet của bạn.",
+  "importedPlaylistStarted": "Đang phát danh sách đã nhập ({count} bản nhạc)",
+  "importedPlaylistName": "Nhập ({platform})",
+  "playlistSaved": "Đã lưu danh sách phát «{name}» vào thư viện của bạn!",
+  "spotifyImportSubtitle": "Spotify • Danh sách phát, album và bản nhạc",
+  "artistTrackOrCsv": "Nghệ sĩ — Bản nhạc, hoặc tệp CSV của Exportify",
+  "pastePlaylistOrTrackLink": "Dán liên kết danh sách phát hoặc bản nhạc",
+  "pasteFromClipboard": "Dán từ bộ nhớ tạm",
+  "link": "Liên kết",
+  "trackList": "Danh sách bản nhạc",
+  "playlistName": "Tên danh sách phát",
+  "startImport": "Bắt đầu nhập",
+  "importedCollectionMeta": "{author} • {count} bản nhạc",
+  "importedFromSpotify": "Đã nhập từ Spotify",
+  "importIntro": "Mang danh sách phát của bạn theo. Dùng liên kết Spotify, danh sách bản nhạc hoặc tệp Exportify.",
+  "importTextTab": "Văn bản",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "Chọn tệp",
+  "importFileHint": "Chọn CSV xuất từ Exportify hoặc danh sách bản nhạc TXT. UTF-8, tối đa 10 MB và 10.000 bản nhạc.",
+  "importFileAndroidOnly": "Chọn tệp chỉ khả dụng trên Android. Tại đây bạn có thể dán nội dung CSV hoặc danh sách bản nhạc.",
+  "importTextHint": "Mỗi dòng một cặp Nghệ sĩ — Bản nhạc. Bạn cũng có thể dán nguyên CSV, kể cả dòng tiêu đề.",
+  "importPreview": "Xem trước bản nhạc",
+  "importedFromCsv": "Đã nhập từ CSV",
+  "importedFromText": "Đã nhập từ danh sách bản nhạc",
+  "importMoreTracks": "Và {count} bản nữa",
+  "importMetadataHint": "Danh sách phát được lưu trên thiết bị này. Âm thanh được tìm khi phát bản nhạc; nhập không tải xuống bài hát.",
+  "importAnother": "Nhập nội dung khác",
+  "importReading": "Đang đọc danh sách của bạn…",
+  "importSaving": "Đang lưu vào thư viện…",
+  "importNameRequired": "Nhập tên danh sách phát.",
+  "importNameExists": "Đã có danh sách phát trùng tên. Chọn tên khác để giữ cả hai.",
+  "importSaveFailed": "Không lưu được danh sách phát. Bản xem trước vẫn còn đây — thử lại nhé.",
+  "importFileTooLarge": "Tệp này vượt quá 10 MB. Chia danh sách thành các bản xuất nhỏ hơn.",
+  "importFileUnsupported": "Chọn tệp .csv hoặc .txt.",
+  "importFileEncoding": "Không đọc được mã hóa văn bản. Lưu tệp dạng UTF-8 rồi thử lại.",
+  "importCsvInvalid": "CSV không đầy đủ hoặc sai định dạng. Xuất lại mà không chỉnh cột hay dấu ngoặc kép.",
+  "importCsvMissingColumns": "CSV cần cột Track Name và Artist Name(s), hoặc Title và Artist. Hãy dùng bản xuất Exportify gốc.",
+  "importFileEmpty": "Không tìm thấy bản nhạc nào. Chọn bản xuất có nội dung hoặc dán danh sách Nghệ sĩ — Bản nhạc.",
+  "importTooManyTracks": "Mỗi lần nhập tối đa 10.000 bản nhạc. Hãy chia danh sách này; chưa có gì được lưu.",
+  "importFileReadFailed": "Không mở được tệp này. Kiểm tra tệp có sẵn trên thiết bị rồi chọn lại.",
+  "importSpotifyBlocked": "Spotify không chia sẻ danh sách phát này ở khu vực của bạn. Hãy xuất bằng Exportify rồi chọn tệp CSV.",
+  "listen": "Phát",
+  "addToPlaylists": "Thêm vào danh sách phát",
+  "trackSemantics": "Bản nhạc {title}, {artist}",
+  "trackActions": "Thao tác bản nhạc",
+  "startWaveFromTrack": "Bắt đầu làn sóng từ bản nhạc này",
+  "addToQueue": "Thêm vào hàng đợi",
+  "addedToQueue": "Đã thêm vào hàng đợi: {title}",
+  "removeFavorite": "Bỏ khỏi yêu thích",
+  "addFavorite": "Thêm vào yêu thích",
+  "addToPlaylist": "Thêm vào danh sách phát",
+  "goToArtist": "Đến nghệ sĩ",
+  "myPlaylist": "Danh sách của tôi",
+  "newPlaylist": "Danh sách phát mới",
+  "name": "Tên",
+  "create": "Tạo",
+  "loading": "Đang tải…",
+  "pause": "Tạm dừng",
+  "play": "Phát",
+  "next": "Tiếp",
+  "speedAndPitch": "Tốc độ và cao độ",
+  "speedValue": "Tốc độ: {value}x",
+  "pitchValue": "Cao độ: {value}x",
+  "reset": "Đặt lại",
+  "moreActions": "Thao tác khác",
+  "playbackQueue": "Hàng đợi phát",
+  "queueEmpty": "Hàng đợi trống",
+  "selectingSource": "Đang chọn nguồn",
+  "collapsePlayer": "Thu gọn trình phát",
+  "nowPlayingUpper": "ĐANG PHÁT",
+  "queue": "Hàng đợi",
+  "startWave": "Bắt đầu làn sóng",
+  "cover": "Bìa",
+  "karaokeLyrics": "Lời karaoke",
+  "findMusicStart": "Tìm nhạc và bắt đầu phát",
+  "playbackNotStarted": "Chưa bắt đầu phát",
+  "openSearchFirstTrack": "Mở tìm kiếm để tìm bản nhạc đầu tiên của bạn",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "Trên thiết bị",
+  "sourceCatalog": "Danh mục",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "Máy chủ",
+  "serverResolver": "Máy chủ phân giải",
+  "serverResolverCaption": "Máy chủ tự vận hành tùy chọn để phân giải luồng âm thanh đầy đủ. Ứng dụng gửi truy vấn tìm kiếm hoặc ID bản nhạc; máy chủ trả về URL phát. Bản cam kết và hiện thực tham khảo nằm trong docs/REMOTE_RESOLVER.md.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "Chưa cấu hình",
+  "serverSave": "Lưu",
+  "serverDisable": "Tắt",
+  "onboardingWelcomeTitle": "Chào mừng đến với Hook",
+  "onboardingWelcomeCaption": "Âm nhạc, lời hát và phong cách thị giác của riêng bạn. Chọn ngôn ngữ để bắt đầu — có thể đổi sau trong cài đặt.",
+  "onboardingSkip": "Bỏ qua",
+  "onboardingNext": "Tiếp tục",
+  "onboardingStart": "Bắt đầu nghe",
+  "onboardingMicrogTitle": "MicroG và tài khoản Google",
+  "onboardingMicrogBody": "MicroG tái tạo các dịch vụ Google trên các ROM Android tùy biến không kèm sẵn chúng. Hook chỉ dùng chúng cho một tính năng tùy chọn: kết nối tài khoản YouTube để nhập danh sách phát. Nghe nhạc không bao giờ cần MicroG hay bất kỳ dịch vụ Google nào.",
+  "onboardingMicrogNote": "Phát nhạc không phụ thuộc MicroG. Kết nối tài khoản là tùy chọn.",
+  "onboardingMicrogDownload": "Tải MicroG",
+  "onboardingMicrogStatusChecking": "Đang kiểm tra dịch vụ Google…",
+  "onboardingMicrogStatusOk": "Dịch vụ Google đã có trên thiết bị này ({version}). Nhập tài khoản sẽ hoạt động ngay.",
+  "onboardingMicrogStatusReVanced": "Phát hiện ReVanced GmsCore ({version}). SDK đăng nhập chính thức của Google không tương thích với nó, nên kết nối tài khoản có thể không hoạt động. Phát nhạc không bị ảnh hưởng.",
+  "onboardingMicrogStatusMissing": "Không tìm thấy dịch vụ Google. Để nhập danh sách phát từ tài khoản YouTube, hãy cài MicroG trước — hoặc bỏ qua và dùng Hook không cần tài khoản.",
+  "lyricsView": "Chế độ xem lời · {mode}",
+  "lyricsReadingRhythm": "Nhịp đọc của bạn",
+  "lyricsModeSubtitle": "Ba cách đến gần hơn với bài hát.",
+  "lyricsModeLines": "Dòng",
+  "lyricsModeKaraoke": "Karaoke",
+  "lyricsModeFocus": "Tập trung",
+  "lyricsModeLinesDescription": "Lời hát yên tĩnh với dòng hiện tại được tô sáng",
+  "lyricsModeKaraokeDescription": "Các từ sáng dần nhẹ nhàng theo giọng hát",
+  "lyricsModeFocusDescription": "Một dòng lớn. Không gì khác",
+  "lyricsModeSaveFailed": "Không lưu được chế độ xem lời bài hát.",
+  "lyricsModeFootnote": "Lựa chọn của bạn được lưu cho các bài sau. Độ chính xác của karaoke phụ thuộc dữ liệu nguồn: tô sáng từ chỉ là gần đúng khi không có thời điểm từng từ, và lời đứng yên khi không có dấu thời gian.",
+  "lyricsNotFound": "Không tìm thấy lời bài hát",
+  "karaokeUnavailable": "Lời karaoke không có cho bản nhạc này",
+  "unsyncedLyrics": "Lời chưa đồng bộ",
+  "wordSyncUpper": "ĐỒNG BỘ THEO TỪ",
+  "lineSyncUpper": "ĐỒNG BỘ THEO DÒNG",
+  "adjustLyricsSync": "Chỉnh đồng bộ lời bài hát",
+  "startsSoon": "Sắp bắt đầu",
+  "musicContinues": "Nhạc vẫn tiếp tục",
+  "decreaseLyricsOffset": "Giảm lệch 0,1 giây",
+  "lyricsOffset": "Lệch: {value} giây",
+  "increaseLyricsOffset": "Tăng lệch 0,1 giây",
+  "hideSetting": "Ẩn cài đặt",
+  "lyricsOffsetSaveFailed": "Không lưu được độ lệch lời bài hát.",
+  "audioForbidden": "Máy chủ âm thanh từ chối truy cập (HTTP 403). Đã tìm thấy bản nhạc nhưng luồng của nó không khả dụng. VPN không đảm bảo truy cập âm thanh.",
+  "fullVersionUnavailable": "Không tìm thấy bản đầy đủ trong các nguồn khả dụng. Kiểm tra kết nối hoặc thử lại sau.",
+  "sourcePlaybackFailed": "{source} không phát được bản nhạc này. Kiểm tra kết nối hoặc thử lại sau.",
+  "@@locale": "vi",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

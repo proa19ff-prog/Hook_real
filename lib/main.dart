@@ -15,6 +15,7 @@ import 'core/storage/local_storage_service.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
 import 'features/extractor/stream_resolver.dart';
+import 'features/extractor/sources/remote_resolver_source.dart';
 import 'features/extractor/sources/youtube_proxy.dart';
 import 'features/library/presentation/library_provider.dart';
 
@@ -28,6 +29,7 @@ Future<void> main() async {
   if (kDebugMode) PlaybackDiagnostics.sink = debugPrint;
 
   final storageService = await LocalStorageService.create();
+  RemoteResolverSource.endpoint = storageService.getRemoteResolverUrl();
   final selectedLocale = storageService.getLocaleCode();
   final usesRussian =
       selectedLocale == 'ru' ||

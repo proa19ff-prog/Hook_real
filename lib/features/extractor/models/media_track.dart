@@ -5,7 +5,9 @@ enum TrackSource {
   spotify,
   // A distinct key keeps old `youtube` catalog entries on the migration path.
   youtubeMusic,
-  audius;
+  audius,
+  // A track resolved by the user's own self-hosted server (optional).
+  remote;
 
   String get label => switch (this) {
     soundcloud => 'SoundCloud',
@@ -13,6 +15,7 @@ enum TrackSource {
     spotify => 'Каталог',
     youtubeMusic => 'YouTube',
     audius => 'Audius',
+    remote => 'Server',
   };
 
   bool get isCatalog => this == spotify;

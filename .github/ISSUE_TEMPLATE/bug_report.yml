@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a playback, import or UI problem
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Steps to reproduce and what you expected instead.
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: App version / build
+      placeholder: e.g. 0.1.0+1 from Releases or built from source
+    validations:
+      required: true
+  - type: input
+    id: android
+    attributes:
+      label: Android version and device
+      placeholder: e.g. Android 14, Pixel 7 / custom ROM (which?)
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Problematic source
+      options:
+        - YouTube
+        - SoundCloud
+        - Audius
+        - Catalog
+        - Lyrics
+        - Import
+        - Equalizer / audio
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra context
+      description: Do not paste tokens or personal data.

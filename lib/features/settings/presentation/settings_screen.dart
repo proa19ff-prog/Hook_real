@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/localization/supported_languages.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -110,8 +111,7 @@ class SettingsScreen extends ConsumerWidget {
                     children: [
                       for (final (code, label) in [
                         ('system', strings.systemLanguage),
-                        ('ru', strings.russian),
-                        ('en', strings.english),
+                        ...supportedLanguages,
                       ])
                         ChoiceChip(
                           label: Text(label),
@@ -175,6 +175,23 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    key: const ValueKey('remote-resolver-setting'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.dns_outlined,
+                      color: colors.textPrimary,
+                    ),
+                    title: Text(strings.serverResolver),
+                    subtitle: Text(
+                      ref.watch(remoteResolverProvider) ?? strings.serverResolverDisabled,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => _editRemoteResolver(context, ref, colors),
+                  ),
                 ],
               ),
             ),
@@ -192,4 +209,72 @@ class SettingsScreen extends ConsumerWidget {
       fontWeight: FontWeight.w600,
     ),
   );
+
+  void _editRemoteResolver(
+    BuildContext context,
+    WidgetRef ref,
+    HookColors colors,
+  ) {
+    final strings = AppLocalizations.of(context);
+    final controller = TextEditingController(
+      text: ref.read(remoteResolverProvider),
+    );
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: colors.surface,
+          title: Text(strings.serverResolver),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.serverResolverCaption,
+                style: TextStyle(
+                  color: colors.textSecondary,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                key: const ValueKey('remote-resolver-input'),
+                controller: controller,
+                keyboardType: TextInputType.url,
+                autocorrect: false,
+                enableSuggestions: false,
+                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: strings.serverResolverHint,
+                  hintStyle: TextStyle(color: colors.textSecondary),
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                ref.read(remoteResolverProvider.notifier).setEndpoint(null);
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(strings.serverDisable),
+            ),
+            TextButton(
+              key: const ValueKey('remote-resolver-save'),
+              onPressed: () {
+                ref
+                    .read(remoteResolverProvider.notifier)
+                    .setEndpoint(controller.text.trim());
+                Navigator.of(dialogContext).pop();
+              },
+              child: Text(strings.serverSave),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

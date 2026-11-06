@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('Hook App smoke test', (WidgetTester tester) async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({'hook_onboarding_done': true});
     final preferences = await SharedPreferences.getInstance();
     final storage = LocalStorageService(preferences);
 
@@ -29,7 +29,10 @@ void main() {
   testWidgets('saved English locale is applied to navigation', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'hook_locale_code': 'en'});
+    SharedPreferences.setMockInitialValues({
+      'hook_locale_code': 'en',
+      'hook_onboarding_done': true,
+    });
     final storage = LocalStorageService(await SharedPreferences.getInstance());
 
     await tester.pumpWidget(
@@ -51,7 +54,10 @@ void main() {
   testWidgets('unavailable YouTube shows a dismissible network warning', (
     WidgetTester tester,
   ) async {
-    SharedPreferences.setMockInitialValues({'hook_locale_code': 'ru'});
+    SharedPreferences.setMockInitialValues({
+      'hook_locale_code': 'ru',
+      'hook_onboarding_done': true,
+    });
     final storage = LocalStorageService(await SharedPreferences.getInstance());
 
     await tester.pumpWidget(

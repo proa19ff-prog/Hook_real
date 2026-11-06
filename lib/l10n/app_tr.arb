@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "Ayarlar",
+  "settingsCaption": "Değişiklikler bu cihazda saklanır.",
+  "playerSettings": "Çalar",
+  "lyricsAutoHide": "Şarkı sözü okurken kontrolleri gizle",
+  "lyricsAutoHideDescription": "10 saniye etkileşim olmadıktan sonra çalar panelleri ekrandan kayar. Geri getirmek için geri yükleme düğmesini kullanın.",
+  "showPlayerControls": "Çalar kontrollerini göster",
+  "equalizer": "Ekolayzer",
+  "equalizerEnabled": "Ses işleme",
+  "equalizerPresets": "Ses profili",
+  "equalizerFlat": "Orijinal",
+  "equalizerBass": "Derin bas",
+  "equalizerVocal": "Vokal",
+  "equalizerRock": "Rock",
+  "equalizerElectronic": "Elektronik",
+  "equalizerSoft": "Yumuşak",
+  "equalizerCustom": "Özel",
+  "equalizerBands": "Frekans bantları",
+  "equalizerBassBoost": "Bas güçlendirme",
+  "equalizerBassUnsupported": "Ek bas güçlendirme desteklenmiyor. Düşük frekans bantlarını kullanın.",
+  "equalizerPreamp": "Ön yükseltme",
+  "equalizerHeadroom": "Otomatik pay",
+  "equalizerHeadroomDescription": "Frekans yükseltirken çıkış seviyesini azaltarak tepe seslere yer açar. Bir limiter değildir.",
+  "equalizerWaiting": "Ekolayzeri ses oturumuna bağlamak için bir parça başlatın.",
+  "equalizerUnsupported": "Ses işleme şu an yalnızca Android'de kullanılabilir.",
+  "equalizerFailed": "Bu cihaz ses efektlerini etkinleştiremedi. Müzik onlar olmadan da çalar.",
+  "equalizerRetry": "Efektleri yeniden bağla",
+  "equalizerLive": "Değişiklikler anında uygulanır ve bu cihazda saklanır.",
+  "youtubeAccount": "YouTube ve MicroG",
+  "youtubeAccountReadOnly": "Play listelere salt okunur erişim. Oturum açmak sesin kullanılabilirliğini garanti etmez.",
+  "youtubeAccountCompatibility": "Uyumluluk ve gizlilik",
+  "youtubeAccountSubtitle": "Hesap bağlama ve çalma listesi içe aktarma",
+  "youtubeAccountPrivacy": "Hook yalnızca salt okunur YouTube erişimi ister. Şifrenizi yalnızca Google'ın sistem penceresine girin, asla Hook'a değil. Belirteç hiçbir Hook sunucusuna gönderilmez ve yalnızca bellekte tutulur. Uygulamayı yeniden başlattıktan sonra yeniden bağlanın.",
+  "youtubeAccountPlaybackNotice": "Oturum açmak hesap verilerine erişim verir, ses akışlarına değil. HTTP 403 sorununu çözme garantisi yoktur. İçe aktarmalar YouTube kayıtlarını başka bir kaynakla değiştirmeden korur.",
+  "youtubeAccountConnect": "Hesabı bağla",
+  "youtubeAccountDisconnect": "Hook'ta bağlantıyı kes",
+  "youtubeAccountDisconnected": "Bağlı hesap yok",
+  "youtubeAccountDisconnectNotice": "Bu hesabın bağlantısı yalnızca Hook'ta kesilsin mi? Kayıtlı çalma listeleri kalır. Telefondaki Google ve MicroG hesaplarının oturumu kapatılmaz.",
+  "youtubeAccountSystem": "Sistem Google API'leri",
+  "youtubeAccountServicesMissing": "Uyumlu sistem Google API'leri yok. Ayrı bir ReVanced GmsCore kurulumu Hook oturum açması için onların yerine geçmez.",
+  "youtubeAccountMicrogNotice": "Ayrı bir ReVanced GmsCore kurulumu algılandı. Hook ReVanced hesaplarını veya belirteçlerini kullanmaz. Sistem MicroG'si uyumlu Google API'leri sağlayabilir, ancak bu oturum açma yöntemiyle uyumluluğu garanti edilmez.",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced yüklü",
+  "youtubeAccountPlaylists": "Hesap çalma listeleri",
+  "youtubeAccountNoPlaylists": "Erişilebilir çalma listesi yok. Bazı otomatik YouTube Music derlemeleri YouTube Data API üzerinden kullanılamaz.",
+  "youtubeAccountMore": "Daha fazla yükle",
+  "youtubeAccountPreview": "İçe aktarmayı hazırla",
+  "youtubeAccountProgress": "Alınan parçalar: {count}",
+  "youtubeAccountUnavailableTracks": "Atlanan kullanılamayan girdiler: {count}. Bunlar başka parçalarla değiştirilmez.",
+  "youtubeAccountSetup": "Oturum açma kurulumu",
+  "youtubeAccountSetupBody": "Geliştiricinin Google Cloud'da YouTube Data API v3'ü etkinleştirmesi, com.hook.music ve yüklü derlemenin imza SHA-1'i için bir Android OAuth istemcisi kaydetmesi ve onay ekranını yapılandırması gerekir. Test modunda izin verilen kullanıcıları ekleyin. Bakın: docs/YOUTUBE_ACCOUNT_SETUP.md. Asla parola, istemci sırrı veya başka uygulamaların belirteçlerini eklemeyin.",
+  "youtubeAccountConfigError": "Oturum açma bu derleme için yapılandırılmamış. Google Cloud'da Android OAuth istemcisini, paket adını, SHA-1'i ve izin verilen test kullanıcılarını kontrol edin.",
+  "youtubeAccountPermissionError": "YouTube verilerine okuma erişimi verilmedi.",
+  "youtubeAccountExpired": "Oturumunuzun süresi doldu. Hesabı yeniden bağlayın.",
+  "youtubeAccountNoChannel": "Seçilen hesabın erişilebilir bir YouTube kanalı yok.",
+  "youtubeAccountQuota": "YouTube API kotası aşıldı. Daha sonra tekrar deneyin.",
+  "youtubeAccountFailed": "YouTube verileri alınamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+  "youtubeAccountUnsupported": "Hesap bağlama, uyumlu sistem Google API'leri olan Android gerektirir.",
+  "importedFromYouTube": "YouTube hesabından içe aktarıldı",
+  "translateLyrics": "Sözleri çevir",
+  "hideTranslation": "Çeviriyi gizle",
+  "cancelTranslation": "Çeviriyi iptal et",
+  "translationLoading": "Çeviri hazırlanıyor…",
+  "translationAttribution": "Google Translate tarafından otomatik çevrildi",
+  "translationNotice": "Çeviri, şarkının anlamını tam yansıtmayabilir. Kelime vurgulama yalnızca özgün metne uygulanır.",
+  "translationModelTitle": "Dil modelleri indirilsin mi?",
+  "translationModelBody": "Çeviri telefonunuzda çalışır: sözler hiçbir sunucuya gönderilmez. İlk çeviri, onlarca megabyte yer kaplayan Google ML Kit modellerini gerektirir. İndirme, mobil veri dahil mevcut bağlantınızı kullanır. İptal etmek sonucu gizler; ancak zaten başlamış bir model indirmesi arka planda tamamlanabilir.",
+  "translationDownload": "İndir ve çevir",
+  "translationUnavailable": "Çeviri başarısız oldu. Model indirmelerine erişimi kontrol edip tekrar deneyin.",
+  "translationUnsupported": "Cihaz üzerinde çeviri şu an yalnızca Android'de kullanılabilir.",
+  "translationUnknownLanguage": "Bu şarkı için desteklenen bir dil tanımlanamadı.",
+  "translationSameLanguage": "Sözler zaten seçilen dilde.",
+  "translationTooLarge": "Bu sözler cihaz üzerinde çeviri için fazla uzun.",
+  "translationRussian": "Rusçaya",
+  "translationEnglish": "İngilizceye",
+  "translationTarget": "Çeviri dili",
+  "retry": "Tekrar dene",
+  "home": "Ana sayfa",
+  "search": "Ara",
+  "library": "Kitaplık",
+  "youtubeUnavailableTitle": "YouTube şu anda kullanılamıyor",
+  "youtubeUnavailableBody": "Ses akışı alınamadı. Ağınızı ve VPN rotanızı kontrol edin: YouTube istekleri VPN ile bile reddedebilir.",
+  "checkAgain": "Yeniden kontrol et",
+  "dismiss": "Kapat",
+  "goodNight": "İyi geceler",
+  "goodMorning": "Günaydın",
+  "goodAfternoon": "İyi günler",
+  "goodEvening": "İyi akşamlar",
+  "themeSettings": "Görünüm ayarları",
+  "onYourAir": "Yayınınızda",
+  "recentSignals": "{count, plural, =0{Yakın sinyal yok} =1{1 yakın sinyal} other{{count} yakın sinyal}}",
+  "collectionWaiting": "Koleksiyonunuz sizi bekliyor",
+  "saved": "Kaydedildi",
+  "collectionEmptyDetail": "Geri dönmek istediğiniz müzik burada kalacak",
+  "tracksCount": "{count, plural, other{{count} parça}}",
+  "homeSearchHint": "Parça, sanatçı veya söz",
+  "searchUpper": "ARA",
+  "findFirstTrack": "İlk parçanızı bulun",
+  "continuationAfter": "{artist} sonrasında daha fazla müzik",
+  "chooseTrackWaveDetail": "Bir parça seçin, ona dair bir dalga kuracağız.",
+  "continueWaveLabel": "DEVAM / 01",
+  "yourWaveLabel": "DALGANIZ / 01",
+  "continueWave": "Dalgayı sürdür",
+  "chooseTrack": "Bir parça seçin",
+  "firstTrace": "İlk izinizi burada bırakın",
+  "favoriteWaveHint": "Favorileri kaydedin, dalganız daha isabetli olur.",
+  "openSearch": "Aramayı aç",
+  "findYourMusic": "Sesinizi bulun.",
+  "importMusic": "Müzik içe aktar",
+  "rememberedLyricsHint": "Hatırladığınız sözler…",
+  "trackArtistHint": "Parça veya sanatçı — herhangi bir dil",
+  "clear": "Temizle",
+  "music": "Müzik",
+  "byLyrics": "Söze göre",
+  "allSources": "Tüm kaynaklar",
+  "lyricsSearchCaption": "Şarkının başlığını değil, bir dizesini arayın.",
+  "searchingLyrics": "Tanıdık satırlar aranıyor…",
+  "searchingSources": "Müzik kaynakları taranıyor…",
+  "connectionFailed": "Bağlantı kurulamadı",
+  "noMatches": "Henüz eşleşme yok",
+  "lyricsUnavailable": "Söz araması şu anda kullanılamıyor. Daha sonra deneyin veya başlığa göre arayın.",
+  "searchUnavailable": "Arama başarısız oldu. Bağlantınızı kontrol edip tekrar deneyin.",
+  "lyricsNoMatches": "Başka bir satır deneyin. Her söz dizine alınmamıştır.",
+  "trackNoMatches": "Sanatçıyı ekleyin veya başka bir kaynak seçin. Bazı hizmetler ağınızda kullanılamayabilir.",
+  "repeatSearch": "Yeniden ara",
+  "lyricMatchesUpper": "SÖZ EŞLEŞMELERİ",
+  "tracksUpper": "PARÇALAR",
+  "playTrack": "{title}, {artist} çal",
+  "familiarLinesUpper": "TANIDIK SATIRLAR",
+  "bestMatchUpper": "EN İYİ EŞLEŞME",
+  "fullVersionOnPlayback": "Çalma başladığında tam sürümü bulacağız.",
+  "forgotTitle": "Başlığı unuttunuz.\nMüziği değil.",
+  "startAsYouRemember": "Bir ad, başlık veya şarkıdan bir dize.\nHatırladığınız her şeyle başlayın.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "Adları kulağa geldiği gibi arayın",
+  "rememberOnlyLine": "Yalnızca bir dize hatırlıyorum",
+  "findSongByWords": "Şarkıyı sözleriyle bulun",
+  "yourArtistsUpper": "SANATÇILARINIZ",
+  "language": "Dil",
+  "languageCaption": "Arayüz seçiminizi hemen izler",
+  "systemLanguage": "Sistem",
+  "russian": "Rusça",
+  "english": "İngilizce",
+  "themesAndShaders": "Temalar ve efektler",
+  "themesSubtitle": "Görünüm, dil ve arka plan hareketi",
+  "invalidThemeJson": "Tema okunamadı. JSON biçimini ve alan değerlerini kontrol edin.",
+  "exportJson": "JSON dışa aktar",
+  "importJson": "JSON içe aktar",
+  "readyThemes": "Hazır temalar",
+  "gpuShaders": "Arka plan efektleri",
+  "meshGradient": "Parça renklerinden yumuşak GPU geçişi",
+  "vinylNoise": "Analog plak greni (gürültü)",
+  "glassBlur": "Cam bulanıklığı (Backdrop Blur)",
+  "cornerRadius": "Arayüz köşe yarıçapı",
+  "importThemeTitle": "Temayı JSON'dan içe aktar",
+  "pasteThemeJson": "Temanın JSON yapılandırmasını yapıştırın:",
+  "cancel": "İptal",
+  "apply": "Uygula",
+  "themeApplied": "Tema başarıyla uygulandı!",
+  "exportThemeTitle": "Temayı dışa aktar (JSON)",
+  "close": "Kapat",
+  "copyJson": "JSON kopyala",
+  "jsonCopied": "Tema JSON'u panoya kopyalandı!",
+  "libraryUpper": "KİTAPLIK",
+  "localCollection": "Yerel koleksiyon ve çalma listeleri",
+  "importShort": "İçe aktar",
+  "favorites": "Favoriler",
+  "playlists": "Çalma listeleri",
+  "history": "Geçmiş",
+  "offline": "Çevrimdışı",
+  "favoritesEmpty": "Favorileriniz boş.\nBir parçanın kalbine dokunarak buraya ekleyin.",
+  "historyEmpty": "Dinleme geçmişiniz boş.\nAramadan müzik çalın, burada görünecek.",
+  "noPlaylists": "Henüz çalma listeniz yok",
+  "importPlaylistHint": "Bir Spotify çalma listesi içe aktarın veya parça listesi yapıştırın.",
+  "importMusicAction": "Müzik içe aktar",
+  "playPlaylist": "Çalma listesini çal",
+  "playlistStarted": "«{name}» çalınıyor ({count} parça)",
+  "deletePlaylist": "Çalma listesini sil",
+  "playAll": "Tümünü çal",
+  "shuffle": "Karıştır",
+  "localAudioCache": "Yerel ses önbelleği",
+  "cacheDescription": "Çalınan parçalar, internet olmadan anında tekrar dinlemek için yerel olarak saklanır.",
+  "deviceUsage": "Bu cihazda: {size}",
+  "clearCache": "Tüm önbelleği temizle",
+  "savedTracksUpper": "KAYITLI PARÇALAR ({count}):",
+  "cacheFeaturesUpper": "ÖNBELLEK ÖZELLİKLERİ:",
+  "offlineFirst": "Tamamen çevrimdışı öncelikli",
+  "offlineFirstDescription": "Tekrar dinlemede ses doğrudan cihazın dosya sisteminden yüklenir.",
+  "maximumBitrate": "En yüksek bit hızı",
+  "maximumBitrateDescription": "160–256 kbps temiz Opus/M4A akışları dönüştürülmeden saklanır.",
+  "trafficAndBattery": "Veri ve pil tasarrufu",
+  "trafficAndBatteryDescription": "Yinelenen ağ isteklerinden kaçınmak telefonunuzun daha uzun dayanmasını sağlar.",
+  "cacheEmpty": "Önbellek boş",
+  "cachedTracksAppear": "İndirilen parçalar burada otomatik görünür",
+  "removeFromCache": "Önbellekten kaldır",
+  "removeCachedTrackTitle": "Parça önbellekten kaldırılsın mı?",
+  "removeCachedTrackBody": "«{title}» bu cihazdan kaldırılacak.",
+  "delete": "Sil",
+  "trackRemovedFromCache": "Parça önbellekten kaldırıldı",
+  "clearCacheTitle": "Önbellek temizlensin mi?",
+  "clearCacheBody": "Kayıtlı tüm ses dosyaları bu cihazdan kaldırılacak. Favoriler ve geçmiş değişmez.",
+  "cacheCleared": "Yerel önbellek temizlendi",
+  "back": "Geri",
+  "playlistActions": "Çalma listesi eylemleri",
+  "playlistUpper": "ÇALMA LİSTESİ",
+  "playlistEmpty": "Bu çalma listesinde henüz parça yok",
+  "pasteTrackList": "Parça listesi yapıştır",
+  "pasteImportLink": "İçe aktarmak için bir bağlantı yapıştır",
+  "tracksNotFound": "Bu bağlantıda parça bulunamadı.",
+  "importError": "İçe aktarma başarısız oldu. Bağlantıyı ve internetinizi kontrol edin.",
+  "importedPlaylistStarted": "İçe aktarılan çalma listesi çalınıyor ({count} parça)",
+  "importedPlaylistName": "İçe aktarma ({platform})",
+  "playlistSaved": "«{name}» çalma listesi kitaplığınıza kaydedildi!",
+  "spotifyImportSubtitle": "Spotify • Çalma listeleri, albümler ve parçalar",
+  "artistTrackOrCsv": "Sanatçı — Parça ya da bir Exportify CSV'si",
+  "pastePlaylistOrTrackLink": "Çalma listesi veya parça bağlantısı yapıştır",
+  "pasteFromClipboard": "Panodan yapıştır",
+  "link": "Bağlantı",
+  "trackList": "Parça listesi",
+  "playlistName": "Çalma listesi adı",
+  "startImport": "İçe aktarmayı başlat",
+  "importedCollectionMeta": "{author} • {count} parça",
+  "importedFromSpotify": "Spotify'dan içe aktarıldı",
+  "importIntro": "Çalma listelerinizi yanınızda getirin. Bir Spotify bağlantısı, parça listesi veya Exportify dosyası kullanın.",
+  "importTextTab": "Metin",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "Dosya seç",
+  "importFileHint": "Exportify tarafından dışa aktarılan CSV'yi ya da bir TXT parça listesini seçin. UTF-8, en fazla 10 MB ve 10.000 parça.",
+  "importFileAndroidOnly": "Dosya seçimi Android'de kullanılabilir. Burada bir CSV veya parça listesinin içeriğini yapıştırabilirsiniz.",
+  "importTextHint": "Her satıra bir Sanatçı — Parça. Başlık dahil tüm CSV'yi de yapıştırabilirsiniz.",
+  "importPreview": "Parça önizlemesi",
+  "importedFromCsv": "CSV'den içe aktarıldı",
+  "importedFromText": "Parça listesinden içe aktarıldı",
+  "importMoreTracks": "Ve {count} tane daha",
+  "importMetadataHint": "Çalma listesi bu cihazda saklanır. Ses, parça çalınırken bulunur; içe aktarma şarkı indirmez.",
+  "importAnother": "Başka bir şey içe aktar",
+  "importReading": "Çalma listeniz okunuyor…",
+  "importSaving": "Kitaplığınıza kaydediliyor…",
+  "importNameRequired": "Bir çalma listesi adı girin.",
+  "importNameExists": "Bu ada sahip bir çalma listesi zaten var. İkisini de korumak için başka bir ad seçin.",
+  "importSaveFailed": "Çalma listesi kaydedilemedi. Önizlemeniz hâlâ burada — tekrar deneyin.",
+  "importFileTooLarge": "Bu dosya 10 MB'ı aşıyor. Çalma listesini daha küçük dışa aktarımlara bölün.",
+  "importFileUnsupported": "Bir .csv veya .txt dosyası seçin.",
+  "importFileEncoding": "Metin kodlaması okunamadı. Dosyayı UTF-8 olarak kaydedip tekrar deneyin.",
+  "importCsvInvalid": "CSV eksik veya bozuk. Sütunlarını veya tırnaklarını değiştirmeden yeniden dışa aktarın.",
+  "importCsvMissingColumns": "CSV, Track Name ve Artist Name(s) ya da Title ve Artist sütunlarını gerektirir. Özgün Exportify dışa aktarımını seçin.",
+  "importFileEmpty": "Hiç parça bulunamadı. Dolu bir dışa aktarım seçin veya Sanatçı — Parça listesi yapıştırın.",
+  "importTooManyTracks": "Tek bir içe aktarma en fazla 10.000 parça içerebilir. Bu çalma listesini bölün; henüz hiçbir şey kaydedilmedi.",
+  "importFileReadFailed": "Bu dosya açılamadı. Cihazınızda kullanılabilir olduğunu doğrulayın ve yeniden seçin.",
+  "importSpotifyBlocked": "Spotify bu çalma listesini bölgenizde paylaşmadı. Exportify ile dışa aktarın ve CSV dosyasını seçin.",
+  "listen": "Çal",
+  "addToPlaylists": "Çalma listelerine ekle",
+  "trackSemantics": "Parça {title}, {artist}",
+  "trackActions": "Parça eylemleri",
+  "startWaveFromTrack": "Bu parçadan bir dalga başlat",
+  "addToQueue": "Kuyruğa ekle",
+  "addedToQueue": "Kuyruğa eklendi: {title}",
+  "removeFavorite": "Favorilerden çıkar",
+  "addFavorite": "Favorilere ekle",
+  "addToPlaylist": "Çalma listesine ekle",
+  "goToArtist": "Sanatçıya git",
+  "myPlaylist": "Çalma listem",
+  "newPlaylist": "Yeni çalma listesi",
+  "name": "Ad",
+  "create": "Oluştur",
+  "loading": "Yükleniyor…",
+  "pause": "Duraklat",
+  "play": "Çal",
+  "next": "Sonraki",
+  "speedAndPitch": "Hız ve perde",
+  "speedValue": "Hız: {value}x",
+  "pitchValue": "Perde: {value}x",
+  "reset": "Sıfırla",
+  "moreActions": "Daha fazla eylem",
+  "playbackQueue": "Çalma kuyruğu",
+  "queueEmpty": "Kuyruk boş",
+  "selectingSource": "Kaynak seçiliyor",
+  "collapsePlayer": "Çaları daralt",
+  "nowPlayingUpper": "ŞİMDİ ÇALIYOR",
+  "queue": "Kuyruk",
+  "startWave": "Dalga başlat",
+  "cover": "Kapak",
+  "karaokeLyrics": "Karaoke sözleri",
+  "findMusicStart": "Müzik bulun ve çalmaya başlayın",
+  "playbackNotStarted": "Çalma henüz başlamadı",
+  "openSearchFirstTrack": "İlk parçanızı bulmak için aramayı açın",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "Cihazda",
+  "sourceCatalog": "Katalog",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "Sunucu",
+  "serverResolver": "Çözümleyici sunucu",
+  "serverResolverCaption": "Tam ses akışlarını çözen, isteğe bağlı kendi sunucunuz. Uygulama bir arama veya parça kimliği gönderir; sunucu bir çalma URL'si döndürür. Sözleşme ve örnek uygulama docs/REMOTE_RESOLVER.md içinde.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "Yapılandırılmadı",
+  "serverSave": "Kaydet",
+  "serverDisable": "Devre dışı bırak",
+  "onboardingWelcomeTitle": "Hook'a hoş geldiniz",
+  "onboardingWelcomeCaption": "Müzik, sözler ve kendinize ait görsel bir stil. Başlamak için bir dil seçin — ayarlardan sonra değiştirebilirsiniz.",
+  "onboardingSkip": "Atla",
+  "onboardingNext": "Devam",
+  "onboardingStart": "Dinlemeye başla",
+  "onboardingMicrogTitle": "MicroG ve Google hesabı",
+  "onboardingMicrogBody": "MicroG, Google servisleri olmadan gelen özel Android ROM'larında bu servisleri yeniden oluşturur. Hook bunları yalnızca isteğe bağlı bir özellik için kullanır: çalma listelerinizi içe aktarmak üzere bir YouTube hesabı bağlamak. Müzik çalmak için MicroG veya hiçbir Google servisi gerekmez.",
+  "onboardingMicrogNote": "Çalma, MicroG'ye bağlı değildir. Hesap bağlamak isteğe bağlıdır.",
+  "onboardingMicrogDownload": "MicroG'yi indir",
+  "onboardingMicrogStatusChecking": "Google servisleri kontrol ediliyor…",
+  "onboardingMicrogStatusOk": "Google servisleri bu cihazda mevcut ({version}). Hesap içe aktarma hemen çalışacak.",
+  "onboardingMicrogStatusReVanced": "ReVanced GmsCore algılandı ({version}). Resmî Google oturum açma SDK'sı onunla uyumlu değil; hesap bağlantısı çalışmayabilir. Çalma etkilenmez.",
+  "onboardingMicrogStatusMissing": "Google servisleri bulunamadı. Bir YouTube hesabından çalma listesi içe aktarmak için önce MicroG'yi yükleyin — ya da bunu atlayın ve Hook'u hesapsız kullanın.",
+  "lyricsView": "Söz görünümü · {mode}",
+  "lyricsReadingRhythm": "Okuma ritminiz",
+  "lyricsModeSubtitle": "Şarkıya yaklaşmanın üç yolu.",
+  "lyricsModeLines": "Satırlar",
+  "lyricsModeKaraoke": "Karaoke",
+  "lyricsModeFocus": "Odak",
+  "lyricsModeLinesDescription": "Geçerli satırı vurgulanan sakin sözler",
+  "lyricsModeKaraokeDescription": "Kelimeler vokalle birlikte yumuşakça aydınlanır",
+  "lyricsModeFocusDescription": "Tek büyük satır. Başka hiçbir şey",
+  "lyricsModeSaveFailed": "Söz görünümü kaydedilemedi.",
+  "lyricsModeFootnote": "Seçiminiz sonraki şarkılar için saklanır. Karaoke doğruluğu kaynak verilerine bağlıdır: kelime zamanlaması olmadan vurgulama yaklaşıktır ve zaman damgası olmadan sözler hareketsiz kalır.",
+  "lyricsNotFound": "Sözler bulunamadı",
+  "karaokeUnavailable": "Bu parça için karaoke sözleri yok",
+  "unsyncedLyrics": "Senkronize edilmemiş sözler",
+  "wordSyncUpper": "KELİME KELİME SENKRON",
+  "lineSyncUpper": "SATIR SATIR SENKRON",
+  "adjustLyricsSync": "Söz senkronizasyonunu ayarla",
+  "startsSoon": "Yakında başlıyor",
+  "musicContinues": "Müzik sürüyor",
+  "decreaseLyricsOffset": "Kaydırmayı 0,1 sn azalt",
+  "lyricsOffset": "Kaydırma: {value} sn",
+  "increaseLyricsOffset": "Kaydırmayı 0,1 sn artır",
+  "hideSetting": "Ayarı gizle",
+  "lyricsOffsetSaveFailed": "Söz kaydırması kaydedilemedi.",
+  "audioForbidden": "Ses sunucusu erişimi reddetti (HTTP 403). Parça bulundu ama akışı kullanılamıyor. Bir VPN ses erişimini garanti etmez.",
+  "fullVersionUnavailable": "Kullanılabilir kaynaklarda tam sürüm bulunamadı. Bağlantınızı kontrol edin veya daha sonra deneyin.",
+  "sourcePlaybackFailed": "{source} bu parçayı çalamadı. Bağlantınızı kontrol edin veya daha sonra deneyin.",
+  "@@locale": "tr",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

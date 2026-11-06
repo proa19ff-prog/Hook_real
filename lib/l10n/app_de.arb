@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "Einstellungen",
+  "settingsCaption": "Änderungen werden auf diesem Gerät gespeichert.",
+  "playerSettings": "Player",
+  "lyricsAutoHide": "Steuerung beim Lesen des Textes ausblenden",
+  "lyricsAutoHideDescription": "Nach 10 Sekunden ohne Interaktion gleiten die Player-Panels aus dem Bild. Mit der Wiederherstellen-Taste holst du sie zurück.",
+  "showPlayerControls": "Player-Steuerung anzeigen",
+  "equalizer": "Equalizer",
+  "equalizerEnabled": "Klangverarbeitung",
+  "equalizerPresets": "Klangprofil",
+  "equalizerFlat": "Original",
+  "equalizerBass": "Tiefe Bässe",
+  "equalizerVocal": "Gesang",
+  "equalizerRock": "Rock",
+  "equalizerElectronic": "Electronic",
+  "equalizerSoft": "Sanft",
+  "equalizerCustom": "Benutzerdefiniert",
+  "equalizerBands": "Frequenzbänder",
+  "equalizerBassBoost": "Bass-Boost",
+  "equalizerBassUnsupported": "Zusätzlicher Bass-Boost wird nicht unterstützt. Nutze die Tiefbänder.",
+  "equalizerPreamp": "Vorverstärkung",
+  "equalizerHeadroom": "Automatischer Headroom",
+  "equalizerHeadroomDescription": "Reduziert den Ausgangspegel beim Anheben von Frequenzen, um Spitzen Raum zu geben. Kein Limiter.",
+  "equalizerWaiting": "Starte einen Titel, um den Equalizer mit seiner Audiositzung zu verbinden.",
+  "equalizerUnsupported": "Klangverarbeitung ist derzeit nur unter Android verfügbar.",
+  "equalizerFailed": "Dieses Gerät konnte die Audioeffekte nicht aktivieren. Musik läuft auch ohne sie.",
+  "equalizerRetry": "Effekte neu verbinden",
+  "equalizerLive": "Änderungen wirken sofort und werden auf diesem Gerät gespeichert.",
+  "youtubeAccount": "YouTube & MicroG",
+  "youtubeAccountReadOnly": "Lesezugriff auf Playlists. Anmeldung garantiert keine Audioverfügbarkeit.",
+  "youtubeAccountCompatibility": "Kompatibilität und Datenschutz",
+  "youtubeAccountSubtitle": "Kontoanbindung und Playlist-Import",
+  "youtubeAccountPrivacy": "Hook fordert nur Lesezugriff auf YouTube an. Gib dein Passwort nur im Systemdialog von Google ein, nie in Hook. Der Token wird an keinen Hook-Server gesendet und bleibt nur im Arbeitsspeicher. Nach dem Neustart der App musst du dich neu verbinden.",
+  "youtubeAccountPlaybackNotice": "Die Anmeldung gewährt Zugriff auf Kontodaten, nicht auf Audiostreams. Sie behebt kein HTTP 403. Importe behalten die YouTube-Aufnahmen bei, ohne sie durch eine andere Quelle zu ersetzen.",
+  "youtubeAccountConnect": "Konto verbinden",
+  "youtubeAccountDisconnect": "In Hook abmelden",
+  "youtubeAccountDisconnected": "Kein Konto verbunden",
+  "youtubeAccountDisconnectNotice": "Dieses Konto nur in Hook abmelden? Gespeicherte Playlists bleiben. Google- und MicroG-Konten auf dem Telefon werden nicht abgemeldet.",
+  "youtubeAccountSystem": "Google-System-APIs",
+  "youtubeAccountServicesMissing": "Kompatible Google-System-APIs sind nicht verfügbar. Eine separate ReVanced-GmsCore-Installation ersetzt sie für die Hook-Anmeldung nicht.",
+  "youtubeAccountMicrogNotice": "Eine separate ReVanced-GmsCore-Installation wurde erkannt. Hook nutzt keine ReVanced-Konten oder -Tokens. Ein System-MicroG kann kompatible Google-APIs bereitstellen, aber die Kompatibilität mit dieser Anmeldemethode ist nicht garantiert.",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced ist installiert",
+  "youtubeAccountPlaylists": "Konto-Playlists",
+  "youtubeAccountNoPlaylists": "Keine zugreifbaren Playlists. Einige automatische YouTube-Music-Sammlungen sind über die YouTube Data API nicht verfügbar.",
+  "youtubeAccountMore": "Mehr laden",
+  "youtubeAccountPreview": "Import vorbereiten",
+  "youtubeAccountProgress": "Titel geladen: {count}",
+  "youtubeAccountUnavailableTracks": "Übersprungene, nicht verfügbare Einträge: {count}. Sie werden nicht durch andere Titel ersetzt.",
+  "youtubeAccountSetup": "Anmelde-Setup",
+  "youtubeAccountSetupBody": "Der Entwickler muss die YouTube Data API v3 in Google Cloud aktivieren, einen Android-OAuth-Client für com.hook.music und den Signatur-SHA-1 des installierten Builds registrieren und den Zustimmungsbildschirm konfigurieren. Füge im Testmodus die erlaubten Nutzer hinzu. Siehe docs/YOUTUBE_ACCOUNT_SETUP.md. Füge niemals Passwörter, Client-Secrets oder Tokens anderer Apps hinzu.",
+  "youtubeAccountConfigError": "Die Anmeldung ist für diesen Build nicht konfiguriert. Prüfe Android-OAuth-Client, Paketnamen, SHA-1 und erlaubte Testnutzer in Google Cloud.",
+  "youtubeAccountPermissionError": "Der Lesezugriff auf YouTube-Daten wurde nicht gewährt.",
+  "youtubeAccountExpired": "Deine Sitzung ist abgelaufen. Verbinde das Konto neu.",
+  "youtubeAccountNoChannel": "Das gewählte Konto hat keinen zugreifbaren YouTube-Kanal.",
+  "youtubeAccountQuota": "YouTube-API-Kontingent überschritten. Versuche es später erneut.",
+  "youtubeAccountFailed": "YouTube-Daten konnten nicht abgerufen werden. Prüfe deine Verbindung und versuche es erneut.",
+  "youtubeAccountUnsupported": "Die Kontoanbindung erfordert Android mit kompatiblen Google-System-APIs.",
+  "importedFromYouTube": "Aus dem YouTube-Konto importiert",
+  "translateLyrics": "Text übersetzen",
+  "hideTranslation": "Übersetzung ausblenden",
+  "cancelTranslation": "Übersetzung abbrechen",
+  "translationLoading": "Übersetzung wird vorbereitet…",
+  "translationAttribution": "Automatisch übersetzt von Google Translate",
+  "translationNotice": "Die Übersetzung kann die Bedeutung des Songs ungenau wiedergeben. Die Wort-Hervorhebung gilt nur für das Original.",
+  "translationModelTitle": "Sprachmodelle herunterladen?",
+  "translationModelBody": "Die Übersetzung läuft auf deinem Telefon: Der Text wird an keinen Server gesendet. Die erste Übersetzung benötigt Google-ML-Kit-Modelle mit mehreren zehn Megabytes. Der Download nutzt deine aktuelle Verbindung, auch mobile Daten. Abbrechen blendet das Ergebnis aus, doch ein bereits begonnener Modell-Download kann im Hintergrund fertig werden.",
+  "translationDownload": "Herunterladen und übersetzen",
+  "translationUnavailable": "Übersetzung fehlgeschlagen. Prüfe den Zugriff auf Modell-Downloads und versuche es erneut.",
+  "translationUnsupported": "Übersetzung auf dem Gerät ist derzeit nur unter Android verfügbar.",
+  "translationUnknownLanguage": "Es konnte keine unterstützte Sprache für diesen Song erkannt werden.",
+  "translationSameLanguage": "Der Text ist bereits in der gewählten Sprache.",
+  "translationTooLarge": "Dieser Text ist zu lang für die Übersetzung auf dem Gerät.",
+  "translationRussian": "Auf Russisch",
+  "translationEnglish": "Auf Englisch",
+  "translationTarget": "Übersetzungssprache",
+  "retry": "Erneut versuchen",
+  "home": "Start",
+  "search": "Suchen",
+  "library": "Bibliothek",
+  "youtubeUnavailableTitle": "YouTube ist gerade nicht verfügbar",
+  "youtubeUnavailableBody": "Kein Audiostream erhältlich. Prüfe dein Netzwerk und die VPN-Route: YouTube kann Anfragen auch mit VPN ablehnen.",
+  "checkAgain": "Erneut prüfen",
+  "dismiss": "Ausblenden",
+  "goodNight": "Gute Nacht",
+  "goodMorning": "Guten Morgen",
+  "goodAfternoon": "Guten Tag",
+  "goodEvening": "Guten Abend",
+  "themeSettings": "Darstellungseinstellungen",
+  "onYourAir": "Auf deiner Welle",
+  "recentSignals": "{count, plural, =0{Keine neuen Signale} =1{1 neues Signal} other{{count} neue Signale}}",
+  "collectionWaiting": "Deine Sammlung wartet",
+  "saved": "Gespeichert",
+  "collectionEmptyDetail": "Musik, zu der du zurückkehren willst, bleibt hier",
+  "tracksCount": "{count, plural, =1{1 Titel} other{{count} Titel}}",
+  "homeSearchHint": "Titel, Künstler oder Text",
+  "searchUpper": "SUCHEN",
+  "findFirstTrack": "Finde deinen ersten Titel",
+  "continuationAfter": "Mehr Musik nach {artist}",
+  "chooseTrackWaveDetail": "Wähle einen Titel und wir bauen eine Welle um seine Stimmung.",
+  "continueWaveLabel": "WEITER / 01",
+  "yourWaveLabel": "DEINE WELLE / 01",
+  "continueWave": "Welle fortsetzen",
+  "chooseTrack": "Titel wählen",
+  "firstTrace": "Hinterlasse hier deine erste Spur",
+  "favoriteWaveHint": "Speichere Favoriten, dann wird deine Welle treffsicherer.",
+  "openSearch": "Suche öffnen",
+  "findYourMusic": "Finde deinen Klang.",
+  "importMusic": "Musik importieren",
+  "rememberedLyricsHint": "Die Worte, an die du dich erinnerst…",
+  "trackArtistHint": "Titel oder Künstler — in jeder Sprache",
+  "clear": "Leeren",
+  "music": "Musik",
+  "byLyrics": "Nach Text",
+  "allSources": "Alle Quellen",
+  "lyricsSearchCaption": "Suche eine Zeile aus dem Song, nicht nur den Titel.",
+  "searchingLyrics": "Suche nach bekannten Zeilen…",
+  "searchingSources": "Musikquellen werden durchsucht…",
+  "connectionFailed": "Verbindung fehlgeschlagen",
+  "noMatches": "Noch keine Treffer",
+  "lyricsUnavailable": "Die Textsuche ist gerade nicht verfügbar. Versuche es später oder suche nach dem Titel.",
+  "searchUnavailable": "Suche fehlgeschlagen. Prüfe deine Verbindung und versuche es erneut.",
+  "lyricsNoMatches": "Versuche eine andere Zeile. Nicht jeder Text ist indexiert.",
+  "trackNoMatches": "Ergänze den Künstler oder wähle eine andere Quelle. Manche Dienste sind in deinem Netzwerk evtl. nicht erreichbar.",
+  "repeatSearch": "Erneut suchen",
+  "lyricMatchesUpper": "TEXT-TREFFER",
+  "tracksUpper": "TITEL",
+  "playTrack": "„{title}“ von {artist} spielen",
+  "familiarLinesUpper": "BEKANNTE ZEILEN",
+  "bestMatchUpper": "BESTER TREFFER",
+  "fullVersionOnPlayback": "Wir suchen die vollständige Version, sobald die Wiedergabe startet.",
+  "forgotTitle": "Der Titel fehlt dir.\nNicht die Musik.",
+  "startAsYouRemember": "Ein Name, ein Titel oder eine Zeile aus dem Song.\nStarte mit allem, woran du dich erinnerst.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "Suche Namen so, wie sie klingen",
+  "rememberOnlyLine": "Ich erinnere mich nur an eine Zeile",
+  "findSongByWords": "Song anhand seiner Worte finden",
+  "yourArtistsUpper": "DEINE KÜNSTLER",
+  "language": "Sprache",
+  "languageCaption": "Die Oberfläche folgt sofort deiner Wahl",
+  "systemLanguage": "System",
+  "russian": "Russisch",
+  "english": "Englisch",
+  "themesAndShaders": "Themen und Effekte",
+  "themesSubtitle": "Aussehen, Sprache und Hintergrundbewegung",
+  "invalidThemeJson": "Thema konnte nicht gelesen werden. Prüfe das JSON-Format und die Feldwerte.",
+  "exportJson": "JSON exportieren",
+  "importJson": "JSON importieren",
+  "readyThemes": "Design-Voreinstellungen",
+  "gpuShaders": "Hintergründe-Effekte",
+  "meshGradient": "Weicher GPU-Verlauf aus den Titelfarben",
+  "vinylNoise": "Analoges Vinyl-Korn (Noise)",
+  "glassBlur": "Glas-Unschärfe (Backdrop Blur)",
+  "cornerRadius": "Eckenradius der Oberfläche",
+  "importThemeTitle": "Thema aus JSON importieren",
+  "pasteThemeJson": "Füge die JSON-Konfiguration des Themas ein:",
+  "cancel": "Abbrechen",
+  "apply": "Anwenden",
+  "themeApplied": "Thema erfolgreich angewendet!",
+  "exportThemeTitle": "Thema exportieren (JSON)",
+  "close": "Schließen",
+  "copyJson": "JSON kopieren",
+  "jsonCopied": "Themen-JSON in die Zwischenablage kopiert!",
+  "libraryUpper": "BIBLIOTHEK",
+  "localCollection": "Lokale Sammlung und Playlists",
+  "importShort": "Importieren",
+  "favorites": "Favoriten",
+  "playlists": "Playlists",
+  "history": "Verlauf",
+  "offline": "Offline",
+  "favoritesEmpty": "Deine Favoriten sind leer.\nTippe bei einem Titel auf das Herz, um ihn hier zu sammeln.",
+  "historyEmpty": "Dein Hörverlauf ist leer.\nSpiele Musik aus der Suche, und er erscheint hier.",
+  "noPlaylists": "Du hast noch keine Playlists",
+  "importPlaylistHint": "Importiere eine Spotify-Playlist oder füge eine Titelliste ein.",
+  "importMusicAction": "Musik importieren",
+  "playPlaylist": "Playlist abspielen",
+  "playlistStarted": "„{name}“ wird gespielt ({count} Titel)",
+  "deletePlaylist": "Playlist löschen",
+  "playAll": "Alles abspielen",
+  "shuffle": "Zufällig",
+  "localAudioCache": "Lokaler Audio-Cache",
+  "cacheDescription": "Gespielte Titel werden lokal gespeichert, um sie ohne Internet sofort erneut zu hören.",
+  "deviceUsage": "Auf diesem Gerät: {size}",
+  "clearCache": "Gesamten Cache leeren",
+  "savedTracksUpper": "GESPEICHERTE TITEL ({count}):",
+  "cacheFeaturesUpper": "CACHE-FUNKTIONEN:",
+  "offlineFirst": "Konsequent offline zuerst",
+  "offlineFirstDescription": "Beim erneuten Hören lädt das Audio direkt aus dem Dateisystem des Geräts.",
+  "maximumBitrate": "Maximale Bitrate",
+  "maximumBitrateDescription": "Saubere Opus-/M4A-Streams mit 160–256 kbps werden ohne Transkodierung gespeichert.",
+  "trafficAndBattery": "Daten und Akku sparen",
+  "trafficAndBatteryDescription": "Wiederholte Netzwerkanfragen vermeiden – dein Telefon hält länger durch.",
+  "cacheEmpty": "Der Cache ist leer",
+  "cachedTracksAppear": "Heruntergeladene Titel erscheinen hier automatisch",
+  "removeFromCache": "Aus dem Cache entfernen",
+  "removeCachedTrackTitle": "Titel aus dem Cache entfernen?",
+  "removeCachedTrackBody": "„{title}“ wird von diesem Gerät entfernt.",
+  "delete": "Löschen",
+  "trackRemovedFromCache": "Titel aus dem Cache entfernt",
+  "clearCacheTitle": "Cache leeren?",
+  "clearCacheBody": "Alle gespeicherten Audiodateien werden von diesem Gerät entfernt. Favoriten und Verlauf bleiben unverändert.",
+  "cacheCleared": "Lokaler Cache geleert",
+  "back": "Zurück",
+  "playlistActions": "Playlist-Aktionen",
+  "playlistUpper": "PLAYLIST",
+  "playlistEmpty": "In dieser Playlist sind noch keine Titel",
+  "pasteTrackList": "Titelliste einfügen",
+  "pasteImportLink": "Link zum Importieren einfügen",
+  "tracksNotFound": "Unter diesem Link wurden keine Titel gefunden.",
+  "importError": "Import fehlgeschlagen. Prüfe den Link und deine Internetverbindung.",
+  "importedPlaylistStarted": "Importierte Playlist wird gespielt ({count} Titel)",
+  "importedPlaylistName": "Import ({platform})",
+  "playlistSaved": "Playlist „{name}“ in deiner Bibliothek gespeichert!",
+  "spotifyImportSubtitle": "Spotify • Playlists, Alben und Titel",
+  "artistTrackOrCsv": "Künstler — Titel oder eine Exportify-CSV",
+  "pastePlaylistOrTrackLink": "Playlist- oder Titellink einfügen",
+  "pasteFromClipboard": "Aus der Zwischenablage einfügen",
+  "link": "Link",
+  "trackList": "Titelliste",
+  "playlistName": "Playlist-Name",
+  "startImport": "Import starten",
+  "importedCollectionMeta": "{author} • {count} Titel",
+  "importedFromSpotify": "Aus Spotify importiert",
+  "importIntro": "Nimm deine Playlists mit. Nutze einen Spotify-Link, eine Titelliste oder eine Exportify-Datei.",
+  "importTextTab": "Text",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "Datei wählen",
+  "importFileHint": "Wähle die von Exportify exportierte CSV oder eine TXT-Titelliste. UTF-8, bis 10 MB und 10.000 Titel.",
+  "importFileAndroidOnly": "Die Dateiauswahl ist unter Android verfügbar. Hier kannst du den Inhalt einer CSV oder Titelliste einfügen.",
+  "importTextHint": "Pro Zeile ein Künstler — Titel. Du kannst auch die komplette CSV samt Kopfzeile einfügen.",
+  "importPreview": "Titelvorschau",
+  "importedFromCsv": "Aus CSV importiert",
+  "importedFromText": "Aus einer Titelliste importiert",
+  "importMoreTracks": "Und {count} weitere",
+  "importMetadataHint": "Die Playlist wird auf diesem Gerät gespeichert. Das Audio wird beim Abspielen gesucht; der Import lädt keine Songs herunter.",
+  "importAnother": "Etwas anderes importieren",
+  "importReading": "Deine Playlist wird gelesen…",
+  "importSaving": "In deiner Bibliothek wird gespeichert…",
+  "importNameRequired": "Gib einen Playlist-Namen ein.",
+  "importNameExists": "Eine Playlist mit diesem Namen existiert bereits. Wähle einen anderen, um beide zu behalten.",
+  "importSaveFailed": "Playlist konnte nicht gespeichert werden. Deine Vorschau bleibt bestehen — versuche es erneut.",
+  "importFileTooLarge": "Diese Datei ist größer als 10 MB. Teile die Playlist in kleinere Exporte auf.",
+  "importFileUnsupported": "Wähle eine .csv- oder .txt-Datei.",
+  "importFileEncoding": "Die Textkodierung konnte nicht gelesen werden. Speichere die Datei als UTF-8 und versuche es erneut.",
+  "importCsvInvalid": "Die CSV ist unvollständig oder fehlerhaft. Exportiere sie erneut, ohne Spalten oder Anführungszeichen zu verändern.",
+  "importCsvMissingColumns": "Die CSV braucht die Spalten Track Name und Artist Name(s) oder Title und Artist. Nutze den originalen Exportify-Export.",
+  "importFileEmpty": "Keine Titel gefunden. Wähle einen gefüllten Export oder füge eine Künstler—Titel-Liste ein.",
+  "importTooManyTracks": "Ein einzelner Import umfasst höchstens 10.000 Titel. Teile diese Playlist; es wurde noch nichts gespeichert.",
+  "importFileReadFailed": "Diese Datei konnte nicht geöffnet werden. Prüfe, ob sie auf deinem Gerät verfügbar ist, und wähle sie erneut.",
+  "importSpotifyBlocked": "Spotify hat diese Playlist in deiner Region nicht geteilt. Exportiere sie mit Exportify und wähle die CSV-Datei.",
+  "listen": "Abspielen",
+  "addToPlaylists": "Zu Playlists hinzufügen",
+  "trackSemantics": "Titel {title}, {artist}",
+  "trackActions": "Titel-Aktionen",
+  "startWaveFromTrack": "Welle ab diesem Titel starten",
+  "addToQueue": "Zur Warteschlange hinzufügen",
+  "addedToQueue": "Zur Warteschlange hinzugefügt: {title}",
+  "removeFavorite": "Aus Favoriten entfernen",
+  "addFavorite": "Zu Favoriten hinzufügen",
+  "addToPlaylist": "Zur Playlist hinzufügen",
+  "goToArtist": "Zum Künstler",
+  "myPlaylist": "Meine Playlist",
+  "newPlaylist": "Neue Playlist",
+  "name": "Name",
+  "create": "Erstellen",
+  "loading": "Lädt…",
+  "pause": "Pause",
+  "play": "Abspielen",
+  "next": "Weiter",
+  "speedAndPitch": "Geschwindigkeit und Tonhöhe",
+  "speedValue": "Geschwindigkeit: {value}x",
+  "pitchValue": "Tonhöhe: {value}x",
+  "reset": "Zurücksetzen",
+  "moreActions": "Weitere Aktionen",
+  "playbackQueue": "Warteschlange",
+  "queueEmpty": "Die Warteschlange ist leer",
+  "selectingSource": "Quelle wird gewählt",
+  "collapsePlayer": "Player einklappen",
+  "nowPlayingUpper": "LÄUFT GERADE",
+  "queue": "Warteschlange",
+  "startWave": "Welle starten",
+  "cover": "Cover",
+  "karaokeLyrics": "Karaoke-Text",
+  "findMusicStart": "Finde Musik und starte die Wiedergabe",
+  "playbackNotStarted": "Die Wiedergabe hat noch nicht begonnen",
+  "openSearchFirstTrack": "Öffne die Suche, um deinen ersten Titel zu finden",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "Auf dem Gerät",
+  "sourceCatalog": "Katalog",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "Server",
+  "serverResolver": "Resolver-Server",
+  "serverResolverCaption": "Optionaler, selbst gehosteter Server, der vollständige Audiostreams auflöst. Die App sendet eine Suchanfrage oder Titel-ID; der Server antwortet mit einer Wiedergabe-URL. Vertrag und Referenzimplementierung liegen in docs/REMOTE_RESOLVER.md.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "Nicht konfiguriert",
+  "serverSave": "Speichern",
+  "serverDisable": "Deaktivieren",
+  "onboardingWelcomeTitle": "Willkommen bei Hook",
+  "onboardingWelcomeCaption": "Musik, Texte und dein eigener visueller Stil. Wähle eine Sprache, um zu starten — du kannst sie später in den Einstellungen wechseln.",
+  "onboardingSkip": "Überspringen",
+  "onboardingNext": "Weiter",
+  "onboardingStart": "Loslegen",
+  "onboardingMicrogTitle": "MicroG und das Google-Konto",
+  "onboardingMicrogBody": "MicroG stellt Google-Dienste auf benutzerdefinierten Android-ROMs nach, die ohne sie ausgeliefert werden. Hook nutzt sie nur für eine optionale Funktion: ein YouTube-Konto zu verbinden, um Playlists zu importieren. Zum Musikhören braucht es weder MicroG noch irgendeinen Google-Dienst.",
+  "onboardingMicrogNote": "Die Wiedergabe hängt nicht von MicroG ab. Die Kontoverbindung ist optional.",
+  "onboardingMicrogDownload": "MicroG herunterladen",
+  "onboardingMicrogStatusChecking": "Google-Dienste werden geprüft…",
+  "onboardingMicrogStatusOk": "Google-Dienste sind auf diesem Gerät vorhanden ({version}). Der Kontoimport funktioniert sofort.",
+  "onboardingMicrogStatusReVanced": "ReVanced GmsCore erkannt ({version}). Das offizielle Google-SDK ist damit nicht kompatibel, die Kontoverbindung kann also scheitern. Die Wiedergabe ist nicht betroffen.",
+  "onboardingMicrogStatusMissing": "Google-Dienste wurden nicht gefunden. Um Playlists aus einem YouTube-Konto zu importieren, installiere zuerst MicroG — oder überspringe dies und nutze Hook ohne Konto.",
+  "lyricsView": "Textansicht · {mode}",
+  "lyricsReadingRhythm": "Dein Leserythmus",
+  "lyricsModeSubtitle": "Drei Wege, dem Song näherzukommen.",
+  "lyricsModeLines": "Zeilen",
+  "lyricsModeKaraoke": "Karaoke",
+  "lyricsModeFocus": "Fokus",
+  "lyricsModeLinesDescription": "Ruhiger Text mit hervorgehobener aktueller Zeile",
+  "lyricsModeKaraokeDescription": "Die Wörter leuchten sanft mit dem Gesang auf",
+  "lyricsModeFocusDescription": "Eine große Zeile. Nichts weiter",
+  "lyricsModeSaveFailed": "Textansicht konnte nicht gespeichert werden.",
+  "lyricsModeFootnote": "Deine Wahl wird für künftige Songs gespeichert. Die Karaoke-Genauigkeit hängt von den Daten der Quelle ab: ohne Wort-Timing ist die Hervorhebung nur ungefähr, ohne Zeitstempel bleibt der Text stehen.",
+  "lyricsNotFound": "Text nicht gefunden",
+  "karaokeUnavailable": "Karaoke-Text ist für diesen Titel nicht verfügbar",
+  "unsyncedLyrics": "Unsynchronisierter Text",
+  "wordSyncUpper": "SYNCHRONISATION WORT FÜR WORT",
+  "lineSyncUpper": "SYNCHRONISATION ZEILE FÜR ZEILE",
+  "adjustLyricsSync": "Text-Synchronisation anpassen",
+  "startsSoon": "Es geht bald los",
+  "musicContinues": "Die Musik läuft weiter",
+  "decreaseLyricsOffset": "Versatz um 0,1 s verringern",
+  "lyricsOffset": "Versatz: {value} s",
+  "increaseLyricsOffset": "Versatz um 0,1 s erhöhen",
+  "hideSetting": "Einstellung ausblenden",
+  "lyricsOffsetSaveFailed": "Text-Versatz konnte nicht gespeichert werden.",
+  "audioForbidden": "Der Audioserver hat den Zugriff verweigert (HTTP 403). Der Titel wurde gefunden, aber sein Stream ist nicht verfügbar. Ein VPN garantiert keinen Audiozugriff.",
+  "fullVersionUnavailable": "In den verfügbaren Quellen wurde keine vollständige Version gefunden. Prüfe deine Verbindung oder versuche es später.",
+  "sourcePlaybackFailed": "{source} konnte diesen Titel nicht wiedergeben. Prüfe deine Verbindung oder versuche es später.",
+  "@@locale": "de",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

@@ -46,12 +46,18 @@ android {
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        multiDexEnabled true
     }
 
     buildTypes {
         release {
+            // TODO: point at a real release keystore before distributing
+            // (key.properties + signingConfigs.release); debug signing is a
+            // local-only convenience. Register the release SHA-1 with the
+            // Android OAuth client for YouTube account sign-in.
             signingConfig signingConfigs.debug
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -61,7 +67,6 @@ flutter {
 }
 
 dependencies {
-    implementation 'androidx.multidex:multidex:2.0.1'
     // Official Google Identity authorization for the read-only YouTube Data API.
     implementation 'com.google.android.gms:play-services-auth:22.0.0'
     // Bundled language identification; translation runs on the device.

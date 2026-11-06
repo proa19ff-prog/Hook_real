@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "设置",
+  "settingsCaption": "更改会保存在此设备上。",
+  "playerSettings": "播放器",
+  "lyricsAutoHide": "阅读歌词时隐藏控件",
+  "lyricsAutoHideDescription": "10 秒无操作后，播放器面板会滑出屏幕。使用还原按钮可将其找回。",
+  "showPlayerControls": "显示播放器控件",
+  "equalizer": "均衡器",
+  "equalizerEnabled": "声音处理",
+  "equalizerPresets": "声音配置",
+  "equalizerFlat": "原声",
+  "equalizerBass": "深沉低音",
+  "equalizerVocal": "人声",
+  "equalizerRock": "摇滚",
+  "equalizerElectronic": "电子",
+  "equalizerSoft": "柔和",
+  "equalizerCustom": "自定义",
+  "equalizerBands": "频段",
+  "equalizerBassBoost": "低音增强",
+  "equalizerBassUnsupported": "不支持额外的低音增强。请使用低频段。",
+  "equalizerPreamp": "前置增益",
+  "equalizerHeadroom": "自动余量",
+  "equalizerHeadroomDescription": "在提升频率时降低输出电平，为峰值留出空间。这不是限幅器。",
+  "equalizerWaiting": "播放一首曲目，将均衡器连接到其音频会话。",
+  "equalizerUnsupported": "声音处理目前仅在 Android 上可用。",
+  "equalizerFailed": "此设备无法启用音频效果。音乐仍可在没有它们的情况下播放。",
+  "equalizerRetry": "重新连接效果",
+  "equalizerLive": "更改立即生效并保存在此设备上。",
+  "youtubeAccount": "YouTube 与 MicroG",
+  "youtubeAccountReadOnly": "对播放列表的只读访问。登录并不保证音频可用。",
+  "youtubeAccountCompatibility": "兼容性与隐私",
+  "youtubeAccountSubtitle": "账号连接与播放列表导入",
+  "youtubeAccountPrivacy": "Hook 请求 YouTube 的只读访问。请仅在 Google 的系统对话框中输入密码，绝不要在 Hook 中输入。令牌不会发送到任何 Hook 服务器，只保留在内存中。重启应用后需要重新连接。",
+  "youtubeAccountPlaybackNotice": "登录提供的是账号数据访问权，而非音频流。它不能保证修复 HTTP 403。导入会保留 YouTube 录音，不会替换为其他来源。",
+  "youtubeAccountConnect": "连接账号",
+  "youtubeAccountDisconnect": "在 Hook 中断开",
+  "youtubeAccountDisconnected": "未连接账号",
+  "youtubeAccountDisconnectNotice": "仅在 Hook 中断开此账号？已保存的播放列表会保留。手机上的 Google 和 MicroG 账号不会退出登录。",
+  "youtubeAccountSystem": "系统 Google API",
+  "youtubeAccountServicesMissing": "缺少兼容的系统 Google API。单独安装的 ReVanced GmsCore 无法在 Hook 登录中替代它们。",
+  "youtubeAccountMicrogNotice": "检测到单独安装的 ReVanced GmsCore。Hook 不使用 ReVanced 的账号或令牌。系统 MicroG 可能提供兼容的 Google API，但不保证与此登录方式兼容。",
+  "youtubeAccountRevancedFound": "已安装 YouTube Music ReVanced",
+  "youtubeAccountPlaylists": "账号播放列表",
+  "youtubeAccountNoPlaylists": "没有可访问的播放列表。部分 YouTube Music 自动合集无法通过 YouTube Data API 获取。",
+  "youtubeAccountMore": "加载更多",
+  "youtubeAccountPreview": "准备导入",
+  "youtubeAccountProgress": "已获取曲目：{count}",
+  "youtubeAccountUnavailableTracks": "已跳过不可用条目：{count}。它们不会被其他曲目替代。",
+  "youtubeAccountSetup": "登录设置",
+  "youtubeAccountSetupBody": "开发者需要在 Google Cloud 启用 YouTube Data API v3，为 com.hook.music 及所安装版本的签名 SHA-1 注册 Android OAuth 客户端，并配置同意界面。在测试模式下添加允许的用户。参见 docs/YOUTUBE_ACCOUNT_SETUP.md。切勿添加密码、客户端密钥或其他应用的令牌。",
+  "youtubeAccountConfigError": "此版本未配置登录。请在 Google Cloud 中检查 Android OAuth 客户端、包名、SHA-1 和允许的测试用户。",
+  "youtubeAccountPermissionError": "未授予 YouTube 数据的读取权限。",
+  "youtubeAccountExpired": "会话已过期。请重新连接账号。",
+  "youtubeAccountNoChannel": "所选账号没有可访问的 YouTube 频道。",
+  "youtubeAccountQuota": "YouTube API 配额已超。请稍后再试。",
+  "youtubeAccountFailed": "无法获取 YouTube 数据。请检查网络连接后重试。",
+  "youtubeAccountUnsupported": "账号连接需要带有兼容系统 Google API 的 Android。",
+  "importedFromYouTube": "从 YouTube 账号导入",
+  "translateLyrics": "翻译歌词",
+  "hideTranslation": "隐藏翻译",
+  "cancelTranslation": "取消翻译",
+  "translationLoading": "正在准备翻译…",
+  "translationAttribution": "由 Google 翻译自动翻译",
+  "translationNotice": "翻译可能无法准确捕捉歌曲含义。逐词高亮仅适用于原文。",
+  "translationModelTitle": "下载语言模型？",
+  "translationModelBody": "翻译在您的手机上运行：歌词不会发送到任何服务器。首次翻译需要 Google ML Kit 模型，占用数十兆字节。下载会使用您当前的网络连接，包括移动数据。取消会隐藏结果，但已开始的模型下载可能在后台完成。",
+  "translationDownload": "下载并翻译",
+  "translationUnavailable": "翻译失败。请检查模型下载权限后重试。",
+  "translationUnsupported": "设备端翻译目前仅在 Android 上可用。",
+  "translationUnknownLanguage": "无法识别这首歌曲的支持语言。",
+  "translationSameLanguage": "歌词已经是所选语言。",
+  "translationTooLarge": "这些歌词太长，无法进行设备端翻译。",
+  "translationRussian": "译为俄语",
+  "translationEnglish": "译为英语",
+  "translationTarget": "翻译语言",
+  "retry": "重试",
+  "home": "主页",
+  "search": "搜索",
+  "library": "资料库",
+  "youtubeUnavailableTitle": "YouTube 当前不可用",
+  "youtubeUnavailableBody": "无法获取音频流。请检查网络和 VPN 路由：即使使用 VPN，YouTube 也可能拒绝请求。",
+  "checkAgain": "再次检查",
+  "dismiss": "关闭",
+  "goodNight": "晚安",
+  "goodMorning": "早上好",
+  "goodAfternoon": "下午好",
+  "goodEvening": "晚上好",
+  "themeSettings": "外观设置",
+  "onYourAir": "在你的电台",
+  "recentSignals": "{count, plural, other{{count} 条近期信号}}",
+  "collectionWaiting": "你的收藏在等你",
+  "saved": "已保存",
+  "collectionEmptyDetail": "你想回味的音乐会留在这里",
+  "tracksCount": "{count, plural, other{{count} 首曲目}}",
+  "homeSearchHint": "曲目、歌手或歌词",
+  "searchUpper": "搜索",
+  "findFirstTrack": "找到你的第一首曲目",
+  "continuationAfter": "{artist} 之后的更多音乐",
+  "chooseTrackWaveDetail": "选择一首曲目，我们会围绕它的情绪生成声波。",
+  "continueWaveLabel": "继续 / 01",
+  "yourWaveLabel": "你的声波 / 01",
+  "continueWave": "继续声波",
+  "chooseTrack": "选择曲目",
+  "firstTrace": "在这里留下你的第一道痕迹",
+  "favoriteWaveHint": "收藏喜欢的歌，你的声波会更准。",
+  "openSearch": "打开搜索",
+  "findYourMusic": "找到你的声音。",
+  "importMusic": "导入音乐",
+  "rememberedLyricsHint": "你记得的那些歌词…",
+  "trackArtistHint": "曲目或歌手——任何语言",
+  "clear": "清除",
+  "music": "音乐",
+  "byLyrics": "按歌词",
+  "allSources": "全部来源",
+  "lyricsSearchCaption": "搜索歌中的一句话，而不仅是标题。",
+  "searchingLyrics": "寻找熟悉的句子…",
+  "searchingSources": "正在搜索音乐来源…",
+  "connectionFailed": "无法连接",
+  "noMatches": "暂无匹配",
+  "lyricsUnavailable": "歌词搜索当前不可用。请稍后再试，或按标题搜索。",
+  "searchUnavailable": "搜索失败。请检查网络连接后重试。",
+  "lyricsNoMatches": "换一句试试。并非所有歌词都已收录。",
+  "trackNoMatches": "加上歌手或换一个来源。某些服务在你的网络中可能不可用。",
+  "repeatSearch": "重新搜索",
+  "lyricMatchesUpper": "歌词匹配",
+  "tracksUpper": "曲目",
+  "playTrack": "播放 {title}，{artist}",
+  "familiarLinesUpper": "熟悉的句子",
+  "bestMatchUpper": "最佳匹配",
+  "fullVersionOnPlayback": "播放开始时我们会寻找完整版本。",
+  "forgotTitle": "忘了标题。\n没忘音乐。",
+  "startAsYouRemember": "歌名、标题或歌中的一句话。\n从任何记得的地方开始。",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "按发音搜索名字",
+  "rememberOnlyLine": "我只记得一句",
+  "findSongByWords": "按歌词找歌",
+  "yourArtistsUpper": "你的歌手",
+  "language": "语言",
+  "languageCaption": "界面立即跟随你的选择",
+  "systemLanguage": "跟随系统",
+  "russian": "俄语",
+  "english": "英语",
+  "themesAndShaders": "主题与特效",
+  "themesSubtitle": "外观、语言与背景动态",
+  "invalidThemeJson": "无法读取主题。请检查 JSON 格式与字段值。",
+  "exportJson": "导出 JSON",
+  "importJson": "导入 JSON",
+  "readyThemes": "主题预设",
+  "gpuShaders": "背景特效",
+  "meshGradient": "基于曲目色彩的柔和 GPU 渐变",
+  "vinylNoise": "模拟黑胶颗粒（噪点）",
+  "glassBlur": "玻璃模糊（Backdrop Blur）",
+  "cornerRadius": "界面圆角半径",
+  "importThemeTitle": "从 JSON 导入主题",
+  "pasteThemeJson": "粘贴主题的 JSON 配置：",
+  "cancel": "取消",
+  "apply": "应用",
+  "themeApplied": "主题应用成功！",
+  "exportThemeTitle": "导出主题（JSON）",
+  "close": "关闭",
+  "copyJson": "复制 JSON",
+  "jsonCopied": "主题 JSON 已复制到剪贴板！",
+  "libraryUpper": "资料库",
+  "localCollection": "本地收藏与播放列表",
+  "importShort": "导入",
+  "favorites": "收藏",
+  "playlists": "播放列表",
+  "history": "历史",
+  "offline": "离线",
+  "favoritesEmpty": "你的收藏还是空的。\n点击曲目上的红心即可添加到这里。",
+  "historyEmpty": "你的收听历史还是空的。\n从搜索播放音乐，它就会出现在这里。",
+  "noPlaylists": "你还没有播放列表",
+  "importPlaylistHint": "导入 Spotify 播放列表或粘贴曲目清单。",
+  "importMusicAction": "导入音乐",
+  "playPlaylist": "播放列表",
+  "playlistStarted": "正在播放「{name}」（{count} 首曲目）",
+  "deletePlaylist": "删除播放列表",
+  "playAll": "全部播放",
+  "shuffle": "随机播放",
+  "localAudioCache": "本地音频缓存",
+  "cacheDescription": "播放过的曲目会本地保存，以便离线秒回。",
+  "deviceUsage": "此设备上：{size}",
+  "clearCache": "清除全部缓存",
+  "savedTracksUpper": "已保存曲目（{count}）：",
+  "cacheFeaturesUpper": "缓存特性：",
+  "offlineFirst": "完全离线优先",
+  "offlineFirstDescription": "重播时，音频直接从设备文件系统加载。",
+  "maximumBitrate": "最高码率",
+  "maximumBitrateDescription": "160–256 kbps 的干净 Opus/M4A 流不经转码直接缓存。",
+  "trafficAndBattery": "省流量省电",
+  "trafficAndBatteryDescription": "避免重复的网络请求，让你的手机续航更久。",
+  "cacheEmpty": "缓存为空",
+  "cachedTracksAppear": "下载的曲目会自动出现在这里",
+  "removeFromCache": "从缓存移除",
+  "removeCachedTrackTitle": "从缓存移除该曲目？",
+  "removeCachedTrackBody": "「{title}」将从此设备移除。",
+  "delete": "删除",
+  "trackRemovedFromCache": "曲目已从缓存移除",
+  "clearCacheTitle": "清除缓存？",
+  "clearCacheBody": "所有保存的音频文件都将从此设备移除。收藏和历史不会改变。",
+  "cacheCleared": "本地缓存已清除",
+  "back": "返回",
+  "playlistActions": "播放列表操作",
+  "playlistUpper": "播放列表",
+  "playlistEmpty": "这个播放列表还没有曲目",
+  "pasteTrackList": "粘贴曲目清单",
+  "pasteImportLink": "粘贴要导入的链接",
+  "tracksNotFound": "该链接未找到曲目。",
+  "importError": "导入失败。请检查链接和网络连接。",
+  "importedPlaylistStarted": "正在播放导入的播放列表（{count} 首曲目）",
+  "importedPlaylistName": "导入（{platform}）",
+  "playlistSaved": "播放列表「{name}」已保存到你的资料库！",
+  "spotifyImportSubtitle": "Spotify • 播放列表、专辑与曲目",
+  "artistTrackOrCsv": "歌手 — 曲目，或 Exportify 的 CSV",
+  "pastePlaylistOrTrackLink": "粘贴播放列表或曲目链接",
+  "pasteFromClipboard": "从剪贴板粘贴",
+  "link": "链接",
+  "trackList": "曲目清单",
+  "playlistName": "播放列表名称",
+  "startImport": "开始导入",
+  "importedCollectionMeta": "{author} • {count} 首曲目",
+  "importedFromSpotify": "从 Spotify 导入",
+  "importIntro": "把你的播放列表带过来。使用 Spotify 链接、曲目清单或 Exportify 文件。",
+  "importTextTab": "文本",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "选择文件",
+  "importFileHint": "选择 Exportify 导出的 CSV 或 TXT 曲目清单。UTF-8，最大 10 MB、10,000 首。",
+  "importFileAndroidOnly": "文件选择在 Android 上可用。在此你可以粘贴 CSV 或曲目清单的内容。",
+  "importTextHint": "每行一条「歌手 — 曲目」。也可以粘贴含表头的完整 CSV。",
+  "importPreview": "曲目预览",
+  "importedFromCsv": "从 CSV 导入",
+  "importedFromText": "从曲目清单导入",
+  "importMoreTracks": "还有 {count} 首",
+  "importMetadataHint": "播放列表保存在此设备上。音频在播放曲目时查找；导入不会下载歌曲。",
+  "importAnother": "导入其他内容",
+  "importReading": "正在读取你的播放列表…",
+  "importSaving": "正在保存到资料库…",
+  "importNameRequired": "请输入播放列表名称。",
+  "importNameExists": "同名播放列表已存在。换一个名称可同时保留两者。",
+  "importSaveFailed": "无法保存播放列表。你的预览还在这里——再试一次。",
+  "importFileTooLarge": "文件超过 10 MB。请把播放列表拆分为更小的导出。",
+  "importFileUnsupported": "请选择 .csv 或 .txt 文件。",
+  "importFileEncoding": "无法读取文本编码。请以 UTF-8 保存文件后重试。",
+  "importCsvInvalid": "CSV 不完整或格式错误。请重新导出，不要改动列或引号。",
+  "importCsvMissingColumns": "CSV 需要包含 Track Name 和 Artist Name(s) 列，或 Title 和 Artist 列。请使用原始的 Exportify 导出。",
+  "importFileEmpty": "未找到曲目。请选择有内容的导出文件，或粘贴「歌手 — 曲目」清单。",
+  "importTooManyTracks": "单次导入最多 10,000 首。请拆分此播放列表；目前尚未保存任何内容。",
+  "importFileReadFailed": "无法打开此文件。请确认它在设备上可用后重新选择。",
+  "importSpotifyBlocked": "Spotify 未在你的地区分享此播放列表。请用 Exportify 导出后选择 CSV 文件。",
+  "listen": "播放",
+  "addToPlaylists": "添加到播放列表",
+  "trackSemantics": "曲目 {title}，{artist}",
+  "trackActions": "曲目操作",
+  "startWaveFromTrack": "从这首曲目开始声波",
+  "addToQueue": "添加到队列",
+  "addedToQueue": "已加入队列：{title}",
+  "removeFavorite": "从收藏移除",
+  "addFavorite": "添加到收藏",
+  "addToPlaylist": "添加到播放列表",
+  "goToArtist": "前往歌手",
+  "myPlaylist": "我的播放列表",
+  "newPlaylist": "新建播放列表",
+  "name": "名称",
+  "create": "创建",
+  "loading": "加载中…",
+  "pause": "暂停",
+  "play": "播放",
+  "next": "下一首",
+  "speedAndPitch": "速度与音调",
+  "speedValue": "速度：{value}x",
+  "pitchValue": "音调：{value}x",
+  "reset": "重置",
+  "moreActions": "更多操作",
+  "playbackQueue": "播放队列",
+  "queueEmpty": "队列为空",
+  "selectingSource": "正在选择来源",
+  "collapsePlayer": "收起播放器",
+  "nowPlayingUpper": "正在播放",
+  "queue": "队列",
+  "startWave": "开始声波",
+  "cover": "封面",
+  "karaokeLyrics": "卡拉OK歌词",
+  "findMusicStart": "找到音乐，开始播放",
+  "playbackNotStarted": "播放尚未开始",
+  "openSearchFirstTrack": "打开搜索，找到你的第一首曲目",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "设备上",
+  "sourceCatalog": "曲库",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "服务器",
+  "serverResolver": "解析服务器",
+  "serverResolverCaption": "可选的自托管服务器，用于解析完整音频流。应用发送搜索词或曲目 ID；服务器返回播放地址。契约与参考实现在 docs/REMOTE_RESOLVER.md。",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "未配置",
+  "serverSave": "保存",
+  "serverDisable": "停用",
+  "onboardingWelcomeTitle": "欢迎来到 Hook",
+  "onboardingWelcomeCaption": "音乐、歌词与属于你的视觉风格。选择语言开始——之后可以在设置中更改。",
+  "onboardingSkip": "跳过",
+  "onboardingNext": "继续",
+  "onboardingStart": "开始聆听",
+  "onboardingMicrogTitle": "MicroG 与 Google 账号",
+  "onboardingMicrogBody": "MicroG 在没有预装 Google 服务的自定义 Android 系统上重建这些服务。Hook 只将它们用于一项可选功能：连接 YouTube 账号以导入播放列表。播放音乐从不需要 MicroG 或任何 Google 服务。",
+  "onboardingMicrogNote": "播放不依赖 MicroG。连接账号是可选的。",
+  "onboardingMicrogDownload": "下载 MicroG",
+  "onboardingMicrogStatusChecking": "正在检查 Google 服务…",
+  "onboardingMicrogStatusOk": "此设备上已有 Google 服务（{version}）。账号导入开箱即用。",
+  "onboardingMicrogStatusReVanced": "检测到 ReVanced GmsCore（{version}）。官方 Google 登录 SDK 与其不兼容，账号连接可能无法使用。播放不受影响。",
+  "onboardingMicrogStatusMissing": "未找到 Google 服务。要从 YouTube 账号导入播放列表，请先安装 MicroG——或者跳过，直接无账号使用 Hook。",
+  "lyricsView": "歌词视图 · {mode}",
+  "lyricsReadingRhythm": "你的阅读节奏",
+  "lyricsModeSubtitle": "三种方式贴近这首歌。",
+  "lyricsModeLines": "逐行",
+  "lyricsModeKaraoke": "卡拉OK",
+  "lyricsModeFocus": "聚焦",
+  "lyricsModeLinesDescription": "安静展示歌词并高亮当前行",
+  "lyricsModeKaraokeDescription": "字词随人声缓缓亮起",
+  "lyricsModeFocusDescription": "一行大字。别无他物",
+  "lyricsModeSaveFailed": "无法保存歌词视图。",
+  "lyricsModeFootnote": "你的选择会为之后的歌曲保留。卡拉OK的精度取决于来源数据：没有逐词时间戳时高亮是近似的，没有时间标记时歌词保持静止。",
+  "lyricsNotFound": "未找到歌词",
+  "karaokeUnavailable": "这首曲目没有卡拉OK歌词",
+  "unsyncedLyrics": "未同步歌词",
+  "wordSyncUpper": "逐词同步",
+  "lineSyncUpper": "逐行同步",
+  "adjustLyricsSync": "调整歌词同步",
+  "startsSoon": "即将开始",
+  "musicContinues": "音乐继续",
+  "decreaseLyricsOffset": "偏移减少 0.1 秒",
+  "lyricsOffset": "偏移：{value} 秒",
+  "increaseLyricsOffset": "偏移增加 0.1 秒",
+  "hideSetting": "隐藏设置",
+  "lyricsOffsetSaveFailed": "无法保存歌词偏移。",
+  "audioForbidden": "音频服务器拒绝访问（HTTP 403）。曲目已找到，但其音频流不可用。VPN 不保证能访问音频。",
+  "fullVersionUnavailable": "在可用来源中未找到完整版本。请检查连接或稍后再试。",
+  "sourcePlaybackFailed": "{source} 无法播放此曲目。请检查连接或稍后再试。",
+  "@@locale": "zh",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

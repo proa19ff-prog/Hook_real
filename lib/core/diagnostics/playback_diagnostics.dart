@@ -35,12 +35,13 @@ class PlaybackDiagnostics {
     Object? error,
     int? count,
     int? durationMs,
+    String? detail,
   }) {
     final output = sink;
     if (output == null) return;
     final host = url == null ? null : Uri.tryParse(url)?.host;
     output(
-      '[HookAudio] ${jsonEncode({'stage': stage, 'source': source, if (host != null && host.isNotEmpty) 'host': host, if (error != null) 'failure': failureLabel(error), if (count != null) 'count': count, if (durationMs != null) 'durationMs': durationMs})}',
+      '[HookAudio] ${jsonEncode({'stage': stage, 'source': source, if (detail != null) 'detail': detail, if (host != null && host.isNotEmpty) 'host': host, if (error != null) 'failure': failureLabel(error), if (count != null) 'count': count, if (durationMs != null) 'durationMs': durationMs})}',
     );
   }
 }

@@ -9,6 +9,8 @@ import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/mini_player.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
 import 'features/home/presentation/home_screen.dart';
+import 'features/onboarding/onboarding_provider.dart';
+import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'features/extractor/models/media_track.dart';
 import 'features/library/presentation/library_screen.dart';
 import 'features/search/presentation/search_screen.dart';
@@ -23,6 +25,7 @@ class HookApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeProvider);
     final locale = ref.watch(localeProvider);
+    final onboardingDone = ref.watch(onboardingProvider);
 
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -36,7 +39,9 @@ class HookApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const MainNavigationShell(),
+      home: onboardingDone
+          ? const MainNavigationShell()
+          : const OnboardingScreen(),
     );
   }
 }

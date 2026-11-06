@@ -8,6 +8,7 @@ import 'models/resolved_stream.dart';
 import 'soundcloud/soundcloud_extractor.dart';
 import 'sources/audius_source.dart';
 import 'sources/music_source.dart';
+import 'sources/remote_resolver_source.dart';
 import 'sources/youtube_music_source.dart';
 import 'spotify/spotify_catalog_service.dart';
 
@@ -25,11 +26,14 @@ class StreamResolver {
     SpotifyCatalogService? spotifyCatalog,
     List<MusicSource>? additionalSources,
     this._searchTimeout = const Duration(seconds: 9),
-    this._resolveTimeout = const Duration(seconds: 14),
+    // Room for the YouTube client chain (7s cap per client) to try several
+    // Innertube clients before the source is declared unavailable.
+    this._resolveTimeout = const Duration(seconds: 20),
   }) : _scExtractor = scExtractor ?? SoundCloudExtractor(),
        _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService(),
        _additionalSources =
-           additionalSources ?? [YouTubeMusicSource(), AudiusSource()];
+           additionalSources ??
+           [YouTubeMusicSource(), AudiusSource(), RemoteResolverSource()];
 
   static String fixKeyboardLayout(String input) =>
       SearchQueryNormalizer.fixKeyboardLayout(input);

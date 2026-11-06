@@ -1003,6 +1003,75 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sourceAudius => 'Audius';
 
   @override
+  String get sourceServer => 'Сервер';
+
+  @override
+  String get serverResolver => 'Резолвер-сервер';
+
+  @override
+  String get serverResolverCaption =>
+      'Необязательный собственный сервер, который находит полные аудиопотоки. Приложение отправляет поисковый запрос или ID трека, сервер возвращает ссылку на воспроизведение. Контракт и пример реализации — в docs/REMOTE_RESOLVER.md.';
+
+  @override
+  String get serverResolverHint => 'https://hook-resolver.example.com';
+
+  @override
+  String get serverResolverDisabled => 'Не настроен';
+
+  @override
+  String get serverSave => 'Сохранить';
+
+  @override
+  String get serverDisable => 'Отключить';
+
+  @override
+  String get onboardingWelcomeTitle => 'Добро пожаловать в Hook';
+
+  @override
+  String get onboardingWelcomeCaption =>
+      'Музыка, тексты и свой визуальный стиль. Выберите язык, чтобы начать — его можно поменять в настройках.';
+
+  @override
+  String get onboardingSkip => 'Пропустить';
+
+  @override
+  String get onboardingNext => 'Далее';
+
+  @override
+  String get onboardingStart => 'Начать';
+
+  @override
+  String get onboardingMicrogTitle => 'MicroG и аккаунт Google';
+
+  @override
+  String get onboardingMicrogBody =>
+      'MicroG воссоздаёт сервисы Google на кастомных прошивках Android, где их нет. Hook использует эти сервисы только для одной необязательной функции — подключения аккаунта YouTube ради импорта плейлистов. Воспроизведению музыки MicroG и любые сервисы Google не нужны.';
+
+  @override
+  String get onboardingMicrogNote =>
+      'Воспроизведение не зависит от MicroG. Подключение аккаунта — необязательный шаг.';
+
+  @override
+  String get onboardingMicrogDownload => 'Скачать MicroG';
+
+  @override
+  String get onboardingMicrogStatusChecking => 'Проверяем сервисы Google…';
+
+  @override
+  String onboardingMicrogStatusOk(String version) {
+    return 'Сервисы Google есть на устройстве ($version). Импорт аккаунта заработает сразу.';
+  }
+
+  @override
+  String onboardingMicrogStatusReVanced(String version) {
+    return 'Обнаружен ReVanced GmsCore ($version). Официальный SDK входа Google с ним несовместим, поэтому подключение аккаунта может не заработать. На воспроизведение это не влияет.';
+  }
+
+  @override
+  String get onboardingMicrogStatusMissing =>
+      'Сервисы Google не найдены. Чтобы импортировать плейлисты из аккаунта YouTube, сначала установите MicroG — либо пропустите и пользуйтесь Hook без аккаунта.';
+
+  @override
   String lyricsView(String mode) {
     return 'Вид текста · $mode';
   }

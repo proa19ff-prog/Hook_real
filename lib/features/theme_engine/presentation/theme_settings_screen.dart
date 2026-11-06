@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/localization/locale_provider.dart';
+import '../../../core/localization/supported_languages.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../domain/hook_theme.dart';
@@ -243,18 +244,13 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                         locale == null,
                         colors,
                       ),
-                      _languageChip(
-                        'ru',
-                        strings.russian,
-                        locale?.languageCode == 'ru',
-                        colors,
-                      ),
-                      _languageChip(
-                        'en',
-                        strings.english,
-                        locale?.languageCode == 'en',
-                        colors,
-                      ),
+                      for (final (code, name) in supportedLanguages)
+                        _languageChip(
+                          code,
+                          name,
+                          locale?.languageCode == code,
+                          colors,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 32),

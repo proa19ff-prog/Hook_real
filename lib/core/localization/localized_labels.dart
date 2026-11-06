@@ -9,6 +9,7 @@ extension LocalizedTrackSource on TrackSource {
     TrackSource.spotify => strings.sourceCatalog,
     TrackSource.youtubeMusic => strings.sourceYouTube,
     TrackSource.audius => strings.sourceAudius,
+    TrackSource.remote => strings.sourceServer,
   };
 }
 

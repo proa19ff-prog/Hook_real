@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "設定",
+  "settingsCaption": "変更はこの端末に保存されます。",
+  "playerSettings": "プレーヤー",
+  "lyricsAutoHide": "歌詞を読む間コントロールを隠す",
+  "lyricsAutoHideDescription": "10秒間操作がないと、プレーヤーのパネルが画面からスライドして消えます。復元ボタンで呼び戻せます。",
+  "showPlayerControls": "プレーヤーのコントロールを表示",
+  "equalizer": "イコライザー",
+  "equalizerEnabled": "サウンド処理",
+  "equalizerPresets": "サウンドプロファイル",
+  "equalizerFlat": "オリジナル",
+  "equalizerBass": "深いベース",
+  "equalizerVocal": "ボーカル",
+  "equalizerRock": "ロック",
+  "equalizerElectronic": "エレクトロニカ",
+  "equalizerSoft": "ソフト",
+  "equalizerCustom": "カスタム",
+  "equalizerBands": "周波数帯域",
+  "equalizerBassBoost": "ベースブースト",
+  "equalizerBassUnsupported": "追加のベースブーストには対応していません。低域の帯域をお使いください。",
+  "equalizerPreamp": "プリアンプ",
+  "equalizerHeadroom": "自動ヘッドルーム",
+  "equalizerHeadroomDescription": "周波数を持ち上げる際に出力レベルを下げ、ピークのための余裕を確保します。リミッターではありません。",
+  "equalizerWaiting": "曲を再生すると、イコライザーがそのオーディオセッションに接続されます。",
+  "equalizerUnsupported": "サウンド処理は現在Androidでのみ利用できます。",
+  "equalizerFailed": "この端末ではオーディオ効果を有効にできませんでした。音楽は効果なしでも再生できます。",
+  "equalizerRetry": "効果を再接続",
+  "equalizerLive": "変更は即座に適用され、この端末に保存されます。",
+  "youtubeAccount": "YouTube と MicroG",
+  "youtubeAccountReadOnly": "プレイリストへの読み取り専用アクセス。サインインしても音声が再生できるとは限りません。",
+  "youtubeAccountCompatibility": "互換性とプライバシー",
+  "youtubeAccountSubtitle": "アカウント接続とプレイリストのインポート",
+  "youtubeAccountPrivacy": "Hook は YouTube への読み取り専用アクセスを要求します。パスワードは Google のシステムダイアログにのみ入力し、Hook には絶対に入力しないでください。トークンは Hook のサーバーには送られず、メモリ上にのみ保持されます。アプリ再起動後は再接続が必要です。",
+  "youtubeAccountPlaybackNotice": "サインインで得られるのはアカウントデータへのアクセスであり、オーディオストリームではありません。HTTP 403 の解決を保証するものでもありません。インポートは YouTube の録音を別のソースに置き換えずに保持します。",
+  "youtubeAccountConnect": "アカウントを接続",
+  "youtubeAccountDisconnect": "Hook で接続解除",
+  "youtubeAccountDisconnected": "アカウント未接続",
+  "youtubeAccountDisconnectNotice": "このアカウントを Hook だけから解除しますか？保存したプレイリストは残ります。携帯電話上の Google・MicroG アカウントからはサインアウトしません。",
+  "youtubeAccountSystem": "システムの Google API",
+  "youtubeAccountServicesMissing": "互換性のあるシステム Google API が利用できません。別途インストールした ReVanced GmsCore は Hook のサインインには代わりになりません。",
+  "youtubeAccountMicrogNotice": "別途インストールされた ReVanced GmsCore が検出されました。Hook は ReVanced のアカウントやトークンを使用しません。システムの MicroG が互換性のある Google API を提供する場合もありますが、このサインイン方式との互換性は保証されません。",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced がインストールされています",
+  "youtubeAccountPlaylists": "アカウントのプレイリスト",
+  "youtubeAccountNoPlaylists": "アクセス可能なプレイリストがありません。YouTube Music の一部の自動コレクションは YouTube Data API からは取得できません。",
+  "youtubeAccountMore": "さらに読み込む",
+  "youtubeAccountPreview": "インポートを準備",
+  "youtubeAccountProgress": "取得したトラック: {count}",
+  "youtubeAccountUnavailableTracks": "スキップした利用不可の項目: {count}。別のトラックには置き換えません。",
+  "youtubeAccountSetup": "サインインの設定",
+  "youtubeAccountSetupBody": "開発者は Google Cloud で YouTube Data API v3 を有効にし、com.hook.music とインストール済みビルドの署名 SHA-1 に対して Android OAuth クライアントを登録し、同意画面を構成する必要があります。テストモードでは許可するユーザーを追加してください。詳細は docs/YOUTUBE_ACCOUNT_SETUP.md。パスワード、クライアントシークレット、他アプリのトークンを絶対に追加しないでください。",
+  "youtubeAccountConfigError": "このビルドではサインインが設定されていません。Google Cloud で Android OAuth クライアント、パッケージ名、SHA-1、許可されたテストユーザーを確認してください。",
+  "youtubeAccountPermissionError": "YouTube データへの読み取りアクセスが許可されませんでした。",
+  "youtubeAccountExpired": "セッションの有効期限が切れました。アカウントに再接続してください。",
+  "youtubeAccountNoChannel": "選択したアカウントにはアクセス可能な YouTube チャンネルがありません。",
+  "youtubeAccountQuota": "YouTube API の割り当てを超えました。後でもう一度お試しください。",
+  "youtubeAccountFailed": "YouTube のデータを取得できませんでした。接続を確認してもう一度お試しください。",
+  "youtubeAccountUnsupported": "アカウント接続には、互換性のあるシステム Google API を備えた Android が必要です。",
+  "importedFromYouTube": "YouTube アカウントからインポート",
+  "translateLyrics": "歌詞を翻訳",
+  "hideTranslation": "翻訳を隠す",
+  "cancelTranslation": "翻訳をキャンセル",
+  "translationLoading": "翻訳を準備中…",
+  "translationAttribution": "Google 翻訳による自動翻訳",
+  "translationNotice": "翻訳が曲の意味を正確に捉えられない場合があります。単語のハイライトは原文にのみ適用されます。",
+  "translationModelTitle": "言語モデルをダウンロードしますか？",
+  "translationModelBody": "翻訳はあなたの携帯電話上で実行されます。歌詞がサーバーに送信されることはありません。初回の翻訳には Google ML Kit のモデルが必要で、数十メガバイトを要します。ダウンロードは現在の接続（モバイルデータを含む）を使用します。キャンセルすると結果は非表示になりますが、開始済みのモデルダウンロードはバックグラウンドで完了する場合があります。",
+  "translationDownload": "ダウンロードして翻訳",
+  "translationUnavailable": "翻訳に失敗しました。モデルのダウンロードへのアクセスを確認してもう一度お試しください。",
+  "translationUnsupported": "端末上での翻訳は現在 Android でのみ利用できます。",
+  "translationUnknownLanguage": "この曲の対応言語を特定できませんでした。",
+  "translationSameLanguage": "歌詞はすでに選択した言語です。",
+  "translationTooLarge": "この歌詞は端末上での翻訳には長すぎます。",
+  "translationRussian": "ロシア語へ",
+  "translationEnglish": "英語へ",
+  "translationTarget": "翻訳言語",
+  "retry": "再試行",
+  "home": "ホーム",
+  "search": "検索",
+  "library": "ライブラリ",
+  "youtubeUnavailableTitle": "YouTube は現在利用できません",
+  "youtubeUnavailableBody": "オーディオストリームを取得できませんでした。ネットワークと VPN 経路を確認してください。VPN を使っていても YouTube はリクエストを拒否することがあります。",
+  "checkAgain": "再確認",
+  "dismiss": "閉じる",
+  "goodNight": "おやすみなさい",
+  "goodMorning": "おはようございます",
+  "goodAfternoon": "こんにちは",
+  "goodEvening": "こんばんは",
+  "themeSettings": "外観の設定",
+  "onYourAir": "あなたの電波に乗せて",
+  "recentSignals": "{count, plural, other{最近のシグナル {count} 件}}",
+  "collectionWaiting": "あなたのコレクションが待っています",
+  "saved": "保存済み",
+  "collectionEmptyDetail": "また聴きたい音楽はここに残ります",
+  "tracksCount": "{count, plural, other{{count} 曲}}",
+  "homeSearchHint": "曲名、アーティスト、または歌詞",
+  "searchUpper": "検索",
+  "findFirstTrack": "最初の1曲を見つけましょう",
+  "continuationAfter": "{artist} のあとの音楽をもっと",
+  "chooseTrackWaveDetail": "曲を選べば、その雰囲気に合わせたウェーブを作ります。",
+  "continueWaveLabel": "つづき / 01",
+  "yourWaveLabel": "あなたのウェーブ / 01",
+  "continueWave": "ウェーブを続ける",
+  "chooseTrack": "曲を選ぶ",
+  "firstTrace": "最初の足跡をここに残しましょう",
+  "favoriteWaveHint": "お気に入りを保存すると、ウェーブがさらに的確になります。",
+  "openSearch": "検索を開く",
+  "findYourMusic": "あなたのサウンドを見つけて。",
+  "importMusic": "音楽をインポート",
+  "rememberedLyricsHint": "覚えているあの言葉…",
+  "trackArtistHint": "曲名かアーティスト — どの言語でも",
+  "clear": "クリア",
+  "music": "音楽",
+  "byLyrics": "歌詞で",
+  "allSources": "すべてのソース",
+  "lyricsSearchCaption": "タイトルではなく、歌の中のフレーズを検索します。",
+  "searchingLyrics": "聞き覚えのあるフレーズを探しています…",
+  "searchingSources": "音楽ソースを検索中…",
+  "connectionFailed": "接続できませんでした",
+  "noMatches": "まだ一致はありません",
+  "lyricsUnavailable": "歌詞検索は現在利用できません。後でもう一度試すか、タイトルで検索してください。",
+  "searchUnavailable": "検索に失敗しました。接続を確認してもう一度お試しください。",
+  "lyricsNoMatches": "別のフレーズを試してください。すべての歌詞が索引化されているわけではありません。",
+  "trackNoMatches": "アーティスト名を加えるか、別のソースを選んでください。一部のサービスはあなたのネットワークで利用できない場合があります。",
+  "repeatSearch": "もう一度検索",
+  "lyricMatchesUpper": "歌詞の一致",
+  "tracksUpper": "トラック",
+  "playTrack": "{title}（{artist}）を再生",
+  "familiarLinesUpper": "聞き覚えのあるフレーズ",
+  "bestMatchUpper": "最適な一致",
+  "fullVersionOnPlayback": "再生開始時にフルバージョンを探します。",
+  "forgotTitle": "タイトルは思い出せない。\nでも音楽は覚えている。",
+  "startAsYouRemember": "名前、タイトル、曲のフレーズ。\n思い出せるところから始めましょう。",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "名前は響きのままに検索",
+  "rememberOnlyLine": "フレーズしか覚えていない",
+  "findSongByWords": "歌詞の言葉から曲を探す",
+  "yourArtistsUpper": "あなたのアーティスト",
+  "language": "言語",
+  "languageCaption": "インターフェースは選択にすぐ従います",
+  "systemLanguage": "システム",
+  "russian": "ロシア語",
+  "english": "英語",
+  "themesAndShaders": "テーマとエフェクト",
+  "themesSubtitle": "外観、言語、背景の動き",
+  "invalidThemeJson": "テーマを読み取れませんでした。JSON 形式とフィールド値を確認してください。",
+  "exportJson": "JSON をエクスポート",
+  "importJson": "JSON をインポート",
+  "readyThemes": "テーマのプリセット",
+  "gpuShaders": "背景エフェクト",
+  "meshGradient": "曲の色に基づくなめらかな GPU グラデーション",
+  "vinylNoise": "アナログレコードの粒子（ノイズ）",
+  "glassBlur": "ガラスのぼかし（Backdrop Blur）",
+  "cornerRadius": "インターフェースの角丸",
+  "importThemeTitle": "JSON からテーマをインポート",
+  "pasteThemeJson": "テーマの JSON 設定を貼り付けてください：",
+  "cancel": "キャンセル",
+  "apply": "適用",
+  "themeApplied": "テーマを適用しました！",
+  "exportThemeTitle": "テーマをエクスポート（JSON）",
+  "close": "閉じる",
+  "copyJson": "JSON をコピー",
+  "jsonCopied": "テーマの JSON をクリップボードにコピーしました！",
+  "libraryUpper": "ライブラリ",
+  "localCollection": "ローカルコレクションとプレイリスト",
+  "importShort": "インポート",
+  "favorites": "お気に入り",
+  "playlists": "プレイリスト",
+  "history": "履歴",
+  "offline": "オフライン",
+  "favoritesEmpty": "お気に入りはまだ空です。\n曲のハートをタップするとここに追加されます。",
+  "historyEmpty": "再生履歴はまだ空です。\n検索から音楽を再生すると、ここに表示されます。",
+  "noPlaylists": "プレイリストはまだありません",
+  "importPlaylistHint": "Spotify のプレイリストをインポートするか、曲リストを貼り付けてください。",
+  "importMusicAction": "音楽をインポート",
+  "playPlaylist": "プレイリストを再生",
+  "playlistStarted": "「{name}」を再生中（{count} 曲）",
+  "deletePlaylist": "プレイリストを削除",
+  "playAll": "すべて再生",
+  "shuffle": "シャッフル",
+  "localAudioCache": "ローカルオーディオキャッシュ",
+  "cacheDescription": "再生した曲はローカルに保存され、インターネットなしですぐに再再生できます。",
+  "deviceUsage": "この端末上: {size}",
+  "clearCache": "キャッシュをすべて消去",
+  "savedTracksUpper": "保存したトラック（{count}）:",
+  "cacheFeaturesUpper": "キャッシュの特徴:",
+  "offlineFirst": "完全なオフラインファースト",
+  "offlineFirstDescription": "再再生の際、オーディオは端末のファイルシステムから直接読み込まれます。",
+  "maximumBitrate": "最大ビットレート",
+  "maximumBitrateDescription": "160〜256 kbps のクリーンな Opus/M4A ストリームはトランスコードせずに保存されます。",
+  "trafficAndBattery": "データと電池を節約",
+  "trafficAndBatteryDescription": "繰り返しのネットワーク要求を避けることで、携帯電話が長くもちます。",
+  "cacheEmpty": "キャッシュは空です",
+  "cachedTracksAppear": "ダウンロードした曲はここに自動的に表示されます",
+  "removeFromCache": "キャッシュから削除",
+  "removeCachedTrackTitle": "この曲をキャッシュから削除しますか？",
+  "removeCachedTrackBody": "「{title}」はこの端末から削除されます。",
+  "delete": "削除",
+  "trackRemovedFromCache": "曲をキャッシュから削除しました",
+  "clearCacheTitle": "キャッシュを消去しますか？",
+  "clearCacheBody": "保存済みのオーディオファイルはすべてこの端末から削除されます。お気に入りと履歴は変わりません。",
+  "cacheCleared": "ローカルキャッシュを消去しました",
+  "back": "戻る",
+  "playlistActions": "プレイリストの操作",
+  "playlistUpper": "プレイリスト",
+  "playlistEmpty": "このプレイリストにはまだ曲がありません",
+  "pasteTrackList": "曲リストを貼り付け",
+  "pasteImportLink": "インポートするリンクを貼り付け",
+  "tracksNotFound": "そのリンクからは曲が見つかりませんでした。",
+  "importError": "インポートに失敗しました。リンクとインターネット接続を確認してください。",
+  "importedPlaylistStarted": "インポートしたプレイリストを再生中（{count} 曲）",
+  "importedPlaylistName": "インポート（{platform}）",
+  "playlistSaved": "プレイリスト「{name}」をライブラリに保存しました！",
+  "spotifyImportSubtitle": "Spotify • プレイリスト、アルバム、トラック",
+  "artistTrackOrCsv": "アーティスト — 曲名、または Exportify の CSV",
+  "pastePlaylistOrTrackLink": "プレイリストまたは曲のリンクを貼り付け",
+  "pasteFromClipboard": "クリップボードから貼り付け",
+  "link": "リンク",
+  "trackList": "曲リスト",
+  "playlistName": "プレイリスト名",
+  "startImport": "インポートを開始",
+  "importedCollectionMeta": "{author} • {count} 曲",
+  "importedFromSpotify": "Spotify からインポート",
+  "importIntro": "あなたのプレイリストを持ち込みましょう。Spotify リンク、曲リスト、Exportify ファイルが使えます。",
+  "importTextTab": "テキスト",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "ファイルを選択",
+  "importFileHint": "Exportify でエクスポートした CSV か、TXT の曲リストを選択してください。UTF-8、最大 10 MB・10,000 曲。",
+  "importFileAndroidOnly": "ファイル選択は Android で利用できます。ここでは CSV や曲リストの内容を貼り付けることができます。",
+  "importTextHint": "1行に「アーティスト — 曲名」を1件。ヘッダー付きの CSV 全体を貼り付けても構いません。",
+  "importPreview": "曲のプレビュー",
+  "importedFromCsv": "CSV からインポート",
+  "importedFromText": "曲リストからインポート",
+  "importMoreTracks": "ほか {count} 曲",
+  "importMetadataHint": "プレイリストはこの端末に保存されます。オーディオは再生時に探されます。インポートしても曲はダウンロードされません。",
+  "importAnother": "ほかのものをインポート",
+  "importReading": "プレイリストを読み込み中…",
+  "importSaving": "ライブラリに保存中…",
+  "importNameRequired": "プレイリスト名を入力してください。",
+  "importNameExists": "同じ名前のプレイリストが既にあります。両方残すには別の名前を選んでください。",
+  "importSaveFailed": "プレイリストを保存できませんでした。プレビューは残っています — もう一度お試しください。",
+  "importFileTooLarge": "このファイルは 10 MB を超えています。プレイリストを小さなエクスポートに分けてください。",
+  "importFileUnsupported": ".csv または .txt ファイルを選択してください。",
+  "importFileEncoding": "テキストのエンコーディングを読み取れませんでした。ファイルを UTF-8 で保存してもう一度お試しください。",
+  "importCsvInvalid": "CSV が不完全か破損しています。列や引用符を変更せずに再エクスポートしてください。",
+  "importCsvMissingColumns": "CSV には Track Name と Artist Name(s)、または Title と Artist の列が必要です。元の Exportify エクスポートを使用してください。",
+  "importFileEmpty": "曲が見つかりませんでした。中身のあるエクスポートを選ぶか、アーティスト — 曲名のリストを貼り付けてください。",
+  "importTooManyTracks": "1回のインポートは最大 10,000 曲です。このプレイリストを分けてください。まだ何も保存されていません。",
+  "importFileReadFailed": "このファイルを開けませんでした。端末で利用可能か確認して、もう一度選択してください。",
+  "importSpotifyBlocked": "Spotify はこのプレイリストをあなたの地域で共有していません。Exportify でエクスポートし、CSV ファイルを選択してください。",
+  "listen": "再生",
+  "addToPlaylists": "プレイリストに追加",
+  "trackSemantics": "トラック {title}、{artist}",
+  "trackActions": "トラックの操作",
+  "startWaveFromTrack": "この曲からウェーブを開始",
+  "addToQueue": "キューに追加",
+  "addedToQueue": "キューに追加しました: {title}",
+  "removeFavorite": "お気に入りから削除",
+  "addFavorite": "お気に入りに追加",
+  "addToPlaylist": "プレイリストに追加",
+  "goToArtist": "アーティストへ",
+  "myPlaylist": "マイプレイリスト",
+  "newPlaylist": "新しいプレイリスト",
+  "name": "名前",
+  "create": "作成",
+  "loading": "読み込み中…",
+  "pause": "一時停止",
+  "play": "再生",
+  "next": "次へ",
+  "speedAndPitch": "速度とピッチ",
+  "speedValue": "速度: {value}x",
+  "pitchValue": "ピッチ: {value}x",
+  "reset": "リセット",
+  "moreActions": "その他の操作",
+  "playbackQueue": "再生キュー",
+  "queueEmpty": "キューは空です",
+  "selectingSource": "ソースを選択中",
+  "collapsePlayer": "プレーヤーを折りたたむ",
+  "nowPlayingUpper": "再生中",
+  "queue": "キュー",
+  "startWave": "ウェーブを開始",
+  "cover": "アートワーク",
+  "karaokeLyrics": "カラオケ歌詞",
+  "findMusicStart": "音楽を見つけて再生を始めよう",
+  "playbackNotStarted": "再生はまだ始まっていません",
+  "openSearchFirstTrack": "検索を開いて最初の1曲を見つけましょう",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "端末内",
+  "sourceCatalog": "カタログ",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "サーバー",
+  "serverResolver": "リゾルバサーバー",
+  "serverResolverCaption": "完全なオーディオストリームを解決する任意の自前サーバー。アプリは検索語またはトラック ID を送り、サーバーは再生 URL を返します。契約とリファレンス実装は docs/REMOTE_RESOLVER.md にあります。",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "未設定",
+  "serverSave": "保存",
+  "serverDisable": "無効にする",
+  "onboardingWelcomeTitle": "Hook へようこそ",
+  "onboardingWelcomeCaption": "音楽、歌詞、そしてあなただけのビジュアルスタイル。言語を選んで始めましょう — 設定から後で変えられます。",
+  "onboardingSkip": "スキップ",
+  "onboardingNext": "続ける",
+  "onboardingStart": "聴き始める",
+  "onboardingMicrogTitle": "MicroG と Google アカウント",
+  "onboardingMicrogBody": "MicroG は、Google サービスなしで提供されるカスタム Android ROM の上に、それらのサービスを再現します。Hook はそれを1つのオプション機能だけに使います。プレイリストをインポートするために YouTube アカウントを接続することです。音楽の再生に MicroG や Google サービスは一切必要ありません。",
+  "onboardingMicrogNote": "再生は MicroG に依存しません。アカウント接続は任意です。",
+  "onboardingMicrogDownload": "MicroG をダウンロード",
+  "onboardingMicrogStatusChecking": "Google サービスを確認中…",
+  "onboardingMicrogStatusOk": "この端末には Google サービスがあります（{version}）。アカウントのインポートはすぐに使えます。",
+  "onboardingMicrogStatusReVanced": "ReVanced GmsCore を検出（{version}）。公式の Google サインイン SDK とは互換性がないため、アカウント接続は動作しない可能性があります。再生には影響しません。",
+  "onboardingMicrogStatusMissing": "Google サービスが見つかりません。YouTube アカウントからプレイリストをインポートするには、先に MicroG をインストールするか、これをスキップしてアカウントなしで Hook をお使いください。",
+  "lyricsView": "歌詞ビュー · {mode}",
+  "lyricsReadingRhythm": "あなたの読むリズム",
+  "lyricsModeSubtitle": "曲に寄り添う3つの方法。",
+  "lyricsModeLines": "行",
+  "lyricsModeKaraoke": "カラオケ",
+  "lyricsModeFocus": "フォーカス",
+  "lyricsModeLinesDescription": "現在の行をハイライトした落ち着いた歌詞",
+  "lyricsModeKaraokeDescription": "言葉がボーカルに合わせてやさしく光ります",
+  "lyricsModeFocusDescription": "大きな1行だけ。他には何も",
+  "lyricsModeSaveFailed": "歌詞ビューを保存できませんでした。",
+  "lyricsModeFootnote": "選択は今後の曲にも保存されます。カラオケの精度はソースデータ次第です。単語ごとのタイミングがない場合ハイライトは概算で、タイムスタンプがなければ歌詞は動きません。",
+  "lyricsNotFound": "歌詞が見つかりません",
+  "karaokeUnavailable": "この曲のカラオケ歌詞は利用できません",
+  "unsyncedLyrics": "同期されていない歌詞",
+  "wordSyncUpper": "単語ごとのシンク",
+  "lineSyncUpper": "行ごとのシンク",
+  "adjustLyricsSync": "歌詞の同期を調整",
+  "startsSoon": "もうすぐ始まります",
+  "musicContinues": "音楽は続きます",
+  "decreaseLyricsOffset": "オフセットを 0.1 秒減らす",
+  "lyricsOffset": "オフセット: {value} 秒",
+  "increaseLyricsOffset": "オフセットを 0.1 秒増やす",
+  "hideSetting": "設定を隠す",
+  "lyricsOffsetSaveFailed": "歌詞のオフセットを保存できませんでした。",
+  "audioForbidden": "オーディオサーバーがアクセスを拒否しました（HTTP 403）。曲は見つかりましたが、そのストリームは利用できません。VPN でもオーディオへのアクセスは保証されません。",
+  "fullVersionUnavailable": "利用可能なソースにフルバージョンが見つかりませんでした。接続を確認するか、後でもう一度お試しください。",
+  "sourcePlaybackFailed": "{source} はこの曲を再生できませんでした。接続を確認するか、後でもう一度お試しください。",
+  "@@locale": "ja",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

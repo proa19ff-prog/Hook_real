@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "الإعدادات",
+  "settingsCaption": "تُحفظ التغييرات على هذا الجهاز.",
+  "playerSettings": "المشغّل",
+  "lyricsAutoHide": "إخفاء عناصر التحكم أثناء قراءة الكلمات",
+  "lyricsAutoHideDescription": "بعد 10 ثوانٍ من عدم التفاعل، تنزلق لوحات المشغّل خارج الشاشة. استخدم زر الاستعادة لإعادتها.",
+  "showPlayerControls": "إظهار عناصر تحكم المشغّل",
+  "equalizer": "مُعادِل الصوت",
+  "equalizerEnabled": "معالجة الصوت",
+  "equalizerPresets": "الملف الصوتي",
+  "equalizerFlat": "الأصلي",
+  "equalizerBass": "باس عميق",
+  "equalizerVocal": "غناء",
+  "equalizerRock": "روك",
+  "equalizerElectronic": "إلكترونية",
+  "equalizerSoft": "ناعم",
+  "equalizerCustom": "مخصص",
+  "equalizerBands": "نطاقات الترددات",
+  "equalizerBassBoost": "تعزيز الباس",
+  "equalizerBassUnsupported": "تعزيز الباس الإضافي غير مدعوم. استخدم نطاقات الترددات المنخفضة.",
+  "equalizerPreamp": "التضخيم المسبق",
+  "equalizerHeadroom": "هامش تلقائي",
+  "equalizerHeadroomDescription": "يخفض مستوى الخرج عند رفع الترددات لترك مساحة للذِرَوات. ليس محدِّداً.",
+  "equalizerWaiting": "شغّل مقطوعة لربط مُعادِل الصوت بجلستها الصوتية.",
+  "equalizerUnsupported": "معالجة الصوت متاحة حالياً على أندرويد فقط.",
+  "equalizerFailed": "تعذّر على هذا الجهاز تشغيل المؤثرات الصوتية. لا يزال بإمكان الموسيقى أن تعمل بدونها.",
+  "equalizerRetry": "إعادة ربط المؤثرات",
+  "equalizerLive": "تُطبَّق التغييرات فوراً وتُحفَظ على هذا الجهاز.",
+  "youtubeAccount": "يوتيوب وMicroG",
+  "youtubeAccountReadOnly": "وصول للقراءة فقط إلى قوائم التشغيل. تسجيل الدخول لا يضمن توفّر الصوت.",
+  "youtubeAccountCompatibility": "التوافق والخصوصية",
+  "youtubeAccountSubtitle": "ربط الحساب واستيراد قوائم التشغيل",
+  "youtubeAccountPrivacy": "يطلب Hook وصولاً للقراءة فقط إلى يوتيوب. أدخل كلمة المرور في نافذة نظام Google فقط، وليس في Hook أبداً. لا يُرسَل الرمز إلى أي خادم تابع لـ Hook ويُحفَظ في الذاكرة فقط. أعد الاتصال بعد إعادة تشغيل التطبيق.",
+  "youtubeAccountPlaybackNotice": "منح تسجيل الدخول إمكانية الوصول إلى بيانات الحساب، لا إلى تدفقات الصوت. لا يضمن إصلاح الخطأ 403. تحافظ عمليات الاستيراد على تسجيلات يوتيوب دون استبدالها بمصدر آخر.",
+  "youtubeAccountConnect": "ربط الحساب",
+  "youtubeAccountDisconnect": "فصل الحساب في Hook",
+  "youtubeAccountDisconnected": "لا يوجد حساب مرتبط",
+  "youtubeAccountDisconnectNotice": "فصل هذا الحساب في Hook فقط؟ ستبقى قوائم التشغيل المحفوظة. لن تُسجَّل الخروج حسابات Google وMicroG على الهاتف.",
+  "youtubeAccountSystem": "واجهات Google للنظام",
+  "youtubeAccountServicesMissing": "واجهات Google للنظام المتوافقة غير متوفرة. تثبيت ReVanced GmsCore منفصلاً لا يحل محلها لتسجيل الدخول في Hook.",
+  "youtubeAccountMicrogNotice": "تم رصد تثبيت منفصل لـ ReVanced GmsCore. لا يستخدم Hook حسابات أو رموز ReVanced. قد يوفر MicroG النظامي واجهات Google متوافقة، لكن التوافق مع طريقة تسجيل الدخول هذه غير مضمون.",
+  "youtubeAccountRevancedFound": "تطبيق YouTube Music ReVanced مثبّت",
+  "youtubeAccountPlaylists": "قوائم تشغيل الحساب",
+  "youtubeAccountNoPlaylists": "لا توجد قوائم تشغيل متاحة. بعض مجموعات YouTube Music التلقائية غير متاحة عبر YouTube Data API.",
+  "youtubeAccountMore": "تحميل المزيد",
+  "youtubeAccountPreview": "تجهيز الاستيراد",
+  "youtubeAccountProgress": "المقاطع المستردة: {count}",
+  "youtubeAccountUnavailableTracks": "إدخالات غير متاحة تم تخطيها: {count}. لا تُستبدل بمقاطع أخرى.",
+  "youtubeAccountSetup": "إعداد تسجيل الدخول",
+  "youtubeAccountSetupBody": "على المطوّر تفعيل YouTube Data API v3 في Google Cloud، وتسجيل عميل OAuth لأندرويد باسم com.hook.music وببصمة SHA-1 لتوقيع النسخة المثبَّتة، وضبط شاشة الموافقة. أضف المستخدمين المسموح لهم في وضع الاختبار. راجع docs/YOUTUBE_ACCOUNT_SETUP.md. لا تضِف كلمات مرور أو أسرار عملاء أو رموزاً من تطبيقات أخرى مطلقاً.",
+  "youtubeAccountConfigError": "تسجيل الدخول غير مضبوط لهذه النسخة. تحقق من عميل OAuth لأندرويد واسم الحزمة وSHA-1 والمستخدمين التجريبيين المسموح لهم في Google Cloud.",
+  "youtubeAccountPermissionError": "لم يُمنَح الوصول للقراءة إلى بيانات يوتيوب.",
+  "youtubeAccountExpired": "انتهت جلستك. أعد ربط الحساب.",
+  "youtubeAccountNoChannel": "الحساب المحدد لا يملك قناة يوتيوب متاحة.",
+  "youtubeAccountQuota": "تم تجاوز حصة واجهة يوتيوب. حاول لاحقاً.",
+  "youtubeAccountFailed": "تعذّر جلب بيانات يوتيوب. تحقق من اتصالك وحاول مجدداً.",
+  "youtubeAccountUnsupported": "يتطلب ربط الحساب أندرويد مع واجهات Google للنظام المتوافقة.",
+  "importedFromYouTube": "مستورد من حساب يوتيوب",
+  "translateLyrics": "ترجمة الكلمات",
+  "hideTranslation": "إخفاء الترجمة",
+  "cancelTranslation": "إلغاء الترجمة",
+  "translationLoading": "جارٍ تجهيز الترجمة…",
+  "translationAttribution": "مترجم آلياً بواسطة Google Translate",
+  "translationNotice": "قد لا تنقل الترجمة معنى الأغنية بدقة. يقتصر تمييز الكلمات على النص الأصلي.",
+  "translationModelTitle": "تنزيل نماذج اللغة؟",
+  "translationModelBody": "تعمل الترجمة على هاتفك: لا تُرسَل الكلمات إلى أي خادم. تحتاج الترجمة الأولى إلى نماذج Google ML Kit التي تستهلك عشرات الميغابايت. يستخدم التنزيل اتصالك الحالي، بما فيه بيانات الجوال. الإلغاء يخفي النتيجة، لكن تنزيلاً بدأ فعلاً قد يكتمل في الخلفية.",
+  "translationDownload": "تنزيل وترجمة",
+  "translationUnavailable": "فشلت الترجمة. تحقق من إمكانية تنزيل النماذج وحاول مجدداً.",
+  "translationUnsupported": "الترجمة على الجهاز متاحة حالياً على أندرويد فقط.",
+  "translationUnknownLanguage": "تعذّر تحديد لغة مدعومة لهذه الأغنية.",
+  "translationSameLanguage": "الكلمات بالفعل باللغة المحددة.",
+  "translationTooLarge": "هذه الكلمات أطول من أن تُترجَم على الجهاز.",
+  "translationRussian": "إلى الروسية",
+  "translationEnglish": "إلى الإنجليزية",
+  "translationTarget": "لغة الترجمة",
+  "retry": "إعادة المحاولة",
+  "home": "الرئيسية",
+  "search": "بحث",
+  "library": "المكتبة",
+  "youtubeUnavailableTitle": "يوتيوب غير متاح حالياً",
+  "youtubeUnavailableBody": "تعذّر الحصول على تدفق صوتي. تحقق من شبكتك ومسار VPN: قد يرفض يوتيوب الطلبات حتى مع VPN.",
+  "checkAgain": "تحقق مجدداً",
+  "dismiss": "تجاهل",
+  "goodNight": "تصبح على خير",
+  "goodMorning": "صباح الخير",
+  "goodAfternoon": "مساء الخير",
+  "goodEvening": "مساء الخير",
+  "themeSettings": "إعدادات المظهر",
+  "onYourAir": "على هوائك",
+  "recentSignals": "{count, plural, =0{لا إشارات حديثة} =1{إشارة حديثة واحدة} =2{إشارتان حديثتان} few{{count} إشارات حديثة} many{{count} إشارة حديثة} other{{count} إشارة حديثة}}",
+  "collectionWaiting": "مجموعتك تنتظرك",
+  "saved": "محفوظ",
+  "collectionEmptyDetail": "الموسيقى التي تريد العودة إليها ستبقى هنا",
+  "tracksCount": "{count, plural, =1{مقطوعة واحدة} =2{مقطوعتان} few{{count} مقاطع} many{{count} مقطوعة} other{{count} مقطوعة}}",
+  "homeSearchHint": "مقطوعة أو فنان أو كلمات",
+  "searchUpper": "بحث",
+  "findFirstTrack": "اعثر على مقطوعتك الأولى",
+  "continuationAfter": "موسيقى أخرى بعد {artist}",
+  "chooseTrackWaveDetail": "اختر مقطوعة وسنبنى موجة حول مزاجها.",
+  "continueWaveLabel": "متابعة / 01",
+  "yourWaveLabel": "موجتك / 01",
+  "continueWave": "متابعة الموجة",
+  "chooseTrack": "اختر مقطوعة",
+  "firstTrace": "اترك أثرك الأول هنا",
+  "favoriteWaveHint": "احفظ المفضلة وستصبح موجتك أدق.",
+  "openSearch": "افتح البحث",
+  "findYourMusic": "اعثر على صوتك.",
+  "importMusic": "استيراد الموسيقى",
+  "rememberedLyricsHint": "الكلمات التي تذكرها…",
+  "trackArtistHint": "مقطوعة أو فنان — بأي لغة",
+  "clear": "مسح",
+  "music": "موسيقى",
+  "byLyrics": "بالكلمات",
+  "allSources": "كل المصادر",
+  "lyricsSearchCaption": "ابحث عن عبارة من الأغنية، لا عن عنوانها فقط.",
+  "searchingLyrics": "البحث عن أسطر مألوفة…",
+  "searchingSources": "البحث في مصادر الموسيقى…",
+  "connectionFailed": "تعذّر الاتصال",
+  "noMatches": "لا تطابقات بعد",
+  "lyricsUnavailable": "البحث في الكلمات غير متاح الآن. جرّب لاحقاً أو ابحث بالعنوان.",
+  "searchUnavailable": "فشل البحث. تحقق من اتصالك وحاول مجدداً.",
+  "lyricsNoMatches": "جرّب سطراً آخر. ليست كل الكلمات مفهرسة.",
+  "trackNoMatches": "أضف اسم الفنان أو اختر مصدراً آخر. قد تكون بعض الخدمات غير متاحة على شبكتك.",
+  "repeatSearch": "ابحث مجدداً",
+  "lyricMatchesUpper": "تطابقات الكلمات",
+  "tracksUpper": "المقاطع",
+  "playTrack": "تشغيل {title} لـ {artist}",
+  "familiarLinesUpper": "أسطر مألوفة",
+  "bestMatchUpper": "أفضل تطابق",
+  "fullVersionOnPlayback": "سنجد النسخة الكاملة عند بدء التشغيل.",
+  "forgotTitle": "نسيتَ العنوان.\nلا الموسيقى.",
+  "startAsYouRemember": "اسم أو عنوان أو سطر من الأغنية.\nابدأ بما تتذكره.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "ابحث عن الأسماء كما تُنطَق",
+  "rememberOnlyLine": "أتذكر سطراً واحداً فقط",
+  "findSongByWords": "اعثر على أغنية بكلماتها",
+  "yourArtistsUpper": "فنانونك",
+  "language": "اللغة",
+  "languageCaption": "تتبع الواجهة اختيارك فوراً",
+  "systemLanguage": "النظام",
+  "russian": "الروسية",
+  "english": "الإنجليزية",
+  "themesAndShaders": "السمات والتأثيرات",
+  "themesSubtitle": "المظهر واللغة وحركة الخلفية",
+  "invalidThemeJson": "تعذّرت قراءة السمة. تحقق من تنسيق JSON وقيم الحقول.",
+  "exportJson": "تصدير JSON",
+  "importJson": "استيراد JSON",
+  "readyThemes": "سمات جاهزة",
+  "gpuShaders": "تأثيرات الخلفية",
+  "meshGradient": "تدرّج GPU ناعم مأخوذ من ألوان المقطوعة",
+  "vinylNoise": "حبيبات الفينيل التناظرية (ضجيج)",
+  "glassBlur": "ضبابية زجاجية (Backdrop Blur)",
+  "cornerRadius": "انحناء زوايا الواجهة",
+  "importThemeTitle": "استيراد سمة من JSON",
+  "pasteThemeJson": "الصق إعدادات السمة بصيغة JSON:",
+  "cancel": "إلغاء",
+  "apply": "تطبيق",
+  "themeApplied": "طُبِّقت السمة بنجاح!",
+  "exportThemeTitle": "تصدير السمة (JSON)",
+  "close": "إغلاق",
+  "copyJson": "نسخ JSON",
+  "jsonCopied": "نُسِخ JSON السمة إلى الحافظة!",
+  "libraryUpper": "المكتبة",
+  "localCollection": "المجموعة المحلية وقوائم التشغيل",
+  "importShort": "استيراد",
+  "favorites": "المفضلة",
+  "playlists": "قوائم التشغيل",
+  "history": "السجل",
+  "offline": "دون اتصال",
+  "favoritesEmpty": "مفضلتك فارغة.\nانقر على القلب عند مقطوعة لإضافتها هنا.",
+  "historyEmpty": "سجل استماعك فارغ.\nشغّل موسيقى من البحث وستظهر هنا.",
+  "noPlaylists": "لا تملك قوائم تشغيل بعد",
+  "importPlaylistHint": "استورد قائمة تشغيل من سبوتيفاي أو الصق قائمة مقاطع.",
+  "importMusicAction": "استيراد الموسيقى",
+  "playPlaylist": "تشغيل القائمة",
+  "playlistStarted": "يتم تشغيل «{name}» ({count} مقاطع)",
+  "deletePlaylist": "حذف قائمة التشغيل",
+  "playAll": "تشغيل الكل",
+  "shuffle": "عشوائي",
+  "localAudioCache": "ذاكرة الصوت المحلية",
+  "cacheDescription": "تُحفَظ المقاطع المشغَّلة محلياً لإعادة الاستماع الفوري دون اتصال.",
+  "deviceUsage": "على هذا الجهاز: {size}",
+  "clearCache": "محو كل ذاكرة التخزين المؤقت",
+  "savedTracksUpper": "المقاطع المحفوظة ({count}):",
+  "cacheFeaturesUpper": "ميزات ذاكرة التخزين المؤقت:",
+  "offlineFirst": "الأسبقية للاستخدام دون اتصال",
+  "offlineFirstDescription": "عند إعادة الاستماع يُحمَّل الصوت مباشرة من نظام ملفات الجهاز.",
+  "maximumBitrate": "أقصى معدل بت",
+  "maximumBitrateDescription": "تُحفَظ تدفقات Opus/M4A النظيفة بمعدل 160–256 كيلوبت/ث دون إعادة ترميز.",
+  "trafficAndBattery": "وفّر البيانات والبطارية",
+  "trafficAndBatteryDescription": "تجنّب الطلبات الشبكية المتكررة يجعل هاتفك يدوم أطول.",
+  "cacheEmpty": "ذاكرة التخزين المؤقت فارغة",
+  "cachedTracksAppear": "ستظهر المقاطع المنزَّلة هنا تلقائياً",
+  "removeFromCache": "إزالة من الذاكرة المؤقتة",
+  "removeCachedTrackTitle": "إزالة المقطوعة من الذاكرة المؤقتة؟",
+  "removeCachedTrackBody": "ستُزال «{title}» من هذا الجهاز.",
+  "delete": "حذف",
+  "trackRemovedFromCache": "أُزيلت المقطوعة من الذاكرة المؤقتة",
+  "clearCacheTitle": "محو الذاكرة المؤقتة؟",
+  "clearCacheBody": "ستُحذَف جميع ملفات الصوت المحفوظة من هذا الجهاز. لن تتغير المفضلة والسجل.",
+  "cacheCleared": "مُحِيَت الذاكرة المؤقتة المحلية",
+  "back": "رجوع",
+  "playlistActions": "إجراءات القائمة",
+  "playlistUpper": "قائمة التشغيل",
+  "playlistEmpty": "لا توجد مقاطع في هذه القائمة بعد",
+  "pasteTrackList": "الصق قائمة مقاطع",
+  "pasteImportLink": "الصق رابطاً لاستيراده",
+  "tracksNotFound": "لم يُعثَر على مقاطع في ذلك الرابط.",
+  "importError": "فشل الاستيراد. تحقق من الرابط واتصالك بالإنترنت.",
+  "importedPlaylistStarted": "يتم تشغيل قائمة مستوردة ({count} مقاطع)",
+  "importedPlaylistName": "استيراد ({platform})",
+  "playlistSaved": "حُفِظت قائمة التشغيل «{name}» في مكتبتك!",
+  "spotifyImportSubtitle": "سبوتيفاي • قوائم التشغيل والألبومات والمقاطع",
+  "artistTrackOrCsv": "فنان — مقطوعة، أو ملف CSV من Exportify",
+  "pastePlaylistOrTrackLink": "الصق رابط قائمة تشغيل أو مقطوعة",
+  "pasteFromClipboard": "لصق من الحافظة",
+  "link": "الرابط",
+  "trackList": "قائمة المقاطع",
+  "playlistName": "اسم قائمة التشغيل",
+  "startImport": "بدء الاستيراد",
+  "importedCollectionMeta": "{author} • {count} مقاطع",
+  "importedFromSpotify": "مستورد من سبوتيفاي",
+  "importIntro": "أحضر قوائم تشغيلك معك. استخدم رابط سبوتيفاي أو قائمة مقاطع أو ملف Exportify.",
+  "importTextTab": "نص",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "اختيار ملف",
+  "importFileHint": "اختر ملف CSV المصدَّر من Exportify أو قائمة مقاطع TXT. UTF-8، حتى 10 ميغابايت و10,000 مقطوعة.",
+  "importFileAndroidOnly": "اختيار الملفات متاح على أندرويد. هنا يمكنك لصق محتوى CSV أو قائمة مقاطع.",
+  "importTextHint": "سطر لكل «فنان — مقطوعة». يمكنك أيضاً لصق ملف CSV كاملاً مع ترويسته.",
+  "importPreview": "معاينة المقاطع",
+  "importedFromCsv": "مستورد من CSV",
+  "importedFromText": "مستورد من قائمة مقاطع",
+  "importMoreTracks": "و{count} أخرى",
+  "importMetadataHint": "تُحفَظ قائمة التشغيل على هذا الجهاز. يُبحَث عن الصوت عند تشغيل المقطوعة؛ الاستيراد لا ينزّل أغاني.",
+  "importAnother": "استيراد شيء آخر",
+  "importReading": "جارٍ قراءة قائمتك…",
+  "importSaving": "جارٍ الحفظ في مكتبتك…",
+  "importNameRequired": "أدخل اسم قائمة التشغيل.",
+  "importNameExists": "توجد قائمة بهذا الاسم بالفعل. اختر اسماً آخر للاحتفاظ بالاثنتين.",
+  "importSaveFailed": "تعذّر حفظ القائمة. معاينتك ما تزال هنا — حاول مجدداً.",
+  "importFileTooLarge": "هذا الملف يتجاوز 10 ميغابايت. قسّم القائمة إلى تصديرات أصغر.",
+  "importFileUnsupported": "اختر ملف .csv أو .txt.",
+  "importFileEncoding": "تعذّرت قراءة ترميز النص. احفظ الملف بترميز UTF-8 وحاول مجدداً.",
+  "importCsvInvalid": "ملف CSV غير مكتمل أو مشوه. أعد تصديره دون تعديل أعمدته أو علامات التنصيص.",
+  "importCsvMissingColumns": "يحتاج ملف CSV إلى عمودَي Track Name وArtist Name(s) أو Title وArtist. استخدم تصدير Exportify الأصلي.",
+  "importFileEmpty": "لم يُعثَر على مقاطع. اختر تصديراً مملوءاً أو الصق قائمة «فنان — مقطوعة».",
+  "importTooManyTracks": "يمكن لاستيراد واحد أن يحوي حتى 10,000 مقطوعة. قسّم هذه القائمة؛ لم يُحفَظ شيء بعد.",
+  "importFileReadFailed": "تعذّر فتح الملف. تأكد من توفره على جهازك واختره مجدداً.",
+  "importSpotifyBlocked": "لم تشارك سبوتيفاي هذه القائمة في منطقتك. صدِّرها عبر Exportify واختر ملف CSV بدلاً من ذلك.",
+  "listen": "تشغيل",
+  "addToPlaylists": "إضافة إلى قوائم التشغيل",
+  "trackSemantics": "مقطوعة {title}، {artist}",
+  "trackActions": "إجراءات المقطوعة",
+  "startWaveFromTrack": "بدء موجة من هذه المقطوعة",
+  "addToQueue": "إضافة إلى قائمة الانتظار",
+  "addedToQueue": "أُضيف إلى قائمة الانتظار: {title}",
+  "removeFavorite": "إزالة من المفضلة",
+  "addFavorite": "إضافة إلى المفضلة",
+  "addToPlaylist": "إضافة إلى قائمة تشغيل",
+  "goToArtist": "الانتقال إلى الفنان",
+  "myPlaylist": "قائمتي",
+  "newPlaylist": "قائمة جديدة",
+  "name": "الاسم",
+  "create": "إنشاء",
+  "loading": "جارٍ التحميل…",
+  "pause": "إيقاف مؤقت",
+  "play": "تشغيل",
+  "next": "التالي",
+  "speedAndPitch": "السرعة والطبقة",
+  "speedValue": "السرعة: {value}x",
+  "pitchValue": "الطبقة: {value}x",
+  "reset": "إعادة ضبط",
+  "moreActions": "إجراءات أخرى",
+  "playbackQueue": "قائمة انتظار التشغيل",
+  "queueEmpty": "قائمة الانتظار فارغة",
+  "selectingSource": "جارٍ اختيار المصدر",
+  "collapsePlayer": "تصغير المشغّل",
+  "nowPlayingUpper": "يُشغَّل الآن",
+  "queue": "قائمة الانتظار",
+  "startWave": "بدء الموجة",
+  "cover": "الغلاف",
+  "karaokeLyrics": "كلمات كاريوكي",
+  "findMusicStart": "اعثر على موسيقى وابدأ التشغيل",
+  "playbackNotStarted": "لم يبدأ التشغيل بعد",
+  "openSearchFirstTrack": "افتح البحث لتعثر على مقطوعتك الأولى",
+  "sourceSoundCloud": "ساوندكلاود",
+  "sourceDevice": "على الجهاز",
+  "sourceCatalog": "الكتالوج",
+  "sourceYouTube": "يوتيوب",
+  "sourceAudius": "أوديوس",
+  "sourceServer": "الخادم",
+  "serverResolver": "خادم التحليل",
+  "serverResolverCaption": "خادم ذاتي الاستضافة اختياري يحلل تدفقات صوتية كاملة. يرسل التطبيق بحثاً أو معرّف مقطوعة؛ ويعيد الخادم رابط تشغيل. العقد والتنفيذ المرجعي في docs/REMOTE_RESOLVER.md.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "غير مضبوط",
+  "serverSave": "حفظ",
+  "serverDisable": "تعطيل",
+  "onboardingWelcomeTitle": "مرحباً بك في Hook",
+  "onboardingWelcomeCaption": "موسيقى وكلمات وأسلوب بصري من صنعك. اختر لغة للبدء — يمكنك تغييرها لاحقاً في الإعدادات.",
+  "onboardingSkip": "تخطٍّ",
+  "onboardingNext": "متابعة",
+  "onboardingStart": "ابدأ الاستماع",
+  "onboardingMicrogTitle": "MicroG وحساب Google",
+  "onboardingMicrogBody": "يعيد MicroG بناء خدمات Google على نسخ أندرويد المخصصة التي تأتي بدونها. لا يستخدمها Hook إلا لميزة اختيارية واحدة: ربط حساب يوتيوب لاستيراد قوائم التشغيل. تشغيل الموسيقى لا يتطلب MicroG ولا أي خدمة من Google أبداً.",
+  "onboardingMicrogNote": "لا يعتمد التشغيل على MicroG. ربط الحساب أمر اختياري.",
+  "onboardingMicrogDownload": "تنزيل MicroG",
+  "onboardingMicrogStatusChecking": "جارٍ فحص خدمات Google…",
+  "onboardingMicrogStatusOk": "خدمات Google متوفرة على هذا الجهاز ({version}). سيعمل استيراد الحساب فوراً.",
+  "onboardingMicrogStatusReVanced": "رُصد ReVanced GmsCore ({version}). حزمة تسجيل الدخول الرسمية من Google غير متوافقة معه، لذا قد لا يعمل ربط الحساب. التشغيل لا يتأثر.",
+  "onboardingMicrogStatusMissing": "لم تُعثَر على خدمات Google. لاستيراد قوائم التشغيل من حساب يوتيوب، ثبّت MicroG أولاً — أو تخطَّ هذا واستخدم Hook بدون حساب.",
+  "lyricsView": "عرض الكلمات · {mode}",
+  "lyricsReadingRhythm": "إيقاع قراءتك",
+  "lyricsModeSubtitle": "ثلاث طرق للاقتراب من الأغنية.",
+  "lyricsModeLines": "أسطر",
+  "lyricsModeKaraoke": "كاريوكي",
+  "lyricsModeFocus": "تركيز",
+  "lyricsModeLinesDescription": "كلمات هادئة مع تمييز السطر الحالي",
+  "lyricsModeKaraokeDescription": "تضيء الكلمات بسلاسة مع الغناء",
+  "lyricsModeFocusDescription": "سطر كبير واحد. لا شيء آخر",
+  "lyricsModeSaveFailed": "تعذّر حفظ عرض الكلمات.",
+  "lyricsModeFootnote": "يُحفَظ اختيارك للأغاني القادمة. تعتمد دقة الكاريوكي على بيانات المصدر: تمييز الكلمات تقريبي دون توقيت لكل كلمة، وتبقى الكلمات ثابتة دون طوابع زمنية.",
+  "lyricsNotFound": "لم تُعثَر على الكلمات",
+  "karaokeUnavailable": "كلمات الكاريوكي غير متاحة لهذه المقطوعة",
+  "unsyncedLyrics": "كلمات غير متزامنة",
+  "wordSyncUpper": "مزامنة كلمة بكلمة",
+  "lineSyncUpper": "مزامنة سطراً بسطر",
+  "adjustLyricsSync": "ضبط مزامنة الكلمات",
+  "startsSoon": "تبدأ قريباً",
+  "musicContinues": "تستمر الموسيقى",
+  "decreaseLyricsOffset": "تقليل الإزاحة بمقدار 0.1 ثانية",
+  "lyricsOffset": "الإزاحة: {value} ث",
+  "increaseLyricsOffset": "زيادة الإزاحة بمقدار 0.1 ثانية",
+  "hideSetting": "إخفاء الإعداد",
+  "lyricsOffsetSaveFailed": "تعذّر حفظ إزاحة الكلمات.",
+  "audioForbidden": "رفض خادم الصوت الوصول (HTTP 403). وُجدت المقطوعة لكن تدفقها غير متاح. لا يضمن VPN الوصول إلى الصوت.",
+  "fullVersionUnavailable": "لم يُعثَر على نسخة كاملة في المصادر المتاحة. تحقق من اتصالك أو حاول لاحقاً.",
+  "sourcePlaybackFailed": "لم يتمكن {source} من تشغيل هذه المقطوعة. تحقق من اتصالك أو حاول لاحقاً.",
+  "@@locale": "ar",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

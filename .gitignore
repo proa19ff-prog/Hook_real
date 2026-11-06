@@ -47,3 +47,10 @@ android/.gradle/
 
 # Widget Preview related
 .widget_preview/
+
+# Machine-specific Android SDK/Flutter paths and flutter tool version stamps
+android/local.properties
+
+# Gradle build bookkeeping and generated registrants
+android/.gradle/
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java

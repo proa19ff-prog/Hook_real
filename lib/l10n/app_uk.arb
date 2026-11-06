@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "Налаштування",
+  "settingsCaption": "Зміни зберігаються на цьому пристрої.",
+  "playerSettings": "Програвач",
+  "lyricsAutoHide": "Ховати керування під час читання тексту",
+  "lyricsAutoHideDescription": "Через 10 секунд без взаємодії панелі програвача з'їдуть з екрана. Скористайтеся кнопкою відновлення, щоб повернути їх.",
+  "showPlayerControls": "Показувати керування програвачем",
+  "equalizer": "Еквалайзер",
+  "equalizerEnabled": "Обробка звуку",
+  "equalizerPresets": "Звуковий профіль",
+  "equalizerFlat": "Оригінал",
+  "equalizerBass": "Глибокий бас",
+  "equalizerVocal": "Вокал",
+  "equalizerRock": "Рок",
+  "equalizerElectronic": "Електронна",
+  "equalizerSoft": "М'який",
+  "equalizerCustom": "Власний",
+  "equalizerBands": "Смуги частот",
+  "equalizerBassBoost": "Підсилення басів",
+  "equalizerBassUnsupported": "Додаткове підсилення басів не підтримується. Використовуйте низькочастотні смуги.",
+  "equalizerPreamp": "Попереднє підсилення",
+  "equalizerHeadroom": "Автоматичний запас",
+  "equalizerHeadroomDescription": "Знижує рівень виходу при підсиленні частот, щоб залишити місце для піків. Це не лімітер.",
+  "equalizerWaiting": "Запустіть трек, щоб з'єднати еквалайзер із його аудіосесією.",
+  "equalizerUnsupported": "Обробка звуку наразі доступна лише на Android.",
+  "equalizerFailed": "Цей пристрій не зміг увімкнути звукові ефекти. Музика гратиме й без них.",
+  "equalizerRetry": "Перепідключити ефекти",
+  "equalizerLive": "Зміни застосовуються миттєво та зберігаються на цьому пристрої.",
+  "youtubeAccount": "YouTube і MicroG",
+  "youtubeAccountReadOnly": "Доступ лише для читання до плейлистів. Вхід не гарантує доступності аудіо.",
+  "youtubeAccountCompatibility": "Сумісність і приватність",
+  "youtubeAccountSubtitle": "Підключення облікового запису та імпорт плейлистів",
+  "youtubeAccountPrivacy": "Hook просить доступ до YouTube лише для читання. Пароль уводьте лише в системному вікні Google, ніколи в самому Hook. Токен не надсилається на жоден сервер Hook і зберігається лише в пам'яті. Після перезапуску програми підключіться знову.",
+  "youtubeAccountPlaybackNotice": "Вхід дає доступ до даних облікового запису, а не до аудіопотоків. Це не гарантує виправлення HTTP 403. Імпорт зберігає записи YouTube, не підмінюючи їх іншим джерелом.",
+  "youtubeAccountConnect": "Підключити обліковий запис",
+  "youtubeAccountDisconnect": "Відключити в Hook",
+  "youtubeAccountDisconnected": "Немає підключеного облікового запису",
+  "youtubeAccountDisconnectNotice": "Відключити цей запис лише в Hook? Збережені плейлисти залишаться. Облікові записи Google та MicroG на телефоні не вийдуть.",
+  "youtubeAccountSystem": "Системні API Google",
+  "youtubeAccountServicesMissing": "Сумісні системні API Google недоступні. Окрема інсталяція ReVanced GmsCore не замінює їх для входу Hook.",
+  "youtubeAccountMicrogNotice": "Виявлено окрему інсталяцію ReVanced GmsCore. Hook не використовує облікові записи чи токени ReVanced. Системний MicroG може надавати сумісні API Google, але сумісність із цим методом входу не гарантована.",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced установлено",
+  "youtubeAccountPlaylists": "Плейлисти облікового запису",
+  "youtubeAccountNoPlaylists": "Немає доступних плейлистів. Деякі автоматичні збірки YouTube Music недоступні через YouTube Data API.",
+  "youtubeAccountMore": "Завантажити ще",
+  "youtubeAccountPreview": "Підготувати імпорт",
+  "youtubeAccountProgress": "Отримано треків: {count}",
+  "youtubeAccountUnavailableTracks": "Пропущено недоступних записів: {count}. Вони не замінюються іншими треками.",
+  "youtubeAccountSetup": "Налаштування входу",
+  "youtubeAccountSetupBody": "Розробник має увімкнути YouTube Data API v3 у Google Cloud, зареєструвати OAuth-клієнт Android для com.hook.music та SHA-1 підпису встановленої збірки й налаштувати екран згоди. У тестовому режимі додайте дозволених користувачів. Дивіться docs/YOUTUBE_ACCOUNT_SETUP.md. Ніколи не додавайте паролі, секрети клієнтів чи токени інших програм.",
+  "youtubeAccountConfigError": "Вхід не налаштовано для цієї збірки. Перевірте в Google Cloud OAuth-клієнт Android, назву пакета, SHA-1 і дозволених тестових користувачів.",
+  "youtubeAccountPermissionError": "Доступ на читання даних YouTube не надано.",
+  "youtubeAccountExpired": "Ваша сесія минула. Підключіть обліковий запис знову.",
+  "youtubeAccountNoChannel": "У вибраного облікового запису немає доступного каналу YouTube.",
+  "youtubeAccountQuota": "Квоту API YouTube вичерпано. Спробуйте пізніше.",
+  "youtubeAccountFailed": "Не вдалося отримати дані YouTube. Перевірте з'єднання та спробуйте ще раз.",
+  "youtubeAccountUnsupported": "Підключення облікового запису потребує Android із сумісними системними API Google.",
+  "importedFromYouTube": "Імпортовано з облікового запису YouTube",
+  "translateLyrics": "Перекласти текст",
+  "hideTranslation": "Сховати переклад",
+  "cancelTranslation": "Скасувати переклад",
+  "translationLoading": "Підготовка перекладу…",
+  "translationAttribution": "Автоматично перекладено через Google Перекладач",
+  "translationNotice": "Переклад може не точно передавати зміст пісні. Підсвічування слів стосується лише оригіналу.",
+  "translationModelTitle": "Завантажити мовні моделі?",
+  "translationModelBody": "Переклад працює на вашому телефоні: текст не надсилається на жоден сервер. Для першого перекладу потрібні моделі Google ML Kit — десятки мегабайт. Завантаження використовує поточне з'єднання, зокрема мобільний інтернет. Скасування ховає результат, але вже розпочате завантаження моделі може завершитися у фоні.",
+  "translationDownload": "Завантажити та перекласти",
+  "translationUnavailable": "Переклад не вдався. Перевірте доступ до завантаження моделей і спробуйте ще раз.",
+  "translationUnsupported": "Переклад на пристрої наразі доступний лише на Android.",
+  "translationUnknownLanguage": "Не вдалося визначити підтримувану мову цієї пісні.",
+  "translationSameLanguage": "Текст уже мовою вибору.",
+  "translationTooLarge": "Цей текст завеликий для перекладу на пристрої.",
+  "translationRussian": "Російською",
+  "translationEnglish": "Англійською",
+  "translationTarget": "Мова перекладу",
+  "retry": "Повторити",
+  "home": "Головна",
+  "search": "Пошук",
+  "library": "Бібліотека",
+  "youtubeUnavailableTitle": "YouTube зараз недоступний",
+  "youtubeUnavailableBody": "Не вдалося отримати аудіопотік. Перевірте мережу та маршрут VPN: YouTube може відхиляти запити навіть із VPN.",
+  "checkAgain": "Перевірити ще раз",
+  "dismiss": "Закрити",
+  "goodNight": "Доброї ночі",
+  "goodMorning": "Доброго ранку",
+  "goodAfternoon": "Доброго дня",
+  "goodEvening": "Доброго вечора",
+  "themeSettings": "Налаштування вигляду",
+  "onYourAir": "На вашій хвилі",
+  "recentSignals": "{count, plural, =0{Немає нещодавніх сигналів} one{1 нещодавній сигнал} few{{count} нещодавні сигнали} many{{count} нещодавніх сигналів} other{{count} нещодавнього сигналу}}",
+  "collectionWaiting": "Ваша колекція чекає",
+  "saved": "Збережено",
+  "collectionEmptyDetail": "Музика, до якої ви захочете повернутися, залишеться тут",
+  "tracksCount": "{count, plural, =1{1 трек} few{{count} треки} many{{count} треків} other{{count} трека}}",
+  "homeSearchHint": "Трек, виконавець або текст",
+  "searchUpper": "ПОШУК",
+  "findFirstTrack": "Знайдіть свій перший трек",
+  "continuationAfter": "Більше музики після {artist}",
+  "chooseTrackWaveDetail": "Оберіть трек, і ми збудуємо навколо його настрою хвилю.",
+  "continueWaveLabel": "ПРОДОВЖИТИ / 01",
+  "yourWaveLabel": "ВАША ХВИЛЯ / 01",
+  "continueWave": "Продовжити хвилю",
+  "chooseTrack": "Оберіть трек",
+  "firstTrace": "Залишіть тут свій перший слід",
+  "favoriteWaveHint": "Зберігайте улюблене, і ваша хвиля стане точнішою.",
+  "openSearch": "Відкрити пошук",
+  "findYourMusic": "Знайдіть свій звук.",
+  "importMusic": "Імпортувати музику",
+  "rememberedLyricsHint": "Слова, які ви пам'ятаєте…",
+  "trackArtistHint": "Трек або виконавець — будь-якою мовою",
+  "clear": "Очистити",
+  "music": "Музика",
+  "byLyrics": "За текстом",
+  "allSources": "Усі джерела",
+  "lyricsSearchCaption": "Шукайте фразу з пісні, а не лише назву.",
+  "searchingLyrics": "Шукаю знайомі рядки…",
+  "searchingSources": "Пошук у музичних джерелах…",
+  "connectionFailed": "Не вдалося з'єднатися",
+  "noMatches": "Ще немає збігів",
+  "lyricsUnavailable": "Пошук текстів зараз недоступний. Спробуйте пізніше або шукайте за назвою.",
+  "searchUnavailable": "Пошук не вдався. Перевірте з'єднання та спробуйте ще раз.",
+  "lyricsNoMatches": "Спробуйте інший рядок. Не всі тексти проіндексовано.",
+  "trackNoMatches": "Додайте виконавця або оберіть інше джерело. Деякі сервіси можуть бути недоступні у вашій мережі.",
+  "repeatSearch": "Шукати ще раз",
+  "lyricMatchesUpper": "ЗБІГИ ТЕКСТУ",
+  "tracksUpper": "ТРЕКИ",
+  "playTrack": "Прослухати {title}, {artist}",
+  "familiarLinesUpper": "ЗНАЙОМІ РЯДКИ",
+  "bestMatchUpper": "НАЙКРАЩИЙ ЗБІГ",
+  "fullVersionOnPlayback": "Повну версію знайдемо, коли розпочнеться відтворення.",
+  "forgotTitle": "Ви забули назву.\nАле не музику.",
+  "startAsYouRemember": "Назва, заголовок або рядок із пісні.\nПочніть із того, що пам'ятаєте.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "Шукайте назви так, як вони звучать",
+  "rememberOnlyLine": "Пам'ятаю лише один рядок",
+  "findSongByWords": "Знайдіть пісню за її словами",
+  "yourArtistsUpper": "ВАШІ ВИКОНАВЦІ",
+  "language": "Мова",
+  "languageCaption": "Інтерфейс одразу застосовує ваш вибір",
+  "systemLanguage": "Система",
+  "russian": "Російська",
+  "english": "Англійська",
+  "themesAndShaders": "Теми та ефекти",
+  "themesSubtitle": "Вигляд, мова та рух тла",
+  "invalidThemeJson": "Не вдалося прочитати тему. Перевірте формат JSON і значення полів.",
+  "exportJson": "Експортувати JSON",
+  "importJson": "Імпортувати JSON",
+  "readyThemes": "Готові теми",
+  "gpuShaders": "Ефекти тла",
+  "meshGradient": "Гладкий градієнт GPU з барв треку",
+  "vinylNoise": "Зерно вінілової платівки (шум)",
+  "glassBlur": "Скляне розмиття (Backdrop Blur)",
+  "cornerRadius": "Радіус заокруглення інтерфейсу",
+  "importThemeTitle": "Імпортувати тему з JSON",
+  "pasteThemeJson": "Вставте JSON-конфігурацію теми:",
+  "cancel": "Скасувати",
+  "apply": "Застосувати",
+  "themeApplied": "Тему застосовано успішно!",
+  "exportThemeTitle": "Експортувати тему (JSON)",
+  "close": "Закрити",
+  "copyJson": "Копіювати JSON",
+  "jsonCopied": "JSON теми скопійовано в буфер обміну!",
+  "libraryUpper": "БІБЛІОТЕКА",
+  "localCollection": "Локальна колекція та плейлисти",
+  "importShort": "Імпорт",
+  "favorites": "Улюблене",
+  "playlists": "Плейлисти",
+  "history": "Історія",
+  "offline": "Офлайн",
+  "favoritesEmpty": "Ваше улюблене порожнє.\nТоркніться серця біля трека, щоб додати його сюди.",
+  "historyEmpty": "Ваша історія прослуховування порожня.\nУвімкніть музику з пошуку — вона з'явиться тут.",
+  "noPlaylists": "У вас ще немає плейлистів",
+  "importPlaylistHint": "Імпортуйте плейлист зі Spotify або вставте список треків.",
+  "importMusicAction": "Імпортувати музику",
+  "playPlaylist": "Прослухати плейлист",
+  "playlistStarted": "Відтворення «{name}» ({count} треків)",
+  "deletePlaylist": "Видалити плейлист",
+  "playAll": "Відтворити все",
+  "shuffle": "Перемішати",
+  "localAudioCache": "Локальний аудіокеш",
+  "cacheDescription": "Програшані треки зберігаються локально, щоб слухати їх знову без інтернету.",
+  "deviceUsage": "На цьому пристрої: {size}",
+  "clearCache": "Очистити весь кеш",
+  "savedTracksUpper": "ЗБЕРЕЖЕНІ ТРЕКИ ({count}):",
+  "cacheFeaturesUpper": "МОЖЛИВОСТІ КЕШУ:",
+  "offlineFirst": "Спершу офлайн",
+  "offlineFirstDescription": "При повторному прослуховуванні аудіо завантажується прямо з файлової системи пристрою.",
+  "maximumBitrate": "Максимальний бітрейт",
+  "maximumBitrateDescription": "Чисті потоки Opus/M4A 160–256 кбіт/с зберігаються без перекодування.",
+  "trafficAndBattery": "Економте трафік і батарею",
+  "trafficAndBatteryDescription": "Уникання повторних мережевих запитів допомагає телефону працювати довше.",
+  "cacheEmpty": "Кеш порожній",
+  "cachedTracksAppear": "Завантажені треки з'являться тут автоматично",
+  "removeFromCache": "Видалити з кешу",
+  "removeCachedTrackTitle": "Видалити трек із кешу?",
+  "removeCachedTrackBody": "«{title}» буде видалено з цього пристрою.",
+  "delete": "Видалити",
+  "trackRemovedFromCache": "Трек видалено з кешу",
+  "clearCacheTitle": "Очистити кеш?",
+  "clearCacheBody": "Усі збережені аудіофайли буде видалено з цього пристрою. Улюблене та історія не зміняться.",
+  "cacheCleared": "Локальний кеш очищено",
+  "back": "Назад",
+  "playlistActions": "Дії з плейлистом",
+  "playlistUpper": "ПЛЕЙЛИСТ",
+  "playlistEmpty": "У цьому плейлисті ще немає треків",
+  "pasteTrackList": "Вставте список треків",
+  "pasteImportLink": "Вставте посилання для імпорту",
+  "tracksNotFound": "За цим посиланням не знайдено треків.",
+  "importError": "Імпорт не вдався. Перевірте посилання та інтернет-з'єднання.",
+  "importedPlaylistStarted": "Відтворення імпортованого плейлиста ({count} треків)",
+  "importedPlaylistName": "Імпорт ({platform})",
+  "playlistSaved": "Плейлист «{name}» збережено у вашій бібліотеці!",
+  "spotifyImportSubtitle": "Spotify • Плейлисти, альбоми та треки",
+  "artistTrackOrCsv": "Виконавець — Трек або CSV з Exportify",
+  "pastePlaylistOrTrackLink": "Вставте посилання на плейлист або трек",
+  "pasteFromClipboard": "Вставити з буфера обміну",
+  "link": "Посилання",
+  "trackList": "Список треків",
+  "playlistName": "Назва плейлиста",
+  "startImport": "Розпочати імпорт",
+  "importedCollectionMeta": "{author} • {count} треків",
+  "importedFromSpotify": "Імпортовано зі Spotify",
+  "importIntro": "Заберіть свої плейлисти з собою. Скористайтеся посиланням Spotify, списком треків або файлом Exportify.",
+  "importTextTab": "Текст",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "Обрати файл",
+  "importFileHint": "Оберіть CSV, експортований з Exportify, або список треків TXT. UTF-8, до 10 МБ і 10 000 треків.",
+  "importFileAndroidOnly": "Вибір файлів доступний на Android. Тут можна вставити вміст CSV або списку треків.",
+  "importTextHint": "Рядок на рядок: Виконавець — Трек. Також можна вставити весь CSV, разом із заголовком.",
+  "importPreview": "Перегляд треків",
+  "importedFromCsv": "Імпортовано з CSV",
+  "importedFromText": "Імпортовано зі списку треків",
+  "importMoreTracks": "І ще {count}",
+  "importMetadataHint": "Плейлист зберігається на цьому пристрої. Аудіо шукається під час відтворення трека; імпорт не завантажує пісні.",
+  "importAnother": "Імпортувати щось інше",
+  "importReading": "Читаємо ваш плейлист…",
+  "importSaving": "Зберігаємо до бібліотеки…",
+  "importNameRequired": "Уведіть назву плейлиста.",
+  "importNameExists": "Плейлист із такою назвою вже існує. Оберіть іншу назву, щоб зберегти обидва.",
+  "importSaveFailed": "Не вдалося зберегти плейлист. Ваш попередній перегляд залишився — спробуйте ще раз.",
+  "importFileTooLarge": "Файл перевищує 10 МБ. Розділіть плейлист на менші експорти.",
+  "importFileUnsupported": "Оберіть файл .csv або .txt.",
+  "importFileEncoding": "Не вдалося прочитати кодування тексту. Збережіть файл у UTF-8 і спробуйте ще раз.",
+  "importCsvInvalid": "CSV неповний або пошкоджений. Експортуйте його знову, не змінюючи стовпців та лапок.",
+  "importCsvMissingColumns": "CSV потребує стовпців Track Name і Artist Name(s) або Title і Artist. Оберіть оригінальний експорт Exportify.",
+  "importFileEmpty": "Не знайдено жодного трека. Оберіть заповнений експорт або вставте список Виконавець — Трек.",
+  "importTooManyTracks": "Один імпорт може містити до 10 000 треків. Розділіть цей плейлист; ще нічого не збережено.",
+  "importFileReadFailed": "Не вдалося відкрити цей файл. Перевірте, чи він доступний на пристрої, та оберіть його знову.",
+  "importSpotifyBlocked": "Spotify не поділився цим плейлистом у вашому регіоні. Експортуйте його через Exportify й оберіть файл CSV.",
+  "listen": "Прослухати",
+  "addToPlaylists": "Додати до плейлистів",
+  "trackSemantics": "Трек {title}, {artist}",
+  "trackActions": "Дії з треком",
+  "startWaveFromTrack": "Почати хвилю з цього трека",
+  "addToQueue": "Додати до черги",
+  "addedToQueue": "Додано до черги: {title}",
+  "removeFavorite": "Прибрати з улюблених",
+  "addFavorite": "Додати до улюблених",
+  "addToPlaylist": "Додати до плейлиста",
+  "goToArtist": "До виконавця",
+  "myPlaylist": "Мій плейлист",
+  "newPlaylist": "Новий плейлист",
+  "name": "Назва",
+  "create": "Створити",
+  "loading": "Завантаження…",
+  "pause": "Пауза",
+  "play": "Пуск",
+  "next": "Далі",
+  "speedAndPitch": "Швидкість і висота тону",
+  "speedValue": "Швидкість: {value}x",
+  "pitchValue": "Висота: {value}x",
+  "reset": "Скинути",
+  "moreActions": "Більше дій",
+  "playbackQueue": "Черга відтворення",
+  "queueEmpty": "Черга порожня",
+  "selectingSource": "Вибір джерела",
+  "collapsePlayer": "Згорнути програвач",
+  "nowPlayingUpper": "ЗАРАЗ ГРАЄ",
+  "queue": "Черга",
+  "startWave": "Почати хвилю",
+  "cover": "Обкладинка",
+  "karaokeLyrics": "Текст караоке",
+  "findMusicStart": "Знайдіть музику та почніть відтворення",
+  "playbackNotStarted": "Відтворення ще не почалося",
+  "openSearchFirstTrack": "Відкрийте пошук, щоб знайти свій перший трек",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "На пристрої",
+  "sourceCatalog": "Каталог",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "Сервер",
+  "serverResolver": "Сервер-резолвер",
+  "serverResolverCaption": "Необов'язковий власний сервер, який знаходить повні аудіопотоки. Програма надсилає пошуковий запит або ID трека; сервер повертає адресу відтворення. Контракт і зразок реалізації — у docs/REMOTE_RESOLVER.md.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "Не налаштовано",
+  "serverSave": "Зберегти",
+  "serverDisable": "Вимкнути",
+  "onboardingWelcomeTitle": "Вітаємо в Hook",
+  "onboardingWelcomeCaption": "Музика, тексти та ваш власний візуальний стиль. Оберіть мову, щоб почати — її можна змінити в налаштуваннях.",
+  "onboardingSkip": "Пропустити",
+  "onboardingNext": "Далі",
+  "onboardingStart": "Почати слухати",
+  "onboardingMicrogTitle": "MicroG і обліковий запис Google",
+  "onboardingMicrogBody": "MicroG відтворює сервіси Google на кастомних прошивках Android, які постачаються без них. Hook використовує ці сервіси лише для однієї необов'язкової функції: підключення облікового запису YouTube для імпорту плейлистів. Для відтворення музики MicroG і будь-які сервіси Google не потрібні.",
+  "onboardingMicrogNote": "Відтворення не залежить від MicroG. Підключення облікового запису — необов'язкове.",
+  "onboardingMicrogDownload": "Завантажити MicroG",
+  "onboardingMicrogStatusChecking": "Перевіряємо сервіси Google…",
+  "onboardingMicrogStatusOk": "Сервіси Google є на цьому пристрої ({version}). Імпорт облікового запису запрацює одразу.",
+  "onboardingMicrogStatusReVanced": "Виявлено ReVanced GmsCore ({version}). Офіційний SDK входу Google з ним несумісний, тому підключення облікового запису може не запрацювати. Відтворення не постраждає.",
+  "onboardingMicrogStatusMissing": "Сервіси Google не знайдено. Щоб імпортувати плейлисти з облікового запису YouTube, спершу встановіть MicroG — або пропустіть і користуйтеся Hook без облікового запису.",
+  "lyricsView": "Вигляд тексту · {mode}",
+  "lyricsReadingRhythm": "Ваш ритм читання",
+  "lyricsModeSubtitle": "Три способи наблизитися до пісні.",
+  "lyricsModeLines": "Рядки",
+  "lyricsModeKaraoke": "Караоке",
+  "lyricsModeFocus": "Фокус",
+  "lyricsModeLinesDescription": "Спокійний текст із підсвіченим поточним рядком",
+  "lyricsModeKaraokeDescription": "Слова плавно засвічуються разом із вокалом",
+  "lyricsModeFocusDescription": "Один великий рядок. Більше нічого",
+  "lyricsModeSaveFailed": "Не вдалося зберегти вигляд тексту.",
+  "lyricsModeFootnote": "Ваш вибір зберігається для наступних пісень. Точність караоке залежить від даних джерела: без часу на слово підсвічування приблизне, а без часових міток текст стоїть на місці.",
+  "lyricsNotFound": "Текст не знайдено",
+  "karaokeUnavailable": "Текст караоке недоступний для цього трека",
+  "unsyncedLyrics": "Несинхронізований текст",
+  "wordSyncUpper": "СИНХРОНІЗАЦІЯ СЛОВО ЗА СЛОВОМ",
+  "lineSyncUpper": "СИНХРОНІЗАЦІЯ РЯДОК ЗА РЯДКОМ",
+  "adjustLyricsSync": "Налаштувати синхронізацію тексту",
+  "startsSoon": "Скоро почнеться",
+  "musicContinues": "Музика триває",
+  "decreaseLyricsOffset": "Зменшити зміщення на 0,1 с",
+  "lyricsOffset": "Зміщення: {value} с",
+  "increaseLyricsOffset": "Збільшити зміщення на 0,1 с",
+  "hideSetting": "Сховати налаштування",
+  "lyricsOffsetSaveFailed": "Не вдалося зберегти зміщення тексту.",
+  "audioForbidden": "Аудіосервер відмовив у доступі (HTTP 403). Трек знайдено, але його потік недоступний. VPN не гарантує доступу до аудіо.",
+  "fullVersionUnavailable": "У доступних джерелах не знайдено повної версії. Перевірте з'єднання або спробуйте пізніше.",
+  "sourcePlaybackFailed": "{source} не зміг відтворити цей трек. Перевірте з'єднання або спробуйте пізніше.",
+  "@@locale": "uk",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}

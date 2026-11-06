@@ -1,0 +1,520 @@
+{
+  "appTitle": "Hook",
+  "settings": "Instellingen",
+  "settingsCaption": "Wijzigingen worden op dit apparaat opgeslagen.",
+  "playerSettings": "Speler",
+  "lyricsAutoHide": "Bediening verbergen tijdens het lezen van songteksten",
+  "lyricsAutoHideDescription": "Na 10 seconden zonder interactie schuiven de spelerpanelen uit beeld. Gebruik de herstelknop om ze terug te halen.",
+  "showPlayerControls": "Spelerbediening tonen",
+  "equalizer": "Equalizer",
+  "equalizerEnabled": "Geluidsverwerking",
+  "equalizerPresets": "Geluidsprofiel",
+  "equalizerFlat": "Origineel",
+  "equalizerBass": "Diepe bas",
+  "equalizerVocal": "Zang",
+  "equalizerRock": "Rock",
+  "equalizerElectronic": "Elektronisch",
+  "equalizerSoft": "Zacht",
+  "equalizerCustom": "Aangepast",
+  "equalizerBands": "Frequentiebanden",
+  "equalizerBassBoost": "Bass-boost",
+  "equalizerBassUnsupported": "Extra bass-boost wordt niet ondersteund. Gebruik de lage frequentiebanden.",
+  "equalizerPreamp": "Voorversterking",
+  "equalizerHeadroom": "Automatische speling",
+  "equalizerHeadroomDescription": "Verlaagt het uitgangsniveau bij het versterken van frequenties om ruimte voor pieken te laten. Dit is geen limiter.",
+  "equalizerWaiting": "Speel een nummer af om de equalizer aan zijn audiosessie te koppelen.",
+  "equalizerUnsupported": "Geluidsverwerking is momenteel alleen op Android beschikbaar.",
+  "equalizerFailed": "Dit apparaat kon de audio-effecten niet inschakelen. Muziek kan ook zonder hen spelen.",
+  "equalizerRetry": "Effecten opnieuw verbinden",
+  "equalizerLive": "Wijzigingen werken direct en worden op dit apparaat opgeslagen.",
+  "youtubeAccount": "YouTube en MicroG",
+  "youtubeAccountReadOnly": "Alleen-lezen toegang tot afspeellijsten. Inloggen garandeert geen beschikbare audio.",
+  "youtubeAccountCompatibility": "Compatibiliteit en privacy",
+  "youtubeAccountSubtitle": "Accountkoppeling en afspeellijst-import",
+  "youtubeAccountPrivacy": "Hook vraagt alleen-lezen toegang tot YouTube. Voer je wachtwoord alleen in het systeemvenster van Google in, nooit in Hook. Het token wordt niet naar een Hook-server gestuurd en blijft alleen in het geheugen. Verbind opnieuw na het herstarten van de app.",
+  "youtubeAccountPlaybackNotice": "Inloggen geeft toegang tot accountgegevens, niet tot audiostreams. Het garandeert geen oplossing voor HTTP 403. Imports behouden YouTube-opnames zonder ze te vervangen door een andere bron.",
+  "youtubeAccountConnect": "Account verbinden",
+  "youtubeAccountDisconnect": "Verbreken in Hook",
+  "youtubeAccountDisconnected": "Geen account verbonden",
+  "youtubeAccountDisconnectNotice": "Dit account alleen in Hook verbreken? Opgeslagen afspeellijsten blijven bestaan. Je wordt niet uitgelogd bij Google- en MicroG-accounts op je telefoon.",
+  "youtubeAccountSystem": "Systeem-Google-API's",
+  "youtubeAccountServicesMissing": "Compatibele systeem-Google-API's zijn niet beschikbaar. Een losse installatie van ReVanced GmsCore vervangt ze niet voor Hook-aanmelding.",
+  "youtubeAccountMicrogNotice": "Er is een losse installatie van ReVanced GmsCore gedetecteerd. Hook gebruikt geen ReVanced-accounts of -tokens. Systeem-MicroG kan compatibele Google-API's bieden, maar compatibiliteit met deze aanmeldmethode is niet gegarandeerd.",
+  "youtubeAccountRevancedFound": "YouTube Music ReVanced is geïnstalleerd",
+  "youtubeAccountPlaylists": "Accountafspeellijsten",
+  "youtubeAccountNoPlaylists": "Geen toegankelijke afspeellijsten. Sommige automatische YouTube Music-collecties zijn niet beschikbaar via de YouTube Data API.",
+  "youtubeAccountMore": "Meer laden",
+  "youtubeAccountPreview": "Import voorbereiden",
+  "youtubeAccountProgress": "Opgehaalde nummers: {count}",
+  "youtubeAccountUnavailableTracks": "Overgeslagen onbereikbare items: {count}. Ze worden niet vervangen door andere nummers.",
+  "youtubeAccountSetup": "Aanmeldconfiguratie",
+  "youtubeAccountSetupBody": "De ontwikkelaar moet YouTube Data API v3 in Google Cloud inschakelen, een Android-OAuth-client registreren voor com.hook.music en de SHA-1 van de ondertekening van de geïnstalleerde build, en het toestemmingsscherm configureren. Voeg in de testmodus toegestane gebruikers toe. Zie docs/YOUTUBE_ACCOUNT_SETUP.md. Voeg nooit wachtwoorden, clients secrets of tokens van andere apps toe.",
+  "youtubeAccountConfigError": "Aanmelden is niet geconfigureerd voor deze build. Controleer de Android-OAuth-client, de pakketnaam, de SHA-1 en de toegestane testgebruikers in Google Cloud.",
+  "youtubeAccountPermissionError": "Leestoegang tot YouTube-gegevens is niet verleend.",
+  "youtubeAccountExpired": "Je sessie is verlopen. Verbind het account opnieuw.",
+  "youtubeAccountNoChannel": "Het gekozen account heeft geen toegankelijk YouTube-kanaal.",
+  "youtubeAccountQuota": "YouTube-API-quota overschreden. Probeer het later opnieuw.",
+  "youtubeAccountFailed": "Kon YouTube-gegevens niet ophalen. Controleer je verbinding en probeer het opnieuw.",
+  "youtubeAccountUnsupported": "Accountkoppeling vereist Android met compatibele systeem-Google-API's.",
+  "importedFromYouTube": "Geïmporteerd uit YouTube-account",
+  "translateLyrics": "Songtekst vertalen",
+  "hideTranslation": "Vertaling verbergen",
+  "cancelTranslation": "Vertaling annuleren",
+  "translationLoading": "Vertaling wordt voorbereid…",
+  "translationAttribution": "Automatisch vertaald door Google Translate",
+  "translationNotice": "De vertaling vangt de betekenis van het lied mogelijk niet exact. Woordmarkering geldt alleen voor het origineel.",
+  "translationModelTitle": "Taalmodellen downloaden?",
+  "translationModelBody": "De vertaling draait op je telefoon: songteksten worden niet naar een server gestuurd. De eerste vertaling heeft Google ML Kit-modellen nodig, die tientallen megabytes beslaan. De download gebruikt je huidige verbinding, inclusief mobiele data. Annuleren verbergt het resultaat, maar een al gestarte modeldownload kan op de achtergrond afronden.",
+  "translationDownload": "Downloaden en vertalen",
+  "translationUnavailable": "Vertaling mislukt. Controleer de toegang tot modeldownloads en probeer het opnieuw.",
+  "translationUnsupported": "Vertaling op het apparaat is momenteel alleen op Android beschikbaar.",
+  "translationUnknownLanguage": "Kon geen ondersteunde taal voor dit nummer vaststellen.",
+  "translationSameLanguage": "De songtekst is al in de gekozen taal.",
+  "translationTooLarge": "Deze songtekst is te lang voor vertaling op het apparaat.",
+  "translationRussian": "Naar het Russisch",
+  "translationEnglish": "Naar het Engels",
+  "translationTarget": "Vertaaltaal",
+  "retry": "Opnieuw proberen",
+  "home": "Start",
+  "search": "Zoeken",
+  "library": "Bibliotheek",
+  "youtubeUnavailableTitle": "YouTube is nu niet beschikbaar",
+  "youtubeUnavailableBody": "Kon geen audiostream verkrijgen. Controleer je netwerk en VPN-route: YouTube kan verzoeken afwijzen, zelfs met een VPN.",
+  "checkAgain": "Opnieuw controleren",
+  "dismiss": "Sluiten",
+  "goodNight": "Goedenacht",
+  "goodMorning": "Goedemorgen",
+  "goodAfternoon": "Goedemiddag",
+  "goodEvening": "Goedenavond",
+  "themeSettings": "Uiterlijk-instellingen",
+  "onYourAir": "Op jouw golflengte",
+  "recentSignals": "{count, plural, =0{Geen recente signalen} =1{1 recent signaal} other{{count} recente signalen}}",
+  "collectionWaiting": "Je collectie wacht op je",
+  "saved": "Opgeslagen",
+  "collectionEmptyDetail": "Muziek waarnaar je wilt terugkeren blijft hier",
+  "tracksCount": "{count, plural, =1{1 nummer} other{{count} nummers}}",
+  "homeSearchHint": "Nummer, artiest of songtekst",
+  "searchUpper": "ZOEKEN",
+  "findFirstTrack": "Vind je eerste nummer",
+  "continuationAfter": "Meer muziek na {artist}",
+  "chooseTrackWaveDetail": "Kies een nummer en we bouwen een golf rond zijn sfeer.",
+  "continueWaveLabel": "DOORGAAN / 01",
+  "yourWaveLabel": "JOE GOLF / 01",
+  "continueWave": "Golf voortzetten",
+  "chooseTrack": "Kies een nummer",
+  "firstTrace": "Laat hier je eerste spoor na",
+  "favoriteWaveHint": "Bewaar favorieten, dan wordt je golf nauwkeuriger.",
+  "openSearch": "Zoeken openen",
+  "findYourMusic": "Vind je geluid.",
+  "importMusic": "Muziek importeren",
+  "rememberedLyricsHint": "De woorden die je kent…",
+  "trackArtistHint": "Nummer of artiest — in welke taal dan ook",
+  "clear": "Wissen",
+  "music": "Muziek",
+  "byLyrics": "Op songtekst",
+  "allSources": "Alle bronnen",
+  "lyricsSearchCaption": "Zoek op een zin uit het lied, niet alleen op de titel.",
+  "searchingLyrics": "Bekende regels worden gezocht…",
+  "searchingSources": "Muziekbronnen worden doorzocht…",
+  "connectionFailed": "Kon geen verbinding maken",
+  "noMatches": "Nog geen overeenkomsten",
+  "lyricsUnavailable": "Songtekst-zoeken is nu niet beschikbaar. Probeer het later of zoek op titel.",
+  "searchUnavailable": "Zoeken mislukt. Controleer je verbinding en probeer het opnieuw.",
+  "lyricsNoMatches": "Probeer een andere regel. Lang niet elke songtekst is geïndexeerd.",
+  "trackNoMatches": "Voeg de artiest toe of kies een andere bron. Sommige diensten zijn mogelijk niet bereikbaar op je netwerk.",
+  "repeatSearch": "Opnieuw zoeken",
+  "lyricMatchesUpper": "TEKSTOVEREENKOMSTEN",
+  "tracksUpper": "NUMMERS",
+  "playTrack": "Speel {title}, {artist} af",
+  "familiarLinesUpper": "BEKENDE REGELS",
+  "bestMatchUpper": "BESTE OVEREENKOMST",
+  "fullVersionOnPlayback": "We zoeken de volledige versie zodra het afspelen begint.",
+  "forgotTitle": "De titel was weg.\nDe muziek niet.",
+  "startAsYouRemember": "Een naam, titel of regel uit het lied.\nBegin met wat je nog weet.",
+  "foreignNameExample": "Martin Rose",
+  "foreignNamesCaption": "Zoek namen zoals ze klinken",
+  "rememberOnlyLine": "Ik weet alleen nog een regel",
+  "findSongByWords": "Vind een lied op zijn woorden",
+  "yourArtistsUpper": "JOE ARTIESTEN",
+  "language": "Taal",
+  "languageCaption": "De interface volgt je keuze direct",
+  "systemLanguage": "Systeem",
+  "russian": "Russisch",
+  "english": "Engels",
+  "themesAndShaders": "Thema's en effecten",
+  "themesSubtitle": "Uiterlijk, taal en achtergrondbeweging",
+  "invalidThemeJson": "Kon het thema niet lezen. Controleer het JSON-formaat en de veldwaarden.",
+  "exportJson": "JSON exporteren",
+  "importJson": "JSON importeren",
+  "readyThemes": "Thema-presets",
+  "gpuShaders": "Achtergrondeffecten",
+  "meshGradient": "Gladde GPU-verloop op basis van de kleuren van het nummer",
+  "vinylNoise": "Analoge vinylkorrels (ruis)",
+  "glassBlur": "Glasvervaging (Backdrop Blur)",
+  "cornerRadius": "Hoekstraal van de interface",
+  "importThemeTitle": "Thema importeren uit JSON",
+  "pasteThemeJson": "Plak de JSON-configuratie van het thema:",
+  "cancel": "Annuleren",
+  "apply": "Toepassen",
+  "themeApplied": "Thema succesvol toegepast!",
+  "exportThemeTitle": "Thema exporteren (JSON)",
+  "close": "Sluiten",
+  "copyJson": "JSON kopiëren",
+  "jsonCopied": "Thema-JSON naar het klembord gekopieerd!",
+  "libraryUpper": "BIBLIOTHEEK",
+  "localCollection": "Lokale collectie en afspeellijsten",
+  "importShort": "Importeren",
+  "favorites": "Favorieten",
+  "playlists": "Afspeellijsten",
+  "history": "Geschiedenis",
+  "offline": "Offline",
+  "favoritesEmpty": "Je favorieten zijn leeg.\nTik op het hartje bij een nummer om het hier toe te voegen.",
+  "historyEmpty": "Je luistergeschiedenis is leeg.\nSpeel muziek af via zoeken en het verschijnt hier.",
+  "noPlaylists": "Je hebt nog geen afspeellijsten",
+  "importPlaylistHint": "Importeer een Spotify-afspeellijst of plak een nummerlijst.",
+  "importMusicAction": "Muziek importeren",
+  "playPlaylist": "Afspeellijst afspelen",
+  "playlistStarted": "«{name}» wordt afgespeeld ({count} nummers)",
+  "deletePlaylist": "Afspeellijst verwijderen",
+  "playAll": "Alles afspelen",
+  "shuffle": "Willekeurig",
+  "localAudioCache": "Lokale audiocache",
+  "cacheDescription": "Afgespeelde nummers worden lokaal bewaard om ze zonder internet direct opnieuw te horen.",
+  "deviceUsage": "Op dit apparaat: {size}",
+  "clearCache": "Alle cache wissen",
+  "savedTracksUpper": "OPGESLAGEN NUMMERS ({count}):",
+  "cacheFeaturesUpper": "CACHE-FUNCTIES:",
+  "offlineFirst": "Volledig offline-eerst",
+  "offlineFirstDescription": "Bij herbeluisteren wordt de audio rechtstreeks uit het bestandssysteem van het apparaat geladen.",
+  "maximumBitrate": "Maximale bitrate",
+  "maximumBitrateDescription": "Schone Opus/M4A-streams van 160–256 kbps worden zonder transcodering bewaard.",
+  "trafficAndBattery": "Bespaar data en accu",
+  "trafficAndBatteryDescription": "Herhaalde netwerkverzoeken vermijden helpt je telefoon langer mee te gaan.",
+  "cacheEmpty": "De cache is leeg",
+  "cachedTracksAppear": "Gedownloade nummers verschijnen hier automatisch",
+  "removeFromCache": "Uit cache verwijderen",
+  "removeCachedTrackTitle": "Nummer uit de cache verwijderen?",
+  "removeCachedTrackBody": "«{title}» wordt van dit apparaat verwijderd.",
+  "delete": "Verwijderen",
+  "trackRemovedFromCache": "Nummer uit de cache verwijderd",
+  "clearCacheTitle": "Cache wissen?",
+  "clearCacheBody": "Alle opgeslagen audiobestanden worden van dit apparaat verwijderd. Favorieten en geschiedenis blijven ongewijzigd.",
+  "cacheCleared": "Lokale cache gewist",
+  "back": "Terug",
+  "playlistActions": "Afspeellijstacties",
+  "playlistUpper": "AFSPEELLIJST",
+  "playlistEmpty": "In deze afspeellijst staan nog geen nummers",
+  "pasteTrackList": "Plak een nummerlijst",
+  "pasteImportLink": "Plak een link om te importeren",
+  "tracksNotFound": "Er zijn geen nummers gevonden op die link.",
+  "importError": "Import mislukt. Controleer de link en je internetverbinding.",
+  "importedPlaylistStarted": "Geïmporteerde afspeellijst wordt afgespeeld ({count} nummers)",
+  "importedPlaylistName": "Import ({platform})",
+  "playlistSaved": "Afspeellijst «{name}» opgeslagen in je bibliotheek!",
+  "spotifyImportSubtitle": "Spotify • Afspeellijsten, albums en nummers",
+  "artistTrackOrCsv": "Artiest — Nummer, of een Exportify-CSV",
+  "pastePlaylistOrTrackLink": "Plak een afspeellijst- of nummerlink",
+  "pasteFromClipboard": "Plakken uit klembord",
+  "link": "Link",
+  "trackList": "Nummerlijst",
+  "playlistName": "Naam van de afspeellijst",
+  "startImport": "Import starten",
+  "importedCollectionMeta": "{author} • {count} nummers",
+  "importedFromSpotify": "Geïmporteerd uit Spotify",
+  "importIntro": "Neem je afspeellijsten mee. Gebruik een Spotify-link, een nummerlijst of een Exportify-bestand.",
+  "importTextTab": "Tekst",
+  "importFileTab": "CSV / TXT",
+  "importChooseFile": "Bestand kiezen",
+  "importFileHint": "Kies de door Exportify geëxporteerde CSV of een TXT-nummerlijst. UTF-8, tot 10 MB en 10.000 nummers.",
+  "importFileAndroidOnly": "Bestandskeuze is beschikbaar op Android. Hier kun je de inhoud van een CSV of nummerlijst plakken.",
+  "importTextHint": "Eén regel per Artiest — Nummer. Je kunt ook de volledige CSV, inclusief de kopregel, plakken.",
+  "importPreview": "Voorbeeld van nummers",
+  "importedFromCsv": "Geïmporteerd uit CSV",
+  "importedFromText": "Geïmporteerd uit een nummerlijst",
+  "importMoreTracks": "En {count} meer",
+  "importMetadataHint": "De afspeellijst wordt op dit apparaat opgeslagen. Audio wordt gezocht wanneer je een nummer afspeelt; importeren downloadt geen nummers.",
+  "importAnother": "Iets anders importeren",
+  "importReading": "Je afspeellijst wordt gelezen…",
+  "importSaving": "Opslaan in je bibliotheek…",
+  "importNameRequired": "Voer een naam voor de afspeellijst in.",
+  "importNameExists": "Er bestaat al een afspeellijst met deze naam. Kies een andere naam om beide te bewaren.",
+  "importSaveFailed": "Kon de afspeellijst niet opslaan. Je voorbeeld is er nog — probeer het opnieuw.",
+  "importFileTooLarge": "Dit bestand is groter dan 10 MB. Splits de afspeellijst in kleinere exports.",
+  "importFileUnsupported": "Kies een .csv- of .txt-bestand.",
+  "importFileEncoding": "Kon de tekstcodering niet lezen. Sla het bestand op als UTF-8 en probeer het opnieuw.",
+  "importCsvInvalid": "De CSV is onvolledig of ongeldig. Exporteer hem opnieuw zonder kolommen of aanhalingstekens te wijzigen.",
+  "importCsvMissingColumns": "De CSV heeft de kolommen Track Name en Artist Name(s), of Title en Artist nodig. Gebruik de oorspronkelijke Exportify-export.",
+  "importFileEmpty": "Geen nummers gevonden. Kies een gevulde export of plak een Artiest — Nummer-lijst.",
+  "importTooManyTracks": "Eén import kan maximaal 10.000 nummers bevatten. Splits deze afspeellijst; er is nog niets opgeslagen.",
+  "importFileReadFailed": "Kon dit bestand niet openen. Controleer of het beschikbaar is op je apparaat en kies het opnieuw.",
+  "importSpotifyBlocked": "Spotify heeft deze afspeellijst niet gedeeld in jouw regio. Exporteer met Exportify en kies het CSV-bestand.",
+  "listen": "Afspelen",
+  "addToPlaylists": "Toevoegen aan afspeellijsten",
+  "trackSemantics": "Nummer {title}, {artist}",
+  "trackActions": "Nummeracties",
+  "startWaveFromTrack": "Een golf starten vanaf dit nummer",
+  "addToQueue": "Aan wachtrij toevoegen",
+  "addedToQueue": "Aan wachtrij toegevoegd: {title}",
+  "removeFavorite": "Uit favorieten verwijderen",
+  "addFavorite": "Aan favorieten toevoegen",
+  "addToPlaylist": "Aan afspeellijst toevoegen",
+  "goToArtist": "Naar de artiest",
+  "myPlaylist": "Mijn afspeellijst",
+  "newPlaylist": "Nieuwe afspeellijst",
+  "name": "Naam",
+  "create": "Maken",
+  "loading": "Laden…",
+  "pause": "Pauze",
+  "play": "Afspelen",
+  "next": "Volgende",
+  "speedAndPitch": "Snelheid en toonhoogte",
+  "speedValue": "Snelheid: {value}x",
+  "pitchValue": "Toonhoogte: {value}x",
+  "reset": "Herstellen",
+  "moreActions": "Meer acties",
+  "playbackQueue": "Afspeelwachtrij",
+  "queueEmpty": "De wachtrij is leeg",
+  "selectingSource": "Bron wordt gekozen",
+  "collapsePlayer": "Speler samenvouwen",
+  "nowPlayingUpper": "NU AAN HET SPELEN",
+  "queue": "Wachtrij",
+  "startWave": "Golf starten",
+  "cover": "Hoes",
+  "karaokeLyrics": "Karaoke-songtekst",
+  "findMusicStart": "Vind muziek en begin met afspelen",
+  "playbackNotStarted": "Het afspelen is nog niet gestart",
+  "openSearchFirstTrack": "Open zoeken om je eerste nummer te vinden",
+  "sourceSoundCloud": "SoundCloud",
+  "sourceDevice": "Op apparaat",
+  "sourceCatalog": "Catalogus",
+  "sourceYouTube": "YouTube",
+  "sourceAudius": "Audius",
+  "sourceServer": "Server",
+  "serverResolver": "Resolver-server",
+  "serverResolverCaption": "Optionele zelfgehoste server die volledige audiostreams oplost. De app stuurt een zoekopdracht of nummer-ID; de server geeft een afspeel-URL terug. Het contract en een referentie-implementatie staan in docs/REMOTE_RESOLVER.md.",
+  "serverResolverHint": "https://hook-resolver.example.com",
+  "serverResolverDisabled": "Niet geconfigureerd",
+  "serverSave": "Opslaan",
+  "serverDisable": "Uitschakelen",
+  "onboardingWelcomeTitle": "Welkom bij Hook",
+  "onboardingWelcomeCaption": "Muziek, songteksten en je eigen visuele stijl. Kies een taal om te beginnen — je kunt hem later in de instellingen wijzigen.",
+  "onboardingSkip": "Overslaan",
+  "onboardingNext": "Doorgaan",
+  "onboardingStart": "Beginnen met luisteren",
+  "onboardingMicrogTitle": "MicroG en het Google-account",
+  "onboardingMicrogBody": "MicroG bouwt Google-diensten opnieuw op aangepaste Android-ROM's die er zonder worden geleverd. Hook gebruikt ze slechts voor één optionele functie: een YouTube-account koppelen om je afspeellijsten te importeren. Muziek afspelen heeft nooit MicroG of een Google-dienst nodig.",
+  "onboardingMicrogNote": "Afspelen hangt niet af van MicroG. Een account koppelen is optioneel.",
+  "onboardingMicrogDownload": "MicroG downloaden",
+  "onboardingMicrogStatusChecking": "Google-diensten worden gecontroleerd…",
+  "onboardingMicrogStatusOk": "Google-diensten zijn aanwezig op dit apparaat ({version}). Account-import werkt meteen.",
+  "onboardingMicrogStatusReVanced": "ReVanced GmsCore gedetecteerd ({version}). De officiële Google-aanmeld-SDK is er niet mee compatibel, dus accountkoppeling werkt mogelijk niet. Afspelen is niet beïnvloed.",
+  "onboardingMicrogStatusMissing": "Google-diensten zijn niet gevonden. Om afspeellijsten uit een YouTube-account te importeren, installeer eerst MicroG — of sla dit over en gebruik Hook zonder account.",
+  "lyricsView": "Songtekstweergave · {mode}",
+  "lyricsReadingRhythm": "Je leesritme",
+  "lyricsModeSubtitle": "Drie manieren om dichter bij het lied te komen.",
+  "lyricsModeLines": "Regels",
+  "lyricsModeKaraoke": "Karaoke",
+  "lyricsModeFocus": "Focus",
+  "lyricsModeLinesDescription": "Rustige songtekst met de huidige regel gemarkeerd",
+  "lyricsModeKaraokeDescription": "Woorden lichten zachtjes op met de zang",
+  "lyricsModeFocusDescription": "Eén grote regel. Niets anders",
+  "lyricsModeSaveFailed": "Kon de songtekstweergave niet opslaan.",
+  "lyricsModeFootnote": "Je keuze wordt bewaard voor toekomstige nummers. De nauwkeurigheid van karaoke hangt af van de brongegevens: woordmarkering is bij benadering zonder woordtiming, en de tekst blijft stil zonder tijdstempels.",
+  "lyricsNotFound": "Songtekst niet gevonden",
+  "karaokeUnavailable": "Karaoke-songtekst is niet beschikbaar voor dit nummer",
+  "unsyncedLyrics": "Niet-gesynchroniseerde songtekst",
+  "wordSyncUpper": "WOORD-VOOR-WOORD SYNC",
+  "lineSyncUpper": "REGEL-VOOR-REGEL SYNC",
+  "adjustLyricsSync": "Songtekst-synchronisatie aanpassen",
+  "startsSoon": "Begint zo",
+  "musicContinues": "De muziek gaat door",
+  "decreaseLyricsOffset": "Verschiving 0,1 s verminderen",
+  "lyricsOffset": "Verschiving: {value} s",
+  "increaseLyricsOffset": "Verschiving 0,1 s vergroten",
+  "hideSetting": "Instelling verbergen",
+  "lyricsOffsetSaveFailed": "Kon de songtekst-verschiving niet opslaan.",
+  "audioForbidden": "De audioserver weigerde toegang (HTTP 403). Het nummer is gevonden, maar zijn stream is niet beschikbaar. Een VPN garandeert geen toegang tot audio.",
+  "fullVersionUnavailable": "Er is geen volledige versie gevonden in de beschikbare bronnen. Controleer je verbinding of probeer het later.",
+  "sourcePlaybackFailed": "{source} kon dit nummer niet afspelen. Controleer je verbinding of probeer het later.",
+  "@@locale": "nl",
+  "@youtubeAccountProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@youtubeAccountUnavailableTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@recentSignals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@tracksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@continuationAfter": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playTrack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistStarted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceUsage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "@savedTracksUpper": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@removeCachedTrackBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedPlaylistStarted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importedPlaylistName": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "@playlistSaved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@importedCollectionMeta": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@importMoreTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@trackSemantics": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "@addedToQueue": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@speedValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@pitchValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusOk": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@onboardingMicrogStatusReVanced": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsView": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "@lyricsOffset": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@sourcePlaybackFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  }
+}
