@@ -48,6 +48,10 @@ class LocalStorageService {
       _prefs.setString('hook_locale_code', code);
 
   // --- LYRICS PRESENTATION ---
+  bool getLyricsAutoHide() => _prefs.getBool('hook_lyrics_auto_hide') ?? true;
+  Future<void> saveLyricsAutoHide(bool enabled) =>
+      _prefs.setBool('hook_lyrics_auto_hide', enabled);
+
   String? getLyricsDisplayMode() =>
       _prefs.getString('hook_lyrics_display_mode');
   Future<void> saveLyricsDisplayMode(String mode) =>

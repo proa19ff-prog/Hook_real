@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- audio_service looks these up by Dart-provided names at runtime. Without
+     explicit keep rules, release resource shrinking can remove the small icon
+     and Android then terminates the app when the notification is updated. -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/ic_notification_favorite,@drawable/ic_notification_favorite_border" />
+    tools:keep="@drawable/ic_stat_hook,@drawable/ic_notification_favorite,@drawable/ic_notification_favorite_border" />

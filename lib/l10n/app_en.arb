@@ -1,6 +1,12 @@
 {
   "@@locale": "en",
   "appTitle": "Hook",
+  "settings": "Settings",
+  "settingsCaption": "Changes are saved on this device.",
+  "playerSettings": "Player",
+  "lyricsAutoHide": "Hide controls while reading lyrics",
+  "lyricsAutoHideDescription": "After 10 seconds without interaction, the player panels slide away. Use the restore button to bring them back.",
+  "showPlayerControls": "Show player controls",
   "equalizer": "Equalizer",
   "equalizerEnabled": "Sound processing",
   "equalizerPresets": "Sound profile",

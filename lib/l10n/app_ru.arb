@@ -1,6 +1,12 @@
 {
   "@@locale": "ru",
   "appTitle": "Hook",
+  "settings": "Настройки",
+  "settingsCaption": "Изменения сохраняются на этом устройстве.",
+  "playerSettings": "Плеер",
+  "lyricsAutoHide": "Скрывать панели при просмотре текста",
+  "lyricsAutoHideDescription": "После 10 секунд без касаний панели плеера плавно уезжают. Кнопка возврата снова показывает управление.",
+  "showPlayerControls": "Вернуть управление",
   "equalizer": "Эквалайзер",
   "equalizerEnabled": "Обработка звука",
   "equalizerPresets": "Характер звучания",

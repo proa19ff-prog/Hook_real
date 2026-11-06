@@ -11,6 +11,8 @@ import '../../lyrics/presentation/lyrics_mode_selector.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
+import '../../settings/presentation/settings_provider.dart';
+import 'lyrics_focus_frame.dart';
 import 'playback_controls.dart';
 import 'player_state_provider.dart';
 import 'spotify_track_tile.dart';
@@ -114,6 +116,10 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
     final track = ref.watch(currentTrackProvider);
     final source = ref.watch(playbackSourceProvider);
     final player = ref.watch(audioPlayerServiceProvider);
+    final autoHide = ref.watch(lyricsAutoHideProvider);
+    final lyrics = _showLyrics
+        ? ref.watch(trackLyricsProvider).valueOrNull
+        : null;
     final colors = widget.theme.colors;
     final isFavorite =
         track != null &&
@@ -133,280 +139,366 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
         theme: widget.theme,
         artworkUrl: track?.artworkUrl,
         child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final ambient = AmbientThemeScope.of(context);
-                  final text = ambient?.textPrimary ?? colors.textPrimary;
-                  final muted = ambient?.textSecondary ?? colors.textSecondary;
-                  final reduceMotion = MediaQuery.disableAnimationsOf(context);
-                  final header = Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
-                    child: Row(
-                      children: [
-                        IconButton(
-                          tooltip: strings.collapsePlayer,
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: Icon(MingCuteIcons.mgc_down_line, color: text),
-                        ),
-                        Expanded(
-                          child: Column(
+          child: LyricsFocusFrame(
+            active:
+                _showLyrics &&
+                track != null &&
+                lyrics != null &&
+                !lyrics.isEmpty,
+            enabled: autoHide,
+            trackKey: _trackKey(track),
+            builder: (context, hidden, restore) => Stack(
+              fit: StackFit.expand,
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final ambient = AmbientThemeScope.of(context);
+                        final text = ambient?.textPrimary ?? colors.textPrimary;
+                        final muted =
+                            ambient?.textSecondary ?? colors.textSecondary;
+                        final reduceMotion = MediaQuery.disableAnimationsOf(
+                          context,
+                        );
+                        final header = Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
+                          child: Row(
                             children: [
-                              Text(
-                                'Hook',
-                                style: TextStyle(
+                              IconButton(
+                                tooltip: strings.collapsePlayer,
+                                onPressed: () => Navigator.of(context).pop(),
+                                icon: Icon(
+                                  MingCuteIcons.mgc_down_line,
                                   color: text,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                sourceLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: muted, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: strings.queue,
-                          onPressed: _showQueueSheet,
-                          icon: Icon(
-                            MingCuteIcons.mgc_playlist_line,
-                            color: text,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                  final stage = AnimatedSwitcher(
-                    duration: reduceMotion
-                        ? Duration.zero
-                        : const Duration(milliseconds: 260),
-                    child: KeyedSubtree(
-                      key: ValueKey(_showLyrics),
-                      child: track == null
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Text(
-                                  strings.openSearchFirstTrack,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: muted, fontSize: 16),
-                                ),
-                              ),
-                            )
-                          : _showLyrics
-                          ? KaraokeLyricsView(theme: widget.theme)
-                          : LayoutBuilder(
-                              builder: (context, bounds) {
-                                final width = (bounds.maxWidth - 48).clamp(
-                                  0.0,
-                                  420.0,
-                                );
-                                final size = (bounds.maxHeight - 16).clamp(
-                                  0.0,
-                                  width,
-                                );
-                                return Center(
-                                  child: Hero(
-                                    tag: 'current_artwork_${_trackKey(track)}',
-                                    child: TrackArtwork(
-                                      url: track.artworkUrl,
-                                      size: size,
-                                      borderRadius: BorderRadius.circular(12),
-                                      placeholderColor: colors.surface,
-                                      iconColor: colors.textSecondary,
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Hook',
+                                      style: TextStyle(
+                                        color: text,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  );
-                  final details = Padding(
-                    padding: const EdgeInsets.fromLTRB(28, 16, 16, 4),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height:
-                                    MediaQuery.textScalerOf(context)
-                                        .scale(_showLyrics ? 18 : 24) *
-                                    1.2 *
-                                    (_showLyrics ? 1 : 2),
-                                child: Text(
-                                  track?.title ?? strings.queueEmpty,
-                                  maxLines: _showLyrics ? 1 : 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: text,
-                                    fontSize: _showLyrics ? 18 : 24,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: -0.5,
-                                    height: 1.2,
-                                  ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      sourceLabel,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: muted,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                track?.artist ?? strings.findMusicStart,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: muted, fontSize: 14),
+                              IconButton(
+                                tooltip: strings.queue,
+                                onPressed: _showQueueSheet,
+                                icon: Icon(
+                                  MingCuteIcons.mgc_playlist_line,
+                                  color: text,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          tooltip: isFavorite
-                              ? strings.removeFavorite
-                              : strings.addFavorite,
-                          onPressed: track == null
-                              ? null
-                              : () => ref
-                                    .read(favoritesProvider.notifier)
-                                    .toggleFavorite(track),
-                          icon: Icon(
-                            isFavorite
-                                ? MingCuteIcons.mgc_heart_fill
-                                : MingCuteIcons.mgc_heart_line,
-                            color: isFavorite ? colors.accent : muted,
+                        );
+                        final stage = AnimatedSwitcher(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : const Duration(milliseconds: 260),
+                          child: KeyedSubtree(
+                            key: ValueKey(_showLyrics),
+                            child: track == null
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24),
+                                      child: Text(
+                                        strings.openSearchFirstTrack,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: muted,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : _showLyrics
+                                ? KaraokeLyricsView(theme: widget.theme)
+                                : LayoutBuilder(
+                                    builder: (context, bounds) {
+                                      final width = (bounds.maxWidth - 48)
+                                          .clamp(0.0, 420.0);
+                                      final size = (bounds.maxHeight - 16)
+                                          .clamp(0.0, width);
+                                      return Center(
+                                        child: Hero(
+                                          tag:
+                                              'current_artwork_${_trackKey(track)}',
+                                          child: TrackArtwork(
+                                            url: track.artworkUrl,
+                                            size: size,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            placeholderColor: colors.surface,
+                                            iconColor: colors.textSecondary,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
                           ),
-                        ),
-                      ],
+                        );
+                        final details = Padding(
+                          padding: const EdgeInsets.fromLTRB(28, 16, 16, 4),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.textScalerOf(context)
+                                              .scale(_showLyrics ? 18 : 24) *
+                                          1.2 *
+                                          (_showLyrics ? 1 : 2),
+                                      child: Text(
+                                        track?.title ?? strings.queueEmpty,
+                                        maxLines: _showLyrics ? 1 : 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: text,
+                                          fontSize: _showLyrics ? 18 : 24,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.5,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      track?.artist ?? strings.findMusicStart,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: muted,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: isFavorite
+                                    ? strings.removeFavorite
+                                    : strings.addFavorite,
+                                onPressed: track == null
+                                    ? null
+                                    : () => ref
+                                          .read(favoritesProvider.notifier)
+                                          .toggleFavorite(track),
+                                icon: Icon(
+                                  isFavorite
+                                      ? MingCuteIcons.mgc_heart_fill
+                                      : MingCuteIcons.mgc_heart_line,
+                                  color: isFavorite ? colors.accent : muted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                        final footer = Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 12,
+                            runSpacing: 8,
+                            children: [
+                              TextButton.icon(
+                                key: const ValueKey('player-lyrics-toggle'),
+                                onPressed: track == null
+                                    ? null
+                                    : () => setState(
+                                        () => _showLyrics = !_showLyrics,
+                                      ),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: _showLyrics ? text : muted,
+                                  backgroundColor: _showLyrics
+                                      ? colors.surface
+                                      : null,
+                                  minimumSize: const Size(48, 48),
+                                ),
+                                icon: Icon(
+                                  _showLyrics
+                                      ? MingCuteIcons.mgc_disc_line
+                                      : MingCuteIcons.mgc_subtitle_line,
+                                  size: 20,
+                                ),
+                                label: Text(
+                                  _showLyrics
+                                      ? strings.cover
+                                      : strings.karaokeLyrics,
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: track == null || _isChangingTrack
+                                    ? null
+                                    : () async {
+                                        setState(() => _isChangingTrack = true);
+                                        try {
+                                          await ref
+                                              .read(queueProvider.notifier)
+                                              .startWave(track);
+                                        } finally {
+                                          if (mounted) {
+                                            setState(
+                                              () => _isChangingTrack = false,
+                                            );
+                                          }
+                                        }
+                                      },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: muted,
+                                  minimumSize: const Size(48, 48),
+                                ),
+                                icon: const Icon(
+                                  MingCuteIcons.mgc_sound_line_fill,
+                                  size: 20,
+                                ),
+                                label: Text(strings.startWave),
+                              ),
+                            ],
+                          ),
+                        );
+                        final scrollLayout =
+                            constraints.maxHeight < 560 ||
+                            MediaQuery.textScalerOf(context).scale(16) > 24;
+                        final trackStage = AnimatedPadding(
+                          duration: reduceMotion
+                              ? Duration.zero
+                              : const Duration(milliseconds: 320),
+                          curve: Curves.easeInOutCubic,
+                          padding: EdgeInsets.only(top: hidden ? 56 : 0),
+                          child: stage,
+                        );
+                        final trackPanel = SwipeTrackTransition(
+                          key: _trackTransitionKey,
+                          trackKey: _trackKey(track),
+                          queueIndex: player.currentIndex,
+                          enabled: track != null,
+                          onNext: player.next,
+                          onPrevious: player.previousTrack,
+                          child: Column(
+                            mainAxisSize: scrollLayout
+                                ? MainAxisSize.min
+                                : MainAxisSize.max,
+                            children: [
+                              if (scrollLayout)
+                                AnimatedContainer(
+                                  duration: reduceMotion
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 320),
+                                  curve: Curves.easeInOutCubic,
+                                  height: _showLyrics
+                                      ? hidden
+                                            ? constraints.maxHeight
+                                            : 360
+                                      : 260,
+                                  child: trackStage,
+                                )
+                              else
+                                Expanded(child: trackStage),
+                              LyricsChrome(
+                                key: const ValueKey('player-details-chrome'),
+                                hidden: hidden,
+                                slideUp: false,
+                                child: details,
+                              ),
+                            ],
+                          ),
+                        );
+                        final controls = Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: PlaybackControls(
+                            theme: widget.theme,
+                            onNext: () => _trackTransitionKey.currentState
+                                ?.navigate(TrackSwipeDirection.next),
+                            onPrevious: () =>
+                                _trackTransitionKey.currentState?.navigate(
+                                  TrackSwipeDirection.previous,
+                                  action: player.previous,
+                                ),
+                          ),
+                        );
+                        final topChrome = LyricsChrome(
+                          key: const ValueKey('player-top-chrome'),
+                          hidden: hidden,
+                          slideUp: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              header,
+                              if (_showLyrics)
+                                LyricsModeButton(theme: widget.theme),
+                            ],
+                          ),
+                        );
+                        final bottomChrome = LyricsChrome(
+                          key: const ValueKey('player-bottom-chrome'),
+                          hidden: hidden,
+                          slideUp: false,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [controls, footer],
+                          ),
+                        );
+                        if (scrollLayout) {
+                          return SingleChildScrollView(
+                            child: Column(
+                              children: [topChrome, trackPanel, bottomChrome],
+                            ),
+                          );
+                        }
+                        return Column(
+                          children: [
+                            topChrome,
+                            Expanded(child: trackPanel),
+                            bottomChrome,
+                          ],
+                        );
+                      },
                     ),
-                  );
-                  final footer = Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 12,
-                      runSpacing: 8,
-                      children: [
-                        TextButton.icon(
-                          key: const ValueKey('player-lyrics-toggle'),
-                          onPressed: track == null
-                              ? null
-                              : () =>
-                                    setState(() => _showLyrics = !_showLyrics),
-                          style: TextButton.styleFrom(
-                            foregroundColor: _showLyrics ? text : muted,
-                            backgroundColor: _showLyrics
-                                ? colors.surface
-                                : null,
-                            minimumSize: const Size(48, 48),
-                          ),
-                          icon: Icon(
-                            _showLyrics
-                                ? MingCuteIcons.mgc_disc_line
-                                : MingCuteIcons.mgc_subtitle_line,
-                            size: 20,
-                          ),
-                          label: Text(
-                            _showLyrics ? strings.cover : strings.karaokeLyrics,
-                          ),
+                  ),
+                ),
+                if (hidden)
+                  Positioned(
+                    top: 8,
+                    right: 12,
+                    child: Material(
+                      color: colors.surface,
+                      shape: const CircleBorder(),
+                      child: IconButton(
+                        key: const ValueKey('player-restore-controls'),
+                        tooltip: strings.showPlayerControls,
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
                         ),
-                        TextButton.icon(
-                          onPressed: track == null || _isChangingTrack
-                              ? null
-                              : () async {
-                                  setState(() => _isChangingTrack = true);
-                                  try {
-                                    await ref
-                                        .read(queueProvider.notifier)
-                                        .startWave(track);
-                                  } finally {
-                                    if (mounted) {
-                                      setState(() => _isChangingTrack = false);
-                                    }
-                                  }
-                                },
-                          style: TextButton.styleFrom(
-                            foregroundColor: muted,
-                            minimumSize: const Size(48, 48),
-                          ),
-                          icon: const Icon(
-                            MingCuteIcons.mgc_sound_line_fill,
-                            size: 20,
-                          ),
-                          label: Text(strings.startWave),
-                        ),
-                      ],
-                    ),
-                  );
-                  final scrollLayout =
-                      constraints.maxHeight < 560 ||
-                      MediaQuery.textScalerOf(context).scale(16) > 24;
-                  final trackPanel = SwipeTrackTransition(
-                    key: _trackTransitionKey,
-                    trackKey: _trackKey(track),
-                    queueIndex: player.currentIndex,
-                    enabled: track != null,
-                    onNext: player.next,
-                    onPrevious: player.previousTrack,
-                    child: Column(
-                      mainAxisSize: scrollLayout
-                          ? MainAxisSize.min
-                          : MainAxisSize.max,
-                      children: [
-                        if (scrollLayout)
-                          SizedBox(
-                            height: _showLyrics ? 360 : 260,
-                            child: stage,
-                          )
-                        else
-                          Expanded(child: stage),
-                        details,
-                      ],
-                    ),
-                  );
-                  final controls = Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: PlaybackControls(
-                      theme: widget.theme,
-                      onNext: () => _trackTransitionKey.currentState?.navigate(
-                        TrackSwipeDirection.next,
+                        color: colors.textPrimary,
+                        icon: const Icon(Icons.unfold_more_rounded),
+                        onPressed: restore,
                       ),
-                      onPrevious: () =>
-                          _trackTransitionKey.currentState?.navigate(
-                            TrackSwipeDirection.previous,
-                            action: player.previous,
-                          ),
                     ),
-                  );
-                  if (scrollLayout) {
-                    return SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          header,
-                          if (_showLyrics)
-                            LyricsModeButton(theme: widget.theme),
-                          trackPanel,
-                          controls,
-                          footer,
-                        ],
-                      ),
-                    );
-                  }
-                  return Column(
-                    children: [
-                      header,
-                      if (_showLyrics) LyricsModeButton(theme: widget.theme),
-                      Expanded(child: trackPanel),
-                      controls,
-                      footer,
-                    ],
-                  );
-                },
-              ),
+                  ),
+              ],
             ),
           ),
         ),

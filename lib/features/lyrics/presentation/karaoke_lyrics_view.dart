@@ -17,6 +17,7 @@ import '../data/lyrics_client.dart';
 import '../domain/lyric_line.dart';
 import '../domain/lyrics_display_mode.dart';
 import 'lyrics_preferences_provider.dart';
+import 'lyrics_chrome.dart';
 import 'lyrics_translation_panel.dart';
 
 const _easeOut = Cubic(0.23, 1, 0.32, 1);
@@ -433,26 +434,33 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
             bottom: 12,
             left: 16,
             right: 16,
-            child: Align(
-              alignment: _showOffsetControls
-                  ? Alignment.center
-                  : Alignment.centerRight,
-              child: _showOffsetControls
-                  ? _buildOffsetBar(colors)
-                  : IconButton(
-                      tooltip: strings.adjustLyricsSync,
-                      style: IconButton.styleFrom(
-                        backgroundColor: colors.surface.withValues(alpha: 0.88),
-                        foregroundColor: colors.textSecondary,
-                        side: BorderSide(
-                          color: colors.border.withValues(alpha: 0.45),
+            child: LyricsChrome(
+              key: const ValueKey('lyrics-sync-chrome'),
+              hidden: LyricsControlsScope.hiddenOf(context),
+              slideUp: false,
+              child: Align(
+                alignment: _showOffsetControls
+                    ? Alignment.center
+                    : Alignment.centerRight,
+                child: _showOffsetControls
+                    ? _buildOffsetBar(colors)
+                    : IconButton(
+                        tooltip: strings.adjustLyricsSync,
+                        style: IconButton.styleFrom(
+                          backgroundColor: colors.surface.withValues(
+                            alpha: 0.88,
+                          ),
+                          foregroundColor: colors.textSecondary,
+                          side: BorderSide(
+                            color: colors.border.withValues(alpha: 0.45),
+                          ),
                         ),
+                        icon: const Icon(MingCuteIcons.mgc_settings_3_line),
+                        onPressed: () {
+                          setState(() => _showOffsetControls = true);
+                        },
                       ),
-                      icon: const Icon(MingCuteIcons.mgc_settings_3_line),
-                      onPressed: () {
-                        setState(() => _showOffsetControls = true);
-                      },
-                    ),
+              ),
             ),
           ),
       ],

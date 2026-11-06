@@ -9,6 +9,7 @@ import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
+import '../../settings/presentation/settings_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/theme_settings_screen.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
@@ -79,6 +80,23 @@ class HomeScreen extends ConsumerWidget {
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => ThemeSettingsScreen(theme: theme),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          key: const ValueKey('home-settings-button'),
+                          tooltip: strings.settings,
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
+                          icon: Icon(
+                            Icons.settings_outlined,
+                            color: colors.textSecondary,
+                          ),
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const SettingsScreen(),
                             ),
                           ),
                         ),

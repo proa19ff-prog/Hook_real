@@ -104,6 +104,42 @@ abstract class AppLocalizations {
   /// **'Hook'**
   String get appTitle;
 
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @settingsCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes are saved on this device.'**
+  String get settingsCaption;
+
+  /// No description provided for @playerSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get playerSettings;
+
+  /// No description provided for @lyricsAutoHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide controls while reading lyrics'**
+  String get lyricsAutoHide;
+
+  /// No description provided for @lyricsAutoHideDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'After 10 seconds without interaction, the player panels slide away. Use the restore button to bring them back.'**
+  String get lyricsAutoHideDescription;
+
+  /// No description provided for @showPlayerControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Show player controls'**
+  String get showPlayerControls;
+
   /// No description provided for @equalizer.
   ///
   /// In en, this message translates to:

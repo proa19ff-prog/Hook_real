@@ -9,6 +9,7 @@ import '../../theme_engine/domain/hook_theme.dart';
 import '../data/lyrics_client.dart';
 import '../data/lyrics_translation_service.dart';
 import '../domain/lyric_line.dart';
+import 'lyrics_chrome.dart';
 
 List<String> translationLines(LyricsResult lyrics) {
   final output = <String>[];
@@ -170,137 +171,162 @@ class _LyricsTranslationPanelState
         : 'en';
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
+        LyricsChrome(
+          key: const ValueKey('lyrics-translation-chrome'),
+          hidden: LyricsControlsScope.hiddenOf(context),
+          slideUp: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Text(
-                  widget.caption,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: colors.textSecondary, fontSize: 10),
-                ),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 80,
-                child: Semantics(
-                  label: strings.translationTarget,
-                  child: DropdownButton<String>(
-                    key: const ValueKey('translation-target'),
-                    value: _target,
-                    isExpanded: true,
-                    menuWidth: 240,
-                    selectedItemBuilder: (context) => [
-                      Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          'RU',
-                          semanticsLabel: strings.translationRussian,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.caption,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 10,
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          'EN',
-                          semanticsLabel: strings.translationEnglish,
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 80,
+                      child: Semantics(
+                        label: strings.translationTarget,
+                        child: DropdownButton<String>(
+                          key: const ValueKey('translation-target'),
+                          value: _target,
+                          isExpanded: true,
+                          menuWidth: 240,
+                          selectedItemBuilder: (context) => [
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'RU',
+                                semanticsLabel: strings.translationRussian,
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                'EN',
+                                semanticsLabel: strings.translationEnglish,
+                              ),
+                            ),
+                          ],
+                          underline: const SizedBox.shrink(),
+                          dropdownColor: colors.surface,
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: 12,
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: 'ru',
+                              child: Text(strings.translationRussian),
+                            ),
+                            DropdownMenuItem(
+                              value: 'en',
+                              child: Text(strings.translationEnglish),
+                            ),
+                          ],
+                          onChanged: _busy
+                              ? null
+                              : (target) => setState(() {
+                                  _target = target;
+                                  _translations = const {};
+                                  _visible = false;
+                                  _error = null;
+                                }),
                         ),
                       ),
-                    ],
-                    underline: const SizedBox.shrink(),
-                    dropdownColor: colors.surface,
-                    style: TextStyle(color: colors.textSecondary, fontSize: 12),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'ru',
-                        child: Text(strings.translationRussian),
+                    ),
+                    IconButton(
+                      key: const ValueKey('lyrics-translate-button'),
+                      tooltip: _busy
+                          ? strings.cancelTranslation
+                          : _visible
+                          ? strings.hideTranslation
+                          : strings.translateLyrics,
+                      isSelected: _visible,
+                      constraints: const BoxConstraints(
+                        minWidth: 48,
+                        minHeight: 48,
                       ),
-                      DropdownMenuItem(
-                        value: 'en',
-                        child: Text(strings.translationEnglish),
+                      color: _visible ? colors.accent : colors.textPrimary,
+                      icon: Icon(
+                        _busy ? Icons.close_rounded : Icons.translate_rounded,
                       ),
-                    ],
-                    onChanged: _busy
-                        ? null
-                        : (target) => setState(() {
-                            _target = target;
-                            _translations = const {};
-                            _visible = false;
-                            _error = null;
-                          }),
-                  ),
+                      onPressed: _toggle,
+                    ),
+                  ],
                 ),
               ),
-              IconButton(
-                key: const ValueKey('lyrics-translate-button'),
-                tooltip: _busy
-                    ? strings.cancelTranslation
-                    : _visible
-                    ? strings.hideTranslation
-                    : strings.translateLyrics,
-                isSelected: _visible,
-                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-                color: _visible ? colors.accent : colors.textPrimary,
-                icon: Icon(
-                  _busy ? Icons.close_rounded : Icons.translate_rounded,
-                ),
-                onPressed: _toggle,
-              ),
-            ],
-          ),
-        ),
-        if (_busy)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Semantics(
-              liveRegion: true,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: colors.accent,
+              if (_busy)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: colors.accent,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            strings.translationLoading,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
+                ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Semantics(
+                    liveRegion: true,
                     child: Text(
-                      strings.translationLoading,
+                      _error!,
                       style: TextStyle(
                         color: colors.textSecondary,
                         fontSize: 12,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
+              if (_visible)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                  child: Tooltip(
+                    message: strings.translationNotice,
+                    child: Text(
+                      strings.translationAttribution,
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-        if (_error != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Semantics(
-              liveRegion: true,
-              child: Text(
-                _error!,
-                style: TextStyle(color: colors.textSecondary, fontSize: 12),
-              ),
-            ),
-          ),
-        if (_visible)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-            child: Tooltip(
-              message: strings.translationNotice,
-              child: Text(
-                strings.translationAttribution,
-                style: TextStyle(color: colors.textSecondary, fontSize: 11),
-              ),
-            ),
-          ),
+        ),
         Expanded(child: widget.builder(_visible ? _translations : const {})),
       ],
     );

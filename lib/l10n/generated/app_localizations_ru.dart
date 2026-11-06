@@ -13,6 +13,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appTitle => 'Hook';
 
   @override
+  String get settings => 'Настройки';
+
+  @override
+  String get settingsCaption => 'Изменения сохраняются на этом устройстве.';
+
+  @override
+  String get playerSettings => 'Плеер';
+
+  @override
+  String get lyricsAutoHide => 'Скрывать панели при просмотре текста';
+
+  @override
+  String get lyricsAutoHideDescription =>
+      'После 10 секунд без касаний панели плеера плавно уезжают. Кнопка возврата снова показывает управление.';
+
+  @override
+  String get showPlayerControls => 'Вернуть управление';
+
+  @override
   String get equalizer => 'Эквалайзер';
 
   @override

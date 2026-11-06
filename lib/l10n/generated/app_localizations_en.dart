@@ -13,6 +13,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Hook';
 
   @override
+  String get settings => 'Settings';
+
+  @override
+  String get settingsCaption => 'Changes are saved on this device.';
+
+  @override
+  String get playerSettings => 'Player';
+
+  @override
+  String get lyricsAutoHide => 'Hide controls while reading lyrics';
+
+  @override
+  String get lyricsAutoHideDescription =>
+      'After 10 seconds without interaction, the player panels slide away. Use the restore button to bring them back.';
+
+  @override
+  String get showPlayerControls => 'Show player controls';
+
+  @override
   String get equalizer => 'Equalizer';
 
   @override
