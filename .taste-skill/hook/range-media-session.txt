@@ -1,0 +1,64 @@
+MEDIA SESSION SERVICE (dumpsys media_session)
+
+5 sessions listeners.
+Global priority session is com.android.server.telecom/HeadsetMediaButton (userId=0)
+  HeadsetMediaButton com.android.server.telecom/HeadsetMediaButton (userId=0)
+    ownerPid=1619, ownerUid=1000, userId=0
+    package=com.android.server.telecom
+    launchIntent=null
+    mediaButtonReceiver=null
+    active=false
+    flags=65537
+    rating type=0
+    controllers: 0
+    state=null
+    audioAttrs=AudioAttributes: usage=USAGE_VOICE_COMMUNICATION content=CONTENT_TYPE_SPEECH flags=0x800 tags= bundle=null
+    volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0, volumeControlId=null
+    metadata: null
+    queueTitle=null, size=0
+User Records:
+Record for full_user=0
+  Volume key long-press listener: null
+  Volume key long-press listener package: 
+  Media key listener: null
+  Media key listener package: 
+  OnMediaKeyEventDispatchedListener: added 0 listener(s)
+  OnMediaKeyEventSessionChangedListener: added 0 listener(s)
+  Last MediaButtonReceiver: MBR {pi=PendingIntent{a221843: PendingIntentRecord{abaeec0 com.hook.music broadcastIntent}}, componentName=ComponentInfo{com.hook.music/com.ryanheise.audioservice.MediaButtonReceiver}, type=1, pkg=com.hook.music}
+  Media button session is com.hook.music/media-session (userId=0)
+  Sessions Stack - have 2 sessions:
+    androidx.media3.session.id. ru.oneme.app/androidx.media3.session.id. (userId=0)
+      ownerPid=20136, ownerUid=10414, userId=0
+      package=ru.oneme.app
+      launchIntent=null
+      mediaButtonReceiver=null
+      active=true
+      flags=7
+      rating type=0
+      controllers: 2
+      state=PlaybackState {state=NONE(0), position=0, buffered position=0, speed=0.0, updated=50990670, actions=7339653, custom actions=[], active item id=0, error=null}
+      audioAttrs=AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_UNKNOWN flags=0x800 tags= bundle=null
+      volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0, volumeControlId=null
+      metadata: null
+      queueTitle=null, size=0
+    media-session com.hook.music/media-session (userId=0)
+      ownerPid=4663, ownerUid=10420, userId=0
+      package=com.hook.music
+      launchIntent=null
+      mediaButtonReceiver=MBR {pi=PendingIntent{a221843: PendingIntentRecord{abaeec0 com.hook.music broadcastIntent}}, componentName=ComponentInfo{com.hook.music/com.ryanheise.audioservice.MediaButtonReceiver}, type=1, pkg=com.hook.music}
+      active=false
+      flags=7
+      rating type=0
+      controllers: 1
+      state=PlaybackState {state=NONE(0), position=0, buffered position=0, speed=1.0, updated=55216765, actions=3670015, custom actions=[], active item id=0, error=null}
+      audioAttrs=AudioAttributes: usage=USAGE_MEDIA content=CONTENT_TYPE_UNKNOWN flags=0x800 tags= bundle=null
+      volumeType=LOCAL, controlType=ABSOLUTE, max=0, current=0, volumeControlId=null
+      metadata: size=6, description=Love Me Not, Ravyn Lenae, Love Me Not / Love Is Blind
+      queueTitle=null, size=204
+Audio playback (lastly played comes first)
+  uid=1000 packages=com.miui.securitycore com.miui.aod com.miui.cit android com.mediatek.atci.service com.android.location.fused com.huaqin.sarcontroller com.android.providers.settings com.android.systemui com.xiaomi.trustservice com.miui.daemon miui.systemui.plugin com.modemdebug com.xiaomi.mtb com.android.dynsystem com.miui.powerkeeper com.mediatek.voicecommand com.android.inputdevices com.android.keychain com.miui.securitycenter com.trustonic.teeservice com.mediatek.location.lppe.main com.xiaomi.cameratools com.miui.face com.android.wallpaperbackup com.miui.screenrecorder com.miui.bugreport com.android.server.telecom com.huaqin.clearefs com.android.localtransport com.xiaomi.misettings com.xiaomi.barrage com.miui.qr com.android.provision com.mediatek com.miui.audiomonitor com.miui.notification com.miui.freeform com.android.settings 
+  uid=10420 packages=com.hook.music 
+Media session config:
+  media_button_receiver_fgs_allowlist_duration_ms: [cur: 10000, def: 10000]
+  media_session_calback_fgs_allowlist_duration_ms: [cur: 10000, def: 10000]
+  media_session_callback_fgs_while_in_use_temp_allow_duration_ms: [cur: 10000, def: 10000]

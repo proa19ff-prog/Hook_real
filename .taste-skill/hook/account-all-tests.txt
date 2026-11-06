@@ -1,0 +1,170 @@
+00:00 +0: loading C:/Hook/test/audio_player_service_test.dart
+00:00 +0: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue adds tracks without changing the current index
+00:00 +1: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue publishes tracks to the media session queue
+00:00 +2: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue reorders tracks and keeps the queue identity intact
+00:00 +3: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue ignores invalid queue indexes
+00:00 +4: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue removing the last queued track resets the empty state
+00:00 +5: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue loop mode cycles through all, one, and off
+00:00 +6: C:/Hook/test/audio_stream_probe_test.dart: probe uses native initial GET and headers, not HEAD or Range
+00:00 +7: C:/Hook/test/audio_stream_probe_test.dart: HEAD and Range success cannot hide denied initial audio GET
+00:00 +8: C:/Hook/test/audio_stream_probe_test.dart: successful HTML response is not considered playable audio
+00:00 +9: C:/Hook/test/audio_stream_probe_test.dart: empty audio response is not considered playable
+00:00 +10: C:/Hook/test/audio_stream_probe_test.dart: probe does not wait for or download a whole audio response
+00:00 +11: C:/Hook/test/hook_theme_test.dart: HookColors keeps text readable when theme colors are invalid
+00:01 +12: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +13: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +14: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +15: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +16: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +17: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +18: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +19: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +20: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +21: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +22: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +23: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +24: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +25: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +26: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +27: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +28: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +29: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +30: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:03 +31: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:04 +32: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:04 +33: C:/Hook/test/import_bottom_sheet_test.dart: late file selection after closing does not update disposed state (variant: TargetPlatform.android)
+00:04 +34: C:/Hook/test/import_bottom_sheet_test.dart: late file selection after closing does not update disposed state (variant: TargetPlatform.android)
+00:04 +35: C:/Hook/test/import_bottom_sheet_test.dart: late file selection after closing does not update disposed state (variant: TargetPlatform.android)
+00:04 +36: C:/Hook/test/library_layout_test.dart: library populated playlists keep names and menu accessible
+00:04 +37: C:/Hook/test/library_layout_test.dart: library populated playlists keep names and menu accessible
+00:04 +38: C:/Hook/test/library_layout_test.dart: library populated playlists keep names and menu accessible
+00:04 +39: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +40: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +41: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +42: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +43: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +44: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +45: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:04 +46: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +47: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +48: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +49: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +50: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +51: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +52: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:05 +53: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:05 +54: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:05 +55: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:05 +56: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:05 +57: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:06 +58: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:06 +59: C:/Hook/test/lyrics_translation_test.dart: button translates under original then hides without another request
+00:06 +60: C:/Hook/test/multi_source_search_test.dart: an explicit source filter stays isolated and has its own cache
+00:06 +61: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +62: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +63: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +64: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +65: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +66: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +67: C:/Hook/test/lyrics_translation_test.dart: model download requires explicit confirmation and cancel keeps original
+00:06 +68: C:/Hook/test/lyrics_translation_test.dart: confirmation enables model download only on second call
+00:06 +69: C:/Hook/test/lyrics_translation_test.dart: cancel discards a late result and restores usable original
+00:06 +70: C:/Hook/test/lyrics_translation_test.dart: switching song cancels request and ignores old completion
+00:06 +71: C:/Hook/test/lyrics_translation_test.dart: download failure leaves original visible with a retryable control
+00:06 +72: C:/Hook/test/music_import_service_test.dart: MusicImportService correctly detects platforms from URLs
+00:06 +73: C:/Hook/test/music_import_service_test.dart: parses Russian artist-title text and removes numbering/durations
+00:06 +74: C:/Hook/test/music_import_service_test.dart: parses Exportify-style CSV columns
+00:06 +75: C:/Hook/test/music_import_service_test.dart: CSV import detects CSV before Spotify URIs and reads exact title column
+00:06 +76: C:/Hook/test/music_import_service_test.dart: CSV import preserves multiline quoted fields and exported order including repeats
+00:06 +77: C:/Hook/test/music_import_service_test.dart: CSV import reads semicolon-delimited and tab-delimited exports
+00:06 +78: C:/Hook/test/music_import_service_test.dart: CSV import does not truncate after 500 tracks
+00:06 +79: C:/Hook/test/music_import_service_test.dart: CSV import reports explicit track limit without returning partial import
+00:06 +80: C:/Hook/test/music_import_service_test.dart: CSV import rejects malformed records instead of importing column fragments
+00:06 +81: C:/Hook/test/music_import_service_test.dart: CSV import rejects unsupported headers and empty exports
+00:06 +82: C:/Hook/test/music_import_service_test.dart: CSV import decodes UTF-8 BOM and validates file type, size, and encoding
+00:07 +83: C:/Hook/test/music_import_service_test.dart: CSV import CSV import and pasted CSV keep source metadata without catalog calls
+00:07 +84: C:/Hook/test/music_import_service_test.dart: CSV import does not treat unrelated hosts mentioning Spotify as links
+00:07 +85: C:/Hook/test/music_import_service_test.dart: parses modern Spotify entity.trackList embed data
+00:07 +86: C:/Hook/test/music_import_service_test.dart: TrackArtwork upgrades known low-resolution URLs
+00:07 +87: C:/Hook/test/music_sources_test.dart: SoundCloud rejects restricted and preview records
+00:07 +88: C:/Hook/test/music_sources_test.dart: a saved SoundCloud track with only preview transcodings resolves to null
+00:07 +89: C:/Hook/test/music_sources_test.dart: SoundCloud selects full unencrypted audio instead of an advertised preview
+00:07 +90: C:/Hook/test/music_sources_test.dart: Audius filters paid, gated, inaccessible and malformed tracks
+00:07 +91: C:/Hook/test/music_sources_test.dart: Audius rechecks access for a previously saved track
+00:07 +92: C:/Hook/test/music_sources_test.dart: Audius returns its public full-stream endpoint only for accessible records
+00:07 +93: C:/Hook/test/music_sources_test.dart: YouTube upload noise is normalized without erasing version identity
+00:07 +94: C:/Hook/test/music_sources_test.dart: YouTube metadata distinguishes full tracks from livestreams and shorts
+00:07 +95: C:/Hook/test/music_sources_test.dart: new source keys round-trip without changing the legacy YouTube migration
+00:09 +96: C:/Hook/test/playback_diagnostics_test.dart: diagnostics retain stage, provider and HTTP code without credentials
+00:09 +97: C:/Hook/test/playback_diagnostics_test.dart: HTTP failures are distinct from timeout, TLS and connection failures
+00:09 +98: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +99: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +100: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +101: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +102: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +103: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +104: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +105: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +106: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +107: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +108: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +109: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +110: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +111: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +112: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +113: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +114: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +115: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +116: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +117: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +118: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +119: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:11 +120: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +121: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +122: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +123: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +124: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +125: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +126: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +127: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +128: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +129: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:11 +130: C:/Hook/test/playback_dock_test.dart: empty playlist reserves no invisible player space
+00:11 +131: C:/Hook/test/vocal_lyrics_test.dart: voices keep stable sides and overlapping terminal timestamps
+00:11 +132: C:/Hook/test/vocal_lyrics_test.dart: enhanced word tokens can contain voice and backing prefixes
+00:11 +133: C:/Hook/test/vocal_lyrics_test.dart: unmarked lyrics do not invent speakers or extract untimed parentheses
+00:11 +134: C:/Hook/test/vocal_lyrics_test.dart: named voice sections persist, duet is centered and v2 works first
+00:11 +135: C:/Hook/test/vocal_lyrics_test.dart: inline explicitly timed backing has its own interval
+00:11 +136: C:/Hook/test/vocal_lyrics_test.dart: YRC retains real overlap and strips voice prefixes within words
+00:11 +137: C:/Hook/test/vocal_lyrics_test.dart: word-timed parenthetical phrases become independent backing
+00:11 +138: C:/Hook/test/vocal_lyrics_test.dart: unclosed or mid-word parentheses are not reinterpreted as another voice
+00:11 +139: C:/Hook/test/vocal_lyrics_test.dart: orphan backing remains available instead of disappearing
+00:11 +140: C:/Hook/test/vocal_lyrics_test.dart: repeated enhanced lines shift their word timestamps together
+00:11 +141: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient delivers annotated LRC through normal source selection
+00:11 +142: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient preserves a short YRC duet after grouping backing
+00:11 +143: C:/Hook/test/vocal_lyrics_test.dart: plain source still advertises no real synchronization
+00:11 +144: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:12 +145: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:12 +146: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:13 +147: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +148: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +149: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +150: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +151: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +152: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +153: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:13 +154: C:/Hook/test/youtube_account_test.dart: account screen detects separate GmsCore without automatic login
+00:14 +155: C:/Hook/test/youtube_account_test.dart: account screen detects separate GmsCore without automatic login
+00:14 +156: C:/Hook/test/youtube_account_test.dart: account screen detects separate GmsCore without automatic login
+00:14 +157: C:/Hook/test/youtube_account_test.dart: account screen detects separate GmsCore without automatic login
+00:14 +158: C:/Hook/test/youtube_account_test.dart: account screen detects separate GmsCore without automatic login
+00:14 +159: C:/Hook/test/youtube_account_test.dart: account screen detects separate GmsCore without automatic login
+00:14 +160: C:/Hook/test/youtube_account_test.dart: configuration error explains OAuth instead of claiming connected
+00:15 +161: C:/Hook/test/youtube_account_test.dart: disconnect needs confirmation and leaves saved library intact
+00:15 +162: C:/Hook/test/youtube_account_test.dart: import opens existing save preview without silently saving
+00:15 +163: C:/Hook/test/youtube_account_test.dart: expired clears profile without altering the library
+00:15 +164: C:/Hook/test/youtube_account_test.dart: permissionDenied clears profile without altering the library
+00:15 +165: C:/Hook/test/youtube_account_test.dart: noChannel clears profile without altering the library
+00:15 +166: C:/Hook/test/youtube_account_test.dart: unavailable tracks require confirmation before save preview
+00:15 +167: C:/Hook/test/youtube_account_test.dart: late sign-in result is ignored after cancellation
+00:16 +168: All tests passed!

@@ -1,0 +1,62 @@
+--------- beginning of main
+11-04 18:22:57.096 25439 25589 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+11-04 18:22:57.287 25439 25615 I flutter : The Dart VM service is listening on http://127.0.0.1:33351/Ijp2X4Ocamk=/
+11-04 18:23:04.568 25439 25439 I flutter : [HookAudio] {"stage":"youtube.availability.failed","source":"youtubeMusic","failure":"connection"}
+11-04 18:23:09.822 25439 25439 I flutter : Error loading artUri: ClientException with SocketException: Connection reset by peer (OS Error: Connection reset by peer, errno = 104), address = i1.sndcdn.com, port = 39558, uri=https://i1.sndcdn.com/artworks-icozg85ro2rnnCE8-yJSvEg-t500x500.png
+11-04 18:23:09.822 25439 25439 I flutter : #0      IOClient.send (package:http/src/io_client.dart:227:7)
+11-04 18:23:09.822 25439 25439 I flutter : <asynchronous suspension>
+11-04 18:23:09.822 25439 25439 I flutter : #1      HttpFileService.get (package:flutter_cache_manager/src/web/file_service.dart:39:26)
+11-04 18:23:09.822 25439 25439 I flutter : <asynchronous suspension>
+11-04 18:23:09.822 25439 25439 I flutter : #2      WebHelper._updateFile (package:flutter_cache_manager/src/web/web_helper.dart:106:22)
+11-04 18:23:09.822 25439 25439 I flutter : <asynchronous suspension>
+11-04 18:23:09.822 25439 25439 I flutter : #3      WebHelper._downloadOrAddToQueue (package:flutter_cache_manager/src/web/web_helper.dart:68:7)
+11-04 18:23:09.822 25439 25439 I flutter : <asynchronous suspension>
+11-04 18:23:10.222 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud"}
+11-04 18:23:11.462 25439 25439 I flutter : [HookAudio] {"stage":"native.ready","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud","durationMs":201529}
+11-04 18:23:23.794 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:23.797 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:23.800 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:23.919 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":25}
+11-04 18:23:24.109 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":24}
+11-04 18:23:24.228 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:25.463 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:25.496 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:25.749 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":25}
+11-04 18:23:25.771 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"youtubeMusic","failure":"connection"}
+11-04 18:23:25.772 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":23}
+11-04 18:23:25.846 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"youtubeMusic","failure":"connection"}
+11-04 18:23:25.998 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:26.001 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:26.074 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:26.075 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:26.272 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":25}
+11-04 18:23:26.288 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":21}
+11-04 18:23:26.693 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:26.715 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:27.542 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"youtubeMusic","count":20}
+11-04 18:23:27.858 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"youtubeMusic","count":20}
+11-04 18:23:28.457 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"youtubeMusic","count":20}
+11-04 18:23:28.608 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"youtubeMusic","count":20}
+11-04 18:23:28.930 25439 25439 I flutter : [HookAudio] {"stage":"catalog.search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:32.547 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:32.547 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:33.061 25439 25439 I flutter : [HookAudio] {"stage":"catalog.search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:34.349 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:34.350 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"spotify","count":25}
+11-04 18:23:34.556 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:34.706 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":25}
+11-04 18:23:34.770 25439 25439 I flutter : [HookAudio] {"stage":"search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:35.147 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"soundcloud","count":21}
+11-04 18:23:37.091 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"youtubeMusic","count":20}
+11-04 18:23:37.495 25439 25439 I flutter : [HookAudio] {"stage":"search.completed","source":"youtubeMusic","count":20}
+11-04 18:23:37.850 25439 25439 I flutter : [HookAudio] {"stage":"catalog.search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:23:59.266 25439 25439 I flutter : [HookAudio] {"stage":"catalog.search.failed","source":"audius","failure":"HTTP 403"}
+11-04 18:24:05.363 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com"}
+11-04 18:24:12.123 25439 25439 I flutter : [HookAudio] {"stage":"native.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"PlayerException"}
+11-04 18:24:13.774 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com"}
+11-04 18:24:20.695 25439 25439 I flutter : [HookAudio] {"stage":"native.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"PlayerException"}
+11-04 18:24:26.390 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"youtubeMusic","host":"rr2---sn-i5h7lner.googlevideo.com"}
+11-04 18:24:40.062 25439 25439 I flutter : [HookAudio] {"stage":"native.failed","source":"youtubeMusic","host":"rr2---sn-i5h7lner.googlevideo.com","failure":"PlayerException"}
+11-04 18:24:40.065 25439 25439 I flutter : [HookAudio] {"stage":"playback.failed","source":"spotify","failure":"PlayerException"}
+11-04 18:26:13.936 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud"}
+11-04 18:26:15.323 25439 25439 I flutter : [HookAudio] {"stage":"native.ready","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud","durationMs":262444}

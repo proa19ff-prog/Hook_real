@@ -1,0 +1,27 @@
+00:00 +0: loading C:/Hook/test/vocal_lyrics_test.dart
+00:00 +0: C:/Hook/test/vocal_lyrics_test.dart: voices keep stable sides and overlapping terminal timestamps
+00:00 +1: C:/Hook/test/vocal_lyrics_test.dart: enhanced word tokens can contain voice and backing prefixes
+00:00 +2: C:/Hook/test/vocal_lyrics_test.dart: unmarked lyrics do not invent speakers or extract untimed parentheses
+00:00 +3: C:/Hook/test/vocal_lyrics_test.dart: named voice sections persist, duet is centered and v2 works first
+00:00 +4: C:/Hook/test/vocal_lyrics_test.dart: inline explicitly timed backing has its own interval
+00:00 +5: C:/Hook/test/vocal_lyrics_test.dart: YRC retains real overlap and strips voice prefixes within words
+00:00 +6: C:/Hook/test/vocal_lyrics_test.dart: word-timed parenthetical phrases become independent backing
+00:00 +7: C:/Hook/test/vocal_lyrics_test.dart: unclosed or mid-word parentheses are not reinterpreted as another voice
+00:00 +8: C:/Hook/test/vocal_lyrics_test.dart: orphan backing remains available instead of disappearing
+00:00 +9: C:/Hook/test/vocal_lyrics_test.dart: repeated enhanced lines shift their word timestamps together
+00:00 +10: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient delivers annotated LRC through normal source selection
+00:00 +11: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient preserves a short YRC duet after grouping backing
+00:00 +12: C:/Hook/test/vocal_lyrics_test.dart: plain source still advertises no real synchronization
+00:00 +13: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:00 +14: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:00 +15: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:00 +16: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:00 +17: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:02 +18: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:03 +19: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:03 +20: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:03 +21: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:04 +22: C:/Hook/test/lyrics_translation_test.dart: switching song cancels request and ignores old completion
+00:04 +23: C:/Hook/test/vocal_lyrics_test.dart: long right-aligned lyrics and backing fit narrow large-text screens
+00:04 +24: C:/Hook/test/lyrics_translation_test.dart: download failure leaves original visible with a retryable control
+00:04 +25: All tests passed!

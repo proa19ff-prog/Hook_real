@@ -1,0 +1,19 @@
+--------- beginning of main
+11-04 18:33:11.782 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud"}
+11-04 18:33:17.285 25439 25439 I flutter : [HookAudio] {"stage":"native.failed","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud","failure":"PlayerException"}
+11-04 18:33:18.188 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud"}
+11-04 18:33:18.819 25439 25439 I flutter : [HookAudio] {"stage":"native.ready","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud","durationMs":236015}
+11-04 18:33:45.812 25439 25439 I flutter : [HookAudio] {"stage":"native.load","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud"}
+11-04 18:33:46.503 25439 25439 I flutter : [HookAudio] {"stage":"native.ready","source":"soundcloud","host":"playback.media-streaming.soundcloud.cloud","durationMs":119428}
+11-04 18:33:49.847 25439 25439 E flutter : [ERROR:flutter/lib/ui/window/platform_configuration.cc(475)] Reported frame time is older than the last one; clamping. 28449148431 < 28449153055 ~= 4624
+11-04 18:46:33.313 31554 31615 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+11-04 18:46:33.353 31554 31627 I flutter : The Dart VM service is listening on http://127.0.0.1:43153/m_wAoWQKJrc=/
+11-04 18:56:09.821 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:10.629 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:11.276 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:11.281 31554 31554 I flutter : [HookAudio] {"stage":"catalog.resolve.failed","source":"youtubeMusic","failure":"HTTP 403"}
+11-04 18:56:16.645 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5heen7z.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:17.324 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5heen7z.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:18.736 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5heen7z.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:18.739 31554 31554 I flutter : [HookAudio] {"stage":"catalog.resolve.failed","source":"youtubeMusic","failure":"HTTP 403"}
+11-04 18:56:18.746 31554 31554 I flutter : [HookAudio] {"stage":"playback.failed","source":"spotify"}

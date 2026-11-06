@@ -1,0 +1,24 @@
+--------- beginning of main
+11-04 18:46:33.313 31554 31615 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+11-04 18:46:33.353 31554 31627 I flutter : The Dart VM service is listening on http://127.0.0.1:43153/m_wAoWQKJrc=/
+11-04 18:56:09.821 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:10.629 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:11.276 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:11.281 31554 31554 I flutter : [HookAudio] {"stage":"catalog.resolve.failed","source":"youtubeMusic","failure":"HTTP 403"}
+11-04 18:56:16.645 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5heen7z.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:17.324 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5heen7z.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:18.736 31554 31554 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5heen7z.googlevideo.com","failure":"HTTP 403"}
+11-04 18:56:18.739 31554 31554 I flutter : [HookAudio] {"stage":"catalog.resolve.failed","source":"youtubeMusic","failure":"HTTP 403"}
+11-04 18:56:18.746 31554 31554 I flutter : [HookAudio] {"stage":"playback.failed","source":"spotify"}
+11-04 19:02:22.128  4663  4707 I flutter : [IMPORTANT:flutter/shell/platform/android/android_context_gl_impeller.cc(104)] Using the Impeller rendering backend (OpenGLES).
+11-04 19:02:22.591  4663  4728 I flutter : The Dart VM service is listening on http://127.0.0.1:46635/yl7zv2hamAI=/
+11-04 19:02:38.899  4663  4663 I flutter : [HookAudio] {"stage":"youtube.availability.failed","source":"youtubeMusic","failure":"timeout"}
+11-04 19:09:24.711  4663  4663 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 19:09:26.683  4663  4663 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 19:09:27.921  4663  4663 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr5---sn-2oi5h5-5j.googlevideo.com","failure":"HTTP 403"}
+11-04 19:09:27.925  4663  4663 I flutter : [HookAudio] {"stage":"catalog.resolve.failed","source":"youtubeMusic","failure":"HTTP 403"}
+11-04 19:09:31.014  4663  4663 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5h7lnl6.googlevideo.com","failure":"HTTP 403"}
+11-04 19:09:31.727  4663  4663 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5h7lnl6.googlevideo.com","failure":"HTTP 403"}
+11-04 19:09:32.390  4663  4663 I flutter : [HookAudio] {"stage":"youtube.audio.failed","source":"youtubeMusic","host":"rr4---sn-i5h7lnl6.googlevideo.com","failure":"HTTP 403"}
+11-04 19:09:32.392  4663  4663 I flutter : [HookAudio] {"stage":"catalog.resolve.failed","source":"youtubeMusic","failure":"HTTP 403"}
+11-04 19:09:32.400  4663  4663 I flutter : [HookAudio] {"stage":"playback.failed","source":"spotify"}

@@ -1,0 +1,13 @@
+00:00 +0: loading C:/Hook/test/youtube_account_test.dart
+00:00 +0: native account channel exposes display metadata, not access tokens
+00:00 +1: YouTube metadata keeps native video identity and duration
+00:00 +2: playlist pagination preserves order and repeated recordings
+00:00 +3: repeated page token fails rather than looping or silently truncating
+00:00 +4: cancelled import does not fetch another page or return partial results
+00:00 +5: oversized playlist fails before accessing network
+00:00 +6: account screen detects separate GmsCore without automatic login
+00:01 +7: configuration error explains OAuth instead of claiming connected
+00:01 +8: disconnect needs confirmation and leaves saved library intact
+00:01 +9: import opens existing save preview without silently saving
+00:01 +10: late sign-in result is ignored after cancellation
+00:01 +11: All tests passed!

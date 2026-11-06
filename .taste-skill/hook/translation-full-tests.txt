@@ -1,0 +1,155 @@
+00:00 +0: loading C:/Hook/test/audio_player_service_test.dart
+00:00 +0: C:/Hook/test/hook_theme_test.dart: HookColors keeps text readable when theme colors are invalid
+00:00 +1: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:00 +2: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:00 +3: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +4: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +5: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +6: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +7: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +8: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +9: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +10: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +11: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +12: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:01 +13: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:02 +14: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:02 +15: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:02 +16: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:02 +17: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +18: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +19: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +20: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +21: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +22: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +23: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +24: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +25: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +26: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +27: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +28: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +29: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +30: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +31: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +32: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +33: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +34: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +35: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +36: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +37: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +38: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:05 +39: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:06 +40: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:06 +41: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:06 +42: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:07 +43: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:07 +44: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +45: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +46: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +47: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +48: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +49: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +50: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +51: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +52: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +53: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:07 +54: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +55: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +56: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +57: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +58: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +59: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +60: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +61: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +62: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +63: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +64: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +65: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +66: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +67: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +68: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +69: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +70: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +71: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +72: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +73: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +74: C:/Hook/test/library_layout_test.dart: library tabs and empty states fit narrow large-text screens
+00:08 +75: C:/Hook/test/import_bottom_sheet_test.dart: pasted CSV is not mistaken for a Spotify link (variant: TargetPlatform.android)
+00:08 +76: C:/Hook/test/import_bottom_sheet_test.dart: pasted CSV is not mistaken for a Spotify link (variant: TargetPlatform.android)
+00:08 +77: C:/Hook/test/library_layout_test.dart: library populated playlists keep names and menu accessible
+00:08 +78: C:/Hook/test/library_layout_test.dart: library populated playlists keep names and menu accessible
+00:09 +79: C:/Hook/test/library_layout_test.dart: library populated playlists keep names and menu accessible
+00:09 +80: C:/Hook/test/import_bottom_sheet_test.dart: late file selection after closing does not update disposed state (variant: TargetPlatform.android)
+00:09 +81: C:/Hook/test/import_bottom_sheet_test.dart: late file selection after closing does not update disposed state (variant: TargetPlatform.android)
+00:09 +82: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +83: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +84: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +85: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +86: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +87: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +88: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:09 +89: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:10 +90: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:10 +91: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:10 +92: C:/Hook/test/library_layout_test.dart: search modes remain scrollable with the keyboard open
+00:10 +93: C:/Hook/test/library_layout_test.dart: search loading and results fit above the keyboard
+00:10 +94: C:/Hook/test/library_layout_test.dart: search loading and results fit above the keyboard
+00:10 +95: C:/Hook/test/library_layout_test.dart: search loading and results fit above the keyboard
+00:10 +96: C:/Hook/test/library_layout_test.dart: theme import explains invalid JSON without dismissing input
+00:11 +97: C:/Hook/test/library_layout_test.dart: settings scroll and shader controls fit narrow large-text screens
+00:11 +98: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +99: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +100: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +101: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +102: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +103: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +104: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +105: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +106: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +107: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +108: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +109: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:12 +110: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:14 +111: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:14 +112: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:15 +113: C:/Hook/test/stream_resolver_test.dart: getSearchQueries expands phonetic queries
+00:15 +114: C:/Hook/test/playback_dock_test.dart: empty playlist reserves no invisible player space
+00:15 +115: C:/Hook/test/playback_dock_test.dart: empty playlist reserves no invisible player space
+00:15 +116: C:/Hook/test/stream_resolver_test.dart: scoreTrack prioritizes original songs over bootleg edits
+00:15 +117: C:/Hook/test/stream_resolver_test.dart: scoreTrack matches Cyrillic titles
+00:15 +118: C:/Hook/test/stream_resolver_test.dart: scoreCandidate prefers the original upload over a remix
+00:15 +119: C:/Hook/test/stream_resolver_test.dart: isPlayableMatch rejects alternate SoundCloud uploads
+00:15 +120: C:/Hook/test/stream_resolver_test.dart: scoreTrack finds a title by its first word
+00:15 +121: C:/Hook/test/stream_resolver_test.dart: scoreTrack tolerates a small title typo and bracketed subtitle
+00:15 +122: C:/Hook/test/track_identity_test.dart: same title by unrelated artist cannot replace imported metadata
+00:15 +123: C:/Hook/test/track_identity_test.dart: catalog metadata accepts artist order and stylized digits, not another collaboration
+00:15 +124: C:/Hook/test/track_identity_test.dart: more views choose the same recording but never a different artist
+00:15 +125: C:/Hook/test/track_identity_test.dart: search deduplication prefers more viewed matching upload
+00:15 +126: C:/Hook/test/track_identity_test.dart: playback rejects a different collaboration even with the lead artist
+00:15 +127: C:/Hook/test/track_identity_test.dart: featured artist credits in upload title remain matching evidence
+00:15 +128: C:/Hook/test/track_identity_test.dart: catalog search includes full collaboration instead of only lead artist
+00:15 +129: C:/Hook/test/track_identity_test.dart: artist name must match word boundaries, not substring of other name
+00:15 +130: C:/Hook/test/track_identity_test.dart: view count round-trips and older saved libraries default to unknown
+00:16 +131: C:/Hook/test/vocal_lyrics_test.dart: voices keep stable sides and overlapping terminal timestamps
+00:16 +132: C:/Hook/test/vocal_lyrics_test.dart: enhanced word tokens can contain voice and backing prefixes
+00:16 +133: C:/Hook/test/vocal_lyrics_test.dart: unmarked lyrics do not invent speakers or extract untimed parentheses
+00:16 +134: C:/Hook/test/vocal_lyrics_test.dart: named voice sections persist, duet is centered and v2 works first
+00:16 +135: C:/Hook/test/vocal_lyrics_test.dart: inline explicitly timed backing has its own interval
+00:16 +136: C:/Hook/test/vocal_lyrics_test.dart: YRC retains real overlap and strips voice prefixes within words
+00:16 +137: C:/Hook/test/vocal_lyrics_test.dart: word-timed parenthetical phrases become independent backing
+00:16 +138: C:/Hook/test/vocal_lyrics_test.dart: unclosed or mid-word parentheses are not reinterpreted as another voice
+00:16 +139: C:/Hook/test/vocal_lyrics_test.dart: orphan backing remains available instead of disappearing
+00:16 +140: C:/Hook/test/vocal_lyrics_test.dart: repeated enhanced lines shift their word timestamps together
+00:16 +141: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient delivers annotated LRC through normal source selection
+00:16 +142: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient preserves a short YRC duet after grouping backing
+00:16 +143: C:/Hook/test/vocal_lyrics_test.dart: plain source still advertises no real synchronization
+00:16 +144: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:17 +145: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:17 +146: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:17 +147: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:17 +148: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:17 +149: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:17 +150: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:18 +151: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:18 +152: C:/Hook/test/widget_test.dart: unavailable YouTube shows a dismissible network warning
+00:19 +153: All tests passed!

@@ -1,0 +1,145 @@
+00:00 +0: loading C:/Hook/test/audio_player_service_test.dart
+00:00 +0: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue adds tracks without changing the current index
+00:00 +1: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue publishes tracks to the media session queue
+00:00 +2: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue reorders tracks and keeps the queue identity intact
+00:00 +3: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue ignores invalid queue indexes
+00:00 +4: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue removing the last queued track resets the empty state
+00:00 +5: C:/Hook/test/audio_player_service_test.dart: AudioPlayerService queue loop mode cycles through all, one, and off
+00:00 +6: C:/Hook/test/audio_stream_probe_test.dart: probe uses native initial GET and headers, not HEAD or Range
+00:00 +7: C:/Hook/test/audio_stream_probe_test.dart: HEAD and Range success cannot hide denied initial audio GET
+00:00 +8: C:/Hook/test/audio_stream_probe_test.dart: successful HTML response is not considered playable audio
+00:00 +9: C:/Hook/test/audio_stream_probe_test.dart: empty audio response is not considered playable
+00:00 +10: C:/Hook/test/audio_stream_probe_test.dart: probe does not wait for or download a whole audio response
+00:00 +11: C:/Hook/test/hook_theme_test.dart: HookColors keeps text readable when theme colors are invalid
+00:01 +12: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +13: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +14: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +15: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +16: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +17: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +18: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +19: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:03 +20: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +21: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +22: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +23: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +24: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +25: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +26: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +27: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +28: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +29: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +30: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +31: C:/Hook/test/import_bottom_sheet_test.dart: selects CSV, previews metadata, renames and saves locally (variant: TargetPlatform.android)
+00:04 +32: C:/Hook/test/library_layout_test.dart: theme import explains invalid JSON without dismissing input
+00:04 +33: C:/Hook/test/library_layout_test.dart: theme import explains invalid JSON without dismissing input
+00:04 +34: C:/Hook/test/import_bottom_sheet_test.dart: malformed CSV stays in input state with a useful error (variant: TargetPlatform.android)
+00:04 +35: C:/Hook/test/library_layout_test.dart: settings scroll and shader controls fit narrow large-text screens
+00:05 +36: C:/Hook/test/import_bottom_sheet_test.dart: native byte-limit errors are localized and recoverable (variant: TargetPlatform.android)
+00:05 +37: C:/Hook/test/import_bottom_sheet_test.dart: pasted CSV is not mistaken for a Spotify link (variant: TargetPlatform.android)
+00:05 +38: C:/Hook/test/import_bottom_sheet_test.dart: saving disables repeat actions and preserves existing playlists (variant: TargetPlatform.android)
+00:05 +39: C:/Hook/test/import_bottom_sheet_test.dart: late file selection after closing does not update disposed state (variant: TargetPlatform.android)
+00:05 +40: C:/Hook/test/import_bottom_sheet_test.dart: unsupported platforms offer pasted CSV instead of a dead file button (variant: TargetPlatform.windows)
+00:06 +41: C:/Hook/test/lyrics_presentation_test.dart: lyrics presentation persists and safely handles an unknown mode
+00:06 +42: C:/Hook/test/lyrics_presentation_test.dart: offsets belong to a track/version, clamp and reset independently
+00:06 +43: C:/Hook/test/lyrics_presentation_test.dart: all bundled mode previews load as native Lottie compositions
+00:06 +44: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:06 +45: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:06 +46: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:06 +47: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:06 +48: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:06 +49: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:07 +50: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:07 +51: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:07 +52: C:/Hook/test/lyrics_presentation_test.dart: mode selection works on narrow screens with reduced motion and large text
+00:07 +53: C:/Hook/test/multi_source_search_test.dart: phonetics are compositional and bounded, not only a fixed song alias
+00:07 +54: C:/Hook/test/multi_source_search_test.dart: 15 irrelevant hits never suppress the Cyrillic phonetic variant
+00:07 +55: C:/Hook/test/multi_source_search_test.dart: an explicit source filter stays isolated and has its own cache
+00:07 +56: C:/Hook/test/multi_source_search_test.dart: one failed source cannot erase another source results
+00:07 +57: C:/Hook/test/multi_source_search_test.dart: catalog playback returns a usable source without waiting for a blocked source
+00:07 +58: C:/Hook/test/multi_source_search_test.dart: wrong duration, previews, unknown duration and versions are never automatic matches
+00:07 +59: C:/Hook/test/multi_source_search_test.dart: same numeric IDs in different sources do not share failed-match state
+00:07 +60: C:/Hook/test/multi_source_search_test.dart: selecting a particular upload never falls back to another recording
+00:07 +61: C:/Hook/test/multi_source_search_test.dart: invalidated in-flight matches cannot win or update the cache
+00:08 +62: C:/Hook/test/music_import_service_test.dart: MusicImportService correctly detects platforms from URLs
+00:08 +63: C:/Hook/test/music_import_service_test.dart: parses Russian artist-title text and removes numbering/durations
+00:08 +64: C:/Hook/test/music_import_service_test.dart: parses Exportify-style CSV columns
+00:08 +65: C:/Hook/test/music_import_service_test.dart: CSV import detects CSV before Spotify URIs and reads exact title column
+00:08 +66: C:/Hook/test/music_import_service_test.dart: CSV import preserves multiline quoted fields and exported order including repeats
+00:08 +67: C:/Hook/test/music_import_service_test.dart: CSV import reads semicolon-delimited and tab-delimited exports
+00:08 +68: C:/Hook/test/music_import_service_test.dart: CSV import does not truncate after 500 tracks
+00:08 +69: C:/Hook/test/music_import_service_test.dart: CSV import reports explicit track limit without returning partial import
+00:08 +70: C:/Hook/test/music_import_service_test.dart: CSV import rejects malformed records instead of importing column fragments
+00:08 +71: C:/Hook/test/music_import_service_test.dart: CSV import rejects unsupported headers and empty exports
+00:08 +72: C:/Hook/test/music_import_service_test.dart: CSV import decodes UTF-8 BOM and validates file type, size, and encoding
+00:08 +73: C:/Hook/test/music_import_service_test.dart: CSV import CSV import and pasted CSV keep source metadata without catalog calls
+00:08 +74: C:/Hook/test/music_import_service_test.dart: CSV import does not treat unrelated hosts mentioning Spotify as links
+00:08 +75: C:/Hook/test/music_import_service_test.dart: parses modern Spotify entity.trackList embed data
+00:08 +76: C:/Hook/test/music_import_service_test.dart: TrackArtwork upgrades known low-resolution URLs
+00:08 +77: C:/Hook/test/music_sources_test.dart: SoundCloud rejects restricted and preview records
+00:08 +78: C:/Hook/test/music_sources_test.dart: a saved SoundCloud track with only preview transcodings resolves to null
+00:08 +79: C:/Hook/test/music_sources_test.dart: SoundCloud selects full unencrypted audio instead of an advertised preview
+00:08 +80: C:/Hook/test/music_sources_test.dart: Audius filters paid, gated, inaccessible and malformed tracks
+00:08 +81: C:/Hook/test/music_sources_test.dart: Audius rechecks access for a previously saved track
+00:08 +82: C:/Hook/test/music_sources_test.dart: Audius returns its public full-stream endpoint only for accessible records
+00:08 +83: C:/Hook/test/music_sources_test.dart: YouTube upload noise is normalized without erasing version identity
+00:08 +84: C:/Hook/test/music_sources_test.dart: YouTube metadata distinguishes full tracks from livestreams and shorts
+00:08 +85: C:/Hook/test/music_sources_test.dart: new source keys round-trip without changing the legacy YouTube migration
+00:08 +86: C:/Hook/test/playback_diagnostics_test.dart: diagnostics retain stage, provider and HTTP code without credentials
+00:08 +87: C:/Hook/test/playback_diagnostics_test.dart: HTTP failures are distinct from timeout, TLS and connection failures
+00:09 +88: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +89: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +90: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +91: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +92: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +93: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +94: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +95: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +96: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +97: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:09 +98: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +99: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +100: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +101: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +102: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +103: C:/Hook/test/playback_dock_test.dart: main shell reserves player and navigation without overlap
+00:10 +104: C:/Hook/test/stream_resolver_test.dart: scoreTrack prioritizes original songs over bootleg edits
+00:10 +105: C:/Hook/test/stream_resolver_test.dart: scoreTrack matches Cyrillic titles
+00:10 +106: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:10 +107: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:10 +108: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:10 +109: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:10 +110: C:/Hook/test/playback_dock_test.dart: playlist starts playback and retains reachable current-track controls
+00:10 +111: C:/Hook/test/playback_dock_test.dart: empty playlist reserves no invisible player space
+00:13 +112: C:/Hook/test/track_identity_test.dart: same title by unrelated artist cannot replace imported metadata
+00:13 +113: C:/Hook/test/track_identity_test.dart: catalog metadata accepts artist order and stylized digits, not another collaboration
+00:13 +114: C:/Hook/test/track_identity_test.dart: more views choose the same recording but never a different artist
+00:13 +115: C:/Hook/test/track_identity_test.dart: search deduplication prefers more viewed matching upload
+00:13 +116: C:/Hook/test/track_identity_test.dart: playback rejects a different collaboration even with the lead artist
+00:13 +117: C:/Hook/test/track_identity_test.dart: featured artist credits in upload title remain matching evidence
+00:13 +118: C:/Hook/test/track_identity_test.dart: catalog search includes full collaboration instead of only lead artist
+00:13 +119: C:/Hook/test/track_identity_test.dart: artist name must match word boundaries, not substring of other name
+00:13 +120: C:/Hook/test/track_identity_test.dart: view count round-trips and older saved libraries default to unknown
+00:13 +121: C:/Hook/test/vocal_lyrics_test.dart: voices keep stable sides and overlapping terminal timestamps
+00:13 +122: C:/Hook/test/vocal_lyrics_test.dart: enhanced word tokens can contain voice and backing prefixes
+00:13 +123: C:/Hook/test/vocal_lyrics_test.dart: unmarked lyrics do not invent speakers or extract untimed parentheses
+00:13 +124: C:/Hook/test/vocal_lyrics_test.dart: named voice sections persist, duet is centered and v2 works first
+00:13 +125: C:/Hook/test/vocal_lyrics_test.dart: inline explicitly timed backing has its own interval
+00:13 +126: C:/Hook/test/vocal_lyrics_test.dart: YRC retains real overlap and strips voice prefixes within words
+00:13 +127: C:/Hook/test/vocal_lyrics_test.dart: word-timed parenthetical phrases become independent backing
+00:13 +128: C:/Hook/test/vocal_lyrics_test.dart: unclosed or mid-word parentheses are not reinterpreted as another voice
+00:13 +129: C:/Hook/test/vocal_lyrics_test.dart: orphan backing remains available instead of disappearing
+00:13 +130: C:/Hook/test/vocal_lyrics_test.dart: repeated enhanced lines shift their word timestamps together
+00:13 +131: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient delivers annotated LRC through normal source selection
+00:13 +132: C:/Hook/test/vocal_lyrics_test.dart: LyricsClient preserves a short YRC duet after grouping backing
+00:13 +133: C:/Hook/test/vocal_lyrics_test.dart: plain source still advertises no real synchronization
+00:13 +134: C:/Hook/test/vocal_lyrics_test.dart: lead and backing highlight independently, seek backwards, and stay on their side
+00:14 +135: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:14 +136: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:14 +137: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:15 +138: C:/Hook/test/widget_test.dart: Hook App smoke test
+00:15 +139: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:15 +140: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:15 +141: C:/Hook/test/widget_test.dart: saved English locale is applied to navigation
+00:15 +142: C:/Hook/test/widget_test.dart: unavailable YouTube shows a dismissible network warning
+00:15 +143: All tests passed!

@@ -1,0 +1,1155 @@
+Compiled from "DefaultHttpDataSource.java"
+public class androidx.media3.datasource.DefaultHttpDataSource extends androidx.media3.datasource.BaseDataSource implements androidx.media3.datasource.HttpDataSource {
+  public static final int DEFAULT_CONNECT_TIMEOUT_MILLIS;
+
+  public static final int DEFAULT_READ_TIMEOUT_MILLIS;
+
+  private static final java.lang.String TAG;
+
+  private static final int MAX_REDIRECTS;
+
+  private static final int HTTP_STATUS_TEMPORARY_REDIRECT;
+
+  private static final int HTTP_STATUS_PERMANENT_REDIRECT;
+
+  private static final long MAX_BYTES_TO_DRAIN;
+
+  private final boolean allowCrossProtocolRedirects;
+
+  private final boolean crossProtocolRedirectsForceOriginal;
+
+  private final int connectTimeoutMillis;
+
+  private final int readTimeoutMillis;
+
+  private final java.lang.String userAgent;
+
+  private final androidx.media3.datasource.HttpDataSource$RequestProperties defaultRequestProperties;
+
+  private final androidx.media3.datasource.HttpDataSource$RequestProperties requestProperties;
+
+  private final com.google.common.base.Predicate<java.lang.String> contentTypePredicate;
+
+  private final boolean keepPostFor302Redirects;
+
+  private androidx.media3.datasource.DataSpec dataSpec;
+
+  private java.net.HttpURLConnection connection;
+
+  private java.io.InputStream inputStream;
+
+  private boolean opened;
+
+  private int responseCode;
+
+  private long bytesToRead;
+
+  private long bytesRead;
+
+  private androidx.media3.datasource.DefaultHttpDataSource(java.lang.String, int, int, boolean, boolean, androidx.media3.datasource.HttpDataSource$RequestProperties, com.google.common.base.Predicate<java.lang.String>, boolean);
+    Code:
+         0: aload_0
+         1: iconst_1
+         2: invokespecial #7                  // Method androidx/media3/datasource/BaseDataSource."<init>":(Z)V
+         5: aload_0
+         6: aload_1
+         7: putfield      #12                 // Field userAgent:Ljava/lang/String;
+        10: aload_0
+        11: iload_2
+        12: putfield      #16                 // Field connectTimeoutMillis:I
+        15: aload_0
+        16: iload_3
+        17: putfield      #20                 // Field readTimeoutMillis:I
+        20: aload_0
+        21: iload         4
+        23: putfield      #23                 // Field allowCrossProtocolRedirects:Z
+        26: aload_0
+        27: iload         5
+        29: putfield      #27                 // Field crossProtocolRedirectsForceOriginal:Z
+        32: iload         4
+        34: ifeq          52
+        37: iload         5
+        39: ifeq          52
+        42: new           #30                 // class java/lang/IllegalArgumentException
+        45: dup
+        46: ldc           #32                 // String crossProtocolRedirectsForceOriginal should not be set if allowCrossProtocolRedirects is true
+        48: invokespecial #34                 // Method java/lang/IllegalArgumentException."<init>":(Ljava/lang/String;)V
+        51: athrow
+        52: aload_0
+        53: aload         6
+        55: putfield      #37                 // Field defaultRequestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+        58: aload_0
+        59: aload         7
+        61: putfield      #41                 // Field contentTypePredicate:Lcom/google/common/base/Predicate;
+        64: aload_0
+        65: new           #45                 // class androidx/media3/datasource/HttpDataSource$RequestProperties
+        68: dup
+        69: invokespecial #47                 // Method androidx/media3/datasource/HttpDataSource$RequestProperties."<init>":()V
+        72: putfield      #50                 // Field requestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+        75: aload_0
+        76: iload         8
+        78: putfield      #53                 // Field keepPostFor302Redirects:Z
+        81: return
+
+  public android.net.Uri getUri();
+    Code:
+         0: aload_0
+         1: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+         4: ifnonnull     11
+         7: aconst_null
+         8: goto          24
+        11: aload_0
+        12: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        15: invokevirtual #60                 // Method java/net/HttpURLConnection.getURL:()Ljava/net/URL;
+        18: invokevirtual #66                 // Method java/net/URL.toString:()Ljava/lang/String;
+        21: invokestatic  #72                 // Method android/net/Uri.parse:(Ljava/lang/String;)Landroid/net/Uri;
+        24: areturn
+
+  public int getResponseCode();
+    Code:
+         0: aload_0
+         1: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+         4: ifnull        14
+         7: aload_0
+         8: getfield      #78                 // Field responseCode:I
+        11: ifgt          18
+        14: iconst_m1
+        15: goto          22
+        18: aload_0
+        19: getfield      #78                 // Field responseCode:I
+        22: ireturn
+
+  public java.util.Map<java.lang.String, java.util.List<java.lang.String>> getResponseHeaders();
+    Code:
+         0: aload_0
+         1: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+         4: ifnonnull     11
+         7: invokestatic  #81                 // Method com/google/common/collect/ImmutableMap.of:()Lcom/google/common/collect/ImmutableMap;
+        10: areturn
+        11: new           #87                 // class androidx/media3/datasource/DefaultHttpDataSource$NullFilteringHeadersMap
+        14: dup
+        15: aload_0
+        16: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        19: invokevirtual #89                 // Method java/net/HttpURLConnection.getHeaderFields:()Ljava/util/Map;
+        22: invokespecial #93                 // Method androidx/media3/datasource/DefaultHttpDataSource$NullFilteringHeadersMap."<init>":(Ljava/util/Map;)V
+        25: areturn
+
+  public void setRequestProperty(java.lang.String, java.lang.String);
+    Code:
+         0: aload_1
+         1: invokestatic  #96                 // Method androidx/media3/common/util/Assertions.checkNotNull:(Ljava/lang/Object;)Ljava/lang/Object;
+         4: pop
+         5: aload_2
+         6: invokestatic  #96                 // Method androidx/media3/common/util/Assertions.checkNotNull:(Ljava/lang/Object;)Ljava/lang/Object;
+         9: pop
+        10: aload_0
+        11: getfield      #50                 // Field requestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+        14: aload_1
+        15: aload_2
+        16: invokevirtual #102                // Method androidx/media3/datasource/HttpDataSource$RequestProperties.set:(Ljava/lang/String;Ljava/lang/String;)V
+        19: return
+
+  public void clearRequestProperty(java.lang.String);
+    Code:
+         0: aload_1
+         1: invokestatic  #96                 // Method androidx/media3/common/util/Assertions.checkNotNull:(Ljava/lang/Object;)Ljava/lang/Object;
+         4: pop
+         5: aload_0
+         6: getfield      #50                 // Field requestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+         9: aload_1
+        10: invokevirtual #106                // Method androidx/media3/datasource/HttpDataSource$RequestProperties.remove:(Ljava/lang/String;)V
+        13: return
+
+  public void clearAllRequestProperties();
+    Code:
+         0: aload_0
+         1: getfield      #50                 // Field requestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+         4: invokevirtual #109                // Method androidx/media3/datasource/HttpDataSource$RequestProperties.clear:()V
+         7: return
+
+  public long open(androidx.media3.datasource.DataSpec) throws androidx.media3.datasource.HttpDataSource$HttpDataSourceException;
+    Code:
+         0: aload_0
+         1: aload_1
+         2: putfield      #112                // Field dataSpec:Landroidx/media3/datasource/DataSpec;
+         5: aload_0
+         6: lconst_0
+         7: putfield      #116                // Field bytesRead:J
+        10: aload_0
+        11: lconst_0
+        12: putfield      #120                // Field bytesToRead:J
+        15: aload_0
+        16: aload_1
+        17: invokevirtual #123                // Method transferInitializing:(Landroidx/media3/datasource/DataSpec;)V
+        20: aload_0
+        21: aload_0
+        22: aload_1
+        23: invokespecial #127                // Method makeConnection:(Landroidx/media3/datasource/DataSpec;)Ljava/net/HttpURLConnection;
+        26: putfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        29: aload_0
+        30: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        33: astore_3
+        34: aload_0
+        35: aload_3
+        36: invokevirtual #131                // Method java/net/HttpURLConnection.getResponseCode:()I
+        39: putfield      #78                 // Field responseCode:I
+        42: aload_3
+        43: invokevirtual #135                // Method java/net/HttpURLConnection.getResponseMessage:()Ljava/lang/String;
+        46: astore_2
+        47: goto          64
+        50: astore        4
+        52: aload_0
+        53: invokespecial #140                // Method closeConnectionQuietly:()V
+        56: aload         4
+        58: aload_1
+        59: iconst_1
+        60: invokestatic  #145                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException.createForIOException:(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;I)Landroidx/media3/datasource/HttpDataSource$HttpDataSourceException;
+        63: athrow
+        64: aload_0
+        65: getfield      #78                 // Field responseCode:I
+        68: sipush        200
+        71: if_icmplt     84
+        74: aload_0
+        75: getfield      #78                 // Field responseCode:I
+        78: sipush        299
+        81: if_icmple     235
+        84: aload_3
+        85: invokevirtual #89                 // Method java/net/HttpURLConnection.getHeaderFields:()Ljava/util/Map;
+        88: astore        4
+        90: aload_0
+        91: getfield      #78                 // Field responseCode:I
+        94: sipush        416
+        97: if_icmpne     151
+       100: aload_3
+       101: ldc           #151                // String Content-Range
+       103: invokevirtual #153                // Method java/net/HttpURLConnection.getHeaderField:(Ljava/lang/String;)Ljava/lang/String;
+       106: invokestatic  #157                // Method androidx/media3/datasource/HttpUtil.getDocumentSize:(Ljava/lang/String;)J
+       109: lstore        5
+       111: aload_1
+       112: getfield      #163                // Field androidx/media3/datasource/DataSpec.position:J
+       115: lload         5
+       117: lcmp
+       118: ifne          151
+       121: aload_0
+       122: iconst_1
+       123: putfield      #168                // Field opened:Z
+       126: aload_0
+       127: aload_1
+       128: invokevirtual #171                // Method transferStarted:(Landroidx/media3/datasource/DataSpec;)V
+       131: aload_1
+       132: getfield      #174                // Field androidx/media3/datasource/DataSpec.length:J
+       135: ldc2_w        #179                // long -1l
+       138: lcmp
+       139: ifeq          149
+       142: aload_1
+       143: getfield      #174                // Field androidx/media3/datasource/DataSpec.length:J
+       146: goto          150
+       149: lconst_0
+       150: lreturn
+       151: aload_3
+       152: invokevirtual #181                // Method java/net/HttpURLConnection.getErrorStream:()Ljava/io/InputStream;
+       155: astore        5
+       157: aload         5
+       159: ifnull        170
+       162: aload         5
+       164: invokestatic  #185                // Method com/google/common/io/ByteStreams.toByteArray:(Ljava/io/InputStream;)[B
+       167: goto          173
+       170: getstatic     #191                // Field androidx/media3/common/util/Util.EMPTY_BYTE_ARRAY:[B
+       173: astore        6
+       175: goto          185
+       178: astore        7
+       180: getstatic     #191                // Field androidx/media3/common/util/Util.EMPTY_BYTE_ARRAY:[B
+       183: astore        6
+       185: aload_0
+       186: invokespecial #140                // Method closeConnectionQuietly:()V
+       189: aload_0
+       190: getfield      #78                 // Field responseCode:I
+       193: sipush        416
+       196: if_icmpne     212
+       199: new           #197                // class androidx/media3/datasource/DataSourceException
+       202: dup
+       203: sipush        2008
+       206: invokespecial #201                // Method androidx/media3/datasource/DataSourceException."<init>":(I)V
+       209: goto          213
+       212: aconst_null
+       213: astore        7
+       215: new           #204                // class androidx/media3/datasource/HttpDataSource$InvalidResponseCodeException
+       218: dup
+       219: aload_0
+       220: getfield      #78                 // Field responseCode:I
+       223: aload_2
+       224: aload         7
+       226: aload         4
+       228: aload_1
+       229: aload         6
+       231: invokespecial #206                // Method androidx/media3/datasource/HttpDataSource$InvalidResponseCodeException."<init>":(ILjava/lang/String;Ljava/io/IOException;Ljava/util/Map;Landroidx/media3/datasource/DataSpec;[B)V
+       234: athrow
+       235: aload_3
+       236: invokevirtual #209                // Method java/net/HttpURLConnection.getContentType:()Ljava/lang/String;
+       239: astore        4
+       241: aload_0
+       242: getfield      #41                 // Field contentTypePredicate:Lcom/google/common/base/Predicate;
+       245: ifnull        277
+       248: aload_0
+       249: getfield      #41                 // Field contentTypePredicate:Lcom/google/common/base/Predicate;
+       252: aload         4
+       254: invokeinterface #212,  2          // InterfaceMethod com/google/common/base/Predicate.apply:(Ljava/lang/Object;)Z
+       259: ifne          277
+       262: aload_0
+       263: invokespecial #140                // Method closeConnectionQuietly:()V
+       266: new           #218                // class androidx/media3/datasource/HttpDataSource$InvalidContentTypeException
+       269: dup
+       270: aload         4
+       272: aload_1
+       273: invokespecial #220                // Method androidx/media3/datasource/HttpDataSource$InvalidContentTypeException."<init>":(Ljava/lang/String;Landroidx/media3/datasource/DataSpec;)V
+       276: athrow
+       277: aload_0
+       278: getfield      #78                 // Field responseCode:I
+       281: sipush        200
+       284: if_icmpne     303
+       287: aload_1
+       288: getfield      #163                // Field androidx/media3/datasource/DataSpec.position:J
+       291: lconst_0
+       292: lcmp
+       293: ifeq          303
+       296: aload_1
+       297: getfield      #163                // Field androidx/media3/datasource/DataSpec.position:J
+       300: goto          304
+       303: lconst_0
+       304: lstore        5
+       306: aload_3
+       307: invokestatic  #223                // Method isCompressed:(Ljava/net/HttpURLConnection;)Z
+       310: istore        7
+       312: iload         7
+       314: ifne          383
+       317: aload_1
+       318: getfield      #174                // Field androidx/media3/datasource/DataSpec.length:J
+       321: ldc2_w        #179                // long -1l
+       324: lcmp
+       325: ifeq          339
+       328: aload_0
+       329: aload_1
+       330: getfield      #174                // Field androidx/media3/datasource/DataSpec.length:J
+       333: putfield      #120                // Field bytesToRead:J
+       336: goto          391
+       339: aload_3
+       340: ldc           #227                // String Content-Length
+       342: invokevirtual #153                // Method java/net/HttpURLConnection.getHeaderField:(Ljava/lang/String;)Ljava/lang/String;
+       345: aload_3
+       346: ldc           #151                // String Content-Range
+       348: invokevirtual #153                // Method java/net/HttpURLConnection.getHeaderField:(Ljava/lang/String;)Ljava/lang/String;
+       351: invokestatic  #229                // Method androidx/media3/datasource/HttpUtil.getContentLength:(Ljava/lang/String;Ljava/lang/String;)J
+       354: lstore        8
+       356: aload_0
+       357: lload         8
+       359: ldc2_w        #179                // long -1l
+       362: lcmp
+       363: ifeq          374
+       366: lload         8
+       368: lload         5
+       370: lsub
+       371: goto          377
+       374: ldc2_w        #179                // long -1l
+       377: putfield      #120                // Field bytesToRead:J
+       380: goto          391
+       383: aload_0
+       384: aload_1
+       385: getfield      #174                // Field androidx/media3/datasource/DataSpec.length:J
+       388: putfield      #120                // Field bytesToRead:J
+       391: aload_0
+       392: aload_3
+       393: invokevirtual #233                // Method java/net/HttpURLConnection.getInputStream:()Ljava/io/InputStream;
+       396: putfield      #236                // Field inputStream:Ljava/io/InputStream;
+       399: iload         7
+       401: ifeq          419
+       404: aload_0
+       405: new           #240                // class java/util/zip/GZIPInputStream
+       408: dup
+       409: aload_0
+       410: getfield      #236                // Field inputStream:Ljava/io/InputStream;
+       413: invokespecial #242                // Method java/util/zip/GZIPInputStream."<init>":(Ljava/io/InputStream;)V
+       416: putfield      #236                // Field inputStream:Ljava/io/InputStream;
+       419: goto          443
+       422: astore        8
+       424: aload_0
+       425: invokespecial #140                // Method closeConnectionQuietly:()V
+       428: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       431: dup
+       432: aload         8
+       434: aload_1
+       435: sipush        2000
+       438: iconst_1
+       439: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+       442: athrow
+       443: aload_0
+       444: iconst_1
+       445: putfield      #168                // Field opened:Z
+       448: aload_0
+       449: aload_1
+       450: invokevirtual #171                // Method transferStarted:(Landroidx/media3/datasource/DataSpec;)V
+       453: aload_0
+       454: lload         5
+       456: aload_1
+       457: invokespecial #248                // Method skipFully:(JLandroidx/media3/datasource/DataSpec;)V
+       460: goto          498
+       463: astore        8
+       465: aload_0
+       466: invokespecial #140                // Method closeConnectionQuietly:()V
+       469: aload         8
+       471: instanceof    #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       474: ifeq          483
+       477: aload         8
+       479: checkcast     #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       482: athrow
+       483: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       486: dup
+       487: aload         8
+       489: aload_1
+       490: sipush        2000
+       493: iconst_1
+       494: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+       497: athrow
+       498: aload_0
+       499: getfield      #120                // Field bytesToRead:J
+       502: lreturn
+      Exception table:
+         from    to  target type
+            20    47    50   Class java/io/IOException
+           157   175   178   Class java/io/IOException
+           391   419   422   Class java/io/IOException
+           453   460   463   Class java/io/IOException
+
+  public int read(byte[], int, int) throws androidx.media3.datasource.HttpDataSource$HttpDataSourceException;
+    Code:
+         0: aload_0
+         1: aload_1
+         2: iload_2
+         3: iload_3
+         4: invokespecial #252                // Method readInternal:([BII)I
+         7: ireturn
+         8: astore        4
+        10: aload         4
+        12: aload_0
+        13: getfield      #112                // Field dataSpec:Landroidx/media3/datasource/DataSpec;
+        16: invokestatic  #256                // Method androidx/media3/common/util/Util.castNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+        19: checkcast     #164                // class androidx/media3/datasource/DataSpec
+        22: iconst_2
+        23: invokestatic  #145                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException.createForIOException:(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;I)Landroidx/media3/datasource/HttpDataSource$HttpDataSourceException;
+        26: athrow
+      Exception table:
+         from    to  target type
+             0     7     8   Class java/io/IOException
+
+  public void close() throws androidx.media3.datasource.HttpDataSource$HttpDataSourceException;
+    Code:
+         0: aload_0
+         1: getfield      #236                // Field inputStream:Ljava/io/InputStream;
+         4: astore_1
+         5: aload_1
+         6: ifnull        77
+         9: aload_0
+        10: getfield      #120                // Field bytesToRead:J
+        13: ldc2_w        #179                // long -1l
+        16: lcmp
+        17: ifne          26
+        20: ldc2_w        #179                // long -1l
+        23: goto          35
+        26: aload_0
+        27: getfield      #120                // Field bytesToRead:J
+        30: aload_0
+        31: getfield      #116                // Field bytesRead:J
+        34: lsub
+        35: lstore_2
+        36: aload_0
+        37: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        40: lload_2
+        41: invokestatic  #259                // Method maybeTerminateInputStream:(Ljava/net/HttpURLConnection;J)V
+        44: aload_1
+        45: invokevirtual #263                // Method java/io/InputStream.close:()V
+        48: goto          77
+        51: astore        4
+        53: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+        56: dup
+        57: aload         4
+        59: aload_0
+        60: getfield      #112                // Field dataSpec:Landroidx/media3/datasource/DataSpec;
+        63: invokestatic  #256                // Method androidx/media3/common/util/Util.castNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+        66: checkcast     #164                // class androidx/media3/datasource/DataSpec
+        69: sipush        2000
+        72: iconst_3
+        73: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+        76: athrow
+        77: aload_0
+        78: aconst_null
+        79: putfield      #236                // Field inputStream:Ljava/io/InputStream;
+        82: aload_0
+        83: invokespecial #140                // Method closeConnectionQuietly:()V
+        86: aload_0
+        87: getfield      #168                // Field opened:Z
+        90: ifeq          135
+        93: aload_0
+        94: iconst_0
+        95: putfield      #168                // Field opened:Z
+        98: aload_0
+        99: invokevirtual #268                // Method transferEnded:()V
+       102: goto          135
+       105: astore        5
+       107: aload_0
+       108: aconst_null
+       109: putfield      #236                // Field inputStream:Ljava/io/InputStream;
+       112: aload_0
+       113: invokespecial #140                // Method closeConnectionQuietly:()V
+       116: aload_0
+       117: getfield      #168                // Field opened:Z
+       120: ifeq          132
+       123: aload_0
+       124: iconst_0
+       125: putfield      #168                // Field opened:Z
+       128: aload_0
+       129: invokevirtual #268                // Method transferEnded:()V
+       132: aload         5
+       134: athrow
+       135: return
+      Exception table:
+         from    to  target type
+            44    48    51   Class java/io/IOException
+             0    77   105   any
+           105   107   105   any
+
+  private java.net.HttpURLConnection makeConnection(androidx.media3.datasource.DataSpec) throws java.io.IOException;
+    Code:
+         0: new           #67                 // class java/net/URL
+         3: dup
+         4: aload_1
+         5: getfield      #271                // Field androidx/media3/datasource/DataSpec.uri:Landroid/net/Uri;
+         8: invokevirtual #275                // Method android/net/Uri.toString:()Ljava/lang/String;
+        11: invokespecial #276                // Method java/net/URL."<init>":(Ljava/lang/String;)V
+        14: astore_2
+        15: aload_1
+        16: getfield      #277                // Field androidx/media3/datasource/DataSpec.httpMethod:I
+        19: istore_3
+        20: aload_1
+        21: getfield      #280                // Field androidx/media3/datasource/DataSpec.httpBody:[B
+        24: astore        4
+        26: aload_1
+        27: getfield      #163                // Field androidx/media3/datasource/DataSpec.position:J
+        30: lstore        5
+        32: aload_1
+        33: getfield      #174                // Field androidx/media3/datasource/DataSpec.length:J
+        36: lstore        7
+        38: aload_1
+        39: iconst_1
+        40: invokevirtual #283                // Method androidx/media3/datasource/DataSpec.isFlagSet:(I)Z
+        43: istore        9
+        45: aload_0
+        46: getfield      #23                 // Field allowCrossProtocolRedirects:Z
+        49: ifne          86
+        52: aload_0
+        53: getfield      #27                 // Field crossProtocolRedirectsForceOriginal:Z
+        56: ifne          86
+        59: aload_0
+        60: getfield      #53                 // Field keepPostFor302Redirects:Z
+        63: ifne          86
+        66: aload_0
+        67: aload_2
+        68: iload_3
+        69: aload         4
+        71: lload         5
+        73: lload         7
+        75: iload         9
+        77: iconst_1
+        78: aload_1
+        79: getfield      #287                // Field androidx/media3/datasource/DataSpec.httpRequestHeaders:Ljava/util/Map;
+        82: invokespecial #291                // Method makeConnection:(Ljava/net/URL;I[BJJZZLjava/util/Map;)Ljava/net/HttpURLConnection;
+        85: areturn
+        86: iconst_0
+        87: istore        10
+        89: iload         10
+        91: iinc          10, 1
+        94: bipush        20
+        96: if_icmpgt     304
+        99: aload_0
+       100: aload_2
+       101: iload_3
+       102: aload         4
+       104: lload         5
+       106: lload         7
+       108: iload         9
+       110: iconst_0
+       111: aload_1
+       112: getfield      #287                // Field androidx/media3/datasource/DataSpec.httpRequestHeaders:Ljava/util/Map;
+       115: invokespecial #291                // Method makeConnection:(Ljava/net/URL;I[BJJZZLjava/util/Map;)Ljava/net/HttpURLConnection;
+       118: astore        11
+       120: aload         11
+       122: invokevirtual #131                // Method java/net/HttpURLConnection.getResponseCode:()I
+       125: istore        12
+       127: aload         11
+       129: ldc_w         #294                // String Location
+       132: invokevirtual #153                // Method java/net/HttpURLConnection.getHeaderField:(Ljava/lang/String;)Ljava/lang/String;
+       135: astore        13
+       137: iload_3
+       138: iconst_1
+       139: if_icmpeq     147
+       142: iload_3
+       143: iconst_3
+       144: if_icmpne     212
+       147: iload         12
+       149: sipush        300
+       152: if_icmpeq     195
+       155: iload         12
+       157: sipush        301
+       160: if_icmpeq     195
+       163: iload         12
+       165: sipush        302
+       168: if_icmpeq     195
+       171: iload         12
+       173: sipush        303
+       176: if_icmpeq     195
+       179: iload         12
+       181: sipush        307
+       184: if_icmpeq     195
+       187: iload         12
+       189: sipush        308
+       192: if_icmpne     212
+       195: aload         11
+       197: invokevirtual #296                // Method java/net/HttpURLConnection.disconnect:()V
+       200: aload_0
+       201: aload_2
+       202: aload         13
+       204: aload_1
+       205: invokespecial #299                // Method handleRedirect:(Ljava/net/URL;Ljava/lang/String;Landroidx/media3/datasource/DataSpec;)Ljava/net/URL;
+       208: astore_2
+       209: goto          301
+       212: iload_3
+       213: iconst_2
+       214: if_icmpne     298
+       217: iload         12
+       219: sipush        300
+       222: if_icmpeq     249
+       225: iload         12
+       227: sipush        301
+       230: if_icmpeq     249
+       233: iload         12
+       235: sipush        302
+       238: if_icmpeq     249
+       241: iload         12
+       243: sipush        303
+       246: if_icmpne     298
+       249: aload         11
+       251: invokevirtual #296                // Method java/net/HttpURLConnection.disconnect:()V
+       254: aload_0
+       255: getfield      #53                 // Field keepPostFor302Redirects:Z
+       258: ifeq          273
+       261: iload         12
+       263: sipush        302
+       266: if_icmpne     273
+       269: iconst_1
+       270: goto          274
+       273: iconst_0
+       274: istore        14
+       276: iload         14
+       278: ifne          286
+       281: iconst_1
+       282: istore_3
+       283: aconst_null
+       284: astore        4
+       286: aload_0
+       287: aload_2
+       288: aload         13
+       290: aload_1
+       291: invokespecial #299                // Method handleRedirect:(Ljava/net/URL;Ljava/lang/String;Landroidx/media3/datasource/DataSpec;)Ljava/net/URL;
+       294: astore_2
+       295: goto          301
+       298: aload         11
+       300: areturn
+       301: goto          89
+       304: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       307: dup
+       308: new           #303                // class java/net/NoRouteToHostException
+       311: dup
+       312: new           #305                // class java/lang/StringBuilder
+       315: dup
+       316: invokespecial #307                // Method java/lang/StringBuilder."<init>":()V
+       319: ldc_w         #308                // String Too many redirects:
+       322: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       325: iload         10
+       327: invokevirtual #314                // Method java/lang/StringBuilder.append:(I)Ljava/lang/StringBuilder;
+       330: invokevirtual #317                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+       333: invokespecial #318                // Method java/net/NoRouteToHostException."<init>":(Ljava/lang/String;)V
+       336: aload_1
+       337: sipush        2001
+       340: iconst_1
+       341: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+       344: athrow
+
+  private java.net.HttpURLConnection makeConnection(java.net.URL, int, byte[], long, long, boolean, boolean, java.util.Map<java.lang.String, java.lang.String>) throws java.io.IOException;
+    Code:
+         0: aload_0
+         1: aload_1
+         2: invokevirtual #319                // Method openConnection:(Ljava/net/URL;)Ljava/net/HttpURLConnection;
+         5: astore        11
+         7: aload         11
+         9: aload_0
+        10: getfield      #16                 // Field connectTimeoutMillis:I
+        13: invokevirtual #323                // Method java/net/HttpURLConnection.setConnectTimeout:(I)V
+        16: aload         11
+        18: aload_0
+        19: getfield      #20                 // Field readTimeoutMillis:I
+        22: invokevirtual #326                // Method java/net/HttpURLConnection.setReadTimeout:(I)V
+        25: new           #329                // class java/util/HashMap
+        28: dup
+        29: invokespecial #331                // Method java/util/HashMap."<init>":()V
+        32: astore        12
+        34: aload_0
+        35: getfield      #37                 // Field defaultRequestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+        38: ifnull        55
+        41: aload         12
+        43: aload_0
+        44: getfield      #37                 // Field defaultRequestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+        47: invokevirtual #332                // Method androidx/media3/datasource/HttpDataSource$RequestProperties.getSnapshot:()Ljava/util/Map;
+        50: invokeinterface #335,  2          // InterfaceMethod java/util/Map.putAll:(Ljava/util/Map;)V
+        55: aload         12
+        57: aload_0
+        58: getfield      #50                 // Field requestProperties:Landroidx/media3/datasource/HttpDataSource$RequestProperties;
+        61: invokevirtual #332                // Method androidx/media3/datasource/HttpDataSource$RequestProperties.getSnapshot:()Ljava/util/Map;
+        64: invokeinterface #335,  2          // InterfaceMethod java/util/Map.putAll:(Ljava/util/Map;)V
+        69: aload         12
+        71: aload         10
+        73: invokeinterface #335,  2          // InterfaceMethod java/util/Map.putAll:(Ljava/util/Map;)V
+        78: aload         12
+        80: invokeinterface #340,  1          // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
+        85: invokeinterface #344,  1          // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+        90: astore        13
+        92: aload         13
+        94: invokeinterface #350,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        99: ifeq          142
+       102: aload         13
+       104: invokeinterface #356,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+       109: checkcast     #360                // class java/util/Map$Entry
+       112: astore        14
+       114: aload         11
+       116: aload         14
+       118: invokeinterface #362,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+       123: checkcast     #365                // class java/lang/String
+       126: aload         14
+       128: invokeinterface #367,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+       133: checkcast     #365                // class java/lang/String
+       136: invokevirtual #370                // Method java/net/HttpURLConnection.setRequestProperty:(Ljava/lang/String;Ljava/lang/String;)V
+       139: goto          92
+       142: lload         4
+       144: lload         6
+       146: invokestatic  #373                // Method androidx/media3/datasource/HttpUtil.buildRangeRequestHeader:(JJ)Ljava/lang/String;
+       149: astore        13
+       151: aload         13
+       153: ifnull        166
+       156: aload         11
+       158: ldc_w         #377                // String Range
+       161: aload         13
+       163: invokevirtual #370                // Method java/net/HttpURLConnection.setRequestProperty:(Ljava/lang/String;Ljava/lang/String;)V
+       166: aload_0
+       167: getfield      #12                 // Field userAgent:Ljava/lang/String;
+       170: ifnull        185
+       173: aload         11
+       175: ldc_w         #379                // String User-Agent
+       178: aload_0
+       179: getfield      #12                 // Field userAgent:Ljava/lang/String;
+       182: invokevirtual #370                // Method java/net/HttpURLConnection.setRequestProperty:(Ljava/lang/String;Ljava/lang/String;)V
+       185: aload         11
+       187: ldc_w         #381                // String Accept-Encoding
+       190: iload         8
+       192: ifeq          201
+       195: ldc_w         #383                // String gzip
+       198: goto          204
+       201: ldc_w         #385                // String identity
+       204: invokevirtual #370                // Method java/net/HttpURLConnection.setRequestProperty:(Ljava/lang/String;Ljava/lang/String;)V
+       207: aload         11
+       209: iload         9
+       211: invokevirtual #387                // Method java/net/HttpURLConnection.setInstanceFollowRedirects:(Z)V
+       214: aload         11
+       216: aload_3
+       217: ifnull        224
+       220: iconst_1
+       221: goto          225
+       224: iconst_0
+       225: invokevirtual #390                // Method java/net/HttpURLConnection.setDoOutput:(Z)V
+       228: aload         11
+       230: iload_2
+       231: invokestatic  #393                // Method androidx/media3/datasource/DataSpec.getStringForHttpMethod:(I)Ljava/lang/String;
+       234: invokevirtual #397                // Method java/net/HttpURLConnection.setRequestMethod:(Ljava/lang/String;)V
+       237: aload_3
+       238: ifnull        274
+       241: aload         11
+       243: aload_3
+       244: arraylength
+       245: invokevirtual #400                // Method java/net/HttpURLConnection.setFixedLengthStreamingMode:(I)V
+       248: aload         11
+       250: invokevirtual #403                // Method java/net/HttpURLConnection.connect:()V
+       253: aload         11
+       255: invokevirtual #406                // Method java/net/HttpURLConnection.getOutputStream:()Ljava/io/OutputStream;
+       258: astore        14
+       260: aload         14
+       262: aload_3
+       263: invokevirtual #410                // Method java/io/OutputStream.write:([B)V
+       266: aload         14
+       268: invokevirtual #416                // Method java/io/OutputStream.close:()V
+       271: goto          279
+       274: aload         11
+       276: invokevirtual #403                // Method java/net/HttpURLConnection.connect:()V
+       279: aload         11
+       281: areturn
+
+  java.net.HttpURLConnection openConnection(java.net.URL) throws java.io.IOException;
+    Code:
+         0: aload_1
+         1: invokevirtual #417                // Method java/net/URL.openConnection:()Ljava/net/URLConnection;
+         4: checkcast     #61                 // class java/net/HttpURLConnection
+         7: areturn
+
+  private java.net.URL handleRedirect(java.net.URL, java.lang.String, androidx.media3.datasource.DataSpec) throws androidx.media3.datasource.HttpDataSource$HttpDataSourceException;
+    Code:
+         0: aload_2
+         1: ifnonnull     20
+         4: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+         7: dup
+         8: ldc_w         #420                // String Null location redirect
+        11: aload_3
+        12: sipush        2001
+        15: iconst_1
+        16: invokespecial #422                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/lang/String;Landroidx/media3/datasource/DataSpec;II)V
+        19: athrow
+        20: new           #67                 // class java/net/URL
+        23: dup
+        24: aload_1
+        25: aload_2
+        26: invokespecial #425                // Method java/net/URL."<init>":(Ljava/net/URL;Ljava/lang/String;)V
+        29: astore        4
+        31: goto          51
+        34: astore        5
+        36: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+        39: dup
+        40: aload         5
+        42: aload_3
+        43: sipush        2001
+        46: iconst_1
+        47: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+        50: athrow
+        51: aload         4
+        53: invokevirtual #430                // Method java/net/URL.getProtocol:()Ljava/lang/String;
+        56: astore        5
+        58: ldc_w         #433                // String https
+        61: aload         5
+        63: invokevirtual #435                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+        66: ifne          114
+        69: ldc_w         #438                // String http
+        72: aload         5
+        74: invokevirtual #435                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+        77: ifne          114
+        80: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+        83: dup
+        84: new           #305                // class java/lang/StringBuilder
+        87: dup
+        88: invokespecial #307                // Method java/lang/StringBuilder."<init>":()V
+        91: ldc_w         #440                // String Unsupported protocol redirect:
+        94: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+        97: aload         5
+        99: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       102: invokevirtual #317                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+       105: aload_3
+       106: sipush        2001
+       109: iconst_1
+       110: invokespecial #422                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/lang/String;Landroidx/media3/datasource/DataSpec;II)V
+       113: athrow
+       114: aload_0
+       115: getfield      #23                 // Field allowCrossProtocolRedirects:Z
+       118: ifne          236
+       121: aload         5
+       123: aload_1
+       124: invokevirtual #430                // Method java/net/URL.getProtocol:()Ljava/lang/String;
+       127: invokevirtual #435                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+       130: ifne          236
+       133: aload_0
+       134: getfield      #27                 // Field crossProtocolRedirectsForceOriginal:Z
+       137: ifne          193
+       140: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       143: dup
+       144: new           #305                // class java/lang/StringBuilder
+       147: dup
+       148: invokespecial #307                // Method java/lang/StringBuilder."<init>":()V
+       151: ldc_w         #442                // String Disallowed cross-protocol redirect (
+       154: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       157: aload_1
+       158: invokevirtual #430                // Method java/net/URL.getProtocol:()Ljava/lang/String;
+       161: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       164: ldc_w         #444                // String  to
+       167: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       170: aload         5
+       172: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       175: ldc_w         #446                // String )
+       178: invokevirtual #310                // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+       181: invokevirtual #317                // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+       184: aload_3
+       185: sipush        2001
+       188: iconst_1
+       189: invokespecial #422                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/lang/String;Landroidx/media3/datasource/DataSpec;II)V
+       192: athrow
+       193: new           #67                 // class java/net/URL
+       196: dup
+       197: aload         4
+       199: invokevirtual #66                 // Method java/net/URL.toString:()Ljava/lang/String;
+       202: aload         5
+       204: aload_1
+       205: invokevirtual #430                // Method java/net/URL.getProtocol:()Ljava/lang/String;
+       208: invokevirtual #448                // Method java/lang/String.replaceFirst:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+       211: invokespecial #276                // Method java/net/URL."<init>":(Ljava/lang/String;)V
+       214: astore        4
+       216: goto          236
+       219: astore        6
+       221: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+       224: dup
+       225: aload         6
+       227: aload_3
+       228: sipush        2001
+       231: iconst_1
+       232: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+       235: athrow
+       236: aload         4
+       238: areturn
+      Exception table:
+         from    to  target type
+            20    31    34   Class java/net/MalformedURLException
+           193   216   219   Class java/net/MalformedURLException
+
+  private void skipFully(long, androidx.media3.datasource.DataSpec) throws java.io.IOException;
+    Code:
+         0: lload_1
+         1: lconst_0
+         2: lcmp
+         3: ifne          7
+         6: return
+         7: sipush        4096
+        10: newarray       byte
+        12: astore        4
+        14: lload_1
+        15: lconst_0
+        16: lcmp
+        17: ifle          114
+        20: lload_1
+        21: aload         4
+        23: arraylength
+        24: i2l
+        25: invokestatic  #452                // Method java/lang/Math.min:(JJ)J
+        28: l2i
+        29: istore        5
+        31: aload_0
+        32: getfield      #236                // Field inputStream:Ljava/io/InputStream;
+        35: invokestatic  #256                // Method androidx/media3/common/util/Util.castNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+        38: checkcast     #264                // class java/io/InputStream
+        41: aload         4
+        43: iconst_0
+        44: iload         5
+        46: invokevirtual #458                // Method java/io/InputStream.read:([BII)I
+        49: istore        6
+        51: invokestatic  #461                // Method java/lang/Thread.currentThread:()Ljava/lang/Thread;
+        54: invokevirtual #467                // Method java/lang/Thread.isInterrupted:()Z
+        57: ifeq          80
+        60: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+        63: dup
+        64: new           #470                // class java/io/InterruptedIOException
+        67: dup
+        68: invokespecial #472                // Method java/io/InterruptedIOException."<init>":()V
+        71: aload_3
+        72: sipush        2000
+        75: iconst_1
+        76: invokespecial #245                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Ljava/io/IOException;Landroidx/media3/datasource/DataSpec;II)V
+        79: athrow
+        80: iload         6
+        82: iconst_m1
+        83: if_icmpne     99
+        86: new           #143                // class androidx/media3/datasource/HttpDataSource$HttpDataSourceException
+        89: dup
+        90: aload_3
+        91: sipush        2008
+        94: iconst_1
+        95: invokespecial #473                // Method androidx/media3/datasource/HttpDataSource$HttpDataSourceException."<init>":(Landroidx/media3/datasource/DataSpec;II)V
+        98: athrow
+        99: lload_1
+       100: iload         6
+       102: i2l
+       103: lsub
+       104: lstore_1
+       105: aload_0
+       106: iload         6
+       108: invokevirtual #476                // Method bytesTransferred:(I)V
+       111: goto          14
+       114: return
+
+  private int readInternal(byte[], int, int) throws java.io.IOException;
+    Code:
+         0: iload_3
+         1: ifne          6
+         4: iconst_0
+         5: ireturn
+         6: aload_0
+         7: getfield      #120                // Field bytesToRead:J
+        10: ldc2_w        #179                // long -1l
+        13: lcmp
+        14: ifeq          46
+        17: aload_0
+        18: getfield      #120                // Field bytesToRead:J
+        21: aload_0
+        22: getfield      #116                // Field bytesRead:J
+        25: lsub
+        26: lstore        4
+        28: lload         4
+        30: lconst_0
+        31: lcmp
+        32: ifne          37
+        35: iconst_m1
+        36: ireturn
+        37: iload_3
+        38: i2l
+        39: lload         4
+        41: invokestatic  #452                // Method java/lang/Math.min:(JJ)J
+        44: l2i
+        45: istore_3
+        46: aload_0
+        47: getfield      #236                // Field inputStream:Ljava/io/InputStream;
+        50: invokestatic  #256                // Method androidx/media3/common/util/Util.castNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+        53: checkcast     #264                // class java/io/InputStream
+        56: aload_1
+        57: iload_2
+        58: iload_3
+        59: invokevirtual #458                // Method java/io/InputStream.read:([BII)I
+        62: istore        4
+        64: iload         4
+        66: iconst_m1
+        67: if_icmpne     72
+        70: iconst_m1
+        71: ireturn
+        72: aload_0
+        73: dup
+        74: getfield      #116                // Field bytesRead:J
+        77: iload         4
+        79: i2l
+        80: ladd
+        81: putfield      #116                // Field bytesRead:J
+        84: aload_0
+        85: iload         4
+        87: invokevirtual #476                // Method bytesTransferred:(I)V
+        90: iload         4
+        92: ireturn
+
+  private static void maybeTerminateInputStream(java.net.HttpURLConnection, long);
+    Code:
+         0: aload_0
+         1: ifnull        12
+         4: getstatic     #479                // Field androidx/media3/common/util/Util.SDK_INT:I
+         7: bipush        20
+         9: if_icmple     13
+        12: return
+        13: aload_0
+        14: invokevirtual #233                // Method java/net/HttpURLConnection.getInputStream:()Ljava/io/InputStream;
+        17: astore_3
+        18: lload_1
+        19: ldc2_w        #179                // long -1l
+        22: lcmp
+        23: ifne          35
+        26: aload_3
+        27: invokevirtual #482                // Method java/io/InputStream.read:()I
+        30: iconst_m1
+        31: if_icmpne     44
+        34: return
+        35: lload_1
+        36: ldc2_w        #484                // long 2048l
+        39: lcmp
+        40: ifgt          44
+        43: return
+        44: aload_3
+        45: invokevirtual #486                // Method java/lang/Object.getClass:()Ljava/lang/Class;
+        48: invokevirtual #492                // Method java/lang/Class.getName:()Ljava/lang/String;
+        51: astore        4
+        53: ldc_w         #497                // String com.android.okhttp.internal.http.HttpTransport$ChunkedInputStream
+        56: aload         4
+        58: invokevirtual #435                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+        61: ifne          75
+        64: ldc_w         #499                // String com.android.okhttp.internal.http.HttpTransport$FixedLengthInputStream
+        67: aload         4
+        69: invokevirtual #435                // Method java/lang/String.equals:(Ljava/lang/Object;)Z
+        72: ifeq          121
+        75: aload_3
+        76: invokevirtual #486                // Method java/lang/Object.getClass:()Ljava/lang/Class;
+        79: invokevirtual #501                // Method java/lang/Class.getSuperclass:()Ljava/lang/Class;
+        82: astore        5
+        84: aload         5
+        86: invokestatic  #96                 // Method androidx/media3/common/util/Assertions.checkNotNull:(Ljava/lang/Object;)Ljava/lang/Object;
+        89: checkcast     #493                // class java/lang/Class
+        92: ldc_w         #504                // String unexpectedEndOfInput
+        95: iconst_0
+        96: anewarray     #493                // class java/lang/Class
+        99: invokevirtual #506                // Method java/lang/Class.getDeclaredMethod:(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+       102: astore        6
+       104: aload         6
+       106: iconst_1
+       107: invokevirtual #510                // Method java/lang/reflect/Method.setAccessible:(Z)V
+       110: aload         6
+       112: aload_3
+       113: iconst_0
+       114: anewarray     #487                // class java/lang/Object
+       117: invokevirtual #515                // Method java/lang/reflect/Method.invoke:(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+       120: pop
+       121: goto          125
+       124: astore_3
+       125: return
+      Exception table:
+         from    to  target type
+            13    34   124   Class java/lang/Exception
+            35    43   124   Class java/lang/Exception
+            44   121   124   Class java/lang/Exception
+
+  private void closeConnectionQuietly();
+    Code:
+         0: aload_0
+         1: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+         4: ifnull        33
+         7: aload_0
+         8: getfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        11: invokevirtual #296                // Method java/net/HttpURLConnection.disconnect:()V
+        14: goto          28
+        17: astore_1
+        18: ldc_w         #521                // String DefaultHttpDataSource
+        21: ldc_w         #523                // String Unexpected error while disconnecting
+        24: aload_1
+        25: invokestatic  #525                // Method androidx/media3/common/util/Log.e:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+        28: aload_0
+        29: aconst_null
+        30: putfield      #56                 // Field connection:Ljava/net/HttpURLConnection;
+        33: return
+      Exception table:
+         from    to  target type
+             7    14    17   Class java/lang/Exception
+
+  private static boolean isCompressed(java.net.HttpURLConnection);
+    Code:
+         0: aload_0
+         1: ldc_w         #531                // String Content-Encoding
+         4: invokevirtual #153                // Method java/net/HttpURLConnection.getHeaderField:(Ljava/lang/String;)Ljava/lang/String;
+         7: astore_1
+         8: ldc_w         #383                // String gzip
+        11: aload_1
+        12: invokevirtual #533                // Method java/lang/String.equalsIgnoreCase:(Ljava/lang/String;)Z
+        15: ireturn
+
+  androidx.media3.datasource.DefaultHttpDataSource(java.lang.String, int, int, boolean, boolean, androidx.media3.datasource.HttpDataSource$RequestProperties, com.google.common.base.Predicate, boolean, androidx.media3.datasource.DefaultHttpDataSource$1);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: iload_2
+         3: iload_3
+         4: iload         4
+         6: iload         5
+         8: aload         6
+        10: aload         7
+        12: iload         8
+        14: invokespecial #1                  // Method "<init>":(Ljava/lang/String;IIZZLandroidx/media3/datasource/HttpDataSource$RequestProperties;Lcom/google/common/base/Predicate;Z)V
+        17: return
+}
