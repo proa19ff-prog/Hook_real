@@ -104,5 +104,7 @@ void main() {
     );
     expect(result, isNotNull);
     expect(result!.hasSynced, isTrue);
+    // The matched record's duration rides along for intro compensation.
+    expect(result.durationMs, 213);
   });
 }

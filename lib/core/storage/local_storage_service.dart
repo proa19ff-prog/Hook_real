@@ -84,14 +84,19 @@ class LocalStorageService {
   double getLyricsOffset(String trackKey) {
     final value = _lyricsOffsets()[trackKey];
     return value is num && value.isFinite
-        ? value.toDouble().clamp(-15.0, 15.0)
+        ? value.toDouble().clamp(-45.0, 45.0)
         : 0.0;
   }
+
+  /// Whether the listener has tuned this track by hand. An absent entry
+  /// means the auto intro compensation may take over.
+  bool hasLyricsOffset(String trackKey) =>
+      _lyricsOffsets().containsKey(trackKey);
 
   Future<void> saveLyricsOffset(String trackKey, double seconds) async {
     if (!seconds.isFinite) return;
     final offsets = _lyricsOffsets()..remove(trackKey);
-    if (seconds != 0) offsets[trackKey] = seconds.clamp(-15.0, 15.0);
+    if (seconds != 0) offsets[trackKey] = seconds.clamp(-45.0, 45.0);
     while (offsets.length > 200) {
       offsets.remove(offsets.keys.first);
     }

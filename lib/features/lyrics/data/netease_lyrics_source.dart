@@ -11,7 +11,10 @@ class NeteaseLyrics {
   /// Word-synced lyrics: `[lineStart,lineDur](wordStart,wordDur,0)word`.
   final String? yrc;
 
-  const NeteaseLyrics({this.lrc, this.yrc});
+  /// Duration of the matched song record.
+  final int? durationMs;
+
+  const NeteaseLyrics({this.lrc, this.yrc, this.durationMs});
 }
 
 /// NetEase Cloud Music has word-level timing (YRC) for many international
@@ -43,15 +46,15 @@ class NeteaseLyricsSource {
   }) async {
     final queries = <String>{'$title $artist'.trim(), title.trim()};
     for (final query in queries) {
-      final id = await _findSong(query, title, artist, duration);
-      if (id == null) continue;
-      final lyrics = await _lyrics(id);
+      final match = await _findSong(query, title, artist, duration);
+      if (match == null) continue;
+      final lyrics = await _lyrics(match.$1, durationMs: match.$2);
       if (lyrics != null) return lyrics;
     }
     return null;
   }
 
-  Future<int?> _findSong(
+  Future<(int, int)?> _findSong(
     String query,
     String title,
     String artist,
@@ -65,7 +68,7 @@ class NeteaseLyricsSource {
       final songs = (_json(res.data) as Map?)?['result']?['songs'];
       if (songs is! List) return null;
 
-      int? bestId;
+      (int, int)? best;
       var bestScore = double.negativeInfinity;
       for (final song in songs) {
         if (song is! Map) continue;
@@ -84,16 +87,16 @@ class NeteaseLyricsSource {
         );
         if (s != null && s > bestScore) {
           bestScore = s;
-          bestId = (song['id'] as num?)?.toInt();
+          best = ((song['id'] as num?)?.toInt() ?? 0, ms);
         }
       }
-      return bestId;
+      return best;
     } catch (_) {
       return null;
     }
   }
 
-  Future<NeteaseLyrics?> _lyrics(int id) async {
+  Future<NeteaseLyrics?> _lyrics(int id, {int? durationMs}) async {
     try {
       final res = await _dio.get(
         '$_base/song/lyric/v1',
@@ -107,7 +110,7 @@ class NeteaseLyricsSource {
           (yrc == null || yrc.trim().isEmpty)) {
         return null;
       }
-      return NeteaseLyrics(lrc: lrc, yrc: yrc);
+      return NeteaseLyrics(lrc: lrc, yrc: yrc, durationMs: durationMs);
     } catch (_) {
       return null;
     }

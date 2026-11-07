@@ -45,9 +45,10 @@ void main() {
       expect(storage.getLyricsOffset('soundcloud:a:158000'), -0.3);
       expect(storage.getLyricsOffset('youtubeMusic:a:180000'), 0);
       await storage.saveLyricsOffset('youtubeMusic:a:158000', 200);
-      expect(storage.getLyricsOffset('youtubeMusic:a:158000'), 15);
+      // The clamp covers long uploader intros, not just small nudges.
+      expect(storage.getLyricsOffset('youtubeMusic:a:158000'), 45);
       await storage.saveLyricsOffset('youtubeMusic:a:158000', double.nan);
-      expect(storage.getLyricsOffset('youtubeMusic:a:158000'), 15);
+      expect(storage.getLyricsOffset('youtubeMusic:a:158000'), 45);
       await storage.saveLyricsOffset('youtubeMusic:a:158000', 0);
       expect(storage.getLyricsOffset('youtubeMusic:a:158000'), 0);
     },

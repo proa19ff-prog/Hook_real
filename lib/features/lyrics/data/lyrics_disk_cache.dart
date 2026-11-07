@@ -39,7 +39,7 @@ class LyricsDiskCache {
       final json = jsonDecode(await file.readAsString()) as Map;
       // Version 2: the v1 entries may hold wrong-artist matches accepted
       // before the stricter LyricsMatch rules; refetch them instead.
-      if (json['version'] != 2 || json['key'] != key) return null;
+      if (json['version'] != 3 || json['key'] != key) return null;
       final result = LyricsResult.fromJson(
         Map<String, dynamic>.from(json['lyrics'] as Map),
       );
@@ -60,7 +60,7 @@ class LyricsDiskCache {
         '${file.path}.${DateTime.now().microsecondsSinceEpoch}_${_sequence++}.part',
       );
       await temporary.writeAsString(
-        jsonEncode({'version': 2, 'key': key, 'lyrics': result.toJson()}),
+        jsonEncode({'version': 3, 'key': key, 'lyrics': result.toJson()}),
         flush: true,
       );
       await temporary.rename(file.path);

@@ -89,6 +89,12 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
   String? _offsetTrackKey;
   bool _showOffsetControls = false;
 
+  /// YouTube reuploads often carry an intro the canonical lyric timings do
+  /// not know about. Once the player reports its real duration, the view
+  /// shifts the lyrics by the difference — unless the listener has already
+  /// tuned this track by hand.
+  bool _autoOffsetApplied = false;
+
   DateTime _userScrollUntil = DateTime.fromMillisecondsSinceEpoch(0);
   Timer? _resumeTimer;
 
@@ -239,6 +245,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
           ? 0
           : ref.read(localStorageServiceProvider).getLyricsOffset(offsetKey);
       _showOffsetControls = false;
+      _autoOffsetApplied = false;
       _source = null;
       _items = const [];
       _keys = const [];
@@ -265,6 +272,10 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
         if (result.isRealSync && !identical(result.lines, _source)) {
           _setLines(result.lines);
         }
+        _maybeApplyIntroOffset(
+          result,
+          ref.watch(durationStreamProvider).valueOrNull,
+        );
         return LyricsTranslationPanel(
           key: ValueKey((
             offsetKey,
@@ -615,12 +626,37 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
     );
   }
 
+  /// Shifts the lyrics later when the playing version is longer than the
+  /// record the timings were matched against (an uploader's intro). Runs at
+  /// most once per track and never overrides a saved manual tuning.
+  void _maybeApplyIntroOffset(LyricsResult result, Duration? playing) {
+    if (_autoOffsetApplied || _offsetTrackKey == null) return;
+    final auto = LyricsResult.autoIntroOffsetSeconds(
+      isRealSync: result.isRealSync,
+      sourceDurationMs: result.sourceDurationMs,
+      playingDuration: playing,
+    );
+    if (auto == null) return;
+    _autoOffsetApplied = true;
+    if (ref
+        .read(localStorageServiceProvider)
+        .hasLyricsOffset(_offsetTrackKey!)) {
+      return; // The listener already tuned this track; their word is final.
+    }
+    // Called from build: apply after the frame settles.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _syncOffsetSeconds != auto) {
+        setState(() => _syncOffsetSeconds = auto);
+      }
+    });
+  }
+
   void _shiftOffset(double delta) => _setOffset(_syncOffsetSeconds + delta);
 
   void _setOffset(double value) {
     setState(
       () => _syncOffsetSeconds = double.parse(
-        value.clamp(-15.0, 15.0).toStringAsFixed(1),
+        value.clamp(-45.0, 45.0).toStringAsFixed(1),
       ),
     );
     final key = _offsetTrackKey;

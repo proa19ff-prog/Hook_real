@@ -108,7 +108,12 @@ class LyricsClient {
       final lines = LrcParser.parseYrc(yrc);
       if (lines.isNotEmpty && !LrcParser.looksUnsynced(lines)) {
         return remember(
-          LyricsResult(lines: lines, isRealSync: true, hasWordSync: true),
+          LyricsResult(
+            lines: lines,
+            isRealSync: true,
+            hasWordSync: true,
+            sourceDurationMs: netease?.durationMs,
+          ),
         );
       }
     }
@@ -130,6 +135,9 @@ class LyricsClient {
                   (backing) => backing.hasRealWordTimings,
                 ),
           ),
+          sourceDurationMs: synced == lrclib?.synced
+              ? lrclib?.durationMs
+              : netease?.durationMs,
         ),
       );
     }

@@ -7,7 +7,10 @@ class LrclibLyrics {
   final String? synced;
   final String? plain;
 
-  const LrclibLyrics({this.synced, this.plain});
+  /// Duration of the record these lyrics were matched against.
+  final int? durationMs;
+
+  const LrclibLyrics({this.synced, this.plain, this.durationMs});
 
   bool get hasSynced => synced != null && synced!.trim().isNotEmpty;
   bool get isEmpty => !hasSynced && (plain == null || plain!.trim().isEmpty);
@@ -68,7 +71,13 @@ class LrclibSource {
     );
     if (score == null) return null;
     final lyrics = _fromRecord(record);
-    return lyrics.isEmpty ? null : lyrics;
+    return lyrics.isEmpty
+        ? null
+        : LrclibLyrics(
+            synced: lyrics.synced,
+            plain: lyrics.plain,
+            durationMs: (record['duration'] as num?)?.round(),
+          );
   }
 
   Future<Map?> _getRecord(
@@ -105,14 +114,14 @@ class LrclibSource {
       var bestScore = double.negativeInfinity;
       for (final item in res.data as List) {
         if (item is! Map) continue;
+        final itemDurationMs = (item['duration'] as num?)?.round();
         var s = LyricsMatch.score(
           wantTitle: title,
           wantArtist: artist,
           wantDuration: duration,
           title: item['trackName'] as String? ?? '',
           artists: [item['artistName'] as String? ?? ''],
-          duration: Duration(
-              seconds: (item['duration'] as num?)?.round() ?? 0),
+          duration: Duration(seconds: itemDurationMs ?? 0),
         );
         if (s == null) continue;
         final lyrics = _fromRecord(item);
@@ -120,7 +129,11 @@ class LrclibSource {
         if (lyrics.hasSynced) s += 1;
         if (s > bestScore) {
           bestScore = s;
-          best = lyrics;
+          best = LrclibLyrics(
+            synced: lyrics.synced,
+            plain: lyrics.plain,
+            durationMs: itemDurationMs,
+          );
         }
       }
       return best;
