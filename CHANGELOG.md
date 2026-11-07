@@ -3,7 +3,7 @@
 Все заметные изменения проекта документируются в этом файле.
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/).
 
-## [Unreleased]
+## [0.2.0] — 2026-11-08
 
 ### Added
 - Лирика сама догоняет версии с интро: если играющая запись длиннее той,
@@ -75,7 +75,7 @@
   задаётся в настройках, без него источник неактивен.
 - Диагностический инструмент `tool/youtube_client_probe.dart`: проверка каждого
   внутреннего клиента YouTube отдельно (манифест, битрейт, реальный GET-запрос).
-- Релизная обвязка: LICENSE (MIT), CI (analyze + test), шаблон issue,
+- Релизная обвязка: LICENSE (source-available), CI (analyze + test), шаблон issue,
   CHANGELOG, adaptive-иконка, runtime-запрос `POST_NOTIFICATIONS`.
 
 ### Changed
