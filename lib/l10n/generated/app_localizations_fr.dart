@@ -776,6 +776,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importedFromSpotify => 'Importé depuis Spotify';
 
   @override
+  String get importedFromDeezer => 'Importé depuis Deezer';
+
+  @override
   String get importIntro =>
       'Emportez vos playlists. Utilisez un lien Spotify, une liste de pistes ou un fichier Exportify.';
 

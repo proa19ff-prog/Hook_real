@@ -761,6 +761,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get importedFromSpotify => 'स्पॉटिफ़ाई से आयातित';
 
   @override
+  String get importedFromDeezer => 'Deezer से आयातित';
+
+  @override
   String get importIntro =>
       'अपनी प्लेलिस्ट साथ लाएँ। स्पॉटिफ़ाई लिंक, ट्रैक सूची या Exportify फ़ाइल का उपयोग करें।';
 

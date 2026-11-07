@@ -775,6 +775,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get importedFromSpotify => 'Geïmporteerd uit Spotify';
 
   @override
+  String get importedFromDeezer => 'Geïmporteerd van Deezer';
+
+  @override
   String get importIntro =>
       'Neem je afspeellijsten mee. Gebruik een Spotify-link, een nummerlijst of een Exportify-bestand.';
 

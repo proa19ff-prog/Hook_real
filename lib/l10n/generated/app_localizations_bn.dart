@@ -766,6 +766,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get importedFromSpotify => 'স্পটিফাই থেকে আমদানিকৃত';
 
   @override
+  String get importedFromDeezer => 'Deezer থেকে আমদানি করা';
+
+  @override
   String get importIntro =>
       'আপনার প্লেলিস্ট সঙ্গে আনুন। স্পটিফাই লিংক, ট্র্যাক তালিকা বা Exportify ফাইল ব্যবহার করুন।';
 

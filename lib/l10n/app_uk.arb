@@ -221,6 +221,7 @@
   "startImport": "Розпочати імпорт",
   "importedCollectionMeta": "{author} • {count} треків",
   "importedFromSpotify": "Імпортовано зі Spotify",
+  "importedFromDeezer": "Імпортовано з Deezer",
   "importIntro": "Заберіть свої плейлисти з собою. Скористайтеся посиланням Spotify, списком треків або файлом Exportify.",
   "importTextTab": "Текст",
   "importFileTab": "CSV / TXT",

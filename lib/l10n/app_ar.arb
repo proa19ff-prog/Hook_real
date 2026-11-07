@@ -221,6 +221,7 @@
   "startImport": "بدء الاستيراد",
   "importedCollectionMeta": "{author} • {count} مقاطع",
   "importedFromSpotify": "مستورد من سبوتيفاي",
+  "importedFromDeezer": "مستورد من ديزر",
   "importIntro": "أحضر قوائم تشغيلك معك. استخدم رابط سبوتيفاي أو قائمة مقاطع أو ملف Exportify.",
   "importTextTab": "نص",
   "importFileTab": "CSV / TXT",

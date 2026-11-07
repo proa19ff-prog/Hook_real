@@ -89,7 +89,9 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
       _isSaving = false;
       _errorMessage = switch (error) {
         MusicImportFileException() => _fileError(error.kind, strings),
-        MusicImportException(blocked: true) => strings.importSpotifyBlocked,
+        // The service writes these for the user (region blocks, private
+        // playlists, disabled resolver) — surface them as they are.
+        MusicImportException() => error.message,
         FormatException() when _mode != _ImportInput.link =>
           strings.importFileEmpty,
         _ => fromFile ? strings.importFileReadFailed : strings.importError,
@@ -268,6 +270,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
       ImportPlatform.spotify => strings.importedFromSpotify,
       ImportPlatform.csv => strings.importedFromCsv,
       ImportPlatform.youtube => strings.importedFromYouTube,
+      ImportPlatform.deezer => strings.importedFromDeezer,
       _ => strings.importedFromText,
     };
     final buttonStyle = FilledButton.styleFrom(

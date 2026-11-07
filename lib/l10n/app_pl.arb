@@ -221,6 +221,7 @@
   "startImport": "Rozpocznij import",
   "importedCollectionMeta": "{author} • {count} utworów",
   "importedFromSpotify": "Zaimportowano ze Spotify",
+  "importedFromDeezer": "Zaimportowano z Deezer",
   "importIntro": "Zabierz playlisty ze sobą. Użyj linku Spotify, listy utworów lub pliku Exportify.",
   "importTextTab": "Tekst",
   "importFileTab": "CSV / TXT",

@@ -221,6 +221,7 @@
   "startImport": "Avvia importazione",
   "importedCollectionMeta": "{author} • {count} brani",
   "importedFromSpotify": "Importato da Spotify",
+  "importedFromDeezer": "Importato da Deezer",
   "importIntro": "Porta con te le tue playlist. Usa un link Spotify, un elenco di brani o un file Exportify.",
   "importTextTab": "Testo",
   "importFileTab": "CSV / TXT",

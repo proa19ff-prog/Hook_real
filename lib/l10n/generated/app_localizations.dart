@@ -1466,6 +1466,12 @@ abstract class AppLocalizations {
   /// **'Imported from Spotify'**
   String get importedFromSpotify;
 
+  /// No description provided for @importedFromDeezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported from Deezer'**
+  String get importedFromDeezer;
+
   /// No description provided for @importIntro.
   ///
   /// In en, this message translates to:

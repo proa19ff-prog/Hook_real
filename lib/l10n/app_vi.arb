@@ -221,6 +221,7 @@
   "startImport": "Bắt đầu nhập",
   "importedCollectionMeta": "{author} • {count} bản nhạc",
   "importedFromSpotify": "Đã nhập từ Spotify",
+  "importedFromDeezer": "Nhập từ Deezer",
   "importIntro": "Mang danh sách phát của bạn theo. Dùng liên kết Spotify, danh sách bản nhạc hoặc tệp Exportify.",
   "importTextTab": "Văn bản",
   "importFileTab": "CSV / TXT",

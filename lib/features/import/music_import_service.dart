@@ -5,9 +5,10 @@ import 'package:flutter/foundation.dart';
 
 import '../extractor/models/media_track.dart';
 import '../extractor/spotify/spotify_catalog_service.dart';
+import '../extractor/sources/remote_resolver_source.dart';
 import '../extractor/stream_resolver.dart';
 
-enum ImportPlatform { spotify, text, csv, youtube, unknown }
+enum ImportPlatform { spotify, text, csv, youtube, deezer, unknown }
 
 enum ImportFileError {
   tooLarge,
@@ -72,11 +73,6 @@ class MusicImportService {
 
   static ImportPlatform detectPlatform(String input) {
     final value = input.replaceFirst('﻿', '').trim();
-    if (_csvDelimiter(value) != null) return ImportPlatform.csv;
-    if (value.contains('\n') ||
-        RegExp(r'\S+\s+(?:—|–|-)\s+\S+').hasMatch(value)) {
-      return ImportPlatform.text;
-    }
     final uri = Uri.tryParse(value);
     if (value.startsWith('spotify:') ||
         uri != null &&
@@ -88,6 +84,33 @@ class MusicImportService {
               'spotify.link',
             }.contains(uri.host.toLowerCase())) {
       return ImportPlatform.spotify;
+    }
+    // URL hosts first: a pasted link is never a track list, even when the
+    // text heuristic below would find a dash somewhere in it.
+    if (uri != null && const {'https', 'http'}.contains(uri.scheme)) {
+      final host = uri.host.toLowerCase();
+      if (const {
+        'youtube.com',
+        'www.youtube.com',
+        'm.youtube.com',
+        'music.youtube.com',
+        'youtu.be',
+      }.contains(host)) {
+        return ImportPlatform.youtube;
+      }
+      if (const {
+        'deezer.com',
+        'www.deezer.com',
+        'link.deezer.com',
+        'deezer.page.link',
+      }.contains(host)) {
+        return ImportPlatform.deezer;
+      }
+    }
+    if (_csvDelimiter(value) != null) return ImportPlatform.csv;
+    if (value.contains('\n') ||
+        RegExp(r'\S+\s+(?:—|–|-)\s+\S+').hasMatch(value)) {
+      return ImportPlatform.text;
     }
     return ImportPlatform.unknown;
   }
@@ -123,12 +146,22 @@ class MusicImportService {
   }
 
   Future<ImportedCollection> importFromUrl(String url) async {
-    if (detectPlatform(url) != ImportPlatform.spotify) {
-      throw ArgumentError(
-        'Неподдерживаемая ссылка. Вставьте ссылку на Spotify.',
-      );
+    switch (detectPlatform(url)) {
+      case ImportPlatform.spotify:
+        return _importSpotify(url.trim());
+      case ImportPlatform.youtube:
+        return _importViaResolver(url.trim(), platform: ImportPlatform.youtube);
+      case ImportPlatform.deezer:
+        return _importViaResolver(
+          url.trim(),
+          platform: ImportPlatform.deezer,
+        );
+      default:
+        throw ArgumentError(
+          'Неподдерживаемая ссылка. Вставьте ссылку на плейлист Spotify, '
+          'YouTube Music или Deezer.',
+        );
     }
-    return _importSpotify(url.trim());
   }
 
   Future<ImportedCollection> importFromText(
@@ -161,6 +194,112 @@ class MusicImportService {
           .artworkUrl,
       tracks: tracks,
       platform: ImportPlatform.text,
+    );
+  }
+
+  /// YouTube Music / YouTube and Deezer playlists are read by the resolver
+  /// server (yt-dlp + Deezer's public API): the device's network often
+  /// cannot reach either host directly. YouTube entries carry real video
+  /// ids and play as-is; Deezer entries are placeholders matched against
+  /// the catalog exactly like a pasted track list.
+  Future<ImportedCollection> _importViaResolver(
+    String url, {
+    required ImportPlatform platform,
+  }) async {
+    if (!RemoteResolverSource.enabled) {
+      throw const MusicImportException(
+        'Для импорта с YouTube Music и Deezer нужен сервер-резолвер: '
+        'включите его в настройках или вставьте треки списком.',
+        blocked: true,
+      );
+    }
+    final base = RemoteResolverSource.effectiveEndpoint.replaceFirst(
+      RegExp(r'/+$'),
+      '',
+    );
+    final response = await _dio
+        .get<Map<String, dynamic>>(
+          '$base/playlist',
+          queryParameters: {'url': url},
+          options: Options(
+            validateStatus: (_) => true,
+            headers: {'User-Agent': 'Hook-Music-Player/1.0'},
+          ),
+        )
+        .timeout(const Duration(seconds: 120));
+    final data = response.data;
+    if (response.statusCode != 200 || data == null) {
+      throw const MusicImportException(
+        'Сервер не смог прочитать этот плейлист. Убедитесь, что он '
+        'публичный, или вставьте треки списком.',
+      );
+    }
+    final entries = data['tracks'];
+    if (entries is! List || entries.isEmpty) {
+      throw const MusicImportFileException(ImportFileError.empty);
+    }
+    final playlistTitle = (data['title'] as String? ?? '').trim();
+
+    final tracks = <MediaTrack>[];
+    final seen = <String>{};
+    for (final entry in entries) {
+      if (entry is! Map) continue;
+      final id = (entry['id'] as String? ?? '').trim();
+      final trackTitle = (entry['title'] as String? ?? '').trim();
+      final artist = (entry['artist'] as String? ?? '').trim();
+      if (id.isEmpty || trackTitle.isEmpty || !seen.add(id)) continue;
+      final seconds = (entry['duration'] as num?)?.toInt() ?? 0;
+      final artwork = (entry['artwork'] as String? ?? '').trim();
+      switch (platform) {
+        case ImportPlatform.youtube:
+          tracks.add(
+            MediaTrack(
+              id: id,
+              title: trackTitle,
+              artist: artist.isEmpty ? 'YouTube' : artist,
+              duration: Duration(seconds: seconds),
+              artworkUrl: artwork.isNotEmpty
+                  ? artwork
+                  : 'https://i.ytimg.com/vi/$id/hqdefault.jpg',
+              source: TrackSource.youtubeMusic,
+            ),
+          );
+        case ImportPlatform.deezer:
+          tracks.add(
+            _textTrack(artist, trackTitle, tracks.length).copyWith(
+              duration: Duration(seconds: seconds),
+              artworkUrl: artwork,
+            ),
+          );
+        default:
+          break;
+      }
+      if (tracks.length > maxTracks) {
+        throw const MusicImportFileException(ImportFileError.tooManyTracks);
+      }
+    }
+    if (tracks.isEmpty) {
+      throw const MusicImportFileException(ImportFileError.empty);
+    }
+
+    final resolved = platform == ImportPlatform.deezer
+        ? await _resolveTextTracks(tracks)
+        : tracks;
+    return ImportedCollection(
+      title: playlistTitle.isNotEmpty
+          ? playlistTitle
+          : platform == ImportPlatform.youtube
+          ? 'Импорт с YouTube'
+          : 'Импорт с Deezer',
+      author: platform == ImportPlatform.youtube ? 'YouTube' : 'Deezer',
+      artworkUrl: resolved
+          .firstWhere(
+            (track) => track.artworkUrl.isNotEmpty,
+            orElse: () => resolved.first,
+          )
+          .artworkUrl,
+      tracks: resolved,
+      platform: platform,
     );
   }
 

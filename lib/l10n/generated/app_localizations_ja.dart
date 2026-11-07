@@ -738,6 +738,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get importedFromSpotify => 'Spotify からインポート';
 
   @override
+  String get importedFromDeezer => 'Deezerからインポート';
+
+  @override
   String get importIntro =>
       'あなたのプレイリストを持ち込みましょう。Spotify リンク、曲リスト、Exportify ファイルが使えます。';
 

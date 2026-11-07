@@ -221,6 +221,7 @@
   "startImport": "Mulai impor",
   "importedCollectionMeta": "{author} • {count} lagu",
   "importedFromSpotify": "Diimpor dari Spotify",
+  "importedFromDeezer": "Diimpor dari Deezer",
   "importIntro": "Bawa playlist Anda. Gunakan tautan Spotify, daftar lagu, atau berkas Exportify.",
   "importTextTab": "Teks",
   "importFileTab": "CSV / TXT",

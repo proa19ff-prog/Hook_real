@@ -221,6 +221,7 @@
   "startImport": "开始导入",
   "importedCollectionMeta": "{author} • {count} 首曲目",
   "importedFromSpotify": "从 Spotify 导入",
+  "importedFromDeezer": "从 Deezer 导入",
   "importIntro": "把你的播放列表带过来。使用 Spotify 链接、曲目清单或 Exportify 文件。",
   "importTextTab": "文本",
   "importFileTab": "CSV / TXT",

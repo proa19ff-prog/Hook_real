@@ -754,6 +754,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get importedFromSpotify => 'นำเข้าจาก Spotify';
 
   @override
+  String get importedFromDeezer => 'นำเข้าจาก Deezer';
+
+  @override
   String get importIntro =>
       'พาเพลย์ลิสต์ของคุณมาด้วย ใช้ลิงก์ Spotify, รายชื่อเพลง หรือไฟล์ Exportify';
 

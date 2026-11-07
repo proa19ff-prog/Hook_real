@@ -725,6 +725,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importedFromSpotify => '从 Spotify 导入';
 
   @override
+  String get importedFromDeezer => '从 Deezer 导入';
+
+  @override
   String get importIntro => '把你的播放列表带过来。使用 Spotify 链接、曲目清单或 Exportify 文件。';
 
   @override

@@ -765,6 +765,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get importedFromSpotify => 'مستورد من سبوتيفاي';
 
   @override
+  String get importedFromDeezer => 'مستورد من ديزر';
+
+  @override
   String get importIntro =>
       'أحضر قوائم تشغيلك معك. استخدم رابط سبوتيفاي أو قائمة مقاطع أو ملف Exportify.';
 

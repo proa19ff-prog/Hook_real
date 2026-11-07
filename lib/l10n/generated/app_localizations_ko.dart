@@ -734,6 +734,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get importedFromSpotify => 'Spotify에서 가져옴';
 
   @override
+  String get importedFromDeezer => 'Deezer에서 가져옴';
+
+  @override
   String get importIntro =>
       '재생목록을 함께 가져오세요. Spotify 링크, 트랙 목록 또는 Exportify 파일을 사용하세요.';
 

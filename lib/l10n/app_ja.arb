@@ -221,6 +221,7 @@
   "startImport": "インポートを開始",
   "importedCollectionMeta": "{author} • {count} 曲",
   "importedFromSpotify": "Spotify からインポート",
+  "importedFromDeezer": "Deezerからインポート",
   "importIntro": "あなたのプレイリストを持ち込みましょう。Spotify リンク、曲リスト、Exportify ファイルが使えます。",
   "importTextTab": "テキスト",
   "importFileTab": "CSV / TXT",

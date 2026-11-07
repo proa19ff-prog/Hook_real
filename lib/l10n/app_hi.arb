@@ -221,6 +221,7 @@
   "startImport": "आयात शुरू करें",
   "importedCollectionMeta": "{author} • {count} ट्रैक",
   "importedFromSpotify": "स्पॉटिफ़ाई से आयातित",
+  "importedFromDeezer": "Deezer से आयातित",
   "importIntro": "अपनी प्लेलिस्ट साथ लाएँ। स्पॉटिफ़ाई लिंक, ट्रैक सूची या Exportify फ़ाइल का उपयोग करें।",
   "importTextTab": "टेक्स्ट",
   "importFileTab": "CSV / TXT",

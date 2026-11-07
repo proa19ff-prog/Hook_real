@@ -221,6 +221,7 @@
   "startImport": "가져오기 시작",
   "importedCollectionMeta": "{author} • 트랙 {count}개",
   "importedFromSpotify": "Spotify에서 가져옴",
+  "importedFromDeezer": "Deezer에서 가져옴",
   "importIntro": "재생목록을 함께 가져오세요. Spotify 링크, 트랙 목록 또는 Exportify 파일을 사용하세요.",
   "importTextTab": "텍스트",
   "importFileTab": "CSV / TXT",

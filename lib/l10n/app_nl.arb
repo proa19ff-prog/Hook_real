@@ -221,6 +221,7 @@
   "startImport": "Import starten",
   "importedCollectionMeta": "{author} • {count} nummers",
   "importedFromSpotify": "Geïmporteerd uit Spotify",
+  "importedFromDeezer": "Geïmporteerd van Deezer",
   "importIntro": "Neem je afspeellijsten mee. Gebruik een Spotify-link, een nummerlijst of een Exportify-bestand.",
   "importTextTab": "Tekst",
   "importFileTab": "CSV / TXT",

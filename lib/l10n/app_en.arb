@@ -236,6 +236,7 @@
   "importedCollectionMeta": "{author} • {count} tracks",
   "@importedCollectionMeta": {"placeholders": {"author": {"type": "String"}, "count": {"type": "int"}}},
   "importedFromSpotify": "Imported from Spotify",
+  "importedFromDeezer": "Imported from Deezer",
   "importIntro": "Bring your playlists with you. Use a Spotify link, a track list, or an Exportify file.",
   "importTextTab": "Text",
   "importFileTab": "CSV / TXT",

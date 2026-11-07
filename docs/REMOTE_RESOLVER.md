@@ -54,6 +54,20 @@ GET {base}/resolve?id=<id из поиска>
 Приложение ничего не отправляет на сервер, кроме поисковой строки и ID.
 
 ```
+GET {base}/playlist?url=<ссылка на плейлист>
+200 → { "title": "...", "tracks": [ {"id","title","artist","duration","artwork"} ] }
+502 → чтение не удалось (таймаут/недоступен); 400 → url вне белого списка
+```
+
+- Необязательный эндпоинт для импорта плейлистов: YouTube / YouTube Music
+  читаются одним flat-извлечением yt-dlp (`--playlist-end 300`), Deezer —
+  публичным API api.deezer.com (yt-dlp сам Deezer не умеет: DRM-guard);
+- только https и публичные плейлисты: youtube.com, music.youtube.com,
+  youtu.be, deezer.com, link.deezer.com;
+- ответ кэшируется 15 минут; приватные плейлисты («Мне нравится» в YT
+  Music) прочесть нельзя — только публичные.
+
+```
 GET {base}/download?url=<страница трека>
 200 → аудиофайл целиком (yt-dlp bestaudio), Content-Length присутствует
 502 → упаковка не удалась; 503 → сервер занят; 400 → url вне белого списка

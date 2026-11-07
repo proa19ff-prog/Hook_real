@@ -769,6 +769,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get importedFromSpotify => 'Spotify\'dan içe aktarıldı';
 
   @override
+  String get importedFromDeezer => 'Deezer\'den içe aktarıldı';
+
+  @override
   String get importIntro =>
       'Çalma listelerinizi yanınızda getirin. Bir Spotify bağlantısı, parça listesi veya Exportify dosyası kullanın.';
 

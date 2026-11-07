@@ -221,6 +221,7 @@
   "startImport": "İçe aktarmayı başlat",
   "importedCollectionMeta": "{author} • {count} parça",
   "importedFromSpotify": "Spotify'dan içe aktarıldı",
+  "importedFromDeezer": "Deezer'den içe aktarıldı",
   "importIntro": "Çalma listelerinizi yanınızda getirin. Bir Spotify bağlantısı, parça listesi veya Exportify dosyası kullanın.",
   "importTextTab": "Metin",
   "importFileTab": "CSV / TXT",

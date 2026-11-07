@@ -767,6 +767,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get importedFromSpotify => 'Đã nhập từ Spotify';
 
   @override
+  String get importedFromDeezer => 'Nhập từ Deezer';
+
+  @override
   String get importIntro =>
       'Mang danh sách phát của bạn theo. Dùng liên kết Spotify, danh sách bản nhạc hoặc tệp Exportify.';
 
