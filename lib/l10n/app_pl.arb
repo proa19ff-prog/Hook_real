@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "OSTATNIE ZAPYTANIA",
+  "clearHistory": "Wyczyść",
+  "waveFromArtist": "Fala artysty",
+  "popularTracksUpper": "POPULARNE UTWORY",
+  "artistTracksCount": "{count, plural, =0{brak utworów} one{{count} utwór} few{{count} utwory} many{{count} utworów} other{{count} utworu}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

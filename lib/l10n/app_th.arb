@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "การค้นหาล่าสุด",
+  "clearHistory": "ล้าง",
+  "waveFromArtist": "คลื่นจากศิลปิน",
+  "popularTracksUpper": "เพลงยอดนิยม",
+  "artistTracksCount": "{count, plural, =0{ยังไม่มีเพลง} other{{count} เพลง}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "PESQUISAS RECENTES",
+  "clearHistory": "Limpar",
+  "waveFromArtist": "Onda do artista",
+  "popularTracksUpper": "FAIXAS POPULARES",
+  "artistTracksCount": "{count, plural, =0{ainda sem faixas} one{1 faixa} other{{count} faixas}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

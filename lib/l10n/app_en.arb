@@ -360,5 +360,11 @@
   "audioForbidden": "The audio server denied access (HTTP 403). The track was found, but its stream is unavailable. A VPN doesn't guarantee audio access.",
   "fullVersionUnavailable": "No full version was found in the available sources. Check your connection or try again later.",
   "sourcePlaybackFailed": "{source} couldn't play this track. Check your connection or try again later.",
-  "@sourcePlaybackFailed": {"placeholders": {"source": {"type": "String"}}}
+  "@sourcePlaybackFailed": {"placeholders": {"source": {"type": "String"}}},
+  "recentQueriesUpper": "RECENT QUERIES",
+  "clearHistory": "Clear",
+  "waveFromArtist": "Artist wave",
+  "popularTracksUpper": "POPULAR TRACKS",
+  "artistTracksCount": "{count, plural, =0{no tracks yet} =1{1 track} other{{count} tracks}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

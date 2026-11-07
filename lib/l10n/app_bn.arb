@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "সাম্প্রতিক অনুসন্ধান",
+  "clearHistory": "মুছে ফেলুন",
+  "waveFromArtist": "শিল্পীর ঢেউ",
+  "popularTracksUpper": "জনপ্রিয় গান",
+  "artistTracksCount": "{count, plural, =0{এখনও কোনো গান নেই} one{১টি গান} other{{count}টি গান}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -1143,4 +1143,27 @@ class AppLocalizationsTh extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source เล่นเพลงนี้ไม่ได้ ตรวจสอบการเชื่อมต่อหรือลองภายหลัง';
   }
+
+  @override
+  String get recentQueriesUpper => 'การค้นหาล่าสุด';
+
+  @override
+  String get clearHistory => 'ล้าง';
+
+  @override
+  String get waveFromArtist => 'คลื่นจากศิลปิน';
+
+  @override
+  String get popularTracksUpper => 'เพลงยอดนิยม';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count เพลง',
+      zero: 'ยังไม่มีเพลง',
+    );
+    return '$_temp0';
+  }
 }

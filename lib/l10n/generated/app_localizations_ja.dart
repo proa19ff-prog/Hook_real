@@ -1121,4 +1121,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source はこの曲を再生できませんでした。接続を確認するか、後でもう一度お試しください。';
   }
+
+  @override
+  String get recentQueriesUpper => '最近の検索';
+
+  @override
+  String get clearHistory => '消去';
+
+  @override
+  String get waveFromArtist => 'アーティストのウェーブ';
+
+  @override
+  String get popularTracksUpper => '人気曲';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 曲',
+      zero: 'まだ曲がありません',
+    );
+    return '$_temp0';
+  }
 }

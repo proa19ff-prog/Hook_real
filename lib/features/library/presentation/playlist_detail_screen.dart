@@ -7,7 +7,7 @@ import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../theme_engine/domain/hook_theme.dart';
-import '../../theme_engine/presentation/track_artwork.dart';
+import '../../theme_engine/presentation/playlist_artwork.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 class PlaylistDetailScreen extends ConsumerWidget {
@@ -26,7 +26,6 @@ class PlaylistDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = theme.colors;
     final strings = AppLocalizations.of(context);
-    final artwork = tracks.isEmpty ? '' : tracks.first.artworkUrl;
     return Scaffold(
       backgroundColor: colors.background,
       bottomNavigationBar: PlaybackDock(theme: theme),
@@ -69,8 +68,8 @@ class PlaylistDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Center(
-                      child: TrackArtwork(
-                        url: artwork,
+                      child: PlaylistArtwork(
+                        urls: tracks.map((track) => track.artworkUrl),
                         size: 190,
                         borderRadius: BorderRadius.circular(12),
                         placeholderColor: colors.surface,

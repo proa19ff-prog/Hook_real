@@ -25,6 +25,7 @@ void main() {
     overrides: [
       localStorageServiceProvider.overrideWithValue(storage),
       youtubeAvailabilityProvider.overrideWith((ref) async => true),
+      personalMixSeedProvider.overrideWith((ref) async => null),
       youtubeAccountServiceProvider.overrideWithValue(
         const _StubAccountService(),
       ),

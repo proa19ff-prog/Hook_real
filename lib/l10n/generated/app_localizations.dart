@@ -2155,6 +2155,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{source} couldn\'t play this track. Check your connection or try again later.'**
   String sourcePlaybackFailed(String source);
+
+  /// No description provided for @recentQueriesUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'RECENT QUERIES'**
+  String get recentQueriesUpper;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearHistory;
+
+  /// No description provided for @waveFromArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist wave'**
+  String get waveFromArtist;
+
+  /// No description provided for @popularTracksUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'POPULAR TRACKS'**
+  String get popularTracksUpper;
+
+  /// No description provided for @artistTracksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{no tracks yet} =1{1 track} other{{count} tracks}}'**
+  String artistTracksCount(int count);
 }
 
 class _AppLocalizationsDelegate

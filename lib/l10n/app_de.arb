@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "LETZTE SUCHANFRAGEN",
+  "clearHistory": "Löschen",
+  "waveFromArtist": "Künstlerwelle",
+  "popularTracksUpper": "BELIEBTE TITEL",
+  "artistTracksCount": "{count, plural, =0{noch keine Titel} one{1 Titel} other{{count} Titel}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

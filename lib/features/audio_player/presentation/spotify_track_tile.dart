@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
@@ -5,6 +6,7 @@ import 'package:ming_cute_icons/ming_cute_icons.dart';
 import '../../../core/localization/localized_labels.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
+import '../../search/presentation/artist_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'player_state_provider.dart';
@@ -135,21 +137,25 @@ class SpotifyTrackTile extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      [
-                        track.artist,
+                    _ArtistSubtitle(
+                      artist: track.artist,
+                      rest: [
                         if (showSource)
                           track.source.labelFor(strings)
                         else if (track.album?.isNotEmpty == true)
                           track.album!,
                       ].where((part) => part.isNotEmpty).join(' • '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: colors.textSecondary,
                         fontSize: 13,
                         height: 1.15,
                       ),
+                      onTap: onFindArtist ??
+                          () => openArtistScreen(
+                                context,
+                                theme,
+                                track.artist,
+                              ),
                     ),
                   ],
                 ),
@@ -311,7 +317,9 @@ Future<void> showSpotifyTrackActions(
               label: strings.goToArtist,
               onTap: () {
                 Navigator.of(sheetContext).pop();
-                onFindArtist?.call();
+                (onFindArtist ??
+                        () => openArtistScreen(context, theme, track.artist))
+                    .call();
               },
             ),
           ],
@@ -441,6 +449,65 @@ class _TrackAction extends StatelessWidget {
       leading: Icon(icon, color: textColor, size: 22),
       title: Text(label, style: TextStyle(color: textColor, fontSize: 15)),
       onTap: onTap,
+    );
+  }
+}
+
+/// "Artist • album" subtitle where the performer's name opens their page.
+class _ArtistSubtitle extends StatefulWidget {
+  final String artist;
+  final String rest;
+  final TextStyle style;
+  final VoidCallback onTap;
+
+  const _ArtistSubtitle({
+    required this.artist,
+    required this.rest,
+    required this.style,
+    required this.onTap,
+  });
+
+  @override
+  State<_ArtistSubtitle> createState() => _ArtistSubtitleState();
+}
+
+class _ArtistSubtitleState extends State<_ArtistSubtitle> {
+  final TapGestureRecognizer _recognizer = TapGestureRecognizer();
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer.onTap = widget.onTap;
+  }
+
+  @override
+  void didUpdateWidget(_ArtistSubtitle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _recognizer.onTap = widget.onTap;
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: widget.artist,
+            recognizer: widget.artist.isEmpty ? null : _recognizer,
+          ),
+          if (widget.rest.isNotEmpty)
+            TextSpan(text: ' • ${widget.rest}'),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: widget.style,
     );
   }
 }

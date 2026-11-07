@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "최근 검색어",
+  "clearHistory": "지우기",
+  "waveFromArtist": "아티스트 웨이브",
+  "popularTracksUpper": "인기 트랙",
+  "artistTracksCount": "{count, plural, =0{아직 트랙이 없습니다} other{{count}개 트랙}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -298,6 +298,12 @@ class _WaveField extends ConsumerWidget {
     final active = ref.watch(waveActiveProvider);
     final playing = ref.watch(isPlayingProvider);
     final loading = ref.watch(isTrackLoadingProvider);
+    // With nothing listened to yet, the personal mix proposes a starter track
+    // so the wave works from the very first minute.
+    final personalSeed = seed == null
+        ? ref.watch(personalMixSeedProvider).valueOrNull
+        : null;
+    final effectiveSeed = seed ?? personalSeed;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
       child: Container(
@@ -321,10 +327,10 @@ class _WaveField extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if (seed != null) ...[
+                if (effectiveSeed != null) ...[
                   const SizedBox(width: 12),
                   TrackArtwork(
-                    url: seed!.artworkUrl,
+                    url: effectiveSeed.artworkUrl,
                     size: 40,
                     borderRadius: BorderRadius.circular(8),
                     placeholderColor: colors.background,
@@ -341,7 +347,7 @@ class _WaveField extends ConsumerWidget {
               ),
             ),
             Text(
-              seed?.title ?? strings.findFirstTrack,
+              effectiveSeed?.title ?? strings.findFirstTrack,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -354,9 +360,9 @@ class _WaveField extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              seed == null
+              effectiveSeed == null
                   ? strings.chooseTrackWaveDetail
-                  : strings.continuationAfter(seed!.artist),
+                  : strings.continuationAfter(effectiveSeed.artist),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -370,9 +376,10 @@ class _WaveField extends ConsumerWidget {
               key: const ValueKey('home-wave-button'),
               onPressed: loading
                   ? null
-                  : seed == null
+                  : effectiveSeed == null
                   ? onOpenSearch
-                  : () => ref.read(queueProvider.notifier).startWave(seed!),
+                  : () =>
+                        ref.read(queueProvider.notifier).startWave(effectiveSeed),
               style: FilledButton.styleFrom(
                 backgroundColor: colors.textPrimary,
                 foregroundColor: colors.background,
@@ -384,13 +391,13 @@ class _WaveField extends ConsumerWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Icon(
-                      seed == null
+                      effectiveSeed == null
                           ? MingCuteIcons.mgc_search_2_line
                           : MingCuteIcons.mgc_play_fill,
                       size: 20,
                     ),
               label: Text(
-                seed == null ? strings.chooseTrack : strings.continueWave,
+                effectiveSeed == null ? strings.chooseTrack : strings.continueWave,
               ),
             ),
           ],

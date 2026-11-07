@@ -1163,4 +1163,30 @@ class AppLocalizationsRu extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return 'Источник $source не смог воспроизвести трек. Проверьте сеть или попробуйте позже.';
   }
+
+  @override
+  String get recentQueriesUpper => 'НЕДАВНИЕ ЗАПРОСЫ';
+
+  @override
+  String get clearHistory => 'Очистить';
+
+  @override
+  String get waveFromArtist => 'Волна от артиста';
+
+  @override
+  String get popularTracksUpper => 'ПОПУЛЯРНЫЕ ТРЕКИ';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count трека',
+      many: '$count треков',
+      few: '$count трека',
+      one: '$count трек',
+      zero: 'пока нет треков',
+    );
+    return '$_temp0';
+  }
 }

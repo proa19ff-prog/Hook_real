@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "RECHERCHES RÉCENTES",
+  "clearHistory": "Effacer",
+  "waveFromArtist": "Vague de l'artiste",
+  "popularTracksUpper": "TITRES POPULAIRES",
+  "artistTracksCount": "{count, plural, =0{aucun titre pour l'instant} one{1 titre} other{{count} titres}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

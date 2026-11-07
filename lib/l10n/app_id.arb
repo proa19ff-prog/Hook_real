@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "PENCARIAN TERAKHIR",
+  "clearHistory": "Hapus",
+  "waveFromArtist": "Gelombang artis",
+  "popularTracksUpper": "LAGU POPULER",
+  "artistTracksCount": "{count, plural, =0{belum ada lagu} other{{count} lagu}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

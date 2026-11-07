@@ -1168,4 +1168,28 @@ class AppLocalizationsNl extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source kon dit nummer niet afspelen. Controleer je verbinding of probeer het later.';
   }
+
+  @override
+  String get recentQueriesUpper => 'RECENTE ZOEKOPDRACHTEN';
+
+  @override
+  String get clearHistory => 'Wissen';
+
+  @override
+  String get waveFromArtist => 'Golf van artiest';
+
+  @override
+  String get popularTracksUpper => 'POPULAIRE NUMMERS';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count nummers',
+      one: '1 nummer',
+      zero: 'nog geen nummers',
+    );
+    return '$_temp0';
+  }
 }

@@ -360,5 +360,11 @@
   "audioForbidden": "Сервер аудио отклонил доступ (HTTP 403). Трек найден, но поток недоступен. VPN не гарантирует доступ к аудио.",
   "fullVersionUnavailable": "Полная версия не найдена в доступных источниках. Проверьте сеть или попробуйте позже.",
   "sourcePlaybackFailed": "Источник {source} не смог воспроизвести трек. Проверьте сеть или попробуйте позже.",
-  "@sourcePlaybackFailed": {"placeholders": {"source": {"type": "String"}}}
+  "@sourcePlaybackFailed": {"placeholders": {"source": {"type": "String"}}},
+  "recentQueriesUpper": "НЕДАВНИЕ ЗАПРОСЫ",
+  "clearHistory": "Очистить",
+  "waveFromArtist": "Волна от артиста",
+  "popularTracksUpper": "ПОПУЛЯРНЫЕ ТРЕКИ",
+  "artistTracksCount": "{count, plural, =0{пока нет треков} one{{count} трек} few{{count} трека} many{{count} треков} other{{count} трека}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

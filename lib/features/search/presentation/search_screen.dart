@@ -13,6 +13,8 @@ import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import '../data/lyrics_search_service.dart';
+import 'artist_screen.dart';
+import 'search_history_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 final lyricsSearchServiceProvider = Provider<LyricsSearchService>((ref) {
@@ -136,6 +138,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       // Do not resolve several expensive catalogs on every keystroke. Only the
       // leading result is warmed; the queue prefetch handles subsequent songs.
       ref.read(audioPlayerServiceProvider).prefetch(results.take(1));
+      // A query worth results is worth remembering; dead queries stay out.
+      if (results.isNotEmpty) {
+        ref.read(searchHistoryProvider.notifier).record(query);
+      }
     } catch (_) {
       if (!mounted || id != _requestId) return;
       final strings = AppLocalizations.of(context);
@@ -189,102 +195,51 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 18, 20, 4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            strings.findYourMusic,
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.7,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: strings.importMusic,
+                          onPressed: () =>
+                              ImportBottomSheet.show(context, widget.theme),
+                          icon: Icon(
+                            MingCuteIcons.mgc_link_line,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // The field stays reachable while results scroll under it.
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _PinnedSearchFieldDelegate(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      child: _buildSearchField(strings, colors),
+                    ),
+                    background: colors.background,
+                  ),
+                ),
+                SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 18, 20, 16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                strings.findYourMusic,
-                                style: TextStyle(
-                                  color: colors.textPrimary,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.7,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              tooltip: strings.importMusic,
-                              onPressed: () =>
-                                  ImportBottomSheet.show(context, widget.theme),
-                              icon: Icon(
-                                MingCuteIcons.mgc_link_line,
-                                color: colors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: TextField(
-                          key: const ValueKey('music-search-field'),
-                          controller: _searchController,
-                          focusNode: _focusNode,
-                          maxLength: 200,
-                          style: TextStyle(
-                            color: colors.textPrimary,
-                            fontSize: 16,
-                          ),
-                          cursorColor: colors.primary,
-                          decoration: InputDecoration(
-                            counterText: '',
-                            hintText: _mode == MusicSearchMode.lyrics
-                                ? strings.rememberedLyricsHint
-                                : strings.trackArtistHint,
-                            hintStyle: TextStyle(
-                              color: colors.textSecondary,
-                              fontSize: 14,
-                            ),
-                            filled: true,
-                            fillColor: colors.surface,
-                            prefixIcon: Icon(
-                              Icons.search_rounded,
-                              color: colors.textSecondary,
-                            ),
-                            suffixIcon:
-                                ValueListenableBuilder<TextEditingValue>(
-                                  valueListenable: _searchController,
-                                  builder: (_, value, __) => value.text.isEmpty
-                                      ? const SizedBox.shrink()
-                                      : IconButton(
-                                          tooltip: strings.clear,
-                                          onPressed: _clear,
-                                          icon: Icon(
-                                            Icons.close_rounded,
-                                            color: colors.textSecondary,
-                                          ),
-                                        ),
-                                ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(
-                                color: colors.primary.withValues(alpha: 0.65),
-                              ),
-                            ),
-                          ),
-                          textInputAction: TextInputAction.search,
-                          onChanged: _onQueryChanged,
-                          onSubmitted: (value) {
-                            _search(value);
-                            _focusNode.unfocus();
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 6),
+                        padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
                         child: Row(
                           children: [
                             _modeButton(MusicSearchMode.tracks, strings.music),
@@ -336,6 +291,52 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSearchField(AppLocalizations strings, HookColors colors) {
+    return TextField(
+      key: const ValueKey('music-search-field'),
+      controller: _searchController,
+      focusNode: _focusNode,
+      maxLength: 200,
+      style: TextStyle(color: colors.textPrimary, fontSize: 16),
+      cursorColor: colors.primary,
+      decoration: InputDecoration(
+        counterText: '',
+        hintText: _mode == MusicSearchMode.lyrics
+            ? strings.rememberedLyricsHint
+            : strings.trackArtistHint,
+        hintStyle: TextStyle(color: colors.textSecondary, fontSize: 14),
+        filled: true,
+        fillColor: colors.surface,
+        prefixIcon: Icon(Icons.search_rounded, color: colors.textSecondary),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _searchController,
+          builder: (_, value, __) => value.text.isEmpty
+              ? const SizedBox.shrink()
+              : IconButton(
+                  tooltip: strings.clear,
+                  onPressed: _clear,
+                  icon: Icon(Icons.close_rounded, color: colors.textSecondary),
+                ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: colors.primary.withValues(alpha: 0.65)),
+        ),
+      ),
+      textInputAction: TextInputAction.search,
+      onChanged: _onQueryChanged,
+      onSubmitted: (value) {
+        _search(value);
+        _focusNode.unfocus();
+      },
     );
   }
 
@@ -505,7 +506,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               track: track,
               showSource: true,
               onTap: () => _play(trackIndex),
-              onFindArtist: () => _quickSearch(track.artist),
             ),
             if (_snippets[track] case final String snippet)
               Padding(
@@ -539,7 +539,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         onTap: () => _play(0),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
-          child: Column(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: colors.surfaceGlass,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.fromBorderSide(
+                BorderSide(color: colors.border.withValues(alpha: 0.5)),
+              ),
+            ),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -629,6 +639,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -636,12 +647,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildDiscovery() {
     final colors = widget.theme.colors;
     final strings = AppLocalizations.of(context);
-    final artists = ref
-        .watch(favoritesProvider)
-        .map((track) => track.artist.trim())
-        .where((artist) => artist.isNotEmpty)
-        .toSet()
-        .take(6);
+    final history = ref.watch(searchHistoryProvider);
+    // Circle covers for the artist cards come from whatever artwork the
+    // user's own tracks carry; names from favorites first, then history.
+    final artistArt = <String, String>{};
+    for (final track in [
+      ...ref.watch(favoritesProvider),
+      ...ref.watch(historyProvider),
+    ]) {
+      final name = track.artist.trim();
+      if (name.isEmpty) continue;
+      artistArt.putIfAbsent(name, () => track.artworkUrl);
+    }
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       children: [
@@ -664,6 +681,112 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             height: 1.6,
           ),
         ),
+        if (history.isNotEmpty) ...[
+          const SizedBox(height: 28),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  strings.recentQueriesUpper,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: strings.clearHistory,
+                visualDensity: VisualDensity.compact,
+                onPressed: () =>
+                    ref.read(searchHistoryProvider.notifier).clear(),
+                icon: Icon(
+                  MingCuteIcons.mgc_delete_2_line,
+                  size: 19,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final query in history)
+                InputChip(
+                  label: Text(query),
+                  avatar: Icon(
+                    Icons.history_rounded,
+                    size: 16,
+                    color: colors.textSecondary,
+                  ),
+                  onPressed: () => _quickSearch(query),
+                  onDeleted: () =>
+                      ref.read(searchHistoryProvider.notifier).remove(query),
+                  backgroundColor: colors.surface,
+                  side: BorderSide.none,
+                  labelStyle: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 13,
+                  ),
+                ),
+            ],
+          ),
+        ],
+        if (artistArt.isNotEmpty) ...[
+          const SizedBox(height: 28),
+          Text(
+            strings.yourArtistsUpper,
+            style: TextStyle(
+              color: colors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 112,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: artistArt.length.clamp(0, 10),
+              separatorBuilder: (_, __) => const SizedBox(width: 14),
+              itemBuilder: (context, index) {
+                final name = artistArt.keys.elementAt(index);
+                return GestureDetector(
+                  onTap: () => openArtistScreen(context, widget.theme, name),
+                  child: SizedBox(
+                    width: 76,
+                    child: Column(
+                      children: [
+                        TrackArtwork(
+                          url: artistArt[name] ?? '',
+                          size: 68,
+                          borderRadius: BorderRadius.circular(34),
+                          placeholderColor: colors.surface,
+                          iconColor: colors.textSecondary,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
         const SizedBox(height: 24),
         _discoveryAction(
           Icons.language_rounded,
@@ -687,32 +810,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           'Post Malone & Swae Lee',
           () => _quickSearch('Post Malone Swae Lee Sunflower'),
         ),
-        if (artists.isNotEmpty) ...[
-          const SizedBox(height: 28),
-          Text(
-            strings.yourArtistsUpper,
-            style: TextStyle(
-              color: colors.textSecondary,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            children: [
-              for (final artist in artists)
-                ActionChip(
-                  label: Text(artist),
-                  onPressed: () => _quickSearch(artist),
-                  backgroundColor: colors.surface,
-                  side: BorderSide.none,
-                  labelStyle: TextStyle(color: colors.textPrimary),
-                ),
-            ],
-          ),
-        ],
       ],
     );
   }
@@ -752,4 +849,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       onTap: action,
     );
   }
+}
+
+/// Keeps the search field on screen while results scroll underneath.
+class _PinnedSearchFieldDelegate extends SliverPersistentHeaderDelegate {
+  _PinnedSearchFieldDelegate({required this.child, required this.background});
+
+  final Widget child;
+  final Color background;
+  static const double _extent = 74;
+
+  @override
+  double get minExtent => _extent;
+
+  @override
+  double get maxExtent => _extent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    // A near-opaque backdrop so result rows do not show through the field.
+    return Container(
+      color: background.withValues(alpha: 0.94),
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _PinnedSearchFieldDelegate oldDelegate) =>
+      oldDelegate.background != background;
 }

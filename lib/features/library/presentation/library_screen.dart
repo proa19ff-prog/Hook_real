@@ -8,6 +8,7 @@ import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../import/presentation/import_bottom_sheet.dart';
 import '../../theme_engine/domain/hook_theme.dart';
+import '../../theme_engine/presentation/playlist_artwork.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'playlist_detail_screen.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
@@ -280,7 +281,6 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         final entry = entries[index];
         final name = entry.key;
         final tracks = entry.value;
-        final firstTrackArt = tracks.isNotEmpty ? tracks.first.artworkUrl : '';
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 8),
@@ -293,8 +293,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 horizontal: 14,
                 vertical: 4,
               ),
-              leading: TrackArtwork(
-                url: firstTrackArt,
+              leading: PlaylistArtwork(
+                urls: tracks.map((track) => track.artworkUrl),
                 size: 50,
                 borderRadius: BorderRadius.circular(10),
                 placeholderColor: colors.surface,

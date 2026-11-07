@@ -17,6 +17,8 @@ void main() {
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
           youtubeAvailabilityProvider.overrideWith((ref) async => true),
+      personalMixSeedProvider.overrideWith((ref) async => null),
+      personalMixSeedProvider.overrideWith((ref) async => null),
         ],
         child: HookApp(),
       ),
@@ -40,6 +42,7 @@ void main() {
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
           youtubeAvailabilityProvider.overrideWith((ref) async => true),
+      personalMixSeedProvider.overrideWith((ref) async => null),
         ],
         child: const HookApp(),
       ),
@@ -65,6 +68,7 @@ void main() {
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
           youtubeAvailabilityProvider.overrideWith((ref) async => false),
+          personalMixSeedProvider.overrideWith((ref) async => null),
         ],
         child: const HookApp(),
       ),

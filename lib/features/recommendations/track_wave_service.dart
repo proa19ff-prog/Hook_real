@@ -17,6 +17,7 @@ class TrackWaveService {
     MediaTrack? relatedSeed,
     Set<String> excluded = const {},
     int limit = 12,
+    List<String> personalArtists = const [],
   }) async {
     final sourceForRelated = relatedSeed ?? seed;
     final results = await Future.wait([
@@ -25,9 +26,14 @@ class TrackWaveService {
         query: seed.artist,
         sources: {TrackSource.spotify},
       ),
+      // The listener's own heavy rotation: one clean catalog pick per
+      // personal artist keeps the radio anchored to their taste.
+      for (final artist in personalArtists.take(2))
+        _resolver.search(query: artist, sources: {TrackSource.spotify}),
     ]);
     final related = results[0];
     final artistTracks = results[1];
+    final personalBatches = results.skip(2).toList(growable: false);
 
     final seen = <String>{
       ...excluded.map((key) => key.toLowerCase().trim()),
@@ -41,15 +47,23 @@ class TrackWaveService {
         .where((track) => _eligible(track, seed, seen))
         .take(8)
         .toList(growable: false);
+    final personalTracks = [
+      for (final batch in personalBatches)
+        for (final track in batch)
+          if (_eligible(track, seed, seen)) track,
+    ].take(2).toList(growable: false);
 
-    // Alternate two related discoveries with one familiar artist release.
-    // This lands near the intended 8:4 ratio without grouping the same artist
-    // tracks together.
+    // Alternate two related discoveries with one familiar artist release and
+    // one personal rotation pick. This lands near the intended 8:4:2 ratio
+    // without grouping same-artist tracks together.
     final output = <MediaTrack>[];
     var artistIndex = 0;
     var relatedIndex = 0;
+    var personalIndex = 0;
     while (output.length < limit &&
-        (artistIndex < artists.length || relatedIndex < relatedTracks.length)) {
+        (artistIndex < artists.length ||
+            relatedIndex < relatedTracks.length ||
+            personalIndex < personalTracks.length)) {
       for (var i = 0;
           i < 2 && relatedIndex < relatedTracks.length && output.length < limit;
           i++) {
@@ -58,6 +72,10 @@ class TrackWaveService {
       }
       if (artistIndex < artists.length && output.length < limit) {
         final track = artists[artistIndex++];
+        if (seen.add(trackKey(track))) output.add(track);
+      }
+      if (personalIndex < personalTracks.length && output.length < limit) {
+        final track = personalTracks[personalIndex++];
         if (seen.add(trackKey(track))) output.add(track);
       }
     }

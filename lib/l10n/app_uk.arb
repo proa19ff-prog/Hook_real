@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "НЕДАВНІ ЗАПИТИ",
+  "clearHistory": "Очистити",
+  "waveFromArtist": "Хвиля від виконавця",
+  "popularTracksUpper": "ПОПУЛЯРНІ ТРЕКИ",
+  "artistTracksCount": "{count, plural, =0{поки немає треків} one{{count} трек} few{{count} треки} many{{count} треків} other{{count} треків}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

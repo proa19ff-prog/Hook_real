@@ -1158,4 +1158,27 @@ class AppLocalizationsId extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source tidak bisa memutar lagu ini. Periksa koneksi atau coba nanti.';
   }
+
+  @override
+  String get recentQueriesUpper => 'PENCARIAN TERAKHIR';
+
+  @override
+  String get clearHistory => 'Hapus';
+
+  @override
+  String get waveFromArtist => 'Gelombang artis';
+
+  @override
+  String get popularTracksUpper => 'LAGU POPULER';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count lagu',
+      zero: 'belum ada lagu',
+    );
+    return '$_temp0';
+  }
 }

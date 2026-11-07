@@ -1149,4 +1149,28 @@ class AppLocalizationsHi extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source यह ट्रैक नहीं चला सका। कनेक्शन जाँचें या बाद में कोशिश करें।';
   }
+
+  @override
+  String get recentQueriesUpper => 'हाल की खोजें';
+
+  @override
+  String get clearHistory => 'साफ़ करें';
+
+  @override
+  String get waveFromArtist => 'आर्टिस्ट वेव';
+
+  @override
+  String get popularTracksUpper => 'लोकप्रिय गाने';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count गाने',
+      one: '1 गाना',
+      zero: 'अभी कोई गाने नहीं',
+    );
+    return '$_temp0';
+  }
 }

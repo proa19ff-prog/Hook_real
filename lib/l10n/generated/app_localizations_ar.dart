@@ -1151,4 +1151,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return 'لم يتمكن $source من تشغيل هذه المقطوعة. تحقق من اتصالك أو حاول لاحقاً.';
   }
+
+  @override
+  String get recentQueriesUpper => 'عمليات البحث الأخيرة';
+
+  @override
+  String get clearHistory => 'مسح';
+
+  @override
+  String get waveFromArtist => 'موجة الفنان';
+
+  @override
+  String get popularTracksUpper => 'أشهر الأغاني';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count أغنية',
+      many: '$count أغنية',
+      few: '$count أغانٍ',
+      two: 'أغنيتان',
+      one: 'أغنية واحدة',
+      zero: 'لا أغانٍ بعد',
+    );
+    return '$_temp0';
+  }
 }

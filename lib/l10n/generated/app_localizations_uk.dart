@@ -1164,4 +1164,30 @@ class AppLocalizationsUk extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source не зміг відтворити цей трек. Перевірте з\'єднання або спробуйте пізніше.';
   }
+
+  @override
+  String get recentQueriesUpper => 'НЕДАВНІ ЗАПИТИ';
+
+  @override
+  String get clearHistory => 'Очистити';
+
+  @override
+  String get waveFromArtist => 'Хвиля від виконавця';
+
+  @override
+  String get popularTracksUpper => 'ПОПУЛЯРНІ ТРЕКИ';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count треків',
+      many: '$count треків',
+      few: '$count треки',
+      one: '$count трек',
+      zero: 'поки немає треків',
+    );
+    return '$_temp0';
+  }
 }

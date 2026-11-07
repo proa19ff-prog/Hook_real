@@ -1153,4 +1153,28 @@ class AppLocalizationsBn extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source এই ট্র্যাক বাজাতে পারেনি। সংযোগ পরীক্ষা করুন বা পরে চেষ্টা করুন।';
   }
+
+  @override
+  String get recentQueriesUpper => 'সাম্প্রতিক অনুসন্ধান';
+
+  @override
+  String get clearHistory => 'মুছে ফেলুন';
+
+  @override
+  String get waveFromArtist => 'শিল্পীর ঢেউ';
+
+  @override
+  String get popularTracksUpper => 'জনপ্রিয় গান';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি গান',
+      one: '১টি গান',
+      zero: 'এখনও কোনো গান নেই',
+    );
+    return '$_temp0';
+  }
 }

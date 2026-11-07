@@ -49,6 +49,18 @@ final recommendationServiceProvider = Provider<RecommendationService>((ref) {
   return RecommendationService(storage: storage, resolver: resolver);
 });
 
+/// A track from the listener's affinity profile for the home wave card when
+/// there is no listening history yet — the "start the mix with nothing saved"
+/// path. Null means even the starter seeds failed (offline first launch).
+final personalMixSeedProvider = FutureProvider.autoDispose<MediaTrack?>((
+  ref,
+) async {
+  final recommendations = await ref
+      .watch(recommendationServiceProvider)
+      .getPersonalizedRecommendations(limit: 3);
+  return recommendations.firstOrNull;
+});
+
 // Theme Management Provider with Persistence
 class ThemeNotifier extends StateNotifier<HookTheme> {
   final ThemeManager _manager;

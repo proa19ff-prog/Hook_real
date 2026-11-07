@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "最近の検索",
+  "clearHistory": "消去",
+  "waveFromArtist": "アーティストのウェーブ",
+  "popularTracksUpper": "人気曲",
+  "artistTracksCount": "{count, plural, =0{まだ曲がありません} other{{count} 曲}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

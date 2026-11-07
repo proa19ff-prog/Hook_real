@@ -1156,4 +1156,27 @@ class AppLocalizationsVi extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source không phát được bản nhạc này. Kiểm tra kết nối hoặc thử lại sau.';
   }
+
+  @override
+  String get recentQueriesUpper => 'TÌM KIẾM GẦN ĐÂY';
+
+  @override
+  String get clearHistory => 'Xóa';
+
+  @override
+  String get waveFromArtist => 'Làn sóng nghệ sĩ';
+
+  @override
+  String get popularTracksUpper => 'BẢN NHẠC PHỔ BIẾN';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count bản nhạc',
+      zero: 'chưa có bản nhạc',
+    );
+    return '$_temp0';
+  }
 }

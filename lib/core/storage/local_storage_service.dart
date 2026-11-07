@@ -169,6 +169,72 @@ class LocalStorageService {
     await _prefs.remove(_historyKey);
   }
 
+  // --- SEARCH HISTORY ---
+  static const String _searchHistoryKey = 'hook_search_history';
+  static const int _maxSearchHistoryCount = 15;
+
+  List<String> getSearchHistory() =>
+      _prefs.getStringList(_searchHistoryKey) ?? [];
+
+  Future<void> addSearchQuery(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty || trimmed.length < 2) return;
+    final history = getSearchHistory()
+      ..removeWhere((q) => q.toLowerCase() == trimmed.toLowerCase());
+    history.insert(0, trimmed);
+    if (history.length > _maxSearchHistoryCount) history.removeLast();
+    await _prefs.setStringList(_searchHistoryKey, history);
+  }
+
+  Future<void> removeSearchQuery(String query) async {
+    final history = getSearchHistory()
+      ..removeWhere((q) => q.toLowerCase() == query.trim().toLowerCase());
+    await _prefs.setStringList(_searchHistoryKey, history);
+  }
+
+  Future<void> clearSearchHistory() async {
+    await _prefs.remove(_searchHistoryKey);
+  }
+
+  // --- PLAY SIGNALS (personal recommendations) ---
+  static const String _playCountsKey = 'hook_play_counts';
+  static const String _playTimestampsKey = 'hook_play_timestamps';
+  static const int _maxPlaySignalEntries = 500;
+
+  Map<String, int> _intMap(String key) {
+    try {
+      final decoded = jsonDecode(_prefs.getString(key) ?? '{}');
+      if (decoded is! Map) return {};
+      return {
+        for (final entry in decoded.entries)
+          if (entry.value is num) entry.key as String: (entry.value as num).toInt(),
+      };
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// How many times a track (by artist|title key) was actually played.
+  Map<String, int> getPlayCounts() => _intMap(_playCountsKey);
+
+  /// Epoch milliseconds of the last play, for recency decay.
+  Map<String, int> getPlayTimestamps() => _intMap(_playTimestampsKey);
+
+  Future<void> registerPlay(String trackKey) async {
+    final counts = getPlayCounts();
+    counts[trackKey] = (counts[trackKey] ?? 0) + 1;
+    while (counts.length > _maxPlaySignalEntries) {
+      counts.remove(counts.keys.first);
+    }
+    final stamps = getPlayTimestamps()
+      ..[trackKey] = DateTime.now().millisecondsSinceEpoch;
+    while (stamps.length > _maxPlaySignalEntries) {
+      stamps.remove(stamps.keys.first);
+    }
+    await _prefs.setString(_playCountsKey, jsonEncode(counts));
+    await _prefs.setString(_playTimestampsKey, jsonEncode(stamps));
+  }
+
   // --- PLAYLISTS ---
   Map<String, List<MediaTrack>> getPlaylists() {
     final raw = _prefs.getString(_playlistsKey);

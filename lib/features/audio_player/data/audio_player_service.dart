@@ -12,6 +12,7 @@ import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
 import '../../extractor/models/resolved_stream.dart';
 import '../../extractor/stream_resolver.dart';
+import '../../recommendations/recommendation_service.dart';
 import '../../recommendations/track_wave_service.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'equalizer_controller.dart';
@@ -103,6 +104,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   int _waveGeneration = 0;
   Future<void>? _waveExtension;
   final Set<String> _waveSeen = <String>{};
+  RecommendationService? _recommender;
   final StreamController<int> _queueController =
       StreamController<int>.broadcast();
   int _queueVersion = 0;
@@ -556,6 +558,8 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         );
       }
       unawaited(_storageService?.addToHistory(track));
+      // Real replay signal for the personal recommendations engine.
+      unawaited(_storageService?.registerPlay(TrackWaveService.trackKey(track)));
       _prefetchNext();
       return true;
     }
@@ -793,19 +797,45 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       _waveSeed!,
       relatedSeed: relatedSeed,
       excluded: _waveSeen,
+      personalArtists: _personalArtists(),
     );
     _waveExtension = future
         .then((tracks) {
           if (generation != _waveGeneration || !_waveActive || tracks.isEmpty) {
             return;
           }
+          PlaybackDiagnostics.record(
+            'wave.batch',
+            source: 'wave',
+            count: tracks.length,
+            detail: relatedSeed.artist,
+          );
           _waveSeen.addAll(tracks.map(TrackWaveService.trackKey));
           _queue.addAll(tracks);
           _notifyQueue();
           _prefetchNext();
         })
+        .catchError((Object error) {
+          PlaybackDiagnostics.record(
+            'wave.batch.failed',
+            source: 'wave',
+            error: error,
+          );
+        })
         .whenComplete(() => _waveExtension = null);
     await _waveExtension;
+  }
+
+  /// Top artists by the listener's own signals; the wave blends one clean
+  /// track per artist into every batch so radio follows their taste.
+  List<String> _personalArtists() {
+    final storage = _storageService;
+    if (storage == null) return const [];
+    _recommender ??= RecommendationService(
+      storage: storage,
+      resolver: _resolver,
+    );
+    return _recommender!.topPersonalArtists(limit: 2);
   }
 
   Future<File?> downloadTrack(

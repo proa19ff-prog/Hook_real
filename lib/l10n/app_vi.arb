@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "TÌM KIẾM GẦN ĐÂY",
+  "clearHistory": "Xóa",
+  "waveFromArtist": "Làn sóng nghệ sĩ",
+  "popularTracksUpper": "BẢN NHẠC PHỔ BIẾN",
+  "artistTracksCount": "{count, plural, =0{chưa có bản nhạc} other{{count} bản nhạc}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "RICERCHE RECENTI",
+  "clearHistory": "Cancella",
+  "waveFromArtist": "Onda dell'artista",
+  "popularTracksUpper": "BRANI POPOLARI",
+  "artistTracksCount": "{count, plural, =0{nessuna traccia} one{1 traccia} other{{count} tracce}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

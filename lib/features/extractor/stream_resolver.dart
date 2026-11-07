@@ -664,10 +664,57 @@ class StreamResolver {
     return List.unmodifiable(output);
   }
 
+  /// Recordings by one artist for the artist screen: the structured catalog
+  /// discography merged with a multi-source text search. The search half
+  /// keeps its relevance order at the top, canonical album tracks follow.
+  /// Anything not actually by the wanted performer is dropped — text search
+  /// freely returns same-titled songs by someone else.
+  Future<List<MediaTrack>> artistTracks(String artistName, {int limit = 50}) async {
+    final name = artistName.trim();
+    if (name.isEmpty || _disposed) return const [];
+    final results = await Future.wait([
+      _spotifyCatalog.artistTopSongs(name, limit: limit),
+      search(
+        query: name,
+        sources: {
+          TrackSource.spotify,
+          TrackSource.soundcloud,
+          ..._additionalSources.map((source) => source.source),
+        },
+      ),
+    ]);
+    if (_disposed) return const [];
+    final discography = results[0];
+    final searched = results[1];
+
+    bool byArtist(MediaTrack track) {
+      final wanted = _artists(name);
+      final got = _artists(track.artist);
+      return wanted.any((w) =>
+          got.any((g) => _hasArtist(g, w) || _hasArtist(w, g)));
+    }
+
+    String dedupKey(MediaTrack track) =>
+        '${_norm(track.title)}|${_loose(_norm(track.artist))}';
+
+    final output = <MediaTrack>[];
+    final seen = <String>{};
+    void addAll(Iterable<MediaTrack> list) {
+      for (final track in list) {
+        if (!byArtist(track)) continue;
+        if (!seen.add(dedupKey(track))) continue;
+        output.add(track);
+      }
+    }
+
+    addAll(searched);
+    addAll(discography);
+    return List.unmodifiable(output.take(limit));
+  }
+
   /// Source-specific entries retain their identity. Only catalog entries are
   /// matched across providers; a selected upload never silently becomes another.
-  Future<ResolvedStream?> resolveStream(MediaTrack track) async {
-    if (_disposed) return null;
+  Future<ResolvedStream?> resolveStream(MediaTrack track) async {    if (_disposed) return null;
     if (track.source.isCatalog) return resolveSpotifyTrack(track);
     if (track.source == TrackSource.local) {
       final url = track.streamUrl;

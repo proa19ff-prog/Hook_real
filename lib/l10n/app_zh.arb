@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "最近搜索",
+  "clearHistory": "清除",
+  "waveFromArtist": "艺人声波",
+  "popularTracksUpper": "热门曲目",
+  "artistTracksCount": "{count, plural, =0{暂无曲目} other{{count} 首曲目}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

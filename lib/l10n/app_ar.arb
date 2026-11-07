@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "عمليات البحث الأخيرة",
+  "clearHistory": "مسح",
+  "waveFromArtist": "موجة الفنان",
+  "popularTracksUpper": "أشهر الأغاني",
+  "artistTracksCount": "{count, plural, =0{لا أغانٍ بعد} one{أغنية واحدة} two{أغنيتان} few{{count} أغانٍ} many{{count} أغنية} other{{count} أغنية}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -1158,4 +1158,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source bu parçayı çalamadı. Bağlantınızı kontrol edin veya daha sonra deneyin.';
   }
+
+  @override
+  String get recentQueriesUpper => 'SON ARAMALAR';
+
+  @override
+  String get clearHistory => 'Temizle';
+
+  @override
+  String get waveFromArtist => 'Sanatçı dalgası';
+
+  @override
+  String get popularTracksUpper => 'POPÜLER PARÇALAR';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count parça',
+      zero: 'henüz parça yok',
+    );
+    return '$_temp0';
+  }
 }

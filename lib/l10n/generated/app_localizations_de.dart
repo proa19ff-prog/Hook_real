@@ -1163,4 +1163,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source konnte diesen Titel nicht wiedergeben. Prüfe deine Verbindung oder versuche es später.';
   }
+
+  @override
+  String get recentQueriesUpper => 'LETZTE SUCHANFRAGEN';
+
+  @override
+  String get clearHistory => 'Löschen';
+
+  @override
+  String get waveFromArtist => 'Künstlerwelle';
+
+  @override
+  String get popularTracksUpper => 'BELIEBTE TITEL';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Titel',
+      one: '1 Titel',
+      zero: 'noch keine Titel',
+    );
+    return '$_temp0';
+  }
 }

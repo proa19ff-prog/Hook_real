@@ -12,6 +12,56 @@ class RecommendationService {
     required this._resolver,
   });
 
+  /// Artist names with the strongest listening signals — the wave blends one
+  /// catalog track per artist into every batch so radio gravitates toward
+  /// the listener's own taste. Favorites weigh most, then history recency,
+  /// then real replay counts fading with idle time.
+  List<String> topPersonalArtists({int limit = 2}) {
+    final scores = _artistAffinity();
+    final ranked = scores.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return ranked.take(limit).map((entry) => entry.key).toList();
+  }
+
+  Map<String, double> _artistAffinity() {
+    final scores = <String, double>{};
+    void bump(String artist, double delta) {
+      final clean = _cleanArtistName(artist);
+      if (clean.isNotEmpty) {
+        scores[clean] = (scores[clean] ?? 0.0) + delta;
+      }
+    }
+
+    for (final track in _storage.getFavorites()) {
+      bump(track.artist, 3.5);
+    }
+    final history = _storage.getHistory();
+    for (var index = 0; index < history.length; index++) {
+      bump(history[index].artist, 1.2 / (1.0 + index * 0.05));
+    }
+    _applyPlaySignals(scores);
+    return scores;
+  }
+
+  /// Adds the device's own replay counters: repeated plays strengthen an
+  /// artist's pull, entries untouched for days fade out.
+  void _applyPlaySignals(Map<String, double> scores) {
+    final counts = _storage.getPlayCounts();
+    final stamps = _storage.getPlayTimestamps();
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+    counts.forEach((key, count) {
+      final artist = _cleanArtistName(key.split('|').first);
+      if (artist.isEmpty) return;
+      var weight = min(count.toDouble(), 12.0) * 0.4;
+      final stamp = stamps[key];
+      if (stamp != null) {
+        final hours = (nowMs - stamp) / 3600000.0;
+        weight *= 1.0 / (1.0 + hours / 48.0);
+      }
+      scores[artist] = (scores[artist] ?? 0.0) + weight;
+    });
+  }
+
   static const List<String> _popularStarters = [
     'The Weeknd',
     'Alan Walker',
@@ -71,6 +121,22 @@ class RecommendationService {
         artistPlayCount[artist] = (artistPlayCount[artist] ?? 0) + 1;
       }
     }
+
+    // Replay counters recorded on the device sharpen the profile further.
+    final counts = _storage.getPlayCounts();
+    final stamps = _storage.getPlayTimestamps();
+    counts.forEach((key, count) {
+      final artist = _cleanArtistName(key.split('|').first);
+      if (artist.isEmpty) return;
+      var weight = min(count.toDouble(), 12.0) * 0.4;
+      final stamp = stamps[key];
+      if (stamp != null) {
+        final hours = (now.millisecondsSinceEpoch - stamp) / 3600000.0;
+        weight *= 1.0 / (1.0 + hours / 48.0);
+      }
+      artistScores[artist] = (artistScores[artist] ?? 0.0) + weight;
+      artistPlayCount[artist] = (artistPlayCount[artist] ?? 0) + count;
+    });
 
     // Average session duration from recent tracks
     final recentTracks = history.take(5).toList();

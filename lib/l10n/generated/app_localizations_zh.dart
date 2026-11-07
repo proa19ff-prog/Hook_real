@@ -1096,4 +1096,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source 无法播放此曲目。请检查连接或稍后再试。';
   }
+
+  @override
+  String get recentQueriesUpper => '最近搜索';
+
+  @override
+  String get clearHistory => '清除';
+
+  @override
+  String get waveFromArtist => '艺人声波';
+
+  @override
+  String get popularTracksUpper => '热门曲目';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 首曲目',
+      zero: '暂无曲目',
+    );
+    return '$_temp0';
+  }
 }

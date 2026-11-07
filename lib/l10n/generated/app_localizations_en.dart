@@ -1158,4 +1158,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source couldn\'t play this track. Check your connection or try again later.';
   }
+
+  @override
+  String get recentQueriesUpper => 'RECENT QUERIES';
+
+  @override
+  String get clearHistory => 'Clear';
+
+  @override
+  String get waveFromArtist => 'Artist wave';
+
+  @override
+  String get popularTracksUpper => 'POPULAR TRACKS';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tracks',
+      one: '1 track',
+      zero: 'no tracks yet',
+    );
+    return '$_temp0';
+  }
 }

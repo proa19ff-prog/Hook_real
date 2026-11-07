@@ -1116,4 +1116,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source에서 이 트랙을 재생하지 못했습니다. 연결을 확인하거나 나중에 다시 시도하세요.';
   }
+
+  @override
+  String get recentQueriesUpper => '최근 검색어';
+
+  @override
+  String get clearHistory => '지우기';
+
+  @override
+  String get waveFromArtist => '아티스트 웨이브';
+
+  @override
+  String get popularTracksUpper => '인기 트랙';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count개 트랙',
+      zero: '아직 트랙이 없습니다',
+    );
+    return '$_temp0';
+  }
 }

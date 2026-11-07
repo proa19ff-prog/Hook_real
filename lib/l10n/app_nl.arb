@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "RECENTE ZOEKOPDRACHTEN",
+  "clearHistory": "Wissen",
+  "waveFromArtist": "Golf van artiest",
+  "popularTracksUpper": "POPULAIRE NUMMERS",
+  "artistTracksCount": "{count, plural, =0{nog geen nummers} one{1 nummer} other{{count} nummers}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

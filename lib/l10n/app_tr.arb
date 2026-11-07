@@ -516,5 +516,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recentQueriesUpper": "SON ARAMALAR",
+  "clearHistory": "Temizle",
+  "waveFromArtist": "Sanatçı dalgası",
+  "popularTracksUpper": "POPÜLER PARÇALAR",
+  "artistTracksCount": "{count, plural, =0{henüz parça yok} other{{count} parça}}",
+  "@artistTracksCount": {"placeholders": {"count": {"type": "int"}}}
 }

@@ -1164,4 +1164,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String sourcePlaybackFailed(String source) {
     return '$source no pudo reproducir esta pista. Comprueba tu conexión o inténtalo más tarde.';
   }
+
+  @override
+  String get recentQueriesUpper => 'BÚSQUEDAS RECIENTES';
+
+  @override
+  String get clearHistory => 'Borrar';
+
+  @override
+  String get waveFromArtist => 'Onda del artista';
+
+  @override
+  String get popularTracksUpper => 'CANCIONES POPULARES';
+
+  @override
+  String artistTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count canciones',
+      one: '1 canción',
+      zero: 'todavía sin canciones',
+    );
+    return '$_temp0';
+  }
 }
