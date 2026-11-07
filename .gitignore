@@ -54,3 +54,4 @@ android/local.properties
 # Gradle build bookkeeping and generated registrants
 android/.gradle/
 android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+promo/
