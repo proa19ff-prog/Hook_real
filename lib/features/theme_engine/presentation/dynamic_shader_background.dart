@@ -138,12 +138,38 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
 
   void _useThemeColors() {
     setState(() {
-      _c1 = widget.theme.colors.primary;
-      _c2 = widget.theme.colors.secondary;
-      _c3 = widget.theme.colors.accent;
-      _c4 = widget.theme.colors.background;
-      _isLightBackground =
+      final lightBg =
           widget.theme.colors.background.computeLuminance() > 0.58;
+      // Dark themes keep their raw primary/secondary/accent as orb colors —
+      // a near-white primary (OLED Monolith) used to flood the screen with a
+      // light beige wash that white text and dark surfaces could not sit on.
+      // Tame dark-theme orbs into the same calm range the cover palette uses.
+      _c1 = lightBg
+          ? widget.theme.colors.primary
+          : _tame(
+              widget.theme.colors.primary,
+              maxSat: 0.55,
+              minLight: 0.20,
+              maxLight: 0.42,
+            );
+      _c2 = lightBg
+          ? widget.theme.colors.secondary
+          : _tame(
+              widget.theme.colors.secondary,
+              maxSat: 0.50,
+              minLight: 0.16,
+              maxLight: 0.36,
+            );
+      _c3 = lightBg
+          ? widget.theme.colors.accent
+          : _tame(
+              widget.theme.colors.accent,
+              maxSat: 0.45,
+              minLight: 0.14,
+              maxLight: 0.34,
+            );
+      _c4 = widget.theme.colors.background;
+      _isLightBackground = lightBg;
     });
   }
 

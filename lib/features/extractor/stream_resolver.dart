@@ -751,8 +751,24 @@ class StreamResolver {
         }
       }
     }
+    if (track.source == TrackSource.soundcloud) {
+      // A single saveable file only: skip HLS playlists that stream fine but
+      // cannot be stored as one audio file.
+      final stream = await _scExtractor.resolveAudioStream(
+        track.id,
+        fullFileOnly: true,
+      );
+      return stream == null || stream.url.isEmpty
+          ? null
+          : ResolvedStream(
+              stream.url,
+              source: track.source,
+              duration: track.duration,
+              bitrateKbps: stream.bitrateKbps,
+            );
+    }
     // A catalog entry still goes through the strict recording matcher. Direct
-    // uploads must never become a similarly named upload from another provider.
+    // uploads must never silently become another provider's upload.
     return resolveStream(track);
   }
 

@@ -388,12 +388,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           }
         },
         selectedColor: colors.textPrimary,
-        backgroundColor: Colors.transparent,
+        backgroundColor: colors.surface.withValues(alpha: 0.65),
         side: BorderSide.none,
         labelStyle: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          color: selected ? colors.background : colors.textSecondary,
+          color: selected ? colors.background : colors.textPrimary,
         ),
         shape: const StadiumBorder(),
       ),

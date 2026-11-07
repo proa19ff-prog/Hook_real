@@ -78,10 +78,9 @@ void main() {
       final request =
           (dio.httpClientAdapter as FakeHttpAdapter).requests.single;
       expect(request.headers['User-Agent'], 'Hook');
-      expect(
-        request.headers.keys.any((key) => key.toLowerCase() == 'range'),
-        false,
-      );
+      // The download asks like the player does: a from-zero Range, so CDNs
+      // that reject range-less GETs still serve the whole recording.
+      expect(request.headers['Range'], 'bytes=0-');
       expect(await manager.getTotalCacheSize(), bytes.length);
       await manager.removeCachedTrack(saved.cacheKey);
       expect(await manager.getCachedTracks(), isEmpty);
@@ -141,6 +140,8 @@ void main() {
         );
         expect(await manager.getCachedTracks(), isEmpty);
       }
+      // A 206 without a content-range (or one starting mid-file) cannot be
+      // trusted as the whole recording.
       dio.httpClientAdapter = FakeHttpAdapter(
         (_) => ResponseBody.fromBytes(_audio(), 206),
       );
@@ -149,6 +150,38 @@ void main() {
         isNull,
       );
       expect(await directory.list().toList(), isEmpty);
+      dio.httpClientAdapter = FakeHttpAdapter(
+        (_) => ResponseBody.fromBytes(
+          _audio(),
+          206,
+          headers: {
+            'content-range': ['bytes 100-2147/2048'],
+          },
+        ),
+      );
+      expect(
+        await manager.downloadTrack(track, 'https://audio.example/original'),
+        isNull,
+      );
+      expect(await directory.list().toList(), isEmpty);
+      // But a from-zero 206 IS the whole file and must be stored.
+      final bytes = _audio();
+      dio.httpClientAdapter = FakeHttpAdapter(
+        (_) => ResponseBody.fromBytes(
+          bytes,
+          206,
+          headers: {
+            'content-range': ['bytes 0-2047/2048'],
+            'content-type': ['audio/webm'],
+          },
+        ),
+      );
+      final file = await manager.downloadTrack(
+        track,
+        'https://audio.example/original',
+      );
+      expect(file, isNotNull);
+      expect(await file!.readAsBytes(), bytes);
     },
   );
 

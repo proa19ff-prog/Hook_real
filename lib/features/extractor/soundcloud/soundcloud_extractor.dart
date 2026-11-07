@@ -303,16 +303,23 @@ class SoundCloudExtractor {
       (await resolveAudioStream(trackId, isRetry: isRetry))?.url;
 
   /// Same as [resolveAudioStreamUrl] but also reports the bitrate of the
-  /// chosen transcoding, so downloads can show the quality they carry.
+  /// chosen transcoding, so downloads can show the quality they carry. With
+  /// [fullFileOnly] only progressive (single-file) transcodings count: an
+  /// HLS playlist is streamable by the player yet cannot be saved as one
+  /// audio file without demuxing.
   Future<ResolvedAudioStream?> resolveAudioStream(
     String trackId, {
     bool isRetry = false,
+    bool fullFileOnly = false,
   }) async {
     // Fast path: transcodings from the search response, one request to start.
     final cached = isRetry ? null : _mediaCache[trackId];
     if (cached != null) {
       try {
-        final resolved = await _resolveFromTrackData(cached);
+        final resolved = await _resolveFromTrackData(
+          cached,
+          fullFileOnly: fullFileOnly,
+        );
         if (resolved != null && resolved.url.isNotEmpty) return resolved;
       } catch (_) {
         // Stale search data; fall through to the full track lookup.
@@ -330,7 +337,10 @@ class SoundCloudExtractor {
 
       final trackData = trackDetailsRes.data;
       if (trackData is! Map<String, dynamic>) return null;
-      return await _resolveFromTrackData(trackData);
+      return await _resolveFromTrackData(
+        trackData,
+        fullFileOnly: fullFileOnly,
+      );
     } on DioException catch (dioErr) {
       if (!isRetry && dioErr.response?.statusCode == 401) {
         final newKey = await refreshClientId();
@@ -352,10 +362,12 @@ class SoundCloudExtractor {
 
   /// Picks the fastest-starting playable transcoding and resolves its signed
   /// URL. Falls through to the next transcoding when one answers 404 (the
-  /// `abr_sq` preset does on most tracks).
+  /// `abr_sq` preset does on most tracks). With [fullFileOnly] HLS playlists
+  /// are skipped entirely — see [resolveAudioStream].
   Future<ResolvedAudioStream?> _resolveFromTrackData(
-    Map<String, dynamic> trackData,
-  ) async {
+    Map<String, dynamic> trackData, {
+    bool fullFileOnly = false,
+  }) async {
     if (!isFullTrack(trackData)) return null;
     final media = trackData['media'];
     if (media is! Map) return null;
@@ -390,7 +402,14 @@ class SoundCloudExtractor {
           !isDurationSnippet;
     }
 
-    final candidates = playable.where(isFull).toList();
+    final candidates = playable
+        .where(isFull)
+        .where(
+          (t) => !fullFileOnly ||
+              ((t['format'] as Map?)?['protocol'] as String? ?? '') ==
+                  'progressive',
+        )
+        .toList();
     // A preview is not a fallback for a full song, including saved Go+ entries.
     if (candidates.isEmpty) return null;
 

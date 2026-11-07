@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../features/extractor/models/media_track.dart';
+import '../diagnostics/playback_diagnostics.dart';
 
 class CachedTrack {
   final String cacheKey;
@@ -142,12 +143,16 @@ class AudioCacheManager {
             cancelToken: token,
             options: Options(
               headers: {
+                // Ask for the whole file via Range: several CDNs (SoundCloud's
+                // among them) reject or mishandle a plain range-less GET even
+                // though the same URL streams fine with Range in the player.
+                'Range': 'bytes=0-',
                 for (final entry in (headers ?? <String, String>{}).entries)
                   if (entry.key.toLowerCase() != 'range')
                     entry.key: entry.value,
               },
-              // A download is a whole-file GET, not a partial/probe response.
-              validateStatus: (status) => status == 200,
+              // 200 is a whole-file GET; 206 is the same for a bytes=0- ask.
+              validateStatus: (status) => status == 200 || status == 206,
               receiveTimeout: const Duration(seconds: 20),
               sendTimeout: const Duration(seconds: 10),
             ),
@@ -169,8 +174,31 @@ class AudioCacheManager {
             },
           );
       if (token.isCancelled || !await temporaryFile.exists()) return null;
+      // 206 must answer our bytes=0- ask: a response starting mid-file is a
+      // partial body, never a whole recording.
+      if (response.statusCode == 206) {
+        final range = RegExp(
+          r'^bytes (\d+)-\d+/(\d+|\*)',
+        ).firstMatch(response.headers.value('content-range') ?? '');
+        if (range == null || int.parse(range.group(1)!) != 0) {
+          PlaybackDiagnostics.record(
+            'download.rejected',
+            source: 'cache',
+            detail:
+                'partial content-range: ${response.headers.value('content-range')}',
+          );
+          return null;
+        }
+      }
       final size = await temporaryFile.length();
-      if (size <= 1024 || size > _maxDownloadBytes) return null;
+      if (size <= 1024 || size > _maxDownloadBytes) {
+        PlaybackDiagnostics.record(
+          'download.rejected',
+          source: 'cache',
+          detail: 'size=$size',
+        );
+        return null;
+      }
       final expected = int.tryParse(
         response.headers.value('content-length') ?? '',
       );
@@ -178,6 +206,11 @@ class AudioCacheManager {
       if (expected != null &&
           (encoding == null || encoding == 'identity') &&
           size != expected) {
+        PlaybackDiagnostics.record(
+          'download.rejected',
+          source: 'cache',
+          detail: 'length mismatch: $size != $expected',
+        );
         return null;
       }
 
@@ -193,7 +226,15 @@ class AudioCacheManager {
         fileExtension,
         response.headers.value('content-type') ?? '',
       );
-      if (extension == null) return null;
+      if (extension == null) {
+        PlaybackDiagnostics.record(
+          'download.rejected',
+          source: 'cache',
+          detail:
+              'not audio bytes, content-type=${response.headers.value('content-type')}',
+        );
+        return null;
+      }
       final file = File('$stem.$extension');
       final metadataFile = File('${file.path}.json');
       temporaryMetadata = File('${metadataFile.path}.$nonce.part');
@@ -209,7 +250,15 @@ class AudioCacheManager {
       if (token.isCancelled) return null;
       await temporaryFile.rename(file.path);
       return file;
-    } catch (_) {
+    } catch (error) {
+      if (!token.isCancelled) {
+        PlaybackDiagnostics.record(
+          'download.failed',
+          source: 'cache',
+          error: error,
+          url: streamUrl,
+        );
+      }
       return null;
     } finally {
       for (final file in [temporaryFile, temporaryMetadata]) {
