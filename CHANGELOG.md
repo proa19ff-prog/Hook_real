@@ -75,7 +75,7 @@
   задаётся в настройках, без него источник неактивен.
 - Диагностический инструмент `tool/youtube_client_probe.dart`: проверка каждого
   внутреннего клиента YouTube отдельно (манифест, битрейт, реальный GET-запрос).
-- Релизная обвязка: LICENSE (source-available), CI (analyze + test), шаблон issue,
+- Релизная обвязка: LICENSE (MIT), CI (analyze + test), шаблон issue,
   CHANGELOG, adaptive-иконка, runtime-запрос `POST_NOTIFICATIONS`.
 
 ### Changed
