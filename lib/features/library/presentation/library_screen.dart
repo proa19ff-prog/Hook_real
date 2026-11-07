@@ -222,6 +222,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     final strings = AppLocalizations.of(context);
     final playlists = ref.watch(playlistsProvider);
     final queueNotifier = ref.read(queueProvider.notifier);
+    // Imported playlists ship without covers; resolve them in the background
+    // (idempotent inside the notifier, so rebuilds are cheap).
+    Future.microtask(() {
+      if (!mounted) return;
+      ref
+          .read(playlistsProvider.notifier)
+          .backfillArtwork(catalog: ref.read(playlistArtworkCatalogProvider));
+    });
 
     if (playlists.isEmpty) {
       return SingleChildScrollView(
