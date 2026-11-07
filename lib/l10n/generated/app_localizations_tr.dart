@@ -881,6 +881,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get trackActions => 'Parça eylemleri';
 
   @override
+  String get download => 'İndir';
+
+  @override
+  String get downloading => 'İndiriliyor…';
+
+  @override
+  String get downloaded => 'İndirildi';
+
+  @override
+  String get downloadFailed => 'İndirilemedi';
+
+  @override
+  String get removeDownload => 'İndirmeyi kaldır';
+
+  @override
+  String get downloadSavedOffline => 'Çevrimdışı kaydedildi';
+
+  @override
   String get startWaveFromTrack => 'Bu parçadan bir dalga başlat';
 
   @override

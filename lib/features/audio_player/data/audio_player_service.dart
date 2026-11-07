@@ -841,6 +841,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   Future<File?> downloadTrack(
     MediaTrack track, {
     void Function(double progress)? onProgress,
+    void Function(int? bitrateKbps)? onResolved,
   }) async {
     unawaited(_cacheOfflineLyrics(track));
     try {
@@ -850,6 +851,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
           .resolveDownloadStream(track)
           .timeout(const Duration(seconds: 25));
       if (stream == null || stream.isEmpty) return null;
+      onResolved?.call(stream.bitrateKbps);
       if (stream.url.startsWith('file:')) {
         return File(Uri.parse(stream.url).toFilePath());
       }

@@ -11,12 +11,17 @@ class ResolvedStream {
   /// Container hint for an unchanged audio-only download (never transcoded).
   final String? fileExtension;
 
+  /// Source-reported audio bitrate, when the provider exposes one. Powers the
+  /// "high bitrate" download badge; null simply means "not advertised".
+  final int? bitrateKbps;
+
   const ResolvedStream(
     this.url, {
     this.headers = const {},
     this.source,
     this.duration,
     this.fileExtension,
+    this.bitrateKbps,
   });
 
   bool get isEmpty => url.isEmpty;

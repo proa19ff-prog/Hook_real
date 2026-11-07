@@ -885,6 +885,24 @@ class AppLocalizationsPl extends AppLocalizations {
   String get trackActions => 'Akcje utworu';
 
   @override
+  String get download => 'Pobierz';
+
+  @override
+  String get downloading => 'Pobieranie…';
+
+  @override
+  String get downloaded => 'Pobrano';
+
+  @override
+  String get downloadFailed => 'Nie udało się pobrać';
+
+  @override
+  String get removeDownload => 'Usuń pobrany';
+
+  @override
+  String get downloadSavedOffline => 'Zapisano offline';
+
+  @override
   String get startWaveFromTrack => 'Rozpocznij falę od tego utworu';
 
   @override

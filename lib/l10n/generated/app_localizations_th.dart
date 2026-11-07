@@ -866,6 +866,24 @@ class AppLocalizationsTh extends AppLocalizations {
   String get trackActions => 'การกระทำกับเพลง';
 
   @override
+  String get download => 'ดาวน์โหลด';
+
+  @override
+  String get downloading => 'กำลังดาวน์โหลด…';
+
+  @override
+  String get downloaded => 'ดาวน์โหลดแล้ว';
+
+  @override
+  String get downloadFailed => 'ดาวน์โหลดไม่สำเร็จ';
+
+  @override
+  String get removeDownload => 'ลบการดาวน์โหลด';
+
+  @override
+  String get downloadSavedOffline => 'บันทึกออฟไลน์แล้ว';
+
+  @override
   String get startWaveFromTrack => 'เริ่มคลื่นจากเพลงนี้';
 
   @override

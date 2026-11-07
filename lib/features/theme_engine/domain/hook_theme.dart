@@ -44,21 +44,68 @@ class HookColors {
     }
 
     final background = parseHex(json['background'], const Color(0xFF0D0E12));
-    final surface = parseHex(json['surface'], const Color(0xFF16181F));
-    final surfaceGlass =
+    var surface = parseHex(json['surface'], const Color(0xFF16181F));
+    var surfaceGlass =
         parseHex(json['surfaceGlass'], const Color(0x2416181F));
+    var border = parseHex(json['border'], const Color(0xFF282B37));
     final primary = parseHex(json['primary'], const Color(0xFF6C5CE7));
     final secondary = parseHex(json['secondary'], const Color(0xFFA29BFE));
     final accent = parseHex(json['accent'], const Color(0xFF00CEC9));
     final textPrimary = parseHex(json['textPrimary'], const Color(0xFFFFFFFF));
     final textSecondary =
         parseHex(json['textSecondary'], const Color(0xFF8E92A4));
-    final border = parseHex(json['border'], const Color(0xFF282B37));
     final lightBackground = background.computeLuminance() > 0.45;
     final safePrimaryText =
         lightBackground ? const Color(0xFF141419) : const Color(0xFFFFFFFF);
     final safeSecondaryText =
         lightBackground ? const Color(0xFF4A4A5A) : const Color(0xFFB3B3B3);
+
+    // Themes built from a light cover palette often keep dark surface colors
+    // (or inherit dark fallbacks) — that painted the search field black on a
+    // beige background and dialogs as dark boxes. Surfaces, glass and borders
+    // must live in the same brightness family as the background; anything
+    // else is rebuilt from the background's own hue.
+    Color sameFamilyAsBackground(Color candidate, {required double offset}) {
+      final isLightCandidate = candidate.computeLuminance() > 0.45;
+      if (isLightCandidate == lightBackground) return candidate;
+      final hsl = HSLColor.fromColor(background);
+      return hsl
+          .withLightness(
+            (hsl.lightness + (lightBackground ? -offset : offset)).clamp(
+              0.0,
+              1.0,
+            ),
+          )
+          .toColor();
+    }
+
+    surface = sameFamilyAsBackground(surface, offset: 0.05);
+
+    // Glass is composited over the background, so judge the composite: a
+    // glass that flips the brightness (dark glass over beige) becomes a
+    // subtle on-hue tint instead.
+    final glassOverBackground = Color.alphaBlend(surfaceGlass, background);
+    if ((glassOverBackground.computeLuminance() > 0.45) != lightBackground) {
+      surfaceGlass = lightBackground
+          ? Colors.white.withValues(alpha: 0.55)
+          : Colors.white.withValues(alpha: 0.07);
+    }
+
+    // A border indistinguishable from the background loses its job; nudge it
+    // toward the text side of the palette. Judged by contrast ratio so the
+    // legitimately subtle (barely lighter) borders of dark themes survive.
+    double ratio(Color fg, Color bg) {
+      final light = fg.computeLuminance();
+      final dark = bg.computeLuminance();
+      return (light > dark ? light + 0.05 : dark + 0.05) /
+          (light > dark ? dark + 0.05 : light + 0.05);
+    }
+
+    if (ratio(border, background) < 1.25) {
+      border = lightBackground
+          ? Colors.black.withValues(alpha: 0.18)
+          : Colors.white.withValues(alpha: 0.14);
+    }
 
     return HookColors(
       background: background,
@@ -76,6 +123,19 @@ class HookColors {
       border: border,
     );
   }
+
+  /// Foreground for content drawn on [primary]-colored fills. Beige/light
+  /// primaries need dark ink — hardcoded white turned unreadable on them.
+  Color get onPrimary =>
+      primary.computeLuminance() > 0.6
+      ? const Color(0xFF141419)
+      : Colors.white;
+
+  /// Foreground for content drawn on [accent]-colored fills (chips, buttons).
+  Color get onAccent =>
+      accent.computeLuminance() > 0.6
+      ? const Color(0xFF141419)
+      : Colors.white;
 
   Map<String, dynamic> toJson() {
     String toHex(Color c) =>
@@ -247,8 +307,7 @@ class HookTheme {
       colorScheme: ColorScheme(
         brightness: isDark ? Brightness.dark : Brightness.light,
         primary: colors.primary,
-        onPrimary: ThemeData.estimateBrightnessForColor(colors.primary) == Brightness.light
-            ? Colors.black : Colors.white,
+        onPrimary: colors.onPrimary,
         secondary: colors.secondary,
         onSecondary: colors.textPrimary,
         surface: colors.surface,

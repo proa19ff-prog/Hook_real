@@ -52,10 +52,12 @@ class FakeSoundCloud extends SoundCloudExtractor {
   }
 
   @override
-  Future<String?> resolveAudioStreamUrl(String id,
+  Future<ResolvedAudioStream?> resolveAudioStream(String id,
       {bool isRetry = false}) async {
     resolved.add(id);
-    return onResolve?.call(id);
+    final url = await onResolve?.call(id);
+    if (url == null || url.isEmpty) return null;
+    return ResolvedAudioStream(url);
   }
 }
 

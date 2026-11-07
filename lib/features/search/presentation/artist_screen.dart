@@ -158,8 +158,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                           tooltip: strings.waveFromArtist,
                           style: IconButton.styleFrom(
                             backgroundColor: colors.primary,
-                            foregroundColor:
-                                widget.theme.toThemeData().colorScheme.onPrimary,
+                            foregroundColor: colors.onPrimary,
                             minimumSize: const Size(54, 54),
                           ),
                           icon: const Icon(

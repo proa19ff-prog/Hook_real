@@ -883,6 +883,24 @@ class AppLocalizationsPt extends AppLocalizations {
   String get trackActions => 'Ações da faixa';
 
   @override
+  String get download => 'Baixar';
+
+  @override
+  String get downloading => 'Baixando…';
+
+  @override
+  String get downloaded => 'Baixado';
+
+  @override
+  String get downloadFailed => 'Falha ao baixar';
+
+  @override
+  String get removeDownload => 'Remover download';
+
+  @override
+  String get downloadSavedOffline => 'Salvo off-line';
+
+  @override
   String get startWaveFromTrack => 'Iniciar uma onda desta faixa';
 
   @override

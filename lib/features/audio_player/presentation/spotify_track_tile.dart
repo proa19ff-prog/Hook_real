@@ -10,6 +10,7 @@ import '../../search/presentation/artist_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'player_state_provider.dart';
+import 'track_downloads_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 /// Spotify-inspired, reusable track row used by discovery, collections and the
@@ -59,6 +60,14 @@ class SpotifyTrackTile extends ConsumerWidget {
         (tracks) => tracks.any(
           (item) => item.id == track.id && item.source == track.source,
         ),
+      ),
+    );
+    // A quiet "saved offline" hint once the track has been downloaded.
+    final isDownloaded = ref.watch(
+      trackDownloadsProvider.select(
+        (downloads) =>
+            downloads[TrackDownloadsNotifier.keyOf(track)]?.status ==
+            TrackDownloadStatus.downloaded,
       ),
     );
     final duration = formatDuration(track.duration);
@@ -160,6 +169,15 @@ class SpotifyTrackTile extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (isDownloaded)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Icon(
+                    MingCuteIcons.mgc_download_2_fill,
+                    color: colors.primary,
+                    size: 17,
+                  ),
+                ),
               if (isFavorite)
                 Padding(
                   padding: const EdgeInsets.only(left: 8),
@@ -219,112 +237,178 @@ Future<void> showSpotifyTrackActions(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
     ),
-    builder: (sheetContext) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 34,
-              height: 4,
-              decoration: BoxDecoration(
-                color: colors.textSecondary.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
+    builder: (sheetContext) => Consumer(
+      builder: (sheetContext, sheetRef, _) {
+        final downloads = sheetRef.watch(trackDownloadsProvider);
+        final dlState =
+            downloads[TrackDownloadsNotifier.keyOf(track)] ??
+            const TrackDownloadState();
+        // First open of the sheet syncs the badge with what is on disk.
+        if (dlState.status == TrackDownloadStatus.notDownloaded &&
+            !downloads.containsKey(TrackDownloadsNotifier.keyOf(track))) {
+          Future.microtask(
+            () => sheetRef.read(trackDownloadsProvider.notifier).refresh(track),
+          );
+        }
+        final isDownloading = dlState.status == TrackDownloadStatus.downloading;
+        final isDownloaded =
+            dlState.status == TrackDownloadStatus.downloaded;
+        final isFailed = dlState.status == TrackDownloadStatus.failed;
+        final String? subtitle;
+        if (isDownloading) {
+          subtitle = '${(dlState.progress * 100).round()}%';
+        } else if (isDownloaded && dlState.bitrateKbps != null) {
+          subtitle = '${dlState.bitrateKbps} kbps';
+        } else {
+          subtitle = null;
+        }
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                TrackArtwork(
-                  url: track.artworkUrl,
-                  size: 54,
-                  borderRadius: BorderRadius.circular(4),
-                  placeholderColor: colors.background,
-                  iconColor: colors.textSecondary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        track.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colors.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        track.artist,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: colors.textSecondary),
-                      ),
-                    ],
+                Container(
+                  width: 34,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.textSecondary.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(20),
                   ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    TrackArtwork(
+                      url: track.artworkUrl,
+                      size: 54,
+                      borderRadius: BorderRadius.circular(4),
+                      placeholderColor: colors.background,
+                      iconColor: colors.textSecondary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            track.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            track.artist,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(color: colors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                _TrackAction(
+                  icon: isDownloaded
+                      ? MingCuteIcons.mgc_download_2_fill
+                      : MingCuteIcons.mgc_download_2_line,
+                  label: isDownloading
+                      ? strings.downloading
+                      : isDownloaded
+                      ? strings.downloaded
+                      : isFailed
+                      ? strings.downloadFailed
+                      : strings.download,
+                  subtitle: subtitle,
+                  color: isDownloaded
+                      ? colors.primary
+                      : isFailed
+                      ? Colors.redAccent
+                      : null,
+                  busy: isDownloading,
+                  onTap: () {
+                    final notifier = sheetRef.read(
+                      trackDownloadsProvider.notifier,
+                    );
+                    if (isDownloading) return;
+                    if (isDownloaded) {
+                      notifier.remove(track);
+                      Navigator.of(sheetContext).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(strings.trackRemovedFromCache),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else {
+                      notifier.download(track);
+                    }
+                  },
+                ),
+                _TrackAction(
+                  icon: MingCuteIcons.mgc_sound_line_fill,
+                  label: strings.startWaveFromTrack,
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    ref.read(queueProvider.notifier).startWave(track);
+                  },
+                ),
+                _TrackAction(
+                  icon: MingCuteIcons.mgc_playlist_line,
+                  label: strings.addToQueue,
+                  onTap: () {
+                    ref.read(queueProvider.notifier).addToQueue(track);
+                    Navigator.of(sheetContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(strings.addedToQueue(track.title)),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+                _TrackAction(
+                  icon: isFavorite
+                      ? MingCuteIcons.mgc_heart_fill
+                      : MingCuteIcons.mgc_heart_line,
+                  label: isFavorite
+                      ? strings.removeFavorite
+                      : strings.addFavorite,
+                  color: isFavorite ? colors.primary : null,
+                  onTap: () {
+                    ref.read(favoritesProvider.notifier).toggleFavorite(track);
+                    Navigator.of(sheetContext).pop();
+                  },
+                ),
+                _TrackAction(
+                  icon: MingCuteIcons.mgc_playlist_2_line,
+                  label: strings.addToPlaylist,
+                  onTap: () async {
+                    Navigator.of(sheetContext).pop();
+                    await _choosePlaylist(context, ref, theme, track);
+                  },
+                ),
+                _TrackAction(
+                  icon: MingCuteIcons.mgc_user_3_line,
+                  label: strings.goToArtist,
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    (onFindArtist ??
+                            () => openArtistScreen(context, theme, track.artist))
+                        .call();
+                  },
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            _TrackAction(
-              icon: MingCuteIcons.mgc_sound_line_fill,
-              label: strings.startWaveFromTrack,
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                ref.read(queueProvider.notifier).startWave(track);
-              },
-            ),
-            _TrackAction(
-              icon: MingCuteIcons.mgc_playlist_line,
-              label: strings.addToQueue,
-              onTap: () {
-                ref.read(queueProvider.notifier).addToQueue(track);
-                Navigator.of(sheetContext).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(strings.addedToQueue(track.title)),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-            ),
-            _TrackAction(
-              icon: isFavorite
-                  ? MingCuteIcons.mgc_heart_fill
-                  : MingCuteIcons.mgc_heart_line,
-              label: isFavorite ? strings.removeFavorite : strings.addFavorite,
-              color: isFavorite ? colors.primary : null,
-              onTap: () {
-                ref.read(favoritesProvider.notifier).toggleFavorite(track);
-                Navigator.of(sheetContext).pop();
-              },
-            ),
-            _TrackAction(
-              icon: MingCuteIcons.mgc_playlist_2_line,
-              label: strings.addToPlaylist,
-              onTap: () async {
-                Navigator.of(sheetContext).pop();
-                await _choosePlaylist(context, ref, theme, track);
-              },
-            ),
-            _TrackAction(
-              icon: MingCuteIcons.mgc_user_3_line,
-              label: strings.goToArtist,
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                (onFindArtist ??
-                        () => openArtistScreen(context, theme, track.artist))
-                    .call();
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     ),
   );
 }
@@ -430,14 +514,18 @@ Future<void> _choosePlaylist(
 class _TrackAction extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String? subtitle;
   final Color? color;
+  final bool busy;
   final VoidCallback onTap;
 
   const _TrackAction({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.subtitle,
     this.color,
+    this.busy = false,
   });
 
   @override
@@ -448,6 +536,25 @@ class _TrackAction extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
       leading: Icon(icon, color: textColor, size: 22),
       title: Text(label, style: TextStyle(color: textColor, fontSize: 15)),
+      subtitle: subtitle == null
+          ? null
+          : Text(
+              subtitle!,
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.75),
+                fontSize: 12,
+              ),
+            ),
+      trailing: busy
+          ? SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: textColor,
+              ),
+            )
+          : null,
       onTap: onTap,
     );
   }

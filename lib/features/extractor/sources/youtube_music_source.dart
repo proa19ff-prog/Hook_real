@@ -372,6 +372,7 @@ class YouTubeMusicSource implements MusicSource {
               fileExtension: stream.container.name == 'mp4'
                   ? 'm4a'
                   : stream.container.name,
+              bitrateKbps: stream.bitrate.kiloBitsPerSecond.round(),
             );
           });
           if (resolved != null) {
@@ -445,6 +446,7 @@ class YouTubeMusicSource implements MusicSource {
           headers: headers,
           source: source,
           duration: duration,
+          bitrateKbps: stream.bitrate.kiloBitsPerSecond.round(),
         );
       } catch (error) {
         failure = error;

@@ -886,6 +886,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trackActions => 'Действия с треком';
 
   @override
+  String get download => 'Скачать';
+
+  @override
+  String get downloading => 'Скачивание…';
+
+  @override
+  String get downloaded => 'Скачано';
+
+  @override
+  String get downloadFailed => 'Не удалось скачать';
+
+  @override
+  String get removeDownload => 'Удалить загрузку';
+
+  @override
+  String get downloadSavedOffline => 'Сохранено офлайн';
+
+  @override
   String get startWaveFromTrack => 'Запустить волну по треку';
 
   @override

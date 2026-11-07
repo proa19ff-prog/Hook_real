@@ -204,7 +204,7 @@ class _LanguageChip extends StatelessWidget {
         color: selected ? colors.accent : colors.accent.withValues(alpha: 0.3),
       ),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : colors.textPrimary,
+        color: selected ? colors.onAccent : colors.textPrimary,
         fontSize: 14.5,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
@@ -338,7 +338,7 @@ class _MicrogPage extends ConsumerWidget {
           onPressed: () => onDownload(),
           style: FilledButton.styleFrom(
             backgroundColor: colors.accent,
-            foregroundColor: Colors.white,
+            foregroundColor: colors.onAccent,
             minimumSize: const Size.fromHeight(52),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),

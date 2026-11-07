@@ -880,6 +880,24 @@ class AppLocalizationsId extends AppLocalizations {
   String get trackActions => 'Tindakan lagu';
 
   @override
+  String get download => 'Unduh';
+
+  @override
+  String get downloading => 'Mengunduh…';
+
+  @override
+  String get downloaded => 'Terunduh';
+
+  @override
+  String get downloadFailed => 'Gagal mengunduh';
+
+  @override
+  String get removeDownload => 'Hapus unduhan';
+
+  @override
+  String get downloadSavedOffline => 'Disimpan offline';
+
+  @override
   String get startWaveFromTrack => 'Mulai gelombang dari lagu ini';
 
   @override

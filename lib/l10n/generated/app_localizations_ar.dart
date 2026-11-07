@@ -877,6 +877,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trackActions => 'إجراءات المقطوعة';
 
   @override
+  String get download => 'تنزيل';
+
+  @override
+  String get downloading => 'جارٍ التنزيل…';
+
+  @override
+  String get downloaded => 'تم التنزيل';
+
+  @override
+  String get downloadFailed => 'تعذّر التنزيل';
+
+  @override
+  String get removeDownload => 'إزالة التنزيل';
+
+  @override
+  String get downloadSavedOffline => 'محفوظ دون اتصال';
+
+  @override
   String get startWaveFromTrack => 'بدء موجة من هذه المقطوعة';
 
   @override

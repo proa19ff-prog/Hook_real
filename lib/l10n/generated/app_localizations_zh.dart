@@ -825,6 +825,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trackActions => '曲目操作';
 
   @override
+  String get download => '下载';
+
+  @override
+  String get downloading => '下载中…';
+
+  @override
+  String get downloaded => '已下载';
+
+  @override
+  String get downloadFailed => '下载失败';
+
+  @override
+  String get removeDownload => '删除下载';
+
+  @override
+  String get downloadSavedOffline => '已离线保存';
+
+  @override
   String get startWaveFromTrack => '从这首曲目开始声波';
 
   @override

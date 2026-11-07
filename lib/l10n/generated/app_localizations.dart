@@ -1652,6 +1652,42 @@ abstract class AppLocalizations {
   /// **'Track actions'**
   String get trackActions;
 
+  /// No description provided for @download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get download;
+
+  /// No description provided for @downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading…'**
+  String get downloading;
+
+  /// No description provided for @downloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get downloaded;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t download'**
+  String get downloadFailed;
+
+  /// No description provided for @removeDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove download'**
+  String get removeDownload;
+
+  /// No description provided for @downloadSavedOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved offline'**
+  String get downloadSavedOffline;
+
   /// No description provided for @startWaveFromTrack.
   ///
   /// In en, this message translates to:

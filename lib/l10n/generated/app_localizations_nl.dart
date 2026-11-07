@@ -887,6 +887,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String get trackActions => 'Nummeracties';
 
   @override
+  String get download => 'Downloaden';
+
+  @override
+  String get downloading => 'Downloaden…';
+
+  @override
+  String get downloaded => 'Gedownload';
+
+  @override
+  String get downloadFailed => 'Download mislukt';
+
+  @override
+  String get removeDownload => 'Download verwijderen';
+
+  @override
+  String get downloadSavedOffline => 'Offline opgeslagen';
+
+  @override
   String get startWaveFromTrack => 'Een golf starten vanaf dit nummer';
 
   @override

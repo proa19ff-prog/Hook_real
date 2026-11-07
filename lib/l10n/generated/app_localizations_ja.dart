@@ -848,6 +848,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackActions => 'トラックの操作';
 
   @override
+  String get download => 'ダウンロード';
+
+  @override
+  String get downloading => 'ダウンロード中…';
+
+  @override
+  String get downloaded => 'ダウンロード済み';
+
+  @override
+  String get downloadFailed => 'ダウンロードできませんでした';
+
+  @override
+  String get removeDownload => 'ダウンロードを削除';
+
+  @override
+  String get downloadSavedOffline => 'オフラインで保存しました';
+
+  @override
   String get startWaveFromTrack => 'この曲からウェーブを開始';
 
   @override

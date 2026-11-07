@@ -17,6 +17,7 @@ import 'playback_controls.dart';
 import 'player_state_provider.dart';
 import 'spotify_track_tile.dart';
 import 'swipe_track_transition.dart';
+import 'track_downloads_provider.dart';
 
 class FullscreenPlayer extends ConsumerStatefulWidget {
   final HookTheme theme;
@@ -29,6 +30,7 @@ class FullscreenPlayer extends ConsumerStatefulWidget {
 class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
   bool _showLyrics = false;
   bool _isChangingTrack = false;
+  String? _refreshedDownloadKey;
   final _trackTransitionKey = GlobalKey<SwipeTrackTransitionState>();
 
   String _trackKey(MediaTrack? track) =>
@@ -121,6 +123,55 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
         ? ref.watch(trackLyricsProvider).valueOrNull
         : null;
     final colors = widget.theme.colors;
+
+    // Keep the header badge honest when the app comes back or the track
+    // changes: one disk check per newly opened track, never while downloading.
+    final trackKey = _trackKey(track);
+    if (track != null && _refreshedDownloadKey != trackKey) {
+      _refreshedDownloadKey = trackKey;
+      Future.microtask(
+        () => ref.read(trackDownloadsProvider.notifier).refresh(track),
+      );
+    }
+    final dlState = track == null
+        ? null
+        : ref.watch(
+            trackDownloadsProvider.select(
+              (downloads) => downloads[TrackDownloadsNotifier.keyOf(track)],
+            ),
+          );
+    final isDownloading =
+        dlState?.status == TrackDownloadStatus.downloading;
+    final isDownloaded = dlState?.status == TrackDownloadStatus.downloaded;
+    final isFailed = dlState?.status == TrackDownloadStatus.failed;
+    // Announce the outcome once per state change, outside the sheet.
+    ref.listen(
+      trackDownloadsProvider.select(
+        (downloads) =>
+            track == null ? null : downloads[TrackDownloadsNotifier.keyOf(track)]?.status,
+      ),
+      (previous, next) {
+        if (track == null || !context.mounted) return;
+        if (next == TrackDownloadStatus.downloaded &&
+            previous != TrackDownloadStatus.downloaded) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(strings.downloadSavedOffline),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else if (next == TrackDownloadStatus.failed &&
+            previous != TrackDownloadStatus.failed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(strings.downloadFailed),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+    );
+
     final isFavorite =
         track != null &&
         ref
@@ -197,6 +248,54 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                     ),
                                   ],
                                 ),
+                              ),
+                              IconButton(
+                                tooltip: isDownloaded
+                                    ? strings.removeDownload
+                                    : strings.download,
+                                onPressed: track == null || isDownloading
+                                    ? null
+                                    : () {
+                                        final notifier = ref.read(
+                                          trackDownloadsProvider.notifier,
+                                        );
+                                        if (isDownloaded) {
+                                          notifier.remove(track);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                strings.trackRemovedFromCache,
+                                              ),
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                        } else {
+                                          notifier.download(track);
+                                        }
+                                      },
+                                icon: isDownloading
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: text,
+                                        ),
+                                      )
+                                    : Icon(
+                                        isDownloaded
+                                            ? MingCuteIcons
+                                                  .mgc_download_2_fill
+                                            : MingCuteIcons.mgc_download_2_line,
+                                        color: isDownloaded
+                                            ? colors.primary
+                                            : isFailed
+                                            ? Colors.redAccent
+                                            : text,
+                                      ),
                               ),
                               IconButton(
                                 tooltip: strings.queue,

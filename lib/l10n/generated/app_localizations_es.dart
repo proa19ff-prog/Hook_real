@@ -884,6 +884,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get trackActions => 'Acciones de pista';
 
   @override
+  String get download => 'Descargar';
+
+  @override
+  String get downloading => 'Descargando…';
+
+  @override
+  String get downloaded => 'Descargado';
+
+  @override
+  String get downloadFailed => 'No se pudo descargar';
+
+  @override
+  String get removeDownload => 'Eliminar descarga';
+
+  @override
+  String get downloadSavedOffline => 'Guardado sin conexión';
+
+  @override
   String get startWaveFromTrack => 'Iniciar una onda desde esta pista';
 
   @override

@@ -886,6 +886,24 @@ class AppLocalizationsIt extends AppLocalizations {
   String get trackActions => 'Azioni del brano';
 
   @override
+  String get download => 'Scarica';
+
+  @override
+  String get downloading => 'Download in corso…';
+
+  @override
+  String get downloaded => 'Scaricato';
+
+  @override
+  String get downloadFailed => 'Download non riuscito';
+
+  @override
+  String get removeDownload => 'Rimuovi download';
+
+  @override
+  String get downloadSavedOffline => 'Salvato offline';
+
+  @override
   String get startWaveFromTrack => 'Avvia un\'onda da questo brano';
 
   @override

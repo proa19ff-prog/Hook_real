@@ -723,10 +723,15 @@ class StreamResolver {
           : ResolvedStream(url, source: track.source);
     }
     if (track.source == TrackSource.soundcloud) {
-      final url = await _scExtractor.resolveAudioStreamUrl(track.id);
-      return url == null || url.isEmpty
+      final stream = await _scExtractor.resolveAudioStream(track.id);
+      return stream == null || stream.url.isEmpty
           ? null
-          : ResolvedStream(url, source: track.source, duration: track.duration);
+          : ResolvedStream(
+              stream.url,
+              source: track.source,
+              duration: track.duration,
+              bitrateKbps: stream.bitrateKbps,
+            );
     }
     for (final source in _additionalSources) {
       if (source.source == track.source) return source.resolveTrack(track);

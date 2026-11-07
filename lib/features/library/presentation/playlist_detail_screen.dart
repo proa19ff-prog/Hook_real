@@ -117,10 +117,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                           tooltip: strings.playPlaylist,
                           style: IconButton.styleFrom(
                             backgroundColor: colors.primary,
-                            foregroundColor: theme
-                                .toThemeData()
-                                .colorScheme
-                                .onPrimary,
+                            foregroundColor: colors.onPrimary,
                             minimumSize: const Size(54, 54),
                           ),
                           icon: const Icon(

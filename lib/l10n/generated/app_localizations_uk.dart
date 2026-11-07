@@ -887,6 +887,24 @@ class AppLocalizationsUk extends AppLocalizations {
   String get trackActions => 'Дії з треком';
 
   @override
+  String get download => 'Завантажити';
+
+  @override
+  String get downloading => 'Завантаження…';
+
+  @override
+  String get downloaded => 'Завантажено';
+
+  @override
+  String get downloadFailed => 'Не вдалося завантажити';
+
+  @override
+  String get removeDownload => 'Видалити завантаження';
+
+  @override
+  String get downloadSavedOffline => 'Збережено офлайн';
+
+  @override
   String get startWaveFromTrack => 'Почати хвилю з цього трека';
 
   @override

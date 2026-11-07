@@ -878,6 +878,24 @@ class AppLocalizationsBn extends AppLocalizations {
   String get trackActions => 'ট্র্যাক অ্যাকশন';
 
   @override
+  String get download => 'ডাউনলোড করুন';
+
+  @override
+  String get downloading => 'ডাউনলোড হচ্ছে…';
+
+  @override
+  String get downloaded => 'ডাউনলোড হয়েছে';
+
+  @override
+  String get downloadFailed => 'ডাউনলোড করা যায়নি';
+
+  @override
+  String get removeDownload => 'ডাউনলোড সরান';
+
+  @override
+  String get downloadSavedOffline => 'অফলাইনে সংরক্ষিত';
+
+  @override
   String get startWaveFromTrack => 'এই ট্র্যাক থেকে ঢেউ শুরু করুন';
 
   @override

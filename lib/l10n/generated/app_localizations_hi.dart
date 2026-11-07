@@ -873,6 +873,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trackActions => 'ट्रैक क्रियाएँ';
 
   @override
+  String get download => 'डाउनलोड करें';
+
+  @override
+  String get downloading => 'डाउनलोड हो रहा है…';
+
+  @override
+  String get downloaded => 'डाउनलोड हो गया';
+
+  @override
+  String get downloadFailed => 'डाउनलोड नहीं हो सका';
+
+  @override
+  String get removeDownload => 'डाउनलोड हटाएँ';
+
+  @override
+  String get downloadSavedOffline => 'ऑफ़लाइन सहेजा गया';
+
+  @override
   String get startWaveFromTrack => 'इस ट्रैक से वेव शुरू करें';
 
   @override

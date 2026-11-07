@@ -843,6 +843,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get trackActions => '트랙 작업';
 
   @override
+  String get download => '다운로드';
+
+  @override
+  String get downloading => '다운로드 중…';
+
+  @override
+  String get downloaded => '다운로드됨';
+
+  @override
+  String get downloadFailed => '다운로드 실패';
+
+  @override
+  String get removeDownload => '다운로드 삭제';
+
+  @override
+  String get downloadSavedOffline => '오프라인 저장됨';
+
+  @override
   String get startWaveFromTrack => '이 트랙에서 웨이브 시작';
 
   @override

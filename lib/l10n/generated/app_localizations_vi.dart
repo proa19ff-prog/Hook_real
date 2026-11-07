@@ -879,6 +879,24 @@ class AppLocalizationsVi extends AppLocalizations {
   String get trackActions => 'Thao tác bản nhạc';
 
   @override
+  String get download => 'Tải xuống';
+
+  @override
+  String get downloading => 'Đang tải…';
+
+  @override
+  String get downloaded => 'Đã tải';
+
+  @override
+  String get downloadFailed => 'Không thể tải xuống';
+
+  @override
+  String get removeDownload => 'Xóa bản tải xuống';
+
+  @override
+  String get downloadSavedOffline => 'Đã lưu ngoại tuyến';
+
+  @override
   String get startWaveFromTrack => 'Bắt đầu làn sóng từ bản nhạc này';
 
   @override

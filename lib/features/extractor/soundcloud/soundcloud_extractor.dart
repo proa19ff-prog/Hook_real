@@ -4,6 +4,14 @@ import 'package:hook/core/constants/api_constants.dart';
 import '../../../core/diagnostics/playback_diagnostics.dart';
 import '../models/media_track.dart';
 
+/// A resolved SoundCloud stream URL plus the bitrate of its transcoding.
+class ResolvedAudioStream {
+  final String url;
+  final int? bitrateKbps;
+
+  const ResolvedAudioStream(this.url, {this.bitrateKbps});
+}
+
 class SoundCloudExtractor {
   final Dio _dio;
   String _clientId;
@@ -291,13 +299,21 @@ class SoundCloudExtractor {
   Future<String?> resolveAudioStreamUrl(
     String trackId, {
     bool isRetry = false,
+  }) async =>
+      (await resolveAudioStream(trackId, isRetry: isRetry))?.url;
+
+  /// Same as [resolveAudioStreamUrl] but also reports the bitrate of the
+  /// chosen transcoding, so downloads can show the quality they carry.
+  Future<ResolvedAudioStream?> resolveAudioStream(
+    String trackId, {
+    bool isRetry = false,
   }) async {
     // Fast path: transcodings from the search response, one request to start.
     final cached = isRetry ? null : _mediaCache[trackId];
     if (cached != null) {
       try {
-        final url = await _resolveFromTrackData(cached);
-        if (url != null && url.isNotEmpty) return url;
+        final resolved = await _resolveFromTrackData(cached);
+        if (resolved != null && resolved.url.isNotEmpty) return resolved;
       } catch (_) {
         // Stale search data; fall through to the full track lookup.
       }
@@ -319,7 +335,7 @@ class SoundCloudExtractor {
       if (!isRetry && dioErr.response?.statusCode == 401) {
         final newKey = await refreshClientId();
         if (newKey != null && newKey.isNotEmpty) {
-          return resolveAudioStreamUrl(trackId, isRetry: true);
+          return resolveAudioStream(trackId, isRetry: true);
         }
       }
       Error.throwWithStackTrace(
@@ -337,7 +353,9 @@ class SoundCloudExtractor {
   /// Picks the fastest-starting playable transcoding and resolves its signed
   /// URL. Falls through to the next transcoding when one answers 404 (the
   /// `abr_sq` preset does on most tracks).
-  Future<String?> _resolveFromTrackData(Map<String, dynamic> trackData) async {
+  Future<ResolvedAudioStream?> _resolveFromTrackData(
+    Map<String, dynamic> trackData,
+  ) async {
     if (!isFullTrack(trackData)) return null;
     final media = trackData['media'];
     if (media is! Map) return null;
@@ -377,7 +395,8 @@ class SoundCloudExtractor {
     if (candidates.isEmpty) return null;
 
     // Progressive MP3 is one file, so the player starts after a single
-    // request. Plain HLS needs a playlist fetch first. `abr_sq` presets
+    // request — and at 128 kbps it is also the best quality SoundCloud serves
+    // without Go+. Plain HLS needs a playlist fetch first. `abr_sq` presets
     // currently answer 404, so they go last.
     int rank(Map<String, dynamic> t) {
       final protocol = (t['format'] as Map?)?['protocol'];
@@ -386,6 +405,14 @@ class SoundCloudExtractor {
       if (preset.startsWith('abr')) return 3;
       if (protocol == 'hls') return preset.contains('160') ? 1 : 2;
       return 4;
+    }
+
+    int? bitrateOf(Map<String, dynamic> t) {
+      final preset = (t['preset'] as String? ?? '').toLowerCase();
+      if (preset.contains('160')) return 160;
+      if (preset.startsWith('abr')) return 64;
+      if ((t['format'] as Map?)?['protocol'] == 'progressive') return 128;
+      return null;
     }
 
     candidates.sort((a, b) => rank(a).compareTo(rank(b)));
@@ -408,7 +435,9 @@ class SoundCloudExtractor {
             .timeout(const Duration(seconds: 8));
         final data = res.data;
         final url = data is Map ? data['url'] as String? : null;
-        if (url != null && url.isNotEmpty) return url;
+        if (url != null && url.isNotEmpty) {
+          return ResolvedAudioStream(url, bitrateKbps: bitrateOf(t));
+        }
       } on DioException catch (e) {
         // A 401 means the client_id is stale; let the caller refresh it.
         if (e.response?.statusCode == 401) rethrow;

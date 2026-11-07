@@ -883,6 +883,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get trackActions => 'Titel-Aktionen';
 
   @override
+  String get download => 'Herunterladen';
+
+  @override
+  String get downloading => 'Wird geladen…';
+
+  @override
+  String get downloaded => 'Heruntergeladen';
+
+  @override
+  String get downloadFailed => 'Download fehlgeschlagen';
+
+  @override
+  String get removeDownload => 'Download löschen';
+
+  @override
+  String get downloadSavedOffline => 'Offline gespeichert';
+
+  @override
   String get startWaveFromTrack => 'Welle ab diesem Titel starten';
 
   @override

@@ -888,6 +888,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get trackActions => 'Actions de piste';
 
   @override
+  String get download => 'Télécharger';
+
+  @override
+  String get downloading => 'Téléchargement…';
+
+  @override
+  String get downloaded => 'Téléchargé';
+
+  @override
+  String get downloadFailed => 'Téléchargement impossible';
+
+  @override
+  String get removeDownload => 'Supprimer le téléchargement';
+
+  @override
+  String get downloadSavedOffline => 'Enregistré hors ligne';
+
+  @override
   String get startWaveFromTrack => 'Démarrer une vague depuis cette piste';
 
   @override
