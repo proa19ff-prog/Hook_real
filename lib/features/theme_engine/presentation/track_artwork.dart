@@ -23,10 +23,27 @@ class TrackArtwork extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
   });
 
-  /// Upgrades SoundCloud and catalog thumbnails to their highest resolution.
+  /// Normalizes artwork urls for reliable loading and upgrades SoundCloud and
+  /// catalog thumbnails to their highest resolution.
+  ///
+  /// Saved playlists keep the url captured at save time, so two failure modes
+  /// accumulate there: plain http urls (NetEase covers) now fail because the
+  /// manifest blocks cleartext traffic, and signed YouTube thumbnails
+  /// (`?sqp=…&rs=…`) expire on the CDN. Both are rewritten here.
   static String getHighResUrl(String? rawUrl) {
     if (rawUrl == null || rawUrl.isEmpty) return '';
     var result = rawUrl;
+    // The manifest blocks cleartext traffic; upgrade legacy http urls.
+    if (result.startsWith('http://')) {
+      result = 'https://${result.substring(7)}';
+    }
+    // YouTube: rebuild the canonical unsigned url for the same video id —
+    // it outlives any signed sqp/rs variant.
+    final youTube =
+        RegExp(r'ytimg\.com/vi/([\w-]+)/').firstMatch(result);
+    if (youTube != null) {
+      return 'https://i.ytimg.com/vi/${youTube.group(1)}/hqdefault.jpg';
+    }
     // SoundCloud: upgrade -large, -t300x300, -badge to -t500x500
     if (result.contains('sndcdn.com')) {
       result = result

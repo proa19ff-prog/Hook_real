@@ -13,6 +13,7 @@ import '../../extractor/models/media_track.dart';
 import '../../extractor/models/resolved_stream.dart';
 import '../../extractor/stream_resolver.dart';
 import '../../recommendations/track_wave_service.dart';
+import '../../theme_engine/presentation/track_artwork.dart';
 import 'equalizer_controller.dart';
 import '../../lyrics/data/lyrics_client.dart';
 
@@ -157,7 +158,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         title: track.title,
         artist: track.artist,
         artUri: track.artworkUrl.isNotEmpty
-            ? Uri.tryParse(track.artworkUrl)
+            ? Uri.tryParse(TrackArtwork.getHighResUrl(track.artworkUrl))
             : null,
         duration: track.duration,
       );

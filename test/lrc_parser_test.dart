@@ -98,6 +98,8 @@ void main() {
     expect(score('Sweater Weather (Remix)', 'The Neighbourhood', 238), isNull);
     expect(score('Sweater Weather', 'The Neighbourhood', 300), isNull);
     expect(score('Daddy Issues', 'The Neighbourhood', 240), isNull);
+    // Same title and even the same length, but a different recording.
+    expect(score('Sweater Weather', 'Random Cover Band', 240), isNull);
   });
 
   test('LyricsMatch handles Cyrillic and stylized artist names', () {

@@ -88,8 +88,10 @@ class LyricsMatch {
       }
     }
 
-    // Without the artist, only an exact title with the same length counts.
-    if (!artistOk && !(t == wt && diff != null && diff <= 3)) return null;
+    // A same-titled song by another artist is a different recording even
+    // when the length coincides — showing its text under the track reads as
+    // "wrong lyrics", which is worse than showing none.
+    if (!artistOk) return null;
     return s;
   }
 }

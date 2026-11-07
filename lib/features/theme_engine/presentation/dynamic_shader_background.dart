@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:palette_generator/palette_generator.dart';
 import '../domain/hook_theme.dart';
+import 'track_artwork.dart';
 
 /// Ambient theme data exposed to children inside [DynamicShaderBackground].
 /// When dominant album art is white or light, automatically provides high-contrast dark text
@@ -162,9 +163,9 @@ class _DynamicShaderBackgroundState extends State<DynamicShaderBackground>
   }
 
   Future<void> _updatePalette() async {
-    final artUrl = widget.artworkUrl;
+    final artUrl = TrackArtwork.getHighResUrl(widget.artworkUrl);
     _paletteUrl = artUrl;
-    if (artUrl == null || artUrl.isEmpty) {
+    if (artUrl.isEmpty) {
       _useThemeColors();
       return;
     }

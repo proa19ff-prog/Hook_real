@@ -32,7 +32,15 @@ class LrclibSource {
     required String artist,
     Duration? duration,
   }) async {
-    final exact = await _get(title, artist, duration);
+    // The /get endpoint fuzzy-matches server-side and happily returns a
+    // different song with the same title — score its metadata locally
+    // before trusting it.
+    final exact = _scored(
+      await _getRecord(title, artist, duration),
+      wantTitle: title,
+      wantArtist: artist,
+      wantDuration: duration,
+    );
     if (exact != null && exact.hasSynced) return exact;
 
     final searched = await _search(title, artist, duration);
@@ -42,7 +50,28 @@ class LrclibSource {
     return exact;
   }
 
-  Future<LrclibLyrics?> _get(
+  static LrclibLyrics? _scored(
+    Map? record, {
+    required String wantTitle,
+    required String wantArtist,
+    Duration? wantDuration,
+  }) {
+    if (record == null) return null;
+    final score = LyricsMatch.score(
+      wantTitle: wantTitle,
+      wantArtist: wantArtist,
+      wantDuration: wantDuration,
+      title: record['trackName'] as String? ?? '',
+      artists: [record['artistName'] as String? ?? ''],
+      duration: Duration(
+          seconds: (record['duration'] as num?)?.round() ?? 0),
+    );
+    if (score == null) return null;
+    final lyrics = _fromRecord(record);
+    return lyrics.isEmpty ? null : lyrics;
+  }
+
+  Future<Map?> _getRecord(
       String title, String artist, Duration? duration) async {
     try {
       final res = await _dio.get(
@@ -56,8 +85,7 @@ class LrclibSource {
         options: Options(validateStatus: (s) => s != null && s < 500),
       );
       if (res.statusCode != 200 || res.data is! Map) return null;
-      final lyrics = _fromRecord(res.data as Map);
-      return lyrics.isEmpty ? null : lyrics;
+      return res.data as Map;
     } catch (_) {
       return null;
     }
