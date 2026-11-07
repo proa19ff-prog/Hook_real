@@ -6,7 +6,6 @@ import '../search/domain/search_query_normalizer.dart';
 import 'models/media_track.dart';
 import 'models/resolved_stream.dart';
 import 'soundcloud/soundcloud_extractor.dart';
-import 'sources/audius_source.dart';
 import 'sources/music_source.dart';
 import 'sources/remote_resolver_source.dart';
 import 'sources/youtube_music_source.dart';
@@ -32,8 +31,7 @@ class StreamResolver {
   }) : _scExtractor = scExtractor ?? SoundCloudExtractor(),
        _spotifyCatalog = spotifyCatalog ?? SpotifyCatalogService(),
        _additionalSources =
-           additionalSources ??
-           [YouTubeMusicSource(), AudiusSource(), RemoteResolverSource()];
+           additionalSources ?? [YouTubeMusicSource(), RemoteResolverSource()];
 
   static String fixKeyboardLayout(String input) =>
       SearchQueryNormalizer.fixKeyboardLayout(input);
@@ -743,7 +741,38 @@ class StreamResolver {
             );
     }
     for (final source in _additionalSources) {
-      if (source.source == track.source) return source.resolveTrack(track);
+      if (source.source != track.source) continue;
+      Object? directFailure;
+      StackTrace? directStack;
+      try {
+        final direct = await source.resolveTrack(track);
+        if (direct != null && !direct.isEmpty) return direct;
+      } catch (error, stack) {
+        directFailure = error;
+        directStack = stack;
+      }
+      // A direct source answered 403/region-locked (everyday reality on
+      // carrier networks): the server can still proxy the very same
+      // recording, so a YouTube search result stays playable everywhere.
+      final remote = remoteSource;
+      if (remote != null && remote != source) {
+        try {
+          final viaServer = await remote.resolveTrack(track);
+          if (viaServer != null && !viaServer.isEmpty) {
+            PlaybackDiagnostics.record(
+              'playback.server.fallback',
+              source: source.source.name,
+            );
+            return viaServer;
+          }
+        } catch (_) {
+          // Fall through to the original failure below.
+        }
+      }
+      if (directFailure != null) {
+        Error.throwWithStackTrace(directFailure, directStack!);
+      }
+      return null;
     }
     return null;
   }

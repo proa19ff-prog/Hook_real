@@ -45,7 +45,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   List<MediaTrack> _results = const [];
   Map<MediaTrack, String> _snippets = const {};
   MusicSearchMode _mode = MusicSearchMode.tracks;
-  TrackSource? _source;
   bool _isLoading = false;
   bool _hasSearched = false;
   String? _error;
@@ -111,7 +110,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     if (query.isEmpty) return;
     final id = ++_requestId;
     final mode = _mode;
-    final source = _source;
     setState(() {
       _isLoading = true;
       _hasSearched = true;
@@ -127,7 +125,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       } else {
         results = await ref
             .read(streamResolverProvider)
-            .search(query: query, sources: source == null ? null : {source});
+            .search(query: query);
       }
       if (!mounted || id != _requestId) return;
       setState(() {
@@ -168,10 +166,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     MusicSearchMode mode = MusicSearchMode.tracks,
   }) {
     _searchController.text = value;
-    setState(() {
-      _mode = mode;
-      _source = null;
-    });
+    setState(() => _mode = mode);
     _search(value);
     _focusNode.unfocus();
   }
@@ -251,26 +246,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ],
                         ),
                       ),
-                      if (_mode == MusicSearchMode.tracks)
-                        SizedBox(
-                          height:
-                              MediaQuery.textScalerOf(context).scale(12) + 40,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            children: [
-                              _sourceChip(null, strings.allSources),
-                              for (final source in [
-                                TrackSource.spotify,
-                                TrackSource.youtubeMusic,
-                                TrackSource.soundcloud,
-                                TrackSource.audius,
-                              ])
-                                _sourceChip(source, source.labelFor(strings)),
-                            ],
-                          ),
-                        )
-                      else
+                      if (_mode == MusicSearchMode.lyrics)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(24, 6, 24, 12),
                           child: Text(
@@ -365,37 +341,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
           child: Text(label, textAlign: TextAlign.center),
         ),
-      ),
-    );
-  }
-
-  Widget _sourceChip(TrackSource? source, String label) {
-    final colors = widget.theme.colors;
-    final selected = source == _source;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        showCheckmark: false,
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        onSelected: (_) {
-          if (selected) return;
-          _clear(keepText: true);
-          setState(() => _source = source);
-          if (_searchController.text.trim().isNotEmpty) {
-            _search(_searchController.text);
-          }
-        },
-        selectedColor: colors.textPrimary,
-        backgroundColor: colors.surface.withValues(alpha: 0.65),
-        side: BorderSide.none,
-        labelStyle: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: selected ? colors.background : colors.textPrimary,
-        ),
-        shape: const StadiumBorder(),
       ),
     );
   }
