@@ -49,6 +49,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   bool _hasSearched = false;
   String? _error;
   int _requestId = 0;
+  // Null = every source; otherwise the search is scoped to one.
+  TrackSource? _source;
 
   @override
   void didUpdateWidget(covariant SearchScreen oldWidget) {
@@ -125,7 +127,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       } else {
         results = await ref
             .read(streamResolverProvider)
-            .search(query: query);
+            .search(query: query, sources: _source == null ? null : {_source!});
       }
       if (!mounted || id != _requestId) return;
       setState(() {
@@ -243,6 +245,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               MusicSearchMode.lyrics,
                               strings.byLyrics,
                             ),
+                            const Spacer(),
+                            _sourceFilterButton(strings),
                           ],
                         ),
                       ),
@@ -340,6 +344,114 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           ),
           child: Text(label, textAlign: TextAlign.center),
+        ),
+      ),
+    );
+  }
+
+  /// One quiet button instead of a whole chip row; the sources themselves
+  /// live in a sheet, so the header stays a single tidy line.
+  Widget _sourceFilterButton(AppLocalizations strings) {
+    final colors = widget.theme.colors;
+    return IconButton(
+      tooltip: _source == null
+          ? strings.allSources
+          : '${strings.allSources}: ${_source!.labelFor(strings)}',
+      visualDensity: VisualDensity.compact,
+      onPressed: _showSourceSheet,
+      icon: Badge(
+        isLabelVisible: _source != null,
+        smallSize: 7,
+        backgroundColor: colors.primary,
+        child: Icon(
+          MingCuteIcons.mgc_filter_line,
+          size: 21,
+          color: _source == null
+              ? colors.textSecondary
+              : colors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showSourceSheet() async {
+    final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: colors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  strings.allSources,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            for (final source in <TrackSource?>[
+              null,
+              TrackSource.spotify,
+              TrackSource.youtubeMusic,
+              TrackSource.soundcloud,
+              TrackSource.remote,
+            ])
+              ListTile(
+                dense: true,
+                leading: Icon(
+                  switch (source) {
+                    null => MingCuteIcons.mgc_appstore_line,
+                    TrackSource.spotify => MingCuteIcons.mgc_music_2_line,
+                    TrackSource.youtubeMusic => MingCuteIcons.mgc_youtube_line,
+                    TrackSource.soundcloud => MingCuteIcons.mgc_cloud_line,
+                    TrackSource.remote => MingCuteIcons.mgc_server_line,
+                    _ => MingCuteIcons.mgc_music_line,
+                  },
+                  size: 21,
+                  color: colors.primary,
+                ),
+                title: Text(
+                  source == null
+                      ? strings.allSources
+                      : source.labelFor(strings),
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: source == _source
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                  ),
+                ),
+                trailing: source == _source
+                    ? Icon(
+                        MingCuteIcons.mgc_check_line,
+                        size: 20,
+                        color: colors.primary,
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  if (source == _source) return;
+                  setState(() => _source = source);
+                  if (_searchController.text.trim().isNotEmpty) {
+                    _search(_searchController.text);
+                  }
+                },
+              ),
+            const SizedBox(height: 8),
+          ],
         ),
       ),
     );
