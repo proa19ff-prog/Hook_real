@@ -123,9 +123,12 @@ class PlaylistsNotifier
   /// Imported playlists store no artwork at all, so their cards render as
   /// bare placeholders. Resolves covers for the first tracks from the
   /// catalog (search by "artist title") and persists them once per playlist
-  /// name; everything else keeps working offline as before.
+  /// name; everything else keeps working offline as before. When the catalog
+  /// is unreachable, [artworkFallback] searches other sources instead — a
+  /// candidate cover counts only when the duration lines up.
   Future<void> backfillArtwork({
     SpotifyCatalogService? catalog,
+    Future<List<MediaTrack>> Function(String query)? artworkFallback,
     int perPlaylist = 12,
   }) async {
     if (_artworkBackfill != null) return _artworkBackfill;
@@ -138,47 +141,76 @@ class PlaylistsNotifier
       }
       if (missing.isNotEmpty) targets.add(MapEntry(entry.key, missing));
     }
-    if (targets.isEmpty || catalog == null) {
+    if (targets.isEmpty || (catalog == null && artworkFallback == null)) {
       for (final target in targets) {
         _backfilledNames.add(target.key);
       }
       return;
     }
-    final future = _runArtworkBackfill(targets, catalog);
+    final future = _runArtworkBackfill(targets, catalog, artworkFallback);
     _artworkBackfill = future;
     return future;
   }
 
   Future<void> _runArtworkBackfill(
     List<MapEntry<String, List<int>>> targets,
-    SpotifyCatalogService catalog,
+    SpotifyCatalogService? catalog,
+    Future<List<MediaTrack>> Function(String query)? artworkFallback,
   ) async {
     try {
       for (final target in targets) {
         final name = target.key;
-        _backfilledNames.add(name);
         final playlists = _storage.getPlaylists();
         final tracks = playlists[name];
         if (tracks == null) continue;
         var changed = false;
+        var failures = 0;
         for (final index in target.value) {
           if (index >= tracks.length) continue;
           final track = tracks[index];
+          final query = '${track.artist} ${track.title}'.trim();
+          var artwork = '';
           try {
-            final hits = await catalog
-                .searchTracks('${track.artist} ${track.title}', limit: 1)
-                .timeout(const Duration(seconds: 8));
-            final artwork = hits.isEmpty ? '' : hits.first.artworkUrl;
-            if (artwork.isNotEmpty) {
-              tracks[index] = track.copyWith(artworkUrl: artwork);
-              changed = true;
-            }
+            final hits = catalog == null
+                ? const <MediaTrack>[]
+                : await catalog
+                    .searchTracks(query, limit: 1)
+                    .timeout(const Duration(seconds: 8));
+            if (hits.isNotEmpty) artwork = hits.first.artworkUrl;
           } catch (_) {
-            // Offline or a stubborn query: the placeholder stays for now.
+            failures++;
+            // Catalog unreachable or a stubborn query — try other sources.
+          }
+          if (artwork.isEmpty && artworkFallback != null) {
+            try {
+              final candidates = await artworkFallback(query)
+                  .timeout(const Duration(seconds: 9));
+              final expected = track.duration.inMilliseconds;
+              for (final candidate in candidates) {
+                if (candidate.artworkUrl.trim().isEmpty) continue;
+                final closeEnough = expected <= 0 ||
+                    (candidate.duration.inMilliseconds - expected).abs() <=
+                        8000;
+                if (closeEnough) {
+                  artwork = candidate.artworkUrl;
+                  break;
+                }
+              }
+            } catch (_) {
+              failures++;
+              // Same story: the placeholder stays for now.
+            }
+          }
+          if (artwork.isNotEmpty) {
+            tracks[index] = track.copyWith(artworkUrl: artwork);
+            changed = true;
           }
           // Be polite to the catalog when resolving a long list.
           await Future<void>.delayed(const Duration(milliseconds: 120));
         }
+        // A playlist where every lookup failed is not "done": the next tab
+        // visit gets another chance once the network cooperates.
+        if (changed || failures == 0) _backfilledNames.add(name);
         if (changed) {
           await _storage.savePlaylist(name, tracks);
           if (mounted) state = _storage.getPlaylists();

@@ -9,6 +9,7 @@ import 'package:hook/features/audio_player/data/audio_player_service.dart';
 import 'package:hook/features/audio_player/presentation/player_state_provider.dart';
 import 'package:hook/features/extractor/models/media_track.dart';
 import 'package:hook/features/extractor/stream_resolver.dart';
+import 'package:hook/features/extractor/spotify/spotify_catalog_service.dart';
 import 'package:hook/features/library/presentation/library_provider.dart';
 import 'package:hook/features/library/presentation/library_screen.dart';
 import 'package:hook/features/library/presentation/playlist_detail_screen.dart';
@@ -32,13 +33,33 @@ class _IdleAudioService extends Fake implements AudioPlayerService {
 class _SearchResolver extends Fake implements StreamResolver {
   late final result = Completer<List<MediaTrack>>();
 
+  /// Playlist-cover backfill tests flip this on so its background queries
+  /// resolve empty instead of dangling on the pending [result] timer.
+  bool autoEmpty = false;
+
   @override
   Future<List<MediaTrack>> search({
     required String query,
     bool includeSoundCloud = true,
     bool includeSpotify = true,
     Set<TrackSource>? sources,
-  }) => result.future;
+  }) {
+    if (result.isCompleted || autoEmpty) {
+      return result.isCompleted
+          ? result.future
+          : Future.value(const <MediaTrack>[]);
+    }
+    return result.future;
+  }
+}
+
+class _SilentCatalog extends Fake implements SpotifyCatalogService {
+  @override
+  Future<List<MediaTrack>> searchTracks(
+    String query, {
+    int limit = 25,
+    String? country,
+  }) async => const [];
 }
 
 class _EmptyCache extends Fake implements AudioCacheManager {
@@ -80,6 +101,7 @@ void main() {
           audioCacheManagerProvider.overrideWithValue(_EmptyCache()),
           currentTrackProvider.overrideWithValue(null),
           streamResolverProvider.overrideWithValue(resolver),
+          playlistArtworkCatalogProvider.overrideWith((ref) => _SilentCatalog()),
         ],
         child: MaterialApp(
           locale: const Locale('ru'),
@@ -126,6 +148,7 @@ void main() {
   ) async {
     await storage.savePlaylist('Ночной плейлист с длинным названием', [_track]);
     await storage.toggleFavorite(_track);
+    resolver.autoEmpty = true;
     await pumpScreen(tester, LibraryScreen(theme: theme));
     expect(tester.takeException(), isNull);
     await tester.ensureVisible(find.text('Плейлисты'));

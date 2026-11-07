@@ -223,12 +223,22 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     final playlists = ref.watch(playlistsProvider);
     final queueNotifier = ref.read(queueProvider.notifier);
     // Imported playlists ship without covers; resolve them in the background
-    // (idempotent inside the notifier, so rebuilds are cheap).
+    // (idempotent inside the notifier, so rebuilds are cheap). The catalog
+    // goes first; SoundCloud and the resolver server cover it when Apple is
+    // unreachable.
     Future.microtask(() {
       if (!mounted) return;
       ref
           .read(playlistsProvider.notifier)
-          .backfillArtwork(catalog: ref.read(playlistArtworkCatalogProvider));
+          .backfillArtwork(
+            catalog: ref.read(playlistArtworkCatalogProvider),
+            artworkFallback: (query) => ref
+                .read(streamResolverProvider)
+                .search(query: query, sources: {
+                  TrackSource.soundcloud,
+                  TrackSource.remote,
+                }),
+          );
     });
 
     if (playlists.isEmpty) {
