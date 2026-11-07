@@ -55,3 +55,4 @@ android/local.properties
 android/.gradle/
 android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 promo/
+releases/
