@@ -20,9 +20,11 @@ final lyricsAutoHideProvider =
       (ref) => LyricsAutoHideNotifier(ref.watch(localStorageServiceProvider)),
     );
 
-/// Keeps the optional self-hosted resolver endpoint in storage and mirrored
-/// into the static used by [RemoteResolverSource]. The resolver reads the
-/// endpoint per call, so changes apply without rebuilding the provider tree.
+/// Keeps the optional resolver endpoint in storage and mirrored into the
+/// static used by [RemoteResolverSource]. The resolver reads the endpoint per
+/// call, so changes apply without rebuilding the provider tree. Stored value
+/// semantics: null = never configured (built-in default stays active),
+/// '' = disabled by the user in settings, otherwise the custom endpoint.
 class RemoteResolverNotifier extends StateNotifier<String?> {
   RemoteResolverNotifier(this._storage)
     : super(_storage.getRemoteResolverUrl()) {

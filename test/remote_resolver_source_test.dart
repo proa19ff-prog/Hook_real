@@ -53,13 +53,31 @@ void main() {
   });
 
   test('is inert until an endpoint is configured', () async {
-    RemoteResolverSource.endpoint = null;
+    RemoteResolverSource.endpoint = '';
     expect(RemoteResolverSource.enabled, isFalse);
     expect(await source.searchTracks('anything'), isEmpty);
     expect(
       await source.resolveTrack(_track(id: 'srv-1', source: TrackSource.remote)),
       isNull,
     );
+  });
+
+  test('falls back to the built-in endpoint when never configured', () {
+    RemoteResolverSource.endpoint = null;
+    expect(RemoteResolverSource.enabled, isTrue);
+    expect(
+      RemoteResolverSource.effectiveEndpoint,
+      RemoteResolverSource.defaultEndpoint,
+    );
+  });
+
+  test('custom endpoint overrides the built-in one', () {
+    RemoteResolverSource.endpoint = 'http://127.0.0.1:${server.port}/';
+    expect(RemoteResolverSource.effectiveEndpoint,
+        'http://127.0.0.1:${server.port}/');
+    RemoteResolverSource.endpoint = null;
+    expect(RemoteResolverSource.effectiveEndpoint,
+        RemoteResolverSource.defaultEndpoint);
   });
 
   test('search maps server items and skips malformed entries', () async {

@@ -6,6 +6,7 @@ import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/supported_languages.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
+import '../../extractor/sources/remote_resolver_source.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/theme_settings_screen.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
@@ -184,11 +185,8 @@ class SettingsScreen extends ConsumerWidget {
                       color: colors.textPrimary,
                     ),
                     title: Text(strings.serverResolver),
-                    subtitle: Text(
-                      ref.watch(remoteResolverProvider) ?? strings.serverResolverDisabled,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    subtitle: Text(_resolverSubtitle(ref, strings),
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _editRemoteResolver(context, ref, colors),
                   ),
@@ -210,14 +208,25 @@ class SettingsScreen extends ConsumerWidget {
     ),
   );
 
+  String _resolverSubtitle(
+    WidgetRef ref,
+    AppLocalizations strings,
+  ) {
+    final stored = ref.watch(remoteResolverProvider);
+    if (stored == null) return RemoteResolverSource.defaultEndpoint;
+    if (stored.trim().isEmpty) return strings.serverResolverDisabled;
+    return stored;
+  }
+
   void _editRemoteResolver(
     BuildContext context,
     WidgetRef ref,
     HookColors colors,
   ) {
     final strings = AppLocalizations.of(context);
+    final stored = ref.read(remoteResolverProvider);
     final controller = TextEditingController(
-      text: ref.read(remoteResolverProvider),
+      text: stored ?? RemoteResolverSource.defaultEndpoint,
     );
     showDialog<void>(
       context: context,
@@ -257,7 +266,9 @@ class SettingsScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () {
-                ref.read(remoteResolverProvider.notifier).setEndpoint(null);
+                // Empty string, not null: null means "never configured",
+                // which keeps the built-in default endpoint active.
+                ref.read(remoteResolverProvider.notifier).setEndpoint('');
                 Navigator.of(dialogContext).pop();
               },
               child: Text(strings.serverDisable),

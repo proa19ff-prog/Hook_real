@@ -15,12 +15,29 @@ import 'music_source.dart';
 ///   GET `{base}/search?q={query}&limit={n}` → list of track objects
 ///   GET `{base}/resolve?id={id}`            → `{url, user_agent?, ext?}`
 /// The returned url may point anywhere, including the same server acting as
-/// a Range-capable audio proxy for IP-locked sources. Without an endpoint
-/// every call is a no-op, so the source stays inert until opted in.
+/// a Range-capable audio proxy for IP-locked sources.
+///
+/// A [defaultEndpoint] ships with the build so playback works out of the
+/// box. The stored override decides what is actually used:
+///   null (never configured) → [defaultEndpoint]
+///   '' (disabled in settings) → source off
+///   custom url → that url
 class RemoteResolverSource implements MusicSource {
-  /// Base URL of the resolver server without a trailing slash; null or empty
-  /// disables the source. Mirrored to storage by the settings layer.
+  /// Resolver endpoint shipped with the build. Rotating it is a one-line
+  /// change plus a new release; users can point the source elsewhere in
+  /// settings without waiting for an update.
+  static const String defaultEndpoint =
+      'https://atomic-rush-daixwalr.expresshost.cloud/ed3b53d48fcd09aba8acb666';
+
+  /// Storage mirror maintained by the settings layer.
   static String? endpoint;
+
+  /// Endpoint currently in effect (see the class docs for the precedence).
+  static String get effectiveEndpoint {
+    final stored = endpoint?.trim();
+    if (stored == null) return defaultEndpoint;
+    return stored;
+  }
 
   static const _searchTimeout = Duration(seconds: 9);
   static const _resolveTimeout = Duration(seconds: 20);
@@ -28,11 +45,10 @@ class RemoteResolverSource implements MusicSource {
   @override
   TrackSource get source => TrackSource.remote;
 
-  static bool get enabled =>
-      endpoint != null && endpoint!.trim().isNotEmpty;
+  static bool get enabled => effectiveEndpoint.isNotEmpty;
 
   Uri _build(String path, Map<String, String> query) {
-    final base = endpoint!.trim().replaceFirst(RegExp(r'/+$'), '');
+    final base = effectiveEndpoint.replaceFirst(RegExp(r'/+$'), '');
     return Uri.parse('$base$path').replace(queryParameters: query);
   }
 
