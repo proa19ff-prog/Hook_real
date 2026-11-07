@@ -52,6 +52,27 @@ class RemoteResolverSource implements MusicSource {
     return Uri.parse('$base$path').replace(queryParameters: query);
   }
 
+  /// A server-side packaged download for a track we only know by its page
+  /// URL (SoundCloud permalinks live in [MediaTrack.streamUrl]). The server
+  /// runs yt-dlp and returns one audio file with a real content-length, so
+  /// the explicit download button works where the device's own network
+  /// cannot fetch or cannot save the stream (HLS-only uploads).
+  ResolvedStream? serverDownloadFor(MediaTrack track) {
+    if (!enabled) return null;
+    final page = track.streamUrl?.trim();
+    if (page == null ||
+        page.isEmpty ||
+        !page.startsWith('https://soundcloud.com/')) {
+      return null;
+    }
+    return ResolvedStream(
+      _build('/download', {'url': page}).toString(),
+      source: source,
+      duration: track.duration,
+      fileExtension: null,
+    );
+  }
+
   @override
   Future<List<MediaTrack>> searchTracks(String query, {int limit = 20}) async {
     if (!enabled || query.trim().isEmpty || limit <= 0) return const [];

@@ -38,6 +38,15 @@ class StreamResolver {
   static String fixKeyboardLayout(String input) =>
       SearchQueryNormalizer.fixKeyboardLayout(input);
 
+  /// The self-hosted resolver, when one is wired in. The download path uses
+  /// it to package tracks the device cannot save on its own network.
+  RemoteResolverSource? get remoteSource {
+    for (final source in _additionalSources) {
+      if (source is RemoteResolverSource) return source;
+    }
+    return null;
+  }
+
   List<String> getSearchQueries(String query) =>
       SearchQueryNormalizer.variants(query);
 

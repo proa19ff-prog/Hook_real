@@ -847,22 +847,53 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     try {
       final local = await _cacheManager.getLocalCachedUrl(_cacheKey(track));
       if (local != null) return File(Uri.parse(local).toFilePath());
-      final stream = await _resolver
-          .resolveDownloadStream(track)
-          .timeout(const Duration(seconds: 25));
-      if (stream == null || stream.isEmpty) return null;
-      onResolved?.call(stream.bitrateKbps);
-      if (stream.url.startsWith('file:')) {
-        return File(Uri.parse(stream.url).toFilePath());
+
+      // Candidates in trust order: the source's own full-file stream first,
+      // then the server proxy for the same recording id, then the playback
+      // matcher (probe-verified, includes the server), and finally a
+      // server-side yt-dlp package for permalinks the device's network
+      // cannot fetch or cannot save as one file. First success wins.
+      final remote = _resolver.remoteSource;
+      final candidates = <ResolvedStream>[];
+      Future<void> add(Future<ResolvedStream?> Function() resolve) async {
+        if (candidates.length >= 4) return;
+        try {
+          final stream = await resolve().timeout(const Duration(seconds: 25));
+          if (stream == null || stream.isEmpty) return;
+          if (!candidates.any((c) => c.url == stream.url)) {
+            candidates.add(stream);
+          }
+        } catch (_) {
+          // A failed resolver just leaves fewer candidates behind.
+        }
       }
-      return await _cacheManager.downloadTrack(
-        track,
-        stream.url,
-        cacheKey: _cacheKey(track),
-        headers: stream.headers,
-        fileExtension: stream.fileExtension,
-        onProgress: onProgress,
-      );
+
+      await add(() => _resolver.resolveDownloadStream(track));
+      if (track.source == TrackSource.youtubeMusic && remote != null) {
+        // The server proxies this very video id; direct YouTube GETs are
+        // commonly 403 on carrier networks while the server plays fine.
+        await add(() => remote.resolveTrack(track));
+      }
+      await add(() => _resolver.resolveStream(track));
+      final serverPackage = remote?.serverDownloadFor(track);
+      if (serverPackage != null) candidates.add(serverPackage);
+
+      for (final stream in candidates) {
+        if (stream.url.startsWith('file:')) {
+          return File(Uri.parse(stream.url).toFilePath());
+        }
+        onResolved?.call(stream.bitrateKbps);
+        final file = await _cacheManager.downloadTrack(
+          track,
+          stream.url,
+          cacheKey: _cacheKey(track),
+          headers: stream.headers,
+          fileExtension: stream.fileExtension,
+          onProgress: onProgress,
+        );
+        if (file != null) return file;
+      }
+      return null;
     } catch (_) {
       return null;
     }

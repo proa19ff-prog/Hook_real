@@ -176,6 +176,9 @@ class SoundCloudExtractor {
         }
         _playCounts[id] = (item['playback_count'] as num?)?.toInt() ?? 0;
 
+        // The permalink lets the server-side downloader (yt-dlp) reach this
+        // exact upload — the numeric API id is meaningless to it.
+        final permalink = item['permalink_url'] as String? ?? '';
         tracks.add(
           MediaTrack(
             id: id,
@@ -186,6 +189,10 @@ class SoundCloudExtractor {
             ),
             artworkUrl: artworkUrl,
             source: TrackSource.soundcloud,
+            streamUrl: permalink.isNotEmpty &&
+                    permalink.startsWith('https://soundcloud.com/')
+                ? permalink
+                : null,
             playbackCount: _playCounts[id] ?? 0,
           ),
         );
