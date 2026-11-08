@@ -256,6 +256,7 @@
   "updatesTitle": "Mises à jour",
   "accountTitle": "Compte",
   "waveLoading": "Recherche de titres similaires…",
+  "randomPick": "Choix aléatoire pour vous",
   "accountCaption": "Synchronisez votre bibliothèque entre appareils",
   "nickname": "Pseudo",
   "nicknameHint": "3–20 caractères : lettres, chiffres, . _ -",

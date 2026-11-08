@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
@@ -271,3 +272,26 @@ final trackLyricsProvider = FutureProvider<LyricsResult?>((ref) async {
     trackKey: '${track.source.name}:${track.id}',
   );
 });
+
+/// Picks one random track from a personalized pool, skipping the track that
+/// is playing right now and the ones the die rolled lately. When everything
+/// is excluded the plain pool is used, so the button never dead-ends; null
+/// means the pool itself was empty.
+MediaTrack? pickRandomTrack(
+  List<MediaTrack> pool, {
+  MediaTrack? current,
+  Set<String> avoidKeys = const {},
+  Random? random,
+}) {
+  if (pool.isEmpty) return null;
+  String keyOf(MediaTrack track) => '${track.source.name}:${track.id}';
+  final currentKey = current == null ? null : keyOf(current);
+  final candidates = [
+    for (final track in pool)
+      if (keyOf(track) != currentKey && !avoidKeys.contains(keyOf(track)))
+        track,
+  ];
+  final options = candidates.isNotEmpty ? candidates : pool;
+  final dice = random ?? Random();
+  return options[dice.nextInt(options.length)];
+}

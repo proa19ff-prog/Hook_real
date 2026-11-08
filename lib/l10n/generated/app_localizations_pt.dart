@@ -895,6 +895,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get waveLoading => 'Encontrando músicas parecidas…';
 
   @override
+  String get randomPick => 'Escolha aleatória para você';
+
+  @override
   String get accountCaption => 'Sincronize sua biblioteca entre dispositivos';
 
   @override

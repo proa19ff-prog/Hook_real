@@ -273,6 +273,7 @@
   "updatesTitle": "Updates",
   "accountTitle": "Account",
   "waveLoading": "Finding similar tracks…",
+  "randomPick": "Random pick for you",
   "accountCaption": "Sync your library across devices",
   "nickname": "Nickname",
   "nicknameHint": "3–20 characters: letters, digits, . _ -",

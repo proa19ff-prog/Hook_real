@@ -30,11 +30,42 @@ class FullscreenPlayer extends ConsumerStatefulWidget {
 class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
   bool _showLyrics = false;
   bool _isChangingTrack = false;
+  bool _randomBusy = false;
+  final Set<String> _recentRandomKeys = <String>{};
   String? _refreshedDownloadKey;
   final _trackTransitionKey = GlobalKey<SwipeTrackTransitionState>();
 
   String _trackKey(MediaTrack? track) =>
       track == null ? 'empty' : '${track.source.name}:${track.id}';
+
+  /// Rolls the dice over the listener's personalized pool and starts a wave
+  /// from the winner, so the music keeps flowing after the picked track.
+  Future<void> _playRandomPick() async {
+    if (_randomBusy) return;
+    setState(() => _randomBusy = true);
+    try {
+      final pool = await ref
+          .read(recommendationServiceProvider)
+          .getPersonalizedRecommendations(limit: 40)
+          .timeout(const Duration(seconds: 20));
+      final track = pickRandomTrack(
+        pool,
+        current: ref.read(currentTrackProvider),
+        avoidKeys: _recentRandomKeys,
+      );
+      if (track == null || !mounted) return;
+      final key = '${track.source.name}:${track.id}';
+      if (_recentRandomKeys.length >= 6) {
+        _recentRandomKeys.remove(_recentRandomKeys.first);
+      }
+      _recentRandomKeys.add(key);
+      await ref.read(queueProvider.notifier).startWave(track);
+    } catch (_) {
+      // The profile is unreachable right now; the player stays as it was.
+    } finally {
+      if (mounted) setState(() => _randomBusy = false);
+    }
+  }
 
   void _showQueueSheet() {
     final strings = AppLocalizations.of(context);
@@ -331,6 +362,25 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                             : isFailed
                                             ? Colors.redAccent
                                             : text,
+                                      ),
+                              ),
+                              IconButton(
+                                tooltip: strings.randomPick,
+                                onPressed: _randomBusy
+                                    ? null
+                                    : _playRandomPick,
+                                icon: _randomBusy
+                                    ? SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: text,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.casino_outlined,
+                                        color: text,
                                       ),
                               ),
                               IconButton(

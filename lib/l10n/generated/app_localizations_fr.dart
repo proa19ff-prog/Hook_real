@@ -900,6 +900,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get waveLoading => 'Recherche de titres similaires…';
 
   @override
+  String get randomPick => 'Choix aléatoire pour vous';
+
+  @override
   String get accountCaption =>
       'Synchronisez votre bibliothèque entre appareils';
 

@@ -1676,6 +1676,12 @@ abstract class AppLocalizations {
   /// **'Finding similar tracks…'**
   String get waveLoading;
 
+  /// No description provided for @randomPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Random pick for you'**
+  String get randomPick;
+
   /// No description provided for @accountCaption.
   ///
   /// In en, this message translates to:

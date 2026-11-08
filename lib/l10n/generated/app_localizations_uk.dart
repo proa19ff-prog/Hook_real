@@ -899,6 +899,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get waveLoading => 'Шукаємо схожі треки…';
 
   @override
+  String get randomPick => 'Випадкова рекомендація';
+
+  @override
   String get accountCaption => 'Синхронізація бібліотеки між пристроями';
 
   @override

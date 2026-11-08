@@ -885,6 +885,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get waveLoading => 'मिलते-जुलते गाने खोजे जा रहे हैं…';
 
   @override
+  String get randomPick => 'आपके लिए यादृच्छिक चयन';
+
+  @override
   String get accountCaption => 'अपनी लाइब्रेरी डिवाइसेस के बीच सिंक करें';
 
   @override

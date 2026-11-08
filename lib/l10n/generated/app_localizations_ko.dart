@@ -855,6 +855,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get waveLoading => '비슷한 곡을 찾고 있어요…';
 
   @override
+  String get randomPick => '랜덤 추천';
+
+  @override
   String get accountCaption => '기기 간에 라이브러리 동기화';
 
   @override

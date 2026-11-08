@@ -893,6 +893,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waveLoading => 'Finding similar tracks…';
 
   @override
+  String get randomPick => 'Random pick for you';
+
+  @override
   String get accountCaption => 'Sync your library across devices';
 
   @override

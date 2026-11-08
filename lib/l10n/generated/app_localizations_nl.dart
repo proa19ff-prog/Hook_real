@@ -899,6 +899,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get waveLoading => 'Vergelijkbare nummers zoeken…';
 
   @override
+  String get randomPick => 'Willekeurige keuze voor jou';
+
+  @override
   String get accountCaption => 'Synchroniseer je bibliotheek tussen apparaten';
 
   @override

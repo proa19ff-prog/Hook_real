@@ -890,6 +890,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get waveLoading => 'একই রকম গান খোঁজা হচ্ছে…';
 
   @override
+  String get randomPick => 'আপনার জন্য এলোমেলো পছন্দ';
+
+  @override
   String get accountCaption => 'আপনার লাইব্রেরি ডিভাইসের মধ্যে সিঙ্ক করুন';
 
   @override

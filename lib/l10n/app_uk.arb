@@ -256,6 +256,7 @@
   "updatesTitle": "Оновлення",
   "accountTitle": "Акаунт",
   "waveLoading": "Шукаємо схожі треки…",
+  "randomPick": "Випадкова рекомендація",
   "accountCaption": "Синхронізація бібліотеки між пристроями",
   "nickname": "Нік",
   "nicknameHint": "3–20 символів: букви, цифри, . _ -",

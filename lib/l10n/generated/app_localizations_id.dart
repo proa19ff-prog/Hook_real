@@ -892,6 +892,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get waveLoading => 'Mencari lagu yang mirip…';
 
   @override
+  String get randomPick => 'Pilihan acak untukmu';
+
+  @override
   String get accountCaption => 'Sinkronkan pustakamu antar perangkat';
 
   @override

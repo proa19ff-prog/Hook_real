@@ -860,6 +860,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get waveLoading => '似た曲を探しています…';
 
   @override
+  String get randomPick => 'ランダムに選ぶ';
+
+  @override
   String get accountCaption => 'ライブラリをデバイス間で同期';
 
   @override

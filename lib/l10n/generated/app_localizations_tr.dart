@@ -893,6 +893,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get waveLoading => 'Benzer şarkılar bulunuyor…';
 
   @override
+  String get randomPick => 'Senin için rastgele seçim';
+
+  @override
   String get accountCaption => 'Kitaplığını cihazlar arasında eşitle';
 
   @override
