@@ -8,10 +8,10 @@
 /// Paste the values from the Supabase dashboard → Project Settings → API.
 abstract final class AccountConfig {
   /// `https://<project-ref>.supabase.co`
-  static const String supabaseUrl = 'https://vnosbjzgrxjmutlgnuu.supabase.co';
+  static const String supabaseUrl = 'https://jmemvsxtragmklosehcp.supabase.co';
 
   /// The `anon` / `publishable` public key.
-  static const String supabaseAnonKey = '';
+  static const String supabaseAnonKey = 'sb_publishable_n-j-N2PZMIXagkNzyauY8A_0tY3BIls';
 
   static bool get isConfigured =>
       supabaseUrl.startsWith('https://') && supabaseAnonKey.isNotEmpty;
