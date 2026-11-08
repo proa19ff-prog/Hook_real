@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+import 'updates_section.dart';
 
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/supported_languages.dart';
@@ -190,6 +191,8 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _editRemoteResolver(context, ref, colors),
                   ),
+                  const SizedBox(height: 12),
+                  const UpdatesSection(),
                 ],
               ),
             ),

@@ -851,6 +851,46 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackActions => 'トラックの操作';
 
   @override
+  String get updatesTitle => 'アップデート';
+
+  @override
+  String currentVersion(String version) {
+    return 'バージョン $version';
+  }
+
+  @override
+  String get checkForUpdates => '更新を確認';
+
+  @override
+  String get checkingForUpdates => '確認中…';
+
+  @override
+  String get upToDate => '最新版をご利用中です';
+
+  @override
+  String updateAvailable(String version) {
+    return 'バージョン $version が利用可能';
+  }
+
+  @override
+  String get downloadingUpdate => 'アップデートをダウンロード中…';
+
+  @override
+  String get installUpdate => 'インストール';
+
+  @override
+  String get updateCheckFailed => '更新を確認できませんでした。通信を確認してください。';
+
+  @override
+  String get installPermissionNeeded =>
+      'Hook によるアプリのインストールを許可して、もう一度インストールをタップしてください。';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'ダウンロード';
 
   @override

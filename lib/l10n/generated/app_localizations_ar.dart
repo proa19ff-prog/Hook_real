@@ -880,6 +880,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String get trackActions => 'إجراءات المقطوعة';
 
   @override
+  String get updatesTitle => 'التحديثات';
+
+  @override
+  String currentVersion(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get checkForUpdates => 'التحقق من التحديثات';
+
+  @override
+  String get checkingForUpdates => 'جارٍ التحقق…';
+
+  @override
+  String get upToDate => 'لديك أحدث إصدار';
+
+  @override
+  String updateAvailable(String version) {
+    return 'الإصدار $version متاح';
+  }
+
+  @override
+  String get downloadingUpdate => 'جارٍ تنزيل التحديث…';
+
+  @override
+  String get installUpdate => 'تثبيت';
+
+  @override
+  String get updateCheckFailed => 'تعذّر التحقق من التحديثات. تحقق من اتصالك.';
+
+  @override
+  String get installPermissionNeeded =>
+      'اسمح لـ Hook بتثبيت التطبيقات ثم اضغط تثبيت مرة أخرى.';
+
+  @override
+  String updateSize(String size) {
+    return '$size م.ب';
+  }
+
+  @override
   String get download => 'تنزيل';
 
   @override

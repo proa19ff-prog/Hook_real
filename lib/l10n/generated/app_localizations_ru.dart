@@ -889,6 +889,47 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trackActions => 'Действия с треком';
 
   @override
+  String get updatesTitle => 'Обновления';
+
+  @override
+  String currentVersion(String version) {
+    return 'Версия $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Проверить обновления';
+
+  @override
+  String get checkingForUpdates => 'Проверяем…';
+
+  @override
+  String get upToDate => 'Установлена последняя версия';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Доступна версия $version';
+  }
+
+  @override
+  String get downloadingUpdate => 'Скачивание обновления…';
+
+  @override
+  String get installUpdate => 'Установить';
+
+  @override
+  String get updateCheckFailed =>
+      'Не удалось проверить обновления. Проверьте интернет.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Разрешите Hook установку приложений и нажмите «Установить» снова.';
+
+  @override
+  String updateSize(String size) {
+    return '$size МБ';
+  }
+
+  @override
   String get download => 'Скачать';
 
   @override

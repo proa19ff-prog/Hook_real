@@ -889,6 +889,47 @@ class AppLocalizationsIt extends AppLocalizations {
   String get trackActions => 'Azioni del brano';
 
   @override
+  String get updatesTitle => 'Aggiornamenti';
+
+  @override
+  String currentVersion(String version) {
+    return 'Versione $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Cerca aggiornamenti';
+
+  @override
+  String get checkingForUpdates => 'Ricerca in corso…';
+
+  @override
+  String get upToDate => 'Hai l\'ultima versione';
+
+  @override
+  String updateAvailable(String version) {
+    return 'La versione $version è disponibile';
+  }
+
+  @override
+  String get downloadingUpdate => 'Download dell\'aggiornamento…';
+
+  @override
+  String get installUpdate => 'Installa';
+
+  @override
+  String get updateCheckFailed =>
+      'Impossibile verificare gli aggiornamenti. Controlla la connessione.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Consenti a Hook di installare app e tocca di nuovo Installa.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Scarica';
 
   @override

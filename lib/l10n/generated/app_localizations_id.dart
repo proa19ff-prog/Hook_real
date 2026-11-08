@@ -883,6 +883,47 @@ class AppLocalizationsId extends AppLocalizations {
   String get trackActions => 'Tindakan lagu';
 
   @override
+  String get updatesTitle => 'Pembaruan';
+
+  @override
+  String currentVersion(String version) {
+    return 'Versi $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Periksa pembaruan';
+
+  @override
+  String get checkingForUpdates => 'Memeriksa…';
+
+  @override
+  String get upToDate => 'Kamu memakai versi terbaru';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Versi $version tersedia';
+  }
+
+  @override
+  String get downloadingUpdate => 'Mengunduh pembaruan…';
+
+  @override
+  String get installUpdate => 'Instal';
+
+  @override
+  String get updateCheckFailed =>
+      'Gagal memeriksa pembaruan. Periksa internet.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Izinkan Hook memasang aplikasi lalu ketuk Instal lagi.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Unduh';
 
   @override

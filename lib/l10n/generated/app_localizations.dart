@@ -1658,6 +1658,72 @@ abstract class AppLocalizations {
   /// **'Track actions'**
   String get trackActions;
 
+  /// No description provided for @updatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get updatesTitle;
+
+  /// No description provided for @currentVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String currentVersion(String version);
+
+  /// No description provided for @checkForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get checkForUpdates;
+
+  /// No description provided for @checkingForUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get checkingForUpdates;
+
+  /// No description provided for @upToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on the latest version'**
+  String get upToDate;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String updateAvailable(String version);
+
+  /// No description provided for @downloadingUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update…'**
+  String get downloadingUpdate;
+
+  /// No description provided for @installUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get installUpdate;
+
+  /// No description provided for @updateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check for updates. Check your internet.'**
+  String get updateCheckFailed;
+
+  /// No description provided for @installPermissionNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Hook to install unknown apps, then tap Install again.'**
+  String get installPermissionNeeded;
+
+  /// No description provided for @updateSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String updateSize(String size);
+
   /// No description provided for @download.
   ///
   /// In en, this message translates to:

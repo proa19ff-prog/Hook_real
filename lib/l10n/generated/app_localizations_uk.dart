@@ -890,6 +890,47 @@ class AppLocalizationsUk extends AppLocalizations {
   String get trackActions => 'Дії з треком';
 
   @override
+  String get updatesTitle => 'Оновлення';
+
+  @override
+  String currentVersion(String version) {
+    return 'Версія $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Перевірити оновлення';
+
+  @override
+  String get checkingForUpdates => 'Перевірка…';
+
+  @override
+  String get upToDate => 'Установлено останню версію';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Доступна версія $version';
+  }
+
+  @override
+  String get downloadingUpdate => 'Завантаження оновлення…';
+
+  @override
+  String get installUpdate => 'Встановити';
+
+  @override
+  String get updateCheckFailed =>
+      'Не вдалося перевірити оновлення. Перевірте інтернет.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Дозвольте Hook встановлювати програми та натисніть «Встановити» ще раз.';
+
+  @override
+  String updateSize(String size) {
+    return '$size МБ';
+  }
+
+  @override
   String get download => 'Завантажити';
 
   @override

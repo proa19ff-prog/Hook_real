@@ -876,6 +876,46 @@ class AppLocalizationsHi extends AppLocalizations {
   String get trackActions => 'ट्रैक क्रियाएँ';
 
   @override
+  String get updatesTitle => 'अपडेट';
+
+  @override
+  String currentVersion(String version) {
+    return 'संस्करण $version';
+  }
+
+  @override
+  String get checkForUpdates => 'अपडेट जांचें';
+
+  @override
+  String get checkingForUpdates => 'जांच हो रही है…';
+
+  @override
+  String get upToDate => 'आपके पास नवीनतम संस्करण है';
+
+  @override
+  String updateAvailable(String version) {
+    return 'संस्करण $version उपलब्ध है';
+  }
+
+  @override
+  String get downloadingUpdate => 'अपडेट डाउनलोड हो रहा है…';
+
+  @override
+  String get installUpdate => 'इंस्टॉल करें';
+
+  @override
+  String get updateCheckFailed => 'अपडेट जांच नहीं हो सकी। इंटरनेट जांचें।';
+
+  @override
+  String get installPermissionNeeded =>
+      'Hook को ऐप्स इंस्टॉल करने की अनुमति दें और फिर से इंस्टॉल करें।';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'डाउनलोड करें';
 
   @override

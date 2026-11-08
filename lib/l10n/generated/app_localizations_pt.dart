@@ -886,6 +886,47 @@ class AppLocalizationsPt extends AppLocalizations {
   String get trackActions => 'Ações da faixa';
 
   @override
+  String get updatesTitle => 'Atualizações';
+
+  @override
+  String currentVersion(String version) {
+    return 'Versão $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Verificar atualizações';
+
+  @override
+  String get checkingForUpdates => 'Verificando…';
+
+  @override
+  String get upToDate => 'Você está na versão mais recente';
+
+  @override
+  String updateAvailable(String version) {
+    return 'A versão $version está disponível';
+  }
+
+  @override
+  String get downloadingUpdate => 'Baixando atualização…';
+
+  @override
+  String get installUpdate => 'Instalar';
+
+  @override
+  String get updateCheckFailed =>
+      'Não foi possível verificar atualizações. Verifique a conexão.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Permita que o Hook instale aplicativos e toque em Instalar novamente.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Baixar';
 
   @override

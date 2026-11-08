@@ -828,6 +828,45 @@ class AppLocalizationsZh extends AppLocalizations {
   String get trackActions => '曲目操作';
 
   @override
+  String get updatesTitle => '更新';
+
+  @override
+  String currentVersion(String version) {
+    return '版本 $version';
+  }
+
+  @override
+  String get checkForUpdates => '检查更新';
+
+  @override
+  String get checkingForUpdates => '检查中…';
+
+  @override
+  String get upToDate => '已是最新版本';
+
+  @override
+  String updateAvailable(String version) {
+    return '版本 $version 可用';
+  }
+
+  @override
+  String get downloadingUpdate => '正在下载更新…';
+
+  @override
+  String get installUpdate => '安装';
+
+  @override
+  String get updateCheckFailed => '无法检查更新。请检查网络。';
+
+  @override
+  String get installPermissionNeeded => '允许 Hook 安装应用后再次点按“安装”。';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => '下载';
 
   @override

@@ -846,6 +846,45 @@ class AppLocalizationsKo extends AppLocalizations {
   String get trackActions => '트랙 작업';
 
   @override
+  String get updatesTitle => '업데이트';
+
+  @override
+  String currentVersion(String version) {
+    return '버전 $version';
+  }
+
+  @override
+  String get checkForUpdates => '업데이트 확인';
+
+  @override
+  String get checkingForUpdates => '확인 중…';
+
+  @override
+  String get upToDate => '최신 버전을 사용 중입니다';
+
+  @override
+  String updateAvailable(String version) {
+    return '버전 $version 사용 가능';
+  }
+
+  @override
+  String get downloadingUpdate => '업데이트 다운로드 중…';
+
+  @override
+  String get installUpdate => '설치';
+
+  @override
+  String get updateCheckFailed => '업데이트를 확인하지 못했습니다. 인터넷을 확인하세요.';
+
+  @override
+  String get installPermissionNeeded => 'Hook이 앱을 설치하도록 허용한 뒤 다시 설치를 누르세요.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => '다운로드';
 
   @override

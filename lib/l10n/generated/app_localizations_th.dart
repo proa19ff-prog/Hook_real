@@ -869,6 +869,46 @@ class AppLocalizationsTh extends AppLocalizations {
   String get trackActions => 'การกระทำกับเพลง';
 
   @override
+  String get updatesTitle => 'อัปเดต';
+
+  @override
+  String currentVersion(String version) {
+    return 'เวอร์ชัน $version';
+  }
+
+  @override
+  String get checkForUpdates => 'ตรวจสอบอัปเดต';
+
+  @override
+  String get checkingForUpdates => 'กำลังตรวจสอบ…';
+
+  @override
+  String get upToDate => 'คุณใช้เวอร์ชันล่าสุดแล้ว';
+
+  @override
+  String updateAvailable(String version) {
+    return 'เวอร์ชัน $version พร้อมใช้งาน';
+  }
+
+  @override
+  String get downloadingUpdate => 'กำลังดาวน์โหลดอัปเดต…';
+
+  @override
+  String get installUpdate => 'ติดตั้ง';
+
+  @override
+  String get updateCheckFailed => 'ตรวจสอบอัปเดตไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต';
+
+  @override
+  String get installPermissionNeeded =>
+      'อนุญาตให้ Hook ติดตั้งแอปแล้วแตะติดตั้งอีกครั้ง';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'ดาวน์โหลด';
 
   @override

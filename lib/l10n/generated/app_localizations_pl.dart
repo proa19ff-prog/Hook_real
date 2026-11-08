@@ -888,6 +888,47 @@ class AppLocalizationsPl extends AppLocalizations {
   String get trackActions => 'Akcje utworu';
 
   @override
+  String get updatesTitle => 'Aktualizacje';
+
+  @override
+  String currentVersion(String version) {
+    return 'Wersja $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Sprawdź aktualizacje';
+
+  @override
+  String get checkingForUpdates => 'Sprawdzanie…';
+
+  @override
+  String get upToDate => 'Masz najnowszą wersję';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Dostępna wersja $version';
+  }
+
+  @override
+  String get downloadingUpdate => 'Pobieranie aktualizacji…';
+
+  @override
+  String get installUpdate => 'Zainstaluj';
+
+  @override
+  String get updateCheckFailed =>
+      'Nie udało się sprawdzić aktualizacji. Sprawdź internet.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Zezwól Hook na instalację aplikacji i dotknij Zainstaluj ponownie.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Pobierz';
 
   @override

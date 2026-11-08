@@ -890,6 +890,47 @@ class AppLocalizationsNl extends AppLocalizations {
   String get trackActions => 'Nummeracties';
 
   @override
+  String get updatesTitle => 'Updates';
+
+  @override
+  String currentVersion(String version) {
+    return 'Versie $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Controleren op updates';
+
+  @override
+  String get checkingForUpdates => 'Controleren…';
+
+  @override
+  String get upToDate => 'Je hebt de nieuwste versie';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Versie $version is beschikbaar';
+  }
+
+  @override
+  String get downloadingUpdate => 'Update downloaden…';
+
+  @override
+  String get installUpdate => 'Installeren';
+
+  @override
+  String get updateCheckFailed =>
+      'Kon niet controleren op updates. Controleer je internet.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Sta Hook toe apps te installeren en tik opnieuw op Installeren.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Downloaden';
 
   @override

@@ -881,6 +881,47 @@ class AppLocalizationsBn extends AppLocalizations {
   String get trackActions => 'ট্র্যাক অ্যাকশন';
 
   @override
+  String get updatesTitle => 'আপডেট';
+
+  @override
+  String currentVersion(String version) {
+    return 'সংস্করণ $version';
+  }
+
+  @override
+  String get checkForUpdates => 'আপডেট পরীক্ষা করুন';
+
+  @override
+  String get checkingForUpdates => 'পরীক্ষা চলছে…';
+
+  @override
+  String get upToDate => 'আপনার কাছে সর্বশেষ সংস্করণ আছে';
+
+  @override
+  String updateAvailable(String version) {
+    return 'সংস্করণ $version উপলব্ধ';
+  }
+
+  @override
+  String get downloadingUpdate => 'আপডেট ডাউনলোড হচ্ছে…';
+
+  @override
+  String get installUpdate => 'ইনস্টল করুন';
+
+  @override
+  String get updateCheckFailed =>
+      'আপডেট পরীক্ষা করা যায়নি। ইন্টারনেট পরীক্ষা করুন।';
+
+  @override
+  String get installPermissionNeeded =>
+      'Hook-কে অ্যাপ ইনস্টল করার অনুমতি দিন এবং আবার ইনস্টল চাপুন।';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'ডাউনলোড করুন';
 
   @override

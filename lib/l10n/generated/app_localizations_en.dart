@@ -884,6 +884,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackActions => 'Track actions';
 
   @override
+  String get updatesTitle => 'Updates';
+
+  @override
+  String currentVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Check for updates';
+
+  @override
+  String get checkingForUpdates => 'Checking…';
+
+  @override
+  String get upToDate => 'You\'re on the latest version';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String get downloadingUpdate => 'Downloading update…';
+
+  @override
+  String get installUpdate => 'Install';
+
+  @override
+  String get updateCheckFailed =>
+      'Couldn\'t check for updates. Check your internet.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Allow Hook to install unknown apps, then tap Install again.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Download';
 
   @override

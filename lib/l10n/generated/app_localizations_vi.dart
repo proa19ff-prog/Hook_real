@@ -882,6 +882,46 @@ class AppLocalizationsVi extends AppLocalizations {
   String get trackActions => 'Thao tác bản nhạc';
 
   @override
+  String get updatesTitle => 'Cập nhật';
+
+  @override
+  String currentVersion(String version) {
+    return 'Phiên bản $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Kiểm tra cập nhật';
+
+  @override
+  String get checkingForUpdates => 'Đang kiểm tra…';
+
+  @override
+  String get upToDate => 'Bạn đang dùng phiên bản mới nhất';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Phiên bản $version đã có sẵn';
+  }
+
+  @override
+  String get downloadingUpdate => 'Đang tải bản cập nhật…';
+
+  @override
+  String get installUpdate => 'Cài đặt';
+
+  @override
+  String get updateCheckFailed => 'Không thể kiểm tra cập nhật. Kiểm tra mạng.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Cho phép Hook cài đặt ứng dụng rồi nhấn Cài đặt lần nữa.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'Tải xuống';
 
   @override

@@ -93,6 +93,20 @@ class LocalStorageService {
   bool hasLyricsOffset(String trackKey) =>
       _lyricsOffsets().containsKey(trackKey);
 
+  // --- Update checks -------------------------------------------------------
+
+  static const _updateLastCheckKey = 'hook_update_last_check';
+
+  DateTime? get lastUpdateCheck {
+    final ms = _prefs.getInt(_updateLastCheckKey);
+    return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
+  }
+
+  Future<void> markUpdateChecked() => _prefs.setInt(
+        _updateLastCheckKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+
   Future<void> saveLyricsOffset(String trackKey, double seconds) async {
     if (!seconds.isFinite) return;
     final offsets = _lyricsOffsets()..remove(trackKey);

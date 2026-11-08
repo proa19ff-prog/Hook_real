@@ -884,6 +884,47 @@ class AppLocalizationsTr extends AppLocalizations {
   String get trackActions => 'Parça eylemleri';
 
   @override
+  String get updatesTitle => 'Güncellemeler';
+
+  @override
+  String currentVersion(String version) {
+    return 'Sürüm $version';
+  }
+
+  @override
+  String get checkForUpdates => 'Güncellemeleri kontrol et';
+
+  @override
+  String get checkingForUpdates => 'Kontrol ediliyor…';
+
+  @override
+  String get upToDate => 'En son sürümü kullanıyorsun';
+
+  @override
+  String updateAvailable(String version) {
+    return '$version sürümü mevcut';
+  }
+
+  @override
+  String get downloadingUpdate => 'Güncelleme indiriliyor…';
+
+  @override
+  String get installUpdate => 'Yükle';
+
+  @override
+  String get updateCheckFailed =>
+      'Güncellemeler kontrol edilemedi. İnternetini kontrol et.';
+
+  @override
+  String get installPermissionNeeded =>
+      'Hook\'un uygulama yüklemesine izin ver ve tekrar Yükle\'ye dokun.';
+
+  @override
+  String updateSize(String size) {
+    return '$size MB';
+  }
+
+  @override
   String get download => 'İndir';
 
   @override
