@@ -281,16 +281,26 @@ void main() {
   );
 
   testOnPlatform(
-    'unsupported platforms offer pasted CSV instead of a dead file button',
+    'windows offers the native file picker like Android',
+    (tester) async {
+      await openSheet(tester);
+      expect(find.byKey(const ValueKey('import-mode-file')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+    platform: TargetPlatform.windows,
+  );
+
+  testOnPlatform(
+    'macOS still falls back to pasted CSV without a dead file button',
     (tester) async {
       await openSheet(tester);
       expect(find.byKey(const ValueKey('import-mode-file')), findsNothing);
       expect(
-        find.textContaining('Выбор файла доступен на Android'),
+        find.textContaining('Выбор файла доступен'),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
     },
-    platform: TargetPlatform.windows,
+    platform: TargetPlatform.macOS,
   );
 }

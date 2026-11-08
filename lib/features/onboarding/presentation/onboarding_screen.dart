@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -69,11 +70,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       onSelect: _selectLanguage,
                       onSkip: _finish,
                     ),
-                    _MicrogPage(
-                      theme: theme,
-                      onFinish: _finish,
-                      onDownload: _openMicrog,
-                    ),
+                    // MicroG setup is an Android story; desktop builds skip
+                    // straight to the end of onboarding.
+                    if (defaultTargetPlatform == TargetPlatform.android)
+                      _MicrogPage(
+                        theme: theme,
+                        onFinish: _finish,
+                        onDownload: _openMicrog,
+                      ),
                   ],
                 ),
                 Positioned(

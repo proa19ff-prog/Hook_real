@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -59,10 +61,15 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
   File? _apkFile;
 
   /// App-specific external storage keeps the APK readable by the system
-  /// installer through the FileProvider mapping in file_paths.xml.
-  static Future<Directory> _defaultDirectory() async =>
-      await getExternalStorageDirectory() ??
-      await getApplicationSupportDirectory();
+  /// installer through the FileProvider mapping in file_paths.xml. Desktop
+  /// builds have no external storage; their support directory is used as is.
+  static Future<Directory> _defaultDirectory() async {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      return getApplicationSupportDirectory();
+    }
+    return await getExternalStorageDirectory() ??
+        await getApplicationSupportDirectory();
+  }
 
   /// Manual check from the settings screen. [force] bypasses the 6-hour
   /// gate used by the silent startup check.
@@ -100,8 +107,10 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
         '${dir.path}${Platform.pathSeparator}updates',
       );
       if (!await updatesDir.exists()) await updatesDir.create(recursive: true);
+      final extension =
+          defaultTargetPlatform == TargetPlatform.android ? 'apk' : 'zip';
       _apkFile = File(
-        '${updatesDir.path}${Platform.pathSeparator}hook-${update.version}.apk',
+        '${updatesDir.path}${Platform.pathSeparator}hook-${update.version}.$extension',
       );
       await _dio.download(
         update.apkUrl,
@@ -135,8 +144,27 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
     }
   }
 
-  /// Opens the system installer for the APK already on disk.
+  /// Opens the system installer for the APK already on disk. Desktop builds
+  /// have no in-place self-update (a running exe cannot replace itself), so
+  /// they hand off to the GitHub releases page instead.
   Future<void> openInstaller() async {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      try {
+        await launchUrl(
+          Uri.parse(UpdateService.releasesPageUrl),
+          mode: LaunchMode.externalApplication,
+        );
+      } catch (_) {
+        if (mounted) {
+          state = UpdateState(
+            stage: UpdateStage.failed,
+            update: state.update,
+            failure: 'install',
+          );
+        }
+      }
+      return;
+    }
     final path = _apkFile?.path;
     if (path == null) return;
     String result;

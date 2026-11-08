@@ -32,6 +32,9 @@ class UpdateService {
     this._storage,
   }) : _dio = dio ?? Dio();
 
+  static const releasesPageUrl =
+      'https://github.com/proa19ff-prog/Hook_real/releases/latest';
+
   static const repoApiUrl =
       'https://api.github.com/repos/proa19ff-prog/Hook_real/releases/latest';
   static const checkInterval = Duration(hours: 6);
@@ -85,7 +88,8 @@ class UpdateService {
   }
 
   /// Picks the release payload: tag becomes the version, the APK asset for
-  /// this device's ABI wins (universal is the fallback).
+  /// this device's ABI wins (universal is the fallback). Windows takes the
+  /// `windows-x64` zip.
   @visibleForTesting
   static AppUpdate? parseRelease(Map<String, dynamic> release) {
     final tag = (release['tag_name'] as String? ?? '').trim();
@@ -94,6 +98,8 @@ class UpdateService {
     final draft = release['draft'] == true;
     if (draft) return null;
 
+    final wantedExtension =
+        defaultTargetPlatform == TargetPlatform.android ? '.apk' : '.zip';
     final assets = (release['assets'] as List? ?? const [])
         .whereType<Map<String, dynamic>>()
         .map((asset) => (
@@ -101,7 +107,10 @@ class UpdateService {
               url: asset['browser_download_url']?.toString() ?? '',
               bytes: (asset['size'] as num?)?.toInt() ?? 0,
             ))
-        .where((asset) => asset.url.isNotEmpty && asset.name.endsWith('.apk'))
+        .where(
+          (asset) =>
+              asset.url.isNotEmpty && asset.name.endsWith(wantedExtension),
+        )
         .toList();
     if (assets.isEmpty) return null;
 
@@ -127,9 +136,11 @@ class UpdateService {
 
   /// Which release-asset ABI this device runs, from the Dart VM banner
   /// ("android_arm64", "android_armv7", "android_x64"). No native channel
-  /// needed for a choice the release names already encode.
+  /// needed for a choice the release names already encode. Windows builds
+  /// track the `windows-x64` zip asset instead of an APK.
   @visibleForTesting
   static String currentAbi() {
+    if (defaultTargetPlatform != TargetPlatform.android) return 'windows-x64';
     final banner = Platform.version.toLowerCase();
     if (banner.contains('x86_64') || banner.contains('android_x64')) {
       return 'x86_64';

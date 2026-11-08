@@ -75,14 +75,19 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
   /// ExoPlayer waits for 2.5 s of audio before starting by default. Half a
   /// second is enough for SoundCloud's CDN and starts playback sooner.
-  static const _loadConfiguration = AudioLoadConfiguration(
-    androidLoadControl: AndroidLoadControl(
-      minBufferDuration: Duration(seconds: 15),
-      maxBufferDuration: Duration(seconds: 50),
-      bufferForPlaybackDuration: Duration(milliseconds: 500),
-      bufferForPlaybackAfterRebufferDuration: Duration(seconds: 2),
-    ),
-  );
+  /// The Android tuning is meaningless on desktop engines (WinRT MediaPlayer),
+  /// which are given no custom load configuration at all.
+  static AudioLoadConfiguration? get _loadConfiguration =>
+      Platform.isAndroid
+      ? const AudioLoadConfiguration(
+          androidLoadControl: AndroidLoadControl(
+            minBufferDuration: Duration(seconds: 15),
+            maxBufferDuration: Duration(seconds: 50),
+            bufferForPlaybackDuration: Duration(milliseconds: 500),
+            bufferForPlaybackAfterRebufferDuration: Duration(seconds: 2),
+          ),
+        )
+      : null;
   StreamSubscription<void>? _noisySubscription;
   StreamSubscription<void>? _favoritesSubscription;
   StreamSubscription<PlayerState>? _playerStateSubscription;
@@ -302,15 +307,19 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   }
 
   Future<void> _initialize() async {
-    final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.music());
+    if (Platform.isAndroid) {
+      // audio_session has no desktop implementation; Windows playback works
+      // without focus management (the OS mixer owns it).
+      final session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      // Auto-pause if headphones are unplugged
+      _noisySubscription = session.becomingNoisyEventStream.listen((_) {
+        pause();
+      });
+    }
     // Effects are optional; their hardware availability never gates playback.
     unawaited(equalizer.attachPlayer(_player));
 
-    // Auto-pause if headphones are unplugged
-    _noisySubscription = session.becomingNoisyEventStream.listen((_) {
-      pause();
-    });
     _favoritesSubscription = _storageService?.favoritesChanges.listen(
       (_) => _broadcastPlaybackState(),
     );
