@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/storage/audio_cache_manager.dart';
 import 'core/storage/local_storage_service.dart';
+import 'features/account/account_service.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
 import 'features/extractor/stream_resolver.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
   HttpOverrides.global = SelectiveYouTubeProxyHttpOverrides();
   if (kDebugMode) PlaybackDiagnostics.sink = debugPrint;
 
+  await AccountService.ensureInitialized();
   final storageService = await LocalStorageService.create();
   RemoteResolverSource.endpoint = storageService.getRemoteResolverUrl();
   final selectedLocale = storageService.getLocaleCode();

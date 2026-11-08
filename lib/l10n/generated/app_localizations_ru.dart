@@ -892,6 +892,71 @@ class AppLocalizationsRu extends AppLocalizations {
   String get updatesTitle => 'Обновления';
 
   @override
+  String get accountTitle => 'Аккаунт';
+
+  @override
+  String get accountCaption => 'Синхронизация библиотеки между устройствами';
+
+  @override
+  String get nickname => 'Ник';
+
+  @override
+  String get nicknameHint => '3–20 символов: буквы, цифры, . _ -';
+
+  @override
+  String get password => 'Пароль';
+
+  @override
+  String get passwordMinHint => 'Минимум 6 символов';
+
+  @override
+  String get signIn => 'Войти';
+
+  @override
+  String get signUp => 'Создать аккаунт';
+
+  @override
+  String get haveAccountToggle => 'Уже есть аккаунт? Войти';
+
+  @override
+  String get noAccountToggle => 'Нет аккаунта? Создать';
+
+  @override
+  String get signOut => 'Выйти';
+
+  @override
+  String get syncNow => 'Синхронизировать';
+
+  @override
+  String get syncing => 'Синхронизация…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Синхронизировано: $time';
+  }
+
+  @override
+  String get neverSynced => 'Ещё не синхронизировалось';
+
+  @override
+  String get errorNicknameTaken => 'Такой ник уже занят';
+
+  @override
+  String get errorNicknameInvalid => 'Ник: 3–20 символов, буквы/цифры/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Неверный ник или пароль';
+
+  @override
+  String get errorWeakPassword => 'Пароль слишком короткий';
+
+  @override
+  String get errorNetwork => 'Нет соединения';
+
+  @override
+  String get errorServer => 'Ошибка сервера, попробуйте позже';
+
+  @override
   String currentVersion(String version) {
     return 'Версия $version';
   }

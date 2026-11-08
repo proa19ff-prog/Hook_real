@@ -886,6 +886,71 @@ class AppLocalizationsId extends AppLocalizations {
   String get updatesTitle => 'Pembaruan';
 
   @override
+  String get accountTitle => 'Akun';
+
+  @override
+  String get accountCaption => 'Sinkronkan pustakamu antar perangkat';
+
+  @override
+  String get nickname => 'Nama panggilan';
+
+  @override
+  String get nicknameHint => '3–20 karakter: huruf, angka, . _ -';
+
+  @override
+  String get password => 'Kata sandi';
+
+  @override
+  String get passwordMinHint => 'Setidaknya 6 karakter';
+
+  @override
+  String get signIn => 'Masuk';
+
+  @override
+  String get signUp => 'Buat akun';
+
+  @override
+  String get haveAccountToggle => 'Sudah punya akun? Masuk';
+
+  @override
+  String get noAccountToggle => 'Belum punya akun? Buat satu';
+
+  @override
+  String get signOut => 'Keluar';
+
+  @override
+  String get syncNow => 'Sinkronkan sekarang';
+
+  @override
+  String get syncing => 'Menyinkronkan…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Tersinkron: $time';
+  }
+
+  @override
+  String get neverSynced => 'Belum pernah tersinkron';
+
+  @override
+  String get errorNicknameTaken => 'Nama panggilan itu sudah dipakai';
+
+  @override
+  String get errorNicknameInvalid => 'Nama: 3–20 karakter, huruf/angka/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Nama panggilan atau kata sandi salah';
+
+  @override
+  String get errorWeakPassword => 'Kata sandi terlalu pendek';
+
+  @override
+  String get errorNetwork => 'Tidak ada koneksi';
+
+  @override
+  String get errorServer => 'Galat server, coba lagi nanti';
+
+  @override
   String currentVersion(String version) {
     return 'Versi $version';
   }

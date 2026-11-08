@@ -889,6 +889,72 @@ class AppLocalizationsPt extends AppLocalizations {
   String get updatesTitle => 'Atualizações';
 
   @override
+  String get accountTitle => 'Conta';
+
+  @override
+  String get accountCaption => 'Sincronize sua biblioteca entre dispositivos';
+
+  @override
+  String get nickname => 'Apelido';
+
+  @override
+  String get nicknameHint => '3–20 caracteres: letras, dígitos, . _ -';
+
+  @override
+  String get password => 'Senha';
+
+  @override
+  String get passwordMinHint => 'Pelo menos 6 caracteres';
+
+  @override
+  String get signIn => 'Entrar';
+
+  @override
+  String get signUp => 'Criar conta';
+
+  @override
+  String get haveAccountToggle => 'Já tem uma conta? Entrar';
+
+  @override
+  String get noAccountToggle => 'Ainda não tem conta? Crie uma';
+
+  @override
+  String get signOut => 'Sair';
+
+  @override
+  String get syncNow => 'Sincronizar agora';
+
+  @override
+  String get syncing => 'Sincronizando…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Sincronizado: $time';
+  }
+
+  @override
+  String get neverSynced => 'Ainda não sincronizado';
+
+  @override
+  String get errorNicknameTaken => 'Esse apelido já está em uso';
+
+  @override
+  String get errorNicknameInvalid =>
+      'Apelido: 3–20 caracteres, letras/dígitos/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Apelido ou senha incorretos';
+
+  @override
+  String get errorWeakPassword => 'A senha é curta demais';
+
+  @override
+  String get errorNetwork => 'Sem conexão';
+
+  @override
+  String get errorServer => 'Erro do servidor, tente mais tarde';
+
+  @override
   String currentVersion(String version) {
     return 'Versão $version';
   }

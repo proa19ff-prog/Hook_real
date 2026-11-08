@@ -887,6 +887,71 @@ class AppLocalizationsTr extends AppLocalizations {
   String get updatesTitle => 'Güncellemeler';
 
   @override
+  String get accountTitle => 'Hesap';
+
+  @override
+  String get accountCaption => 'Kitaplığını cihazlar arasında eşitle';
+
+  @override
+  String get nickname => 'Takma ad';
+
+  @override
+  String get nicknameHint => '3–20 karakter: harfler, rakamlar, . _ -';
+
+  @override
+  String get password => 'Şifre';
+
+  @override
+  String get passwordMinHint => 'En az 6 karakter';
+
+  @override
+  String get signIn => 'Giriş yap';
+
+  @override
+  String get signUp => 'Hesap oluştur';
+
+  @override
+  String get haveAccountToggle => 'Zaten hesabın var mı? Giriş yap';
+
+  @override
+  String get noAccountToggle => 'Hesabın yok mu? Bir tane oluştur';
+
+  @override
+  String get signOut => 'Çıkış yap';
+
+  @override
+  String get syncNow => 'Şimdi eşitle';
+
+  @override
+  String get syncing => 'Eşitleniyor…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Eşitlendi: $time';
+  }
+
+  @override
+  String get neverSynced => 'Henüz eşitlenmedi';
+
+  @override
+  String get errorNicknameTaken => 'Bu takma ad zaten alınmış';
+
+  @override
+  String get errorNicknameInvalid => 'Takma ad: 3–20 karakter, harf/rakam/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Takma ad veya şifre hatalı';
+
+  @override
+  String get errorWeakPassword => 'Şifre çok kısa';
+
+  @override
+  String get errorNetwork => 'Bağlantı yok';
+
+  @override
+  String get errorServer => 'Sunucu hatası, daha sonra tekrar dene';
+
+  @override
   String currentVersion(String version) {
     return 'Sürüm $version';
   }

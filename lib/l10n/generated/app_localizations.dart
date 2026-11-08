@@ -1664,6 +1664,132 @@ abstract class AppLocalizations {
   /// **'Updates'**
   String get updatesTitle;
 
+  /// No description provided for @accountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountTitle;
+
+  /// No description provided for @accountCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync your library across devices'**
+  String get accountCaption;
+
+  /// No description provided for @nickname.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname'**
+  String get nickname;
+
+  /// No description provided for @nicknameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'3–20 characters: letters, digits, . _ -'**
+  String get nicknameHint;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @passwordMinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get passwordMinHint;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get signIn;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get signUp;
+
+  /// No description provided for @haveAccountToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get haveAccountToggle;
+
+  /// No description provided for @noAccountToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'No account yet? Create one'**
+  String get noAccountToggle;
+
+  /// No description provided for @signOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOut;
+
+  /// No description provided for @syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get syncNow;
+
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncing;
+
+  /// No description provided for @syncedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced: {time}'**
+  String syncedAt(String time);
+
+  /// No description provided for @neverSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Never synced yet'**
+  String get neverSynced;
+
+  /// No description provided for @errorNicknameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'That nickname is already taken'**
+  String get errorNicknameTaken;
+
+  /// No description provided for @errorNicknameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname: 3–20 characters, letters/digits/._-'**
+  String get errorNicknameInvalid;
+
+  /// No description provided for @errorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong nickname or password'**
+  String get errorInvalidCredentials;
+
+  /// No description provided for @errorWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is too short'**
+  String get errorWeakPassword;
+
+  /// No description provided for @errorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get errorNetwork;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error, try again later'**
+  String get errorServer;
+
   /// No description provided for @currentVersion.
   ///
   /// In en, this message translates to:

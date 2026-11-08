@@ -879,6 +879,71 @@ class AppLocalizationsHi extends AppLocalizations {
   String get updatesTitle => 'अपडेट';
 
   @override
+  String get accountTitle => 'खाता';
+
+  @override
+  String get accountCaption => 'अपनी लाइब्रेरी डिवाइसेस के बीच सिंक करें';
+
+  @override
+  String get nickname => 'उपनाम';
+
+  @override
+  String get nicknameHint => '3–20 वर्ण: अक्षर, अंक, . _ -';
+
+  @override
+  String get password => 'पासवर्ड';
+
+  @override
+  String get passwordMinHint => 'कम से कम 6 वर्ण';
+
+  @override
+  String get signIn => 'साइन इन';
+
+  @override
+  String get signUp => 'खाता बनाएँ';
+
+  @override
+  String get haveAccountToggle => 'पहले से खाता है? साइन इन करें';
+
+  @override
+  String get noAccountToggle => 'अभी खाता नहीं है? बनाएँ';
+
+  @override
+  String get signOut => 'साइन आउट';
+
+  @override
+  String get syncNow => 'अभी सिंक करें';
+
+  @override
+  String get syncing => 'सिंक हो रहा है…';
+
+  @override
+  String syncedAt(String time) {
+    return 'सिंक हुआ: $time';
+  }
+
+  @override
+  String get neverSynced => 'अभी तक सिंक नहीं हुआ';
+
+  @override
+  String get errorNicknameTaken => 'यह उपनाम पहले से लिया गया है';
+
+  @override
+  String get errorNicknameInvalid => 'उपनाम: 3–20 वर्ण, अक्षर/अंक/._-';
+
+  @override
+  String get errorInvalidCredentials => 'उपनाम या पासवर्ड गलत है';
+
+  @override
+  String get errorWeakPassword => 'पासवर्ड बहुत छोटा है';
+
+  @override
+  String get errorNetwork => 'कोई कनेक्शन नहीं';
+
+  @override
+  String get errorServer => 'सर्वर त्रुटि, बाद में कोशिश करें';
+
+  @override
   String currentVersion(String version) {
     return 'संस्करण $version';
   }

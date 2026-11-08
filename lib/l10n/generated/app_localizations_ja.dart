@@ -854,6 +854,71 @@ class AppLocalizationsJa extends AppLocalizations {
   String get updatesTitle => 'アップデート';
 
   @override
+  String get accountTitle => 'アカウント';
+
+  @override
+  String get accountCaption => 'ライブラリをデバイス間で同期';
+
+  @override
+  String get nickname => 'ニックネーム';
+
+  @override
+  String get nicknameHint => '3〜20文字：英数字と . _ -';
+
+  @override
+  String get password => 'パスワード';
+
+  @override
+  String get passwordMinHint => '6文字以上';
+
+  @override
+  String get signIn => 'サインイン';
+
+  @override
+  String get signUp => 'アカウントを作成';
+
+  @override
+  String get haveAccountToggle => 'アカウントをお持ちですか？サインイン';
+
+  @override
+  String get noAccountToggle => 'アカウントをお持ちでない？作成する';
+
+  @override
+  String get signOut => 'サインアウト';
+
+  @override
+  String get syncNow => '今すぐ同期';
+
+  @override
+  String get syncing => '同期中…';
+
+  @override
+  String syncedAt(String time) {
+    return '同期済み：$time';
+  }
+
+  @override
+  String get neverSynced => 'まだ同期されていません';
+
+  @override
+  String get errorNicknameTaken => 'そのニックネームは使用中です';
+
+  @override
+  String get errorNicknameInvalid => 'ニックネーム：3〜20文字、英数字/._-';
+
+  @override
+  String get errorInvalidCredentials => 'ニックネームまたはパスワードが違います';
+
+  @override
+  String get errorWeakPassword => 'パスワードが短すぎます';
+
+  @override
+  String get errorNetwork => '接続がありません';
+
+  @override
+  String get errorServer => 'サーバーエラー、後でもう一度お試しください';
+
+  @override
   String currentVersion(String version) {
     return 'バージョン $version';
   }

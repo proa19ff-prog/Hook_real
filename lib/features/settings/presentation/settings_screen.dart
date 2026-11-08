@@ -11,6 +11,7 @@ import '../../extractor/sources/remote_resolver_source.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/theme_settings_screen.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
+import 'account_section.dart';
 import 'settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -191,6 +192,8 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _editRemoteResolver(context, ref, colors),
                   ),
+                  const SizedBox(height: 12),
+                  const AccountSection(),
                   const SizedBox(height: 12),
                   const UpdatesSection(),
                 ],

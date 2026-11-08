@@ -894,6 +894,73 @@ class AppLocalizationsFr extends AppLocalizations {
   String get updatesTitle => 'Mises à jour';
 
   @override
+  String get accountTitle => 'Compte';
+
+  @override
+  String get accountCaption =>
+      'Synchronisez votre bibliothèque entre appareils';
+
+  @override
+  String get nickname => 'Pseudo';
+
+  @override
+  String get nicknameHint => '3–20 caractères : lettres, chiffres, . _ -';
+
+  @override
+  String get password => 'Mot de passe';
+
+  @override
+  String get passwordMinHint => 'Au moins 6 caractères';
+
+  @override
+  String get signIn => 'Se connecter';
+
+  @override
+  String get signUp => 'Créer un compte';
+
+  @override
+  String get haveAccountToggle => 'Vous avez déjà un compte ? Se connecter';
+
+  @override
+  String get noAccountToggle => 'Pas encore de compte ? En créer un';
+
+  @override
+  String get signOut => 'Se déconnecter';
+
+  @override
+  String get syncNow => 'Synchroniser';
+
+  @override
+  String get syncing => 'Synchronisation…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Synchronisé : $time';
+  }
+
+  @override
+  String get neverSynced => 'Pas encore synchronisé';
+
+  @override
+  String get errorNicknameTaken => 'Ce pseudo est déjà pris';
+
+  @override
+  String get errorNicknameInvalid =>
+      'Pseudo : 3–20 caractères, lettres/chiffres/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Pseudo ou mot de passe incorrect';
+
+  @override
+  String get errorWeakPassword => 'Le mot de passe est trop court';
+
+  @override
+  String get errorNetwork => 'Pas de connexion';
+
+  @override
+  String get errorServer => 'Erreur du serveur, réessayez plus tard';
+
+  @override
   String currentVersion(String version) {
     return 'Version $version';
   }

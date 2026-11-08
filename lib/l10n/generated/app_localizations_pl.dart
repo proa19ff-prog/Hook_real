@@ -891,6 +891,71 @@ class AppLocalizationsPl extends AppLocalizations {
   String get updatesTitle => 'Aktualizacje';
 
   @override
+  String get accountTitle => 'Konto';
+
+  @override
+  String get accountCaption => 'Synchronizuj bibliotekę między urządzeniami';
+
+  @override
+  String get nickname => 'Nick';
+
+  @override
+  String get nicknameHint => '3–20 znaków: litery, cyfry, . _ -';
+
+  @override
+  String get password => 'Hasło';
+
+  @override
+  String get passwordMinHint => 'Co najmniej 6 znaków';
+
+  @override
+  String get signIn => 'Zaloguj się';
+
+  @override
+  String get signUp => 'Utwórz konto';
+
+  @override
+  String get haveAccountToggle => 'Masz już konto? Zaloguj się';
+
+  @override
+  String get noAccountToggle => 'Nie masz konta? Utwórz je';
+
+  @override
+  String get signOut => 'Wyloguj się';
+
+  @override
+  String get syncNow => 'Synchronizuj teraz';
+
+  @override
+  String get syncing => 'Synchronizacja…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Zsynchronizowano: $time';
+  }
+
+  @override
+  String get neverSynced => 'Jeszcze nigdy nie zsynchronizowano';
+
+  @override
+  String get errorNicknameTaken => 'Ten nick jest już zajęty';
+
+  @override
+  String get errorNicknameInvalid => 'Nick: 3–20 znaków, litery/cyfry/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Nieprawidłowy nick lub hasło';
+
+  @override
+  String get errorWeakPassword => 'Hasło jest za krótkie';
+
+  @override
+  String get errorNetwork => 'Brak połączenia';
+
+  @override
+  String get errorServer => 'Błąd serwera, spróbuj później';
+
+  @override
   String currentVersion(String version) {
     return 'Wersja $version';
   }

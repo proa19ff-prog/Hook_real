@@ -872,6 +872,72 @@ class AppLocalizationsTh extends AppLocalizations {
   String get updatesTitle => 'อัปเดต';
 
   @override
+  String get accountTitle => 'บัญชี';
+
+  @override
+  String get accountCaption => 'ซิงก์คลังเพลงของคุณระหว่างอุปกรณ์';
+
+  @override
+  String get nickname => 'ชื่อเล่น';
+
+  @override
+  String get nicknameHint => '3–20 ตัวอักษร: ตัวอักษร ตัวเลข . _ -';
+
+  @override
+  String get password => 'รหัสผ่าน';
+
+  @override
+  String get passwordMinHint => 'อย่างน้อย 6 ตัวอักษร';
+
+  @override
+  String get signIn => 'ลงชื่อเข้าใช้';
+
+  @override
+  String get signUp => 'สร้างบัญชี';
+
+  @override
+  String get haveAccountToggle => 'มีบัญชีอยู่แล้ว? ลงชื่อเข้าใช้';
+
+  @override
+  String get noAccountToggle => 'ยังไม่มีบัญชี? สร้างเลย';
+
+  @override
+  String get signOut => 'ลงชื่อออก';
+
+  @override
+  String get syncNow => 'ซิงก์ตอนนี้';
+
+  @override
+  String get syncing => 'กำลังซิงก์…';
+
+  @override
+  String syncedAt(String time) {
+    return 'ซิงก์แล้ว: $time';
+  }
+
+  @override
+  String get neverSynced => 'ยังไม่เคยซิงก์';
+
+  @override
+  String get errorNicknameTaken => 'ชื่อเล่นนี้ถูกใช้แล้ว';
+
+  @override
+  String get errorNicknameInvalid =>
+      'ชื่อเล่น: 3–20 ตัวอักษร, ตัวอักษร/ตัวเลข/._-';
+
+  @override
+  String get errorInvalidCredentials => 'ชื่อเล่นหรือรหัสผ่านไม่ถูกต้อง';
+
+  @override
+  String get errorWeakPassword => 'รหัสผ่านสั้นเกินไป';
+
+  @override
+  String get errorNetwork => 'ไม่มีการเชื่อมต่อ';
+
+  @override
+  String get errorServer => 'ข้อผิดพลาดเซิร์ฟเวอร์ ลองอีกครั้งภายหลัง';
+
+  @override
   String currentVersion(String version) {
     return 'เวอร์ชัน $version';
   }

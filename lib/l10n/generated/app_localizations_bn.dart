@@ -884,6 +884,71 @@ class AppLocalizationsBn extends AppLocalizations {
   String get updatesTitle => 'আপডেট';
 
   @override
+  String get accountTitle => 'অ্যাকাউন্ট';
+
+  @override
+  String get accountCaption => 'আপনার লাইব্রেরি ডিভাইসের মধ্যে সিঙ্ক করুন';
+
+  @override
+  String get nickname => 'ডাকনাম';
+
+  @override
+  String get nicknameHint => '৩–২০ অক্ষর: অক্ষর, সংখ্যা, . _ -';
+
+  @override
+  String get password => 'পাসওয়ার্ড';
+
+  @override
+  String get passwordMinHint => 'কমপক্ষে ৬ অক্ষর';
+
+  @override
+  String get signIn => 'সাইন ইন';
+
+  @override
+  String get signUp => 'অ্যাকাউন্ট তৈরি করুন';
+
+  @override
+  String get haveAccountToggle => 'ইতিমধ্যে অ্যাকাউন্ট আছে? সাইন ইন করুন';
+
+  @override
+  String get noAccountToggle => 'এখনও অ্যাকাউন্ট নেই? তৈরি করুন';
+
+  @override
+  String get signOut => 'সাইন আউট';
+
+  @override
+  String get syncNow => 'এখনই সিঙ্ক করুন';
+
+  @override
+  String get syncing => 'সিঙ্ক হচ্ছে…';
+
+  @override
+  String syncedAt(String time) {
+    return 'সিঙ্ক হয়েছে: $time';
+  }
+
+  @override
+  String get neverSynced => 'এখনও সিঙ্ক হয়নি';
+
+  @override
+  String get errorNicknameTaken => 'এই ডাকনামটি আগে থেকেই আছে';
+
+  @override
+  String get errorNicknameInvalid => 'ডাকনাম: ৩–২০ অক্ষর, অক্ষর/সংখ্যা/._-';
+
+  @override
+  String get errorInvalidCredentials => 'ডাকনাম বা পাসওয়ার্ড ভুল';
+
+  @override
+  String get errorWeakPassword => 'পাসওয়ার্ড খুব ছোট';
+
+  @override
+  String get errorNetwork => 'সংযোগ নেই';
+
+  @override
+  String get errorServer => 'সার্ভার ত্রুটি, পরে চেষ্টা করুন';
+
+  @override
   String currentVersion(String version) {
     return 'সংস্করণ $version';
   }

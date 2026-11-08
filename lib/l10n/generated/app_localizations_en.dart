@@ -887,6 +887,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updatesTitle => 'Updates';
 
   @override
+  String get accountTitle => 'Account';
+
+  @override
+  String get accountCaption => 'Sync your library across devices';
+
+  @override
+  String get nickname => 'Nickname';
+
+  @override
+  String get nicknameHint => '3–20 characters: letters, digits, . _ -';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get passwordMinHint => 'At least 6 characters';
+
+  @override
+  String get signIn => 'Sign in';
+
+  @override
+  String get signUp => 'Create account';
+
+  @override
+  String get haveAccountToggle => 'Already have an account? Sign in';
+
+  @override
+  String get noAccountToggle => 'No account yet? Create one';
+
+  @override
+  String get signOut => 'Sign out';
+
+  @override
+  String get syncNow => 'Sync now';
+
+  @override
+  String get syncing => 'Syncing…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Synced: $time';
+  }
+
+  @override
+  String get neverSynced => 'Never synced yet';
+
+  @override
+  String get errorNicknameTaken => 'That nickname is already taken';
+
+  @override
+  String get errorNicknameInvalid =>
+      'Nickname: 3–20 characters, letters/digits/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Wrong nickname or password';
+
+  @override
+  String get errorWeakPassword => 'The password is too short';
+
+  @override
+  String get errorNetwork => 'No connection';
+
+  @override
+  String get errorServer => 'Server error, try again later';
+
+  @override
   String currentVersion(String version) {
     return 'Version $version';
   }

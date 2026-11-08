@@ -892,6 +892,72 @@ class AppLocalizationsIt extends AppLocalizations {
   String get updatesTitle => 'Aggiornamenti';
 
   @override
+  String get accountTitle => 'Account';
+
+  @override
+  String get accountCaption => 'Sincronizza la libreria tra i dispositivi';
+
+  @override
+  String get nickname => 'Nickname';
+
+  @override
+  String get nicknameHint => '3–20 caratteri: lettere, cifre, . _ -';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get passwordMinHint => 'Almeno 6 caratteri';
+
+  @override
+  String get signIn => 'Accedi';
+
+  @override
+  String get signUp => 'Crea account';
+
+  @override
+  String get haveAccountToggle => 'Hai già un account? Accedi';
+
+  @override
+  String get noAccountToggle => 'Non hai ancora un account? Creane uno';
+
+  @override
+  String get signOut => 'Esci';
+
+  @override
+  String get syncNow => 'Sincronizza ora';
+
+  @override
+  String get syncing => 'Sincronizzazione…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Sincronizzato: $time';
+  }
+
+  @override
+  String get neverSynced => 'Mai sincronizzato';
+
+  @override
+  String get errorNicknameTaken => 'Questo nickname è già in uso';
+
+  @override
+  String get errorNicknameInvalid =>
+      'Nickname: 3–20 caratteri, lettere/cifre/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Nickname o password errati';
+
+  @override
+  String get errorWeakPassword => 'La password è troppo corta';
+
+  @override
+  String get errorNetwork => 'Nessuna connessione';
+
+  @override
+  String get errorServer => 'Errore del server, riprova più tardi';
+
+  @override
   String currentVersion(String version) {
     return 'Versione $version';
   }

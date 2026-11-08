@@ -885,6 +885,71 @@ class AppLocalizationsVi extends AppLocalizations {
   String get updatesTitle => 'Cập nhật';
 
   @override
+  String get accountTitle => 'Tài khoản';
+
+  @override
+  String get accountCaption => 'Đồng bộ thư viện giữa các thiết bị';
+
+  @override
+  String get nickname => 'Biệt danh';
+
+  @override
+  String get nicknameHint => '3–20 ký tự: chữ cái, chữ số, . _ -';
+
+  @override
+  String get password => 'Mật khẩu';
+
+  @override
+  String get passwordMinHint => 'Ít nhất 6 ký tự';
+
+  @override
+  String get signIn => 'Đăng nhập';
+
+  @override
+  String get signUp => 'Tạo tài khoản';
+
+  @override
+  String get haveAccountToggle => 'Đã có tài khoản? Đăng nhập';
+
+  @override
+  String get noAccountToggle => 'Chưa có tài khoản? Tạo một cái';
+
+  @override
+  String get signOut => 'Đăng xuất';
+
+  @override
+  String get syncNow => 'Đồng bộ ngay';
+
+  @override
+  String get syncing => 'Đang đồng bộ…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Đã đồng bộ: $time';
+  }
+
+  @override
+  String get neverSynced => 'Chưa từng đồng bộ';
+
+  @override
+  String get errorNicknameTaken => 'Biệt danh này đã có người dùng';
+
+  @override
+  String get errorNicknameInvalid => 'Biệt danh: 3–20 ký tự, chữ/chữ số/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Sai biệt danh hoặc mật khẩu';
+
+  @override
+  String get errorWeakPassword => 'Mật khẩu quá ngắn';
+
+  @override
+  String get errorNetwork => 'Không có kết nối';
+
+  @override
+  String get errorServer => 'Lỗi máy chủ, thử lại sau';
+
+  @override
   String currentVersion(String version) {
     return 'Phiên bản $version';
   }

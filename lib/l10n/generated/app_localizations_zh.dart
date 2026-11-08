@@ -831,6 +831,71 @@ class AppLocalizationsZh extends AppLocalizations {
   String get updatesTitle => '更新';
 
   @override
+  String get accountTitle => '账户';
+
+  @override
+  String get accountCaption => '在设备之间同步你的音乐库';
+
+  @override
+  String get nickname => '昵称';
+
+  @override
+  String get nicknameHint => '3–20 个字符：字母、数字、. _ -';
+
+  @override
+  String get password => '密码';
+
+  @override
+  String get passwordMinHint => '至少 6 个字符';
+
+  @override
+  String get signIn => '登录';
+
+  @override
+  String get signUp => '创建账户';
+
+  @override
+  String get haveAccountToggle => '已有账户？登录';
+
+  @override
+  String get noAccountToggle => '还没有账户？创建一个';
+
+  @override
+  String get signOut => '退出登录';
+
+  @override
+  String get syncNow => '立即同步';
+
+  @override
+  String get syncing => '正在同步…';
+
+  @override
+  String syncedAt(String time) {
+    return '已同步：$time';
+  }
+
+  @override
+  String get neverSynced => '尚未同步';
+
+  @override
+  String get errorNicknameTaken => '该昵称已被占用';
+
+  @override
+  String get errorNicknameInvalid => '昵称：3–20 个字符，字母/数字/._-';
+
+  @override
+  String get errorInvalidCredentials => '昵称或密码错误';
+
+  @override
+  String get errorWeakPassword => '密码太短';
+
+  @override
+  String get errorNetwork => '无网络连接';
+
+  @override
+  String get errorServer => '服务器错误，请稍后再试';
+
+  @override
   String currentVersion(String version) {
     return '版本 $version';
   }

@@ -883,6 +883,71 @@ class AppLocalizationsAr extends AppLocalizations {
   String get updatesTitle => 'التحديثات';
 
   @override
+  String get accountTitle => 'الحساب';
+
+  @override
+  String get accountCaption => 'مزامنة مكتبتك بين الأجهزة';
+
+  @override
+  String get nickname => 'الاسم المستعار';
+
+  @override
+  String get nicknameHint => '٣–٢٠ حرفًا: أحرف وأرقام و . _ -';
+
+  @override
+  String get password => 'كلمة المرور';
+
+  @override
+  String get passwordMinHint => '٦ أحرف على الأقل';
+
+  @override
+  String get signIn => 'تسجيل الدخول';
+
+  @override
+  String get signUp => 'إنشاء حساب';
+
+  @override
+  String get haveAccountToggle => 'لديك حساب بالفعل؟ سجّل الدخول';
+
+  @override
+  String get noAccountToggle => 'لا تملك حسابًا بعد؟ أنشئ واحدًا';
+
+  @override
+  String get signOut => 'تسجيل الخروج';
+
+  @override
+  String get syncNow => 'مزامنة الآن';
+
+  @override
+  String get syncing => 'جارٍ المزامنة…';
+
+  @override
+  String syncedAt(String time) {
+    return 'تمت المزامنة: $time';
+  }
+
+  @override
+  String get neverSynced => 'لم تتم المزامنة بعد';
+
+  @override
+  String get errorNicknameTaken => 'هذا الاسم مستعار محجوز';
+
+  @override
+  String get errorNicknameInvalid => 'الاسم: ٣–٢٠ حرفًا، أحرف/أرقام/._-';
+
+  @override
+  String get errorInvalidCredentials => 'اسم أو كلمة مرور خاطئة';
+
+  @override
+  String get errorWeakPassword => 'كلمة المرور قصيرة جدًا';
+
+  @override
+  String get errorNetwork => 'لا يوجد اتصال';
+
+  @override
+  String get errorServer => 'خطأ في الخادم، حاول لاحقًا';
+
+  @override
   String currentVersion(String version) {
     return 'الإصدار $version';
   }

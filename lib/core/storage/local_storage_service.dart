@@ -16,10 +16,20 @@ class LocalStorageService {
   final SharedPreferences _prefs;
   final StreamController<void> _favoritesController =
       StreamController<void>.broadcast();
+  final StreamController<String> _changesController =
+      StreamController<String>.broadcast();
 
   Stream<void> get favoritesChanges => _favoritesController.stream;
 
+  /// Emits the sync-relevant storage key ('favorites', 'history', …) after
+  /// every local mutation. The account sync layer watches this to push.
+  Stream<String> get changes => _changesController.stream;
+
   LocalStorageService(this._prefs);
+
+  void _notify(String key) {
+    if (!_changesController.isClosed) _changesController.add(key);
+  }
 
   static Future<LocalStorageService> create() async {
     final prefs = await SharedPreferences.getInstance();
@@ -36,11 +46,16 @@ class LocalStorageService {
       _prefs.setBool(_oledDefaultAppliedKey, true);
 
   String? getSavedThemeId() => _prefs.getString(_activeThemeKey);
-  Future<void> saveThemeId(String id) => _prefs.setString(_activeThemeKey, id);
+  Future<void> saveThemeId(String id) async {
+    await _prefs.setString(_activeThemeKey, id);
+    _notify('theme_id');
+  }
 
   String? getSavedCustomThemeJson() => _prefs.getString(_customThemeJsonKey);
-  Future<void> saveCustomThemeJson(String json) =>
-      _prefs.setString(_customThemeJsonKey, json);
+  Future<void> saveCustomThemeJson(String json) async {
+    await _prefs.setString(_customThemeJsonKey, json);
+    _notify('custom_theme_json');
+  }
 
   // --- LOCALE ---
   String? getLocaleCode() => _prefs.getString('hook_locale_code');
@@ -62,13 +77,17 @@ class LocalStorageService {
 
   // --- LYRICS PRESENTATION ---
   bool getLyricsAutoHide() => _prefs.getBool('hook_lyrics_auto_hide') ?? true;
-  Future<void> saveLyricsAutoHide(bool enabled) =>
-      _prefs.setBool('hook_lyrics_auto_hide', enabled);
+  Future<void> saveLyricsAutoHide(bool enabled) async {
+    await _prefs.setBool('hook_lyrics_auto_hide', enabled);
+    _notify('lyrics_auto_hide');
+  }
 
   String? getLyricsDisplayMode() =>
       _prefs.getString('hook_lyrics_display_mode');
-  Future<void> saveLyricsDisplayMode(String mode) =>
-      _prefs.setString('hook_lyrics_display_mode', mode);
+  Future<void> saveLyricsDisplayMode(String mode) async {
+    await _prefs.setString('hook_lyrics_display_mode', mode);
+    _notify('lyrics_display_mode');
+  }
 
   Map<String, dynamic> _lyricsOffsets() {
     try {
@@ -80,6 +99,13 @@ class LocalStorageService {
       return {};
     }
   }
+
+  /// Every hand-tuned lyrics offset, keyed `source:id`, in seconds.
+  Map<String, double> getLyricsOffsets() => {
+        for (final entry in _lyricsOffsets().entries)
+          if (entry.value is num && (entry.value as num).isFinite)
+            entry.key: (entry.value as num).toDouble(),
+      };
 
   double getLyricsOffset(String trackKey) {
     final value = _lyricsOffsets()[trackKey];
@@ -115,6 +141,7 @@ class LocalStorageService {
       offsets.remove(offsets.keys.first);
     }
     await _prefs.setString('hook_lyrics_offsets', jsonEncode(offsets));
+    _notify('lyrics_offsets');
   }
 
   // --- FAVORITES ---
@@ -182,10 +209,12 @@ class LocalStorageService {
     }
     final serialized = history.map((t) => jsonEncode(t.toJson())).toList();
     await _prefs.setStringList(_historyKey, serialized);
+    _notify('history');
   }
 
   Future<void> clearHistory() async {
     await _prefs.remove(_historyKey);
+    _notify('history');
   }
 
   // --- SEARCH HISTORY ---
@@ -203,16 +232,19 @@ class LocalStorageService {
     history.insert(0, trimmed);
     if (history.length > _maxSearchHistoryCount) history.removeLast();
     await _prefs.setStringList(_searchHistoryKey, history);
+    _notify('search_history');
   }
 
   Future<void> removeSearchQuery(String query) async {
     final history = getSearchHistory()
       ..removeWhere((q) => q.toLowerCase() == query.trim().toLowerCase());
     await _prefs.setStringList(_searchHistoryKey, history);
+    _notify('search_history');
   }
 
   Future<void> clearSearchHistory() async {
     await _prefs.remove(_searchHistoryKey);
+    _notify('search_history');
   }
 
   // --- PLAY SIGNALS (personal recommendations) ---
@@ -252,6 +284,8 @@ class LocalStorageService {
     }
     await _prefs.setString(_playCountsKey, jsonEncode(counts));
     await _prefs.setString(_playTimestampsKey, jsonEncode(stamps));
+    _notify('play_counts');
+    _notify('play_timestamps');
   }
 
   // --- PLAYLISTS ---
@@ -288,6 +322,7 @@ class LocalStorageService {
       (key, list) => MapEntry(key, list.map((t) => t.toJson()).toList()),
     );
     await _prefs.setString(_playlistsKey, jsonEncode(serialized));
+    _notify('playlists');
   }
 
   Future<void> deletePlaylist(String name) async {
@@ -297,5 +332,67 @@ class LocalStorageService {
       (key, list) => MapEntry(key, list.map((t) => t.toJson()).toList()),
     );
     await _prefs.setString(_playlistsKey, jsonEncode(serialized));
+    _notify('playlists');
   }
+
+  // --- SYNC APPLY (full-value writes used by the account sync layer) ---
+  // These emit the same change signals as the user-facing mutators so every
+  // listening notifier refreshes; the sync layer itself ignores events it
+  // caused via its applying-remote flag.
+
+  Future<void> setFavorites(List<MediaTrack> tracks) async {
+    await _saveFavorites(tracks);
+    if (!_favoritesController.isClosed) _favoritesController.add(null);
+    _notify('favorites');
+  }
+
+  Future<void> setHistory(List<MediaTrack> tracks) async {
+    final capped = tracks.length > _maxHistoryCount
+        ? tracks.sublist(0, _maxHistoryCount)
+        : tracks;
+    final serialized = capped.map((t) => jsonEncode(t.toJson())).toList();
+    await _prefs.setStringList(_historyKey, serialized);
+    _notify('history');
+  }
+
+  Future<void> setPlaylists(Map<String, List<MediaTrack>> playlists) async {
+    final serialized = playlists.map(
+      (key, list) => MapEntry(key, list.map((t) => t.toJson()).toList()),
+    );
+    await _prefs.setString(_playlistsKey, jsonEncode(serialized));
+    _notify('playlists');
+  }
+
+  Future<void> setSearchHistory(List<String> queries) async {
+    final capped = queries.length > _maxSearchHistoryCount
+        ? queries.sublist(0, _maxSearchHistoryCount)
+        : queries;
+    await _prefs.setStringList(_searchHistoryKey, capped);
+    _notify('search_history');
+  }
+
+  Future<void> setPlayCounts(Map<String, int> counts) =>
+      _prefs.setString(_playCountsKey, jsonEncode(counts));
+
+  Future<void> setPlayTimestamps(Map<String, int> stamps) =>
+      _prefs.setString(_playTimestampsKey, jsonEncode(stamps));
+
+  Future<void> setLyricsOffsets(Map<String, double> offsets) =>
+      _prefs.setString('hook_lyrics_offsets', jsonEncode(offsets));
+
+  // --- SYNC META (engine bookkeeping: key timestamps + tombstones) ---
+
+  static const String _syncMetaKey = 'hook_sync_meta';
+
+  Map<String, dynamic> getSyncMeta() {
+    try {
+      final decoded = jsonDecode(_prefs.getString(_syncMetaKey) ?? '{}');
+      return decoded is Map<String, dynamic> ? decoded : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  Future<void> setSyncMeta(Map<String, dynamic> meta) =>
+      _prefs.setString(_syncMetaKey, jsonEncode(meta));
 }

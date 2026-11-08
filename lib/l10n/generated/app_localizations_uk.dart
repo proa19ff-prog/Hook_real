@@ -893,6 +893,71 @@ class AppLocalizationsUk extends AppLocalizations {
   String get updatesTitle => 'Оновлення';
 
   @override
+  String get accountTitle => 'Акаунт';
+
+  @override
+  String get accountCaption => 'Синхронізація бібліотеки між пристроями';
+
+  @override
+  String get nickname => 'Нік';
+
+  @override
+  String get nicknameHint => '3–20 символів: букви, цифри, . _ -';
+
+  @override
+  String get password => 'Пароль';
+
+  @override
+  String get passwordMinHint => 'Щонайменше 6 символів';
+
+  @override
+  String get signIn => 'Увійти';
+
+  @override
+  String get signUp => 'Створити акаунт';
+
+  @override
+  String get haveAccountToggle => 'Вже маєте акаунт? Увійти';
+
+  @override
+  String get noAccountToggle => 'Ще немає акаунта? Створіть';
+
+  @override
+  String get signOut => 'Вийти';
+
+  @override
+  String get syncNow => 'Синхронізувати';
+
+  @override
+  String get syncing => 'Синхронізація…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Синхронізовано: $time';
+  }
+
+  @override
+  String get neverSynced => 'Ще не синхронізовано';
+
+  @override
+  String get errorNicknameTaken => 'Цей нік уже зайнятий';
+
+  @override
+  String get errorNicknameInvalid => 'Нік: 3–20 символів, букви/цифри/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Неправильний нік або пароль';
+
+  @override
+  String get errorWeakPassword => 'Пароль занадто короткий';
+
+  @override
+  String get errorNetwork => 'Немає з\'єднання';
+
+  @override
+  String get errorServer => 'Помилка сервера, спробуйте пізніше';
+
+  @override
   String currentVersion(String version) {
     return 'Версія $version';
   }

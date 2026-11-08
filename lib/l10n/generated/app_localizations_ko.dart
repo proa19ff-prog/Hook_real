@@ -849,6 +849,71 @@ class AppLocalizationsKo extends AppLocalizations {
   String get updatesTitle => '업데이트';
 
   @override
+  String get accountTitle => '계정';
+
+  @override
+  String get accountCaption => '기기 간에 라이브러리 동기화';
+
+  @override
+  String get nickname => '닉네임';
+
+  @override
+  String get nicknameHint => '3–20자: 영문, 숫자, . _ -';
+
+  @override
+  String get password => '비밀번호';
+
+  @override
+  String get passwordMinHint => '6자 이상';
+
+  @override
+  String get signIn => '로그인';
+
+  @override
+  String get signUp => '계정 만들기';
+
+  @override
+  String get haveAccountToggle => '이미 계정이 있나요? 로그인';
+
+  @override
+  String get noAccountToggle => '아직 계정이 없나요? 만들기';
+
+  @override
+  String get signOut => '로그아웃';
+
+  @override
+  String get syncNow => '지금 동기화';
+
+  @override
+  String get syncing => '동기화 중…';
+
+  @override
+  String syncedAt(String time) {
+    return '동기화됨: $time';
+  }
+
+  @override
+  String get neverSynced => '아직 동기화되지 않았습니다';
+
+  @override
+  String get errorNicknameTaken => '이 닉네임은 이미 사용 중입니다';
+
+  @override
+  String get errorNicknameInvalid => '닉네임: 3–20자, 영문/숫자/._-';
+
+  @override
+  String get errorInvalidCredentials => '닉네임 또는 비밀번호가 틀렸습니다';
+
+  @override
+  String get errorWeakPassword => '비밀번호가 너무 짧습니다';
+
+  @override
+  String get errorNetwork => '연결 없음';
+
+  @override
+  String get errorServer => '서버 오류, 나중에 다시 시도하세요';
+
+  @override
   String currentVersion(String version) {
     return '버전 $version';
   }

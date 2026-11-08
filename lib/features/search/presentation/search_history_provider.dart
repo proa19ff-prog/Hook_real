@@ -25,6 +25,11 @@ class SearchHistoryNotifier extends StateNotifier<List<String>> {
     await _storage.clearSearchHistory();
     if (mounted) state = const [];
   }
+
+  /// Re-reads storage; used by the account sync layer after a pull.
+  void refresh() {
+    if (mounted) state = _storage.getSearchHistory();
+  }
 }
 
 final searchHistoryProvider =

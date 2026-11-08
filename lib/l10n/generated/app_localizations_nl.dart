@@ -893,6 +893,72 @@ class AppLocalizationsNl extends AppLocalizations {
   String get updatesTitle => 'Updates';
 
   @override
+  String get accountTitle => 'Account';
+
+  @override
+  String get accountCaption => 'Synchroniseer je bibliotheek tussen apparaten';
+
+  @override
+  String get nickname => 'Bijnaam';
+
+  @override
+  String get nicknameHint => '3–20 tekens: letters, cijfers, . _ -';
+
+  @override
+  String get password => 'Wachtwoord';
+
+  @override
+  String get passwordMinHint => 'Minimaal 6 tekens';
+
+  @override
+  String get signIn => 'Inloggen';
+
+  @override
+  String get signUp => 'Account aanmaken';
+
+  @override
+  String get haveAccountToggle => 'Al een account? Inloggen';
+
+  @override
+  String get noAccountToggle => 'Nog geen account? Er een maken';
+
+  @override
+  String get signOut => 'Uitloggen';
+
+  @override
+  String get syncNow => 'Nu synchroniseren';
+
+  @override
+  String get syncing => 'Synchroniseren…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Gesynchroniseerd: $time';
+  }
+
+  @override
+  String get neverSynced => 'Nog nooit gesynchroniseerd';
+
+  @override
+  String get errorNicknameTaken => 'Die bijnaam is al in gebruik';
+
+  @override
+  String get errorNicknameInvalid =>
+      'Bijnaam: 3–20 tekens, letters/cijfers/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Onjuiste bijnaam of wachtwoord';
+
+  @override
+  String get errorWeakPassword => 'Het wachtwoord is te kort';
+
+  @override
+  String get errorNetwork => 'Geen verbinding';
+
+  @override
+  String get errorServer => 'Serverfout, probeer het later opnieuw';
+
+  @override
   String currentVersion(String version) {
     return 'Versie $version';
   }

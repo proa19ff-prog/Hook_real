@@ -890,6 +890,72 @@ class AppLocalizationsEs extends AppLocalizations {
   String get updatesTitle => 'Actualizaciones';
 
   @override
+  String get accountTitle => 'Cuenta';
+
+  @override
+  String get accountCaption => 'Sincroniza tu biblioteca entre dispositivos';
+
+  @override
+  String get nickname => 'Apodo';
+
+  @override
+  String get nicknameHint => '3–20 caracteres: letras, dígitos, . _ -';
+
+  @override
+  String get password => 'Contraseña';
+
+  @override
+  String get passwordMinHint => 'Al menos 6 caracteres';
+
+  @override
+  String get signIn => 'Iniciar sesión';
+
+  @override
+  String get signUp => 'Crear cuenta';
+
+  @override
+  String get haveAccountToggle => '¿Ya tienes cuenta? Inicia sesión';
+
+  @override
+  String get noAccountToggle => '¿Aún no tienes cuenta? Crea una';
+
+  @override
+  String get signOut => 'Cerrar sesión';
+
+  @override
+  String get syncNow => 'Sincronizar ahora';
+
+  @override
+  String get syncing => 'Sincronizando…';
+
+  @override
+  String syncedAt(String time) {
+    return 'Sincronizado: $time';
+  }
+
+  @override
+  String get neverSynced => 'Aún sin sincronizar';
+
+  @override
+  String get errorNicknameTaken => 'Ese apodo ya está en uso';
+
+  @override
+  String get errorNicknameInvalid =>
+      'Apodo: 3–20 caracteres, letras/dígitos/._-';
+
+  @override
+  String get errorInvalidCredentials => 'Apodo o contraseña incorrectos';
+
+  @override
+  String get errorWeakPassword => 'La contraseña es demasiado corta';
+
+  @override
+  String get errorNetwork => 'Sin conexión';
+
+  @override
+  String get errorServer => 'Error del servidor, inténtalo más tarde';
+
+  @override
   String currentVersion(String version) {
     return 'Versión $version';
   }
