@@ -891,6 +891,69 @@ class AppLocalizationsVi extends AppLocalizations {
   String get waveLoading => 'Đang tìm bài hát tương tự…';
 
   @override
+  String get sleepTimer => 'Hẹn giờ ngủ';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'Đến hết bài';
+
+  @override
+  String get sleepCancel => 'Tắt';
+
+  @override
+  String get dislike => 'Không thích';
+
+  @override
+  String get dislikeRemove => 'Bỏ khỏi ẩn';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Đã ẩn: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'Xuất CSV';
+
+  @override
+  String get playlistExported => 'Đã xuất playlist';
+
+  @override
+  String get exportFailed => 'Xuất thất bại';
+
+  @override
+  String get downloadAll => 'Tải tất cả';
+
+  @override
+  String get statsTitle => 'Thống kê';
+
+  @override
+  String get statsPlays => 'Lượt nghe';
+
+  @override
+  String get statsFavorites => 'Yêu thích';
+
+  @override
+  String get statsPlaylists => 'Playlist';
+
+  @override
+  String get statsTopArtists => 'Nghệ sĩ hàng đầu';
+
+  @override
+  String get statsTopTracks => 'Bài hát hàng đầu';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Tiếp tục trên $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'Giữ cửa sổ trên cùng';
+
+  @override
   String get randomPick => 'Chọn ngẫu nhiên cho bạn';
 
   @override

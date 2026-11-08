@@ -899,6 +899,69 @@ class AppLocalizationsNl extends AppLocalizations {
   String get waveLoading => 'Vergelijkbare nummers zoeken…';
 
   @override
+  String get sleepTimer => 'Slaaptimer';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'Tot het einde van het nummer';
+
+  @override
+  String get sleepCancel => 'Uit';
+
+  @override
+  String get dislike => 'Niet leuk';
+
+  @override
+  String get dislikeRemove => 'Uit verborgen verwijderen';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Verborgen: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSV exporteren';
+
+  @override
+  String get playlistExported => 'Playlist geëxporteerd';
+
+  @override
+  String get exportFailed => 'Export mislukt';
+
+  @override
+  String get downloadAll => 'Alles downloaden';
+
+  @override
+  String get statsTitle => 'Statistieken';
+
+  @override
+  String get statsPlays => 'Keren afgespeeld';
+
+  @override
+  String get statsFavorites => 'Favorieten';
+
+  @override
+  String get statsPlaylists => 'Playlists';
+
+  @override
+  String get statsTopArtists => 'Topartiesten';
+
+  @override
+  String get statsTopTracks => 'Topnummers';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Verder op $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'Venster bovenaan houden';
+
+  @override
   String get randomPick => 'Willekeurige keuze voor jou';
 
   @override

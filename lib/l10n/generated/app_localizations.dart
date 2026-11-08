@@ -1676,6 +1676,120 @@ abstract class AppLocalizations {
   /// **'Finding similar tracks…'**
   String get waveLoading;
 
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep timer'**
+  String get sleepTimer;
+
+  /// No description provided for @sleepMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}'**
+  String sleepMinutes(String value);
+
+  /// No description provided for @sleepUntilTrackEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Until track ends'**
+  String get sleepUntilTrackEnd;
+
+  /// No description provided for @sleepCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off'**
+  String get sleepCancel;
+
+  /// No description provided for @dislike.
+  ///
+  /// In en, this message translates to:
+  /// **'Not interested'**
+  String get dislike;
+
+  /// No description provided for @dislikeRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from hidden'**
+  String get dislikeRemove;
+
+  /// No description provided for @dislikeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden: {artist}'**
+  String dislikeSaved(String artist);
+
+  /// No description provided for @exportPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get exportPlaylist;
+
+  /// No description provided for @playlistExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist exported'**
+  String get playlistExported;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportFailed;
+
+  /// No description provided for @downloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all'**
+  String get downloadAll;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statsTitle;
+
+  /// No description provided for @statsPlays.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays'**
+  String get statsPlays;
+
+  /// No description provided for @statsFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get statsFavorites;
+
+  /// No description provided for @statsPlaylists.
+  ///
+  /// In en, this message translates to:
+  /// **'Playlists'**
+  String get statsPlaylists;
+
+  /// No description provided for @statsTopArtists.
+  ///
+  /// In en, this message translates to:
+  /// **'Top artists'**
+  String get statsTopArtists;
+
+  /// No description provided for @statsTopTracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Top tracks'**
+  String get statsTopTracks;
+
+  /// No description provided for @resumeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue on {device}'**
+  String resumeTitle(String device);
+
+  /// No description provided for @alwaysOnTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep window on top'**
+  String get alwaysOnTop;
+
   /// No description provided for @randomPick.
   ///
   /// In en, this message translates to:

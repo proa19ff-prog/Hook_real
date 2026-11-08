@@ -233,6 +233,14 @@ final _currentTrackStreamProvider = StreamProvider<MediaTrack?>((ref) {
   return service.currentTrackStream;
 });
 
+/// The cross-device "continue listening" snapshot. Re-reads when the local
+/// player changes track (a local start supersedes the hint) and after syncs
+/// invalidate it.
+final resumeStateProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  ref.watch(currentTrackProvider);
+  return ref.watch(localStorageServiceProvider).getResumeState();
+});
+
 // Current Playing Track Provider. Only rebuilds dependants when the track
 // itself changes, not on every buffering/playing state event.
 final currentTrackProvider = Provider<MediaTrack?>((ref) {

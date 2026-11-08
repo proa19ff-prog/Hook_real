@@ -1,7 +1,7 @@
 name: hook
 description: "Hook — Android local-first music player with search across sources, synced lyrics and live GLSL themes"
 publish_to: "none"
-version: 0.5.0+5
+version: 0.6.0+6
 
 environment:
   sdk: ">=3.13.0 <4.0.0"
@@ -43,6 +43,8 @@ dependencies:
   just_audio_windows_plus: ^0.5.6
   smtc_windows: ^1.1.0
   file_picker: ^13.3.2
+  share_plus: ^13.3.1
+  window_manager: 0.5.1
 
 # smtc_windows 1.1.0 ships Rust codegen for FRB 2.11.1; a newer runtime
 # aborts SMTC init (and with it main()) with a version sanity check.

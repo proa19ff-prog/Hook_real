@@ -899,6 +899,69 @@ class AppLocalizationsUk extends AppLocalizations {
   String get waveLoading => 'Шукаємо схожі треки…';
 
   @override
+  String get sleepTimer => 'Таймер сну';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'До кінця треку';
+
+  @override
+  String get sleepCancel => 'Вимкнути';
+
+  @override
+  String get dislike => 'Не подобається';
+
+  @override
+  String get dislikeRemove => 'Прибрати зі схованих';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Сховано: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'Експорт CSV';
+
+  @override
+  String get playlistExported => 'Плейлист вивантажено';
+
+  @override
+  String get exportFailed => 'Не вдалося вивантажити';
+
+  @override
+  String get downloadAll => 'Завантажити все';
+
+  @override
+  String get statsTitle => 'Статистика';
+
+  @override
+  String get statsPlays => 'Прослуховувань';
+
+  @override
+  String get statsFavorites => 'Обране';
+
+  @override
+  String get statsPlaylists => 'Плейлисти';
+
+  @override
+  String get statsTopArtists => 'Топ артистів';
+
+  @override
+  String get statsTopTracks => 'Топ треків';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Продовжити на $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'Тримати вікно поверх';
+
+  @override
   String get randomPick => 'Випадкова рекомендація';
 
   @override

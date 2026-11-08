@@ -150,6 +150,7 @@ class AccountNotifier extends StateNotifier<AccountState> {
     try {
       await task;
       _refreshListeners();
+      _ref.invalidate(resumeStateProvider);
       state = state.copyWith(
         syncing: false,
         lastSyncAt: DateTime.now(),

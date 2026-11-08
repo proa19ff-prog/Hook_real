@@ -10,6 +10,7 @@ import '../../search/presentation/artist_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import 'player_state_provider.dart';
+import 'sleep_timer_provider.dart';
 import 'track_downloads_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
@@ -231,6 +232,8 @@ Future<void> showSpotifyTrackActions(
   final isFavorite = ref
       .read(favoritesProvider)
       .any((item) => item.id == track.id && item.source == track.source);
+  final isDisliked =
+      ref.read(localStorageServiceProvider).isDislikedArtist(track.artist);
   await showModalBottomSheet<void>(
     context: context,
     backgroundColor: colors.surface,
@@ -403,6 +406,121 @@ Future<void> showSpotifyTrackActions(
                             () => openArtistScreen(context, theme, track.artist))
                         .call();
                   },
+                ),
+                _TrackAction(
+                  icon: Icons.casino_outlined,
+                  label: strings.sleepTimer,
+                  onTap: () => _showSleepTimerSheet(
+                    context,
+                    sheetContext,
+                    strings,
+                  ),
+                ),
+                _TrackAction(
+                  icon: isDisliked
+                      ? Icons.thumb_down
+                      : Icons.thumb_down_outlined,
+                  label: isDisliked
+                      ? strings.dislikeRemove
+                      : strings.dislike,
+                  color: isDisliked ? Colors.redAccent : null,
+                  onTap: () {
+                    ref
+                        .read(localStorageServiceProvider)
+                        .toggleDislikedArtist(track.artist);
+                    Navigator.of(sheetContext).pop();
+                    if (!isDisliked) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(strings.dislikeSaved(track.artist)),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
+/// Sleep timer options in a compact modal: presets plus "until the track
+/// ends", with the running countdown shown as the sheet's subtitle.
+void _showSleepTimerSheet(
+  BuildContext context,
+  BuildContext sheetContext,
+  AppLocalizations strings,
+) {
+  Navigator.of(sheetContext).pop();
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => Consumer(
+      builder: (context, ref, _) {
+        final timer = ref.watch(sleepTimerProvider);
+        final remaining = timer.remaining;
+        final options = <Duration>[
+          const Duration(minutes: 15),
+          const Duration(minutes: 30),
+          const Duration(minutes: 45),
+          const Duration(hours: 1),
+        ];
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  remaining == null
+                      ? strings.sleepTimer
+                      : '${strings.sleepTimer} · '
+                          '${remaining.inMinutes}:${(remaining.inSeconds % 60).toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final option in options)
+                      ActionChip(
+                        label: Text(strings.sleepMinutes(
+                          option.inMinutes >= 60
+                              ? '${option.inHours} h'
+                              : '${option.inMinutes} min',
+                        )),
+                        onPressed: () {
+                          ref.read(sleepTimerProvider.notifier).start(option);
+                          Navigator.of(sheetContext).pop();
+                        },
+                      ),
+                    ActionChip(
+                      label: Text(strings.sleepUntilTrackEnd),
+                      onPressed: () {
+                        ref
+                            .read(sleepTimerProvider.notifier)
+                            .startUntilTrackEnd();
+                        Navigator.of(sheetContext).pop();
+                      },
+                    ),
+                    if (timer.active)
+                      ActionChip(
+                        label: Text(strings.sleepCancel),
+                        onPressed: () {
+                          ref.read(sleepTimerProvider.notifier).cancel();
+                          Navigator.of(sheetContext).pop();
+                        },
+                      ),
+                  ],
                 ),
               ],
             ),

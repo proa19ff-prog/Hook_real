@@ -860,6 +860,69 @@ class AppLocalizationsJa extends AppLocalizations {
   String get waveLoading => '似た曲を探しています…';
 
   @override
+  String get sleepTimer => 'スリープタイマー';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => '曲の終わりまで';
+
+  @override
+  String get sleepCancel => 'オフ';
+
+  @override
+  String get dislike => '興味ない';
+
+  @override
+  String get dislikeRemove => '非表示から削除';
+
+  @override
+  String dislikeSaved(String artist) {
+    return '非表示: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSVエクスポート';
+
+  @override
+  String get playlistExported => 'プレイリストを書き出しました';
+
+  @override
+  String get exportFailed => 'エクスポート失敗';
+
+  @override
+  String get downloadAll => 'すべてダウンロード';
+
+  @override
+  String get statsTitle => '統計';
+
+  @override
+  String get statsPlays => '再生回数';
+
+  @override
+  String get statsFavorites => 'お気に入り';
+
+  @override
+  String get statsPlaylists => 'プレイリスト';
+
+  @override
+  String get statsTopArtists => 'アーティスト上位';
+
+  @override
+  String get statsTopTracks => '曲上位';
+
+  @override
+  String resumeTitle(String device) {
+    return '$device で続きを再生';
+  }
+
+  @override
+  String get alwaysOnTop => 'ウィンドウを最前面に';
+
+  @override
   String get randomPick => 'ランダムに選ぶ';
 
   @override

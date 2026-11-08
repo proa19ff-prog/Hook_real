@@ -6,6 +6,8 @@ import '../../audio_player/presentation/mini_player.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
+import '../../audio_player/presentation/playlist_downloads_provider.dart';
+import 'playlist_export.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/playlist_artwork.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -25,6 +27,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = theme.colors;
+    final playlistDownloads = ref.watch(playlistDownloadsProvider);
     final strings = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: colors.background,
@@ -113,6 +116,67 @@ class PlaylistDetailScreen extends ConsumerWidget {
                                 },
                         ),
                         const Spacer(),
+                        IconButton(
+                          tooltip: strings.exportPlaylist,
+                          icon: Icon(
+                            MingCuteIcons.mgc_share_2_line,
+                            color: colors.textPrimary,
+                          ),
+                          onPressed: tracks.isEmpty
+                              ? null
+                              : () async {
+                                  try {
+                                    await PlaylistExport.save(name, tracks);
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content:
+                                              Text(strings.playlistExported),
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    }
+                                  } catch (_) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(strings.exportFailed),
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                        ),
+                        IconButton(
+                          tooltip: strings.downloadAll,
+                          icon: playlistDownloads.progress == null
+                              ? Icon(
+                                  MingCuteIcons.mgc_download_2_line,
+                                  color: colors.textPrimary,
+                                )
+                              : SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    value: playlistDownloads.progress,
+                                    color: colors.primary,
+                                  ),
+                                ),
+                          onPressed: tracks.isEmpty ||
+                                  playlistDownloads.running
+                              ? playlistDownloads.running
+                                  ? () => ref
+                                      .read(playlistDownloadsProvider.notifier)
+                                      .cancel()
+                                  : null
+                              : () => ref
+                                  .read(playlistDownloadsProvider.notifier)
+                                  .downloadAll(tracks),
+                        ),
                         IconButton.filled(
                           tooltip: strings.playPlaylist,
                           style: IconButton.styleFrom(

@@ -22,6 +22,9 @@ abstract final class SyncKeys {
   static const searchHistoryDel = 'search_history_del';
   static const lyricsOffsets = 'lyrics_offsets';
   static const lyricsOffsetsDel = 'lyrics_offsets_del';
+  static const dislikedArtists = 'disliked_artists';
+  static const dislikedArtistsDel = 'disliked_artists_del';
+  static const resume = 'resume';
   static const lyricsDisplayMode = 'lyrics_display_mode';
   static const lyricsAutoHide = 'lyrics_auto_hide';
   static const themeId = 'theme_id';
@@ -39,6 +42,9 @@ abstract final class SyncKeys {
     searchHistoryDel,
     lyricsOffsets,
     lyricsOffsetsDel,
+    dislikedArtists,
+    dislikedArtistsDel,
+    resume,
     lyricsDisplayMode,
     lyricsAutoHide,
     themeId,
@@ -50,6 +56,7 @@ abstract final class SyncKeys {
     playlistsDel,
     searchHistoryDel,
     lyricsOffsetsDel,
+    dislikedArtistsDel,
   ];
 }
 
@@ -137,15 +144,22 @@ abstract final class SyncMerger {
           localFirst ? localValue : remoteValue,
           localFirst ? remoteValue : localValue,
         );
+      case SyncKeys.dislikedArtists:
+        merged = _unionStrings(
+          localFirst ? localValue : remoteValue,
+          localFirst ? remoteValue : localValue,
+        );
       case SyncKeys.favoritesDel ||
           SyncKeys.playlistsDel ||
           SyncKeys.searchHistoryDel ||
-          SyncKeys.lyricsOffsetsDel:
+          SyncKeys.lyricsOffsetsDel ||
+          SyncKeys.dislikedArtistsDel:
         merged = _maxPerEntry(localValue, remoteValue);
       case SyncKeys.lyricsDisplayMode ||
           SyncKeys.lyricsAutoHide ||
           SyncKeys.themeId ||
-          SyncKeys.customThemeJson:
+          SyncKeys.customThemeJson ||
+          SyncKeys.resume:
         merged = localFirst
             ? (localValue ?? remoteValue)
             : (remoteValue ?? localValue);
@@ -172,6 +186,8 @@ abstract final class SyncMerger {
         delKey = SyncKeys.playlistsDel;
       case SyncKeys.searchHistory:
         delKey = SyncKeys.searchHistoryDel;
+      case SyncKeys.dislikedArtists:
+        delKey = SyncKeys.dislikedArtistsDel;
       case SyncKeys.lyricsOffsets:
         delKey = SyncKeys.lyricsOffsetsDel;
       default:
@@ -220,6 +236,9 @@ abstract final class SyncMerger {
           for (final entry in payload.entries)
             if (!deleted.contains('${entry.key}')) entry.key: entry.value,
         };
+      case SyncKeys.dislikedArtists:
+        if (payload is! List) return payload;
+        return payload.where((a) => !deleted.contains('$a')).toList();
       default:
         return payload;
     }
@@ -354,6 +373,7 @@ class SyncEngine {
     SyncKeys.playlists,
     SyncKeys.searchHistory,
     SyncKeys.lyricsOffsets,
+    SyncKeys.dislikedArtists,
   };
 
   final LocalStorageService storage;
@@ -389,6 +409,10 @@ class SyncEngine {
         return storage.getSearchHistory();
       case SyncKeys.lyricsOffsets:
         return storage.getLyricsOffsets();
+      case SyncKeys.dislikedArtists:
+        return storage.getDislikedArtists();
+      case SyncKeys.resume:
+        return storage.getResumeState();
       case SyncKeys.lyricsDisplayMode:
         return storage.getLyricsDisplayMode();
       case SyncKeys.lyricsAutoHide:
@@ -400,7 +424,8 @@ class SyncEngine {
       case SyncKeys.favoritesDel ||
           SyncKeys.playlistsDel ||
           SyncKeys.searchHistoryDel ||
-          SyncKeys.lyricsOffsetsDel:
+          SyncKeys.lyricsOffsetsDel ||
+          SyncKeys.dislikedArtistsDel:
         return _tombstones[key];
       default:
         return null;
@@ -486,6 +511,18 @@ class SyncEngine {
           for (final entry in offsets.entries)
             if (entry.value is num) entry.key: (entry.value as num).toDouble(),
         });
+      }
+      final disliked = envelope(SyncKeys.dislikedArtists)?['v'];
+      if (disliked is List) {
+        await storage.setDislikedArtists([
+          for (final a in disliked) '$a',
+        ]);
+      }
+      final resume = envelope(SyncKeys.resume)?['v'];
+      if (resume is Map) {
+        await storage.saveResumeState(
+          Map<String, dynamic>.from(resume),
+        );
       }
       final displayMode = envelope(SyncKeys.lyricsDisplayMode)?['v'];
       if (displayMode is String) {
@@ -589,6 +626,8 @@ class SyncEngine {
         return SyncKeys.searchHistoryDel;
       case SyncKeys.lyricsOffsets:
         return SyncKeys.lyricsOffsetsDel;
+      case SyncKeys.dislikedArtists:
+        return SyncKeys.dislikedArtistsDel;
       default:
         return key;
     }

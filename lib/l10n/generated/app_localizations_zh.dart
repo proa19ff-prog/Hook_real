@@ -837,6 +837,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String get waveLoading => '正在寻找相似歌曲…';
 
   @override
+  String get sleepTimer => '睡眠定时器';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => '直到本曲结束';
+
+  @override
+  String get sleepCancel => '关闭';
+
+  @override
+  String get dislike => '不喜欢';
+
+  @override
+  String get dislikeRemove => '从隐藏中移除';
+
+  @override
+  String dislikeSaved(String artist) {
+    return '已隐藏：$artist';
+  }
+
+  @override
+  String get exportPlaylist => '导出 CSV';
+
+  @override
+  String get playlistExported => '歌单已导出';
+
+  @override
+  String get exportFailed => '导出失败';
+
+  @override
+  String get downloadAll => '全部下载';
+
+  @override
+  String get statsTitle => '统计';
+
+  @override
+  String get statsPlays => '播放次数';
+
+  @override
+  String get statsFavorites => '收藏';
+
+  @override
+  String get statsPlaylists => '歌单';
+
+  @override
+  String get statsTopArtists => '热门歌手';
+
+  @override
+  String get statsTopTracks => '热门歌曲';
+
+  @override
+  String resumeTitle(String device) {
+    return '在 $device 上继续';
+  }
+
+  @override
+  String get alwaysOnTop => '窗口置顶';
+
+  @override
   String get randomPick => '随机推荐';
 
   @override

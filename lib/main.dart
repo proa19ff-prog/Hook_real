@@ -9,6 +9,7 @@ import 'core/diagnostics/playback_diagnostics.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smtc_windows/smtc_windows.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 import 'core/storage/audio_cache_manager.dart';
@@ -34,6 +35,20 @@ Future<void> main() async {
   await AccountService.ensureInitialized();
   final storageService = await LocalStorageService.create();
   RemoteResolverSource.endpoint = storageService.getRemoteResolverUrl();
+  if (Platform.isWindows) {
+    await windowManager.ensureInitialized();
+    await windowManager.waitUntilReadyToShow(
+      const WindowOptions(
+        size: Size(1180, 780),
+        minimumSize: Size(480, 380),
+        title: 'Hook',
+      ),
+      () async {
+        await windowManager.show();
+        await windowManager.setAlwaysOnTop(storageService.getWindowOnTop());
+      },
+    );
+  }
   final selectedLocale = storageService.getLocaleCode();
   final usesRussian =
       selectedLocale == 'ru' ||

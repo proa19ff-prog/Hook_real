@@ -97,6 +97,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   StreamSubscription<PlaybackEvent>? _playbackErrorSubscription;
   Future<void> Function(Object error)? _runtimeErrorHandler;
   CancelToken? _fallbackDownloadToken;
+  Timer? _resumeTimer;
   final LyricsClient _offlineLyrics = LyricsClient();
   bool _wantsPlayback = false;
   Duration? _pendingFallbackPosition;
@@ -565,10 +566,13 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
             }
           }),
         );
+        // Mask the hard source swap with a soft entry.
+        unawaited(_fadeIn());
       }
       unawaited(_storageService?.addToHistory(track));
       // Real replay signal for the personal recommendations engine.
       unawaited(_storageService?.registerPlay(TrackWaveService.trackKey(track)));
+      _saveResumeState(track);
       _prefetchNext();
       return true;
     }
@@ -966,6 +970,76 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
       await _player.setPitch(pitch.clamp(0.5, 2.0));
   Future<void> setVolume(double volume) async =>
       await equalizer.setVolume(volume);
+
+  /// Writes the now-playing snapshot for cross-device "continue listening".
+  /// While playing it re-writes every 15 seconds (a periodic timer keeps it
+  /// fresh without a per-second write storm), plus once per track change.
+  void _saveResumeState(MediaTrack track) {
+    final storage = _storageService;
+    if (storage == null) return;
+    Future<void> write() async {
+      try {
+        await storage.saveResumeState({
+          'track': {
+            'id': track.id,
+            'title': track.title,
+            'artist': track.artist,
+            if (track.album != null) 'album': track.album,
+            'durationMs': track.duration.inMilliseconds,
+            'artworkUrl': track.artworkUrl,
+            'source': track.source.name,
+          },
+          'positionMs': _player.position.inMilliseconds,
+          'device': Platform.localHostname,
+          'at': DateTime.now().millisecondsSinceEpoch,
+        });
+      } catch (_) {
+        // The resume hint is best-effort; never disturb playback.
+      }
+    }
+
+    unawaited(write());
+    _resumeTimer?.cancel();
+    _resumeTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (_player.playing && _currentTrack == track) {
+        unawaited(write());
+      } else {
+        _resumeTimer?.cancel();
+        _resumeTimer = null;
+      }
+    });
+  }
+
+  /// Ramps the player from silence up to the listener's volume after a
+  /// track switch, softening the instant a new source is attached. Direct
+  /// player-volume writes are safe here: the equalizer only rewrites the
+  /// level when the user moves their own control.
+  Future<void> _fadeIn({
+    Duration length = const Duration(milliseconds: 280),
+  }) async {
+    final target = equalizer.volume.clamp(0.0, 1.0);
+    if (target <= 0) return;
+    const steps = 10;
+    for (var i = 1; i <= steps; i++) {
+      await _player.setVolume(target * i / steps);
+      await Future<void>.delayed(length ~/ steps);
+    }
+  }
+
+  /// Slides to silence before an automated pause (sleep timer) and restores
+  /// the listener's volume afterwards, so the next play is not silent.
+  Future<void> fadeOutAndPause({
+    Duration length = const Duration(seconds: 4),
+  }) async {
+    final start = equalizer.volume.clamp(0.0, 1.0);
+    const steps = 16;
+    for (var i = steps - 1; i >= 0; i--) {
+      await _player.setVolume(start * i / steps);
+      await Future<void>.delayed(length ~/ steps);
+    }
+    await pause();
+    await _player.setVolume(start);
+  }
 
   void toggleLoopMode() {
     switch (_loopMode) {

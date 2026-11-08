@@ -890,6 +890,69 @@ class AppLocalizationsBn extends AppLocalizations {
   String get waveLoading => 'একই রকম গান খোঁজা হচ্ছে…';
 
   @override
+  String get sleepTimer => 'ঘুমের টাইমার';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'ট্র্যাক শেষ পর্যন্ত';
+
+  @override
+  String get sleepCancel => 'বন্ধ করুন';
+
+  @override
+  String get dislike => 'পছন্দ নয়';
+
+  @override
+  String get dislikeRemove => 'লুকানো থেকে সরান';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'লুকানো হয়েছে: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSV রপ্তানি';
+
+  @override
+  String get playlistExported => 'প্লেলিস্ট রপ্তানি হয়েছে';
+
+  @override
+  String get exportFailed => 'রপ্তানি ব্যর্থ';
+
+  @override
+  String get downloadAll => 'সব ডাউনলোড';
+
+  @override
+  String get statsTitle => 'পরিসংখ্যান';
+
+  @override
+  String get statsPlays => 'বাজানো হয়েছে';
+
+  @override
+  String get statsFavorites => 'প্রিয়';
+
+  @override
+  String get statsPlaylists => 'প্লেলিস্ট';
+
+  @override
+  String get statsTopArtists => 'শীর্ষ শিল্পী';
+
+  @override
+  String get statsTopTracks => 'শীর্ষ ট্র্যাক';
+
+  @override
+  String resumeTitle(String device) {
+    return '$device-এ চালিয়ে যান';
+  }
+
+  @override
+  String get alwaysOnTop => 'উইন্ডো উপরে রাখুন';
+
+  @override
   String get randomPick => 'আপনার জন্য এলোমেলো পছন্দ';
 
   @override

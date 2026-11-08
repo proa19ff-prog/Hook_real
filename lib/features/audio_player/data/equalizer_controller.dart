@@ -217,6 +217,9 @@ class EqualizerController extends ChangeNotifier {
   int? _sessionId;
   int _sessionVersion = 0;
   double _volume = 1;
+
+  /// The listener's own volume (0..1), separate from fade automation.
+  double get volume => _volume;
   Future<void> Function(double)? _writeVolume;
   StreamSubscription<int?>? _sessionSubscription;
   SharedPreferences? _prefs;

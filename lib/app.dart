@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -29,6 +30,31 @@ class HookApp extends ConsumerWidget {
 
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+      // Keyboard conveniences on desktop, carried above the navigator so
+      // they fire whenever no text field owns the focus.
+      builder: (context, child) => CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.space): () =>
+              ref.read(audioPlayerServiceProvider).togglePlayPause(),
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () async {
+            final player = ref.read(audioPlayerServiceProvider);
+            await player.seek(
+              player.rawPlayer.position + const Duration(seconds: 10),
+            );
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () async {
+            final player = ref.read(audioPlayerServiceProvider);
+            await player.seek(
+              player.rawPlayer.position - const Duration(seconds: 10),
+            );
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
+              () => ref.read(audioPlayerServiceProvider).skipToNext(),
+          const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
+              () => ref.read(audioPlayerServiceProvider).skipToPrevious(),
+        },
+        child: Focus(autofocus: true, child: child!),
+      ),
       debugShowCheckedModeBanner: false,
       theme: theme.toThemeData(),
       locale: locale,

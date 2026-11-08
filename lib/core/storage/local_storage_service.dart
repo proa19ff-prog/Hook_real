@@ -288,6 +288,30 @@ class LocalStorageService {
     _notify('play_timestamps');
   }
 
+  // --- DISLIKED ARTISTS (recommendation feedback) ---
+  static const String _dislikedArtistsKey = 'hook_disliked_artists';
+  static const int _maxDislikedArtists = 300;
+
+  List<String> getDislikedArtists() =>
+      _prefs.getStringList(_dislikedArtistsKey) ?? [];
+
+  bool isDislikedArtist(String artist) =>
+      getDislikedArtists().contains(artist.trim());
+
+  Future<void> toggleDislikedArtist(String artist) async {
+    final name = artist.trim();
+    if (name.isEmpty) return;
+    final disliked = getDislikedArtists();
+    if (!disliked.remove(name)) {
+      disliked.insert(0, name);
+      if (disliked.length > _maxDislikedArtists) {
+        disliked.removeLast();
+      }
+    }
+    await _prefs.setStringList(_dislikedArtistsKey, disliked);
+    _notify('disliked_artists');
+  }
+
   // --- PLAYLISTS ---
   Map<String, List<MediaTrack>> getPlaylists() {
     final raw = _prefs.getString(_playlistsKey);
@@ -379,6 +403,31 @@ class LocalStorageService {
 
   Future<void> setLyricsOffsets(Map<String, double> offsets) =>
       _prefs.setString('hook_lyrics_offsets', jsonEncode(offsets));
+
+  Future<void> setDislikedArtists(List<String> artists) =>
+      _prefs.setStringList(_dislikedArtistsKey, artists);
+
+  // --- WINDOW (Windows desktop) ---
+  bool getWindowOnTop() => _prefs.getBool('hook_window_on_top') ?? false;
+  Future<void> saveWindowOnTop(bool value) =>
+      _prefs.setBool('hook_window_on_top', value);
+
+  // --- RESUME STATE (continue listening on another device) ---
+  static const String _resumeStateKey = 'hook_resume_state';
+
+  /// The latest playing position snapshot, synced across devices. Shape:
+  /// `{track: MediaTrack json, positionMs: int, device: String, at: epochMs}`.
+  Map<String, dynamic>? getResumeState() {
+    try {
+      final decoded = jsonDecode(_prefs.getString(_resumeStateKey) ?? '');
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> saveResumeState(Map<String, dynamic> state) =>
+      _prefs.setString(_resumeStateKey, jsonEncode(state));
 
   // --- SYNC META (engine bookkeeping: key timestamps + tombstones) ---
 

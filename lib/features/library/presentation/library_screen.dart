@@ -7,6 +7,7 @@ import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
 import '../../import/presentation/import_bottom_sheet.dart';
+import '../../stats/stats_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/playlist_artwork.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
@@ -71,6 +72,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       children: [
                         Text(
                           strings.library,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
@@ -81,6 +84,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                         const SizedBox(height: 4),
                         Text(
                           strings.localCollection,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 13,
                             color: colors.textSecondary,
@@ -90,6 +95,19 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     ),
                   ),
                   const SizedBox(width: 8),
+                  IconButton(
+                    key: const ValueKey('library-stats'),
+                    tooltip: strings.statsTitle,
+                    icon: Icon(
+                      Icons.bar_chart_rounded,
+                      color: colors.textSecondary,
+                    ),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => StatsScreen(theme: widget.theme),
+                      ),
+                    ),
+                  ),
                   IconButton(
                     key: const ValueKey('library-youtube-account'),
                     tooltip: strings.youtubeAccount,

@@ -898,6 +898,69 @@ class AppLocalizationsIt extends AppLocalizations {
   String get waveLoading => 'Ricerca di brani simili…';
 
   @override
+  String get sleepTimer => 'Timer di spegnimento';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'Fino alla fine del brano';
+
+  @override
+  String get sleepCancel => 'Spegni';
+
+  @override
+  String get dislike => 'Non mi interessa';
+
+  @override
+  String get dislikeRemove => 'Rimuovi dai nascosti';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Nascosto: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'Esporta CSV';
+
+  @override
+  String get playlistExported => 'Playlist esportata';
+
+  @override
+  String get exportFailed => 'Esportazione non riuscita';
+
+  @override
+  String get downloadAll => 'Scarica tutto';
+
+  @override
+  String get statsTitle => 'Statistiche';
+
+  @override
+  String get statsPlays => 'Ascolti';
+
+  @override
+  String get statsFavorites => 'Preferiti';
+
+  @override
+  String get statsPlaylists => 'Playlist';
+
+  @override
+  String get statsTopArtists => 'Artisti principali';
+
+  @override
+  String get statsTopTracks => 'Brani principali';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Continua su $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'Mantieni finestra in primo piano';
+
+  @override
   String get randomPick => 'Scelta casuale per te';
 
   @override

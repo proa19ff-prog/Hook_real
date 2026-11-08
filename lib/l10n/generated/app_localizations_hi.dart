@@ -885,6 +885,69 @@ class AppLocalizationsHi extends AppLocalizations {
   String get waveLoading => 'मिलते-जुलते गाने खोजे जा रहे हैं…';
 
   @override
+  String get sleepTimer => 'स्लीप टाइमर';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'ट्रैक खत्म होने तक';
+
+  @override
+  String get sleepCancel => 'बंद करें';
+
+  @override
+  String get dislike => 'पसंद नहीं';
+
+  @override
+  String get dislikeRemove => 'छिपे हुओं से हटाएँ';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'छिपाया गया: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSV निर्यात';
+
+  @override
+  String get playlistExported => 'प्लेलिस्ट निर्यात हुई';
+
+  @override
+  String get exportFailed => 'निर्यात विफल';
+
+  @override
+  String get downloadAll => 'सब डाउनलोड करें';
+
+  @override
+  String get statsTitle => 'आंकड़े';
+
+  @override
+  String get statsPlays => 'चलाए गए';
+
+  @override
+  String get statsFavorites => 'पसंदीदा';
+
+  @override
+  String get statsPlaylists => 'प्लेलिस्ट';
+
+  @override
+  String get statsTopArtists => 'टॉप कलाकार';
+
+  @override
+  String get statsTopTracks => 'टॉप ट्रैक';
+
+  @override
+  String resumeTitle(String device) {
+    return '$device पर जारी रखें';
+  }
+
+  @override
+  String get alwaysOnTop => 'विंडो हमेशा ऊपर रखें';
+
+  @override
   String get randomPick => 'आपके लिए यादृच्छिक चयन';
 
   @override

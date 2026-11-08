@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ming_cute_icons/ming_cute_icons.dart';
+import 'package:window_manager/window_manager.dart';
 import 'updates_section.dart';
 
 import '../../../core/localization/locale_provider.dart';
@@ -12,6 +14,7 @@ import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/theme_settings_screen.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
 import 'account_section.dart';
+import '../../library/presentation/library_provider.dart';
 import 'settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -192,6 +195,34 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _editRemoteResolver(context, ref, colors),
                   ),
+                  if (!kIsWeb &&
+                      defaultTargetPlatform == TargetPlatform.windows)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Material(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        child: SwitchListTile.adaptive(
+                          secondary: Icon(
+                            Icons.picture_in_picture_alt_rounded,
+                            color: colors.textPrimary,
+                          ),
+                          title: Text(
+                            strings.alwaysOnTop,
+                            style: TextStyle(color: colors.textPrimary),
+                          ),
+                          value: ref
+                              .watch(localStorageServiceProvider)
+                              .getWindowOnTop(),
+                          onChanged: (value) async {
+                            await ref
+                                .read(localStorageServiceProvider)
+                                .saveWindowOnTop(value);
+                            await windowManager.setAlwaysOnTop(value);
+                          },
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 12),
                   const AccountSection(),
                   const SizedBox(height: 12),

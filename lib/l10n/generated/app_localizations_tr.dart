@@ -893,6 +893,69 @@ class AppLocalizationsTr extends AppLocalizations {
   String get waveLoading => 'Benzer şarkılar bulunuyor…';
 
   @override
+  String get sleepTimer => 'Uyku zamanlayıcısı';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'Parça sonuna kadar';
+
+  @override
+  String get sleepCancel => 'Kapat';
+
+  @override
+  String get dislike => 'Bana göre değil';
+
+  @override
+  String get dislikeRemove => 'Gizlilerden çıkar';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Gizlendi: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSV dışa aktar';
+
+  @override
+  String get playlistExported => 'Çalma listesi dışa aktarıldı';
+
+  @override
+  String get exportFailed => 'Dışa aktarma başarısız';
+
+  @override
+  String get downloadAll => 'Tümünü indir';
+
+  @override
+  String get statsTitle => 'İstatistikler';
+
+  @override
+  String get statsPlays => 'Dinleme';
+
+  @override
+  String get statsFavorites => 'Favoriler';
+
+  @override
+  String get statsPlaylists => 'Listeler';
+
+  @override
+  String get statsTopArtists => 'En çok dinlenen sanatçılar';
+
+  @override
+  String get statsTopTracks => 'En çok dinlenen parçalar';
+
+  @override
+  String resumeTitle(String device) {
+    return '$device üzerinde devam et';
+  }
+
+  @override
+  String get alwaysOnTop => 'Pencereyi üstte tut';
+
+  @override
   String get randomPick => 'Senin için rastgele seçim';
 
   @override

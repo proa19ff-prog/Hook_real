@@ -895,6 +895,69 @@ class AppLocalizationsDe extends AppLocalizations {
   String get waveLoading => 'Ähnliche Titel werden gesucht…';
 
   @override
+  String get sleepTimer => 'Einschlaftimer';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'Bis zum Titelende';
+
+  @override
+  String get sleepCancel => 'Ausschalten';
+
+  @override
+  String get dislike => 'Nicht interessiert';
+
+  @override
+  String get dislikeRemove => 'Aus Verborgenen entfernen';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Verborgen: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSV exportieren';
+
+  @override
+  String get playlistExported => 'Playlist exportiert';
+
+  @override
+  String get exportFailed => 'Export fehlgeschlagen';
+
+  @override
+  String get downloadAll => 'Alles herunterladen';
+
+  @override
+  String get statsTitle => 'Statistiken';
+
+  @override
+  String get statsPlays => 'Wiedergaben';
+
+  @override
+  String get statsFavorites => 'Favoriten';
+
+  @override
+  String get statsPlaylists => 'Playlists';
+
+  @override
+  String get statsTopArtists => 'Top-Künstler';
+
+  @override
+  String get statsTopTracks => 'Top-Titel';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Auf $device fortfahren';
+  }
+
+  @override
+  String get alwaysOnTop => 'Fenster oben halten';
+
+  @override
   String get randomPick => 'Zufälliger Vorschlag für dich';
 
   @override

@@ -172,7 +172,8 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    expect(find.byType(IconButton), findsNWidgets(3));
+    // Back, shuffle, export, download-all, play.
+    expect(find.byType(IconButton), findsNWidgets(5));
   });
 
   testWidgets('search modes remain scrollable with the keyboard open', (

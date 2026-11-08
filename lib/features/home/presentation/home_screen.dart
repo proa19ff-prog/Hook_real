@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -104,6 +105,7 @@ class HomeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const SliverToBoxAdapter(child: _ResumeCard()),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -538,4 +540,98 @@ class _SectionHeading extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// "Continue listening" hint from another device: the account sync delivers
+/// the latest now-playing snapshot, and one tap picks it up at the saved
+/// position. Hidden when this very device produced the snapshot.
+class _ResumeCard extends ConsumerWidget {
+  const _ResumeCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(resumeStateProvider).valueOrNull;
+    if (state == null) return const SizedBox.shrink();
+    final device = state['device'];
+    final at = state['at'];
+    if (device is! String ||
+        device == Platform.localHostname ||
+        at is! num) {
+      return const SizedBox.shrink();
+    }
+    if (DateTime.now().millisecondsSinceEpoch - at > 48 * 3600 * 1000) {
+      return const SizedBox.shrink();
+    }
+    final trackJson = state['track'];
+    final positionMs = state['positionMs'];
+    if (trackJson is! Map || positionMs is! num) return const SizedBox.shrink();
+    final MediaTrack track;
+    try {
+      track = MediaTrack.fromJson(Map<String, dynamic>.from(trackJson));
+    } catch (_) {
+      return const SizedBox.shrink();
+    }
+    if (track.duration.inMilliseconds > 0 &&
+        positionMs >= track.duration.inMilliseconds * 0.95) {
+      return const SizedBox.shrink();
+    }
+
+    final strings = AppLocalizations.of(context);
+    final minutes = (positionMs ~/ 60000);
+    final position = '$minutes min';
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () async {
+            final notifier = ref.read(queueProvider.notifier);
+            await notifier.playTrack(track);
+            await ref
+                .read(audioPlayerServiceProvider)
+                .seek(Duration(milliseconds: positionMs.round()));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const Icon(Icons.cast_rounded, size: 22),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        strings.resumeTitle(device),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${track.artist} — ${track.title} · $position',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.play_arrow_rounded, size: 26),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

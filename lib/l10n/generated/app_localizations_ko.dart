@@ -855,6 +855,69 @@ class AppLocalizationsKo extends AppLocalizations {
   String get waveLoading => '비슷한 곡을 찾고 있어요…';
 
   @override
+  String get sleepTimer => '수면 타이머';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => '트랙 끝까지';
+
+  @override
+  String get sleepCancel => '끄기';
+
+  @override
+  String get dislike => '관심 없음';
+
+  @override
+  String get dislikeRemove => '숨김에서 제거';
+
+  @override
+  String dislikeSaved(String artist) {
+    return '숨김: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'CSV 내보내기';
+
+  @override
+  String get playlistExported => '재생목록 내보냄';
+
+  @override
+  String get exportFailed => '내보내기 실패';
+
+  @override
+  String get downloadAll => '모두 다운로드';
+
+  @override
+  String get statsTitle => '통계';
+
+  @override
+  String get statsPlays => '재생 횟수';
+
+  @override
+  String get statsFavorites => '즐겨찾기';
+
+  @override
+  String get statsPlaylists => '재생목록';
+
+  @override
+  String get statsTopArtists => '상위 아티스트';
+
+  @override
+  String get statsTopTracks => '상위 트랙';
+
+  @override
+  String resumeTitle(String device) {
+    return '$device에서 이어 듣기';
+  }
+
+  @override
+  String get alwaysOnTop => '창 항상 위';
+
+  @override
   String get randomPick => '랜덤 추천';
 
   @override

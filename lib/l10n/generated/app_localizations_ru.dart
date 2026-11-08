@@ -898,6 +898,69 @@ class AppLocalizationsRu extends AppLocalizations {
   String get waveLoading => 'Подбираем похожие треки…';
 
   @override
+  String get sleepTimer => 'Таймер сна';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'До конца трека';
+
+  @override
+  String get sleepCancel => 'Выключить';
+
+  @override
+  String get dislike => 'Не нравится';
+
+  @override
+  String get dislikeRemove => 'Убрать из скрытых';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Скрыто: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'Экспорт CSV';
+
+  @override
+  String get playlistExported => 'Плейлист выгружен';
+
+  @override
+  String get exportFailed => 'Не удалось выгрузить';
+
+  @override
+  String get downloadAll => 'Скачать всё';
+
+  @override
+  String get statsTitle => 'Статистика';
+
+  @override
+  String get statsPlays => 'Прослушиваний';
+
+  @override
+  String get statsFavorites => 'Избранное';
+
+  @override
+  String get statsPlaylists => 'Плейлисты';
+
+  @override
+  String get statsTopArtists => 'Топ артистов';
+
+  @override
+  String get statsTopTracks => 'Топ треков';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Продолжить на $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'Держать окно поверх';
+
+  @override
   String get randomPick => 'Случайная рекомендация';
 
   @override

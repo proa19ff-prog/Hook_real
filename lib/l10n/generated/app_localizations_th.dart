@@ -878,6 +878,69 @@ class AppLocalizationsTh extends AppLocalizations {
   String get waveLoading => 'กำลังค้นหาเพลงที่คล้ายกัน…';
 
   @override
+  String get sleepTimer => 'ตัวตั้งเวลานอน';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'จนจบเพลง';
+
+  @override
+  String get sleepCancel => 'ปิด';
+
+  @override
+  String get dislike => 'ไม่ชอบ';
+
+  @override
+  String get dislikeRemove => 'ลบจากรายการซ่อน';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'ซ่อนแล้ว: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'ส่งออก CSV';
+
+  @override
+  String get playlistExported => 'ส่งออกเพลย์ลิสต์แล้ว';
+
+  @override
+  String get exportFailed => 'ส่งออกไม่สำเร็จ';
+
+  @override
+  String get downloadAll => 'ดาวน์โหลดทั้งหมด';
+
+  @override
+  String get statsTitle => 'สถิติ';
+
+  @override
+  String get statsPlays => 'จำนวนเล่น';
+
+  @override
+  String get statsFavorites => 'รายการโปรด';
+
+  @override
+  String get statsPlaylists => 'เพลย์ลิสต์';
+
+  @override
+  String get statsTopArtists => 'ศิลปินยอดนิยม';
+
+  @override
+  String get statsTopTracks => 'เพลงยอดนิยม';
+
+  @override
+  String resumeTitle(String device) {
+    return 'เล่นต่อบน $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'หน้าต่างค้างไว้ด้านบน';
+
+  @override
   String get randomPick => 'สุ่มเพลงสำหรับคุณ';
 
   @override

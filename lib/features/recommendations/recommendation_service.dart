@@ -95,6 +95,9 @@ class RecommendationService {
     final favorites = _storage.getFavorites();
     final history = _storage.getHistory();
 
+    // Artists the listener flagged with a dislike never come back.
+    final dislikedArtists = _storage.getDislikedArtists().toSet();
+
     // 1. Build User Interaction Profile and Frequency Graphs
     final artistScores = <String, double>{};
     final artistPlayCount = <String, int>{};
@@ -224,6 +227,7 @@ class RecommendationService {
     for (final track in candidatePool) {
       final trackKey = '${track.source.name}:${track.id}';
       final cleanArtist = _cleanArtistName(track.artist);
+      if (dislikedArtists.contains(cleanArtist)) continue;
 
       // A. Core Compatibility
       // 1. Sim_collab: Graph overlap with user's favorite & history artists

@@ -892,6 +892,69 @@ class AppLocalizationsId extends AppLocalizations {
   String get waveLoading => 'Mencari lagu yang mirip…';
 
   @override
+  String get sleepTimer => 'Timer tidur';
+
+  @override
+  String sleepMinutes(String value) {
+    return '$value';
+  }
+
+  @override
+  String get sleepUntilTrackEnd => 'Sampai lagu selesai';
+
+  @override
+  String get sleepCancel => 'Matikan';
+
+  @override
+  String get dislike => 'Tidak suka';
+
+  @override
+  String get dislikeRemove => 'Hapus dari tersembunyi';
+
+  @override
+  String dislikeSaved(String artist) {
+    return 'Disembunyikan: $artist';
+  }
+
+  @override
+  String get exportPlaylist => 'Ekspor CSV';
+
+  @override
+  String get playlistExported => 'Playlist terekspor';
+
+  @override
+  String get exportFailed => 'Ekspor gagal';
+
+  @override
+  String get downloadAll => 'Unduh semua';
+
+  @override
+  String get statsTitle => 'Statistik';
+
+  @override
+  String get statsPlays => 'Putar';
+
+  @override
+  String get statsFavorites => 'Favorit';
+
+  @override
+  String get statsPlaylists => 'Playlist';
+
+  @override
+  String get statsTopArtists => 'Artis teratas';
+
+  @override
+  String get statsTopTracks => 'Lagu teratas';
+
+  @override
+  String resumeTitle(String device) {
+    return 'Lanjutkan di $device';
+  }
+
+  @override
+  String get alwaysOnTop => 'Jaga jendela di atas';
+
+  @override
   String get randomPick => 'Pilihan acak untukmu';
 
   @override
