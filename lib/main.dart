@@ -74,21 +74,31 @@ Future<void> main() async {
       cacheManager: cacheManager,
     );
     if (Platform.isWindows) {
-      await SMTCWindows.initialize();
-      WindowsSmtcBridge(
-        audioService,
-        SMTCWindows(
-          config: const SMTCConfig(
-            playEnabled: true,
-            pauseEnabled: true,
-            nextEnabled: true,
-            prevEnabled: true,
-            stopEnabled: false,
-            fastForwardEnabled: false,
-            rewindEnabled: false,
+      // Media keys are a nice-to-have; a broken SMTC runtime must never
+      // keep the whole app from starting (it runs before runApp).
+      try {
+        await SMTCWindows.initialize();
+        WindowsSmtcBridge(
+          audioService,
+          SMTCWindows(
+            config: const SMTCConfig(
+              playEnabled: true,
+              pauseEnabled: true,
+              nextEnabled: true,
+              prevEnabled: true,
+              stopEnabled: false,
+              fastForwardEnabled: false,
+              rewindEnabled: false,
+            ),
           ),
-        ),
-      );
+        );
+      } catch (error) {
+        PlaybackDiagnostics.record(
+          'smtc.init.failed',
+          source: 'windows',
+          error: error.toString(),
+        );
+      }
     }
   }
   await audioService.initialize();

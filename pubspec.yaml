@@ -44,6 +44,11 @@ dependencies:
   smtc_windows: ^1.1.0
   file_picker: ^13.3.2
 
+# smtc_windows 1.1.0 ships Rust codegen for FRB 2.11.1; a newer runtime
+# aborts SMTC init (and with it main()) with a version sanity check.
+dependency_overrides:
+  flutter_rust_bridge: 2.11.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
