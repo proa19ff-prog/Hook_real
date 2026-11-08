@@ -56,3 +56,10 @@ android/.gradle/
 android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 promo/
 releases/
+build_elevated.cmd
+vs_repair.cmd
+vs_update.cmd
+build_win.log
+build_win_err.log
+vs_update_out.log
+vs_repair_done.txt
