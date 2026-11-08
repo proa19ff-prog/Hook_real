@@ -18,7 +18,6 @@ import java.util.concurrent.Executors
 class MainActivity : AudioServiceActivity() {
     private var lyricsTranslation: LyricsTranslationChannel? = null
     private var youtubeAccount: YouTubeAccountChannel? = null
-    private var updateInstall: UpdateInstallChannel? = null
     private var importChannel: MethodChannel? = null
     private var pendingImport: MethodChannel.Result? = null
     private val importExecutor = Executors.newSingleThreadExecutor()
@@ -31,10 +30,7 @@ class MainActivity : AudioServiceActivity() {
         }
         lyricsTranslation?.close()
         lyricsTranslation = LyricsTranslationChannel(flutterEngine.dartExecutor.binaryMessenger)
-        updateInstall?.close()
-        updateInstall = UpdateInstallChannel().also { channel ->
-            channel.register(flutterEngine, this)
-        }
+        UpdateInstallChannel.register(flutterEngine, this)
         youtubeAccount?.close()
         youtubeAccount = YouTubeAccountChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         importChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "hook/import_file")
@@ -126,8 +122,7 @@ class MainActivity : AudioServiceActivity() {
     override fun onDestroy() {
         youtubeAccount?.close()
         youtubeAccount = null
-        updateInstall?.close()
-        updateInstall = null
+        UpdateInstallChannel.close()
         lyricsTranslation?.close()
         lyricsTranslation = null
         importChannel?.setMethodCallHandler(null)
