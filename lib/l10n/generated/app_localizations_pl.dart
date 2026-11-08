@@ -894,6 +894,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get accountTitle => 'Konto';
 
   @override
+  String get waveLoading => 'Szukamy podobnych utworów…';
+
+  @override
   String get accountCaption => 'Synchronizuj bibliotekę między urządzeniami';
 
   @override

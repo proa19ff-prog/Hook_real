@@ -272,6 +272,7 @@
   "trackActions": "Действия с треком",
   "updatesTitle": "Обновления",
   "accountTitle": "Аккаунт",
+  "waveLoading": "Подбираем похожие треки…",
   "accountCaption": "Синхронизация библиотеки между устройствами",
   "nickname": "Ник",
   "nicknameHint": "3–20 символов: буквы, цифры, . _ -",

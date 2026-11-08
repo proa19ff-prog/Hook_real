@@ -857,6 +857,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get accountTitle => 'アカウント';
 
   @override
+  String get waveLoading => '似た曲を探しています…';
+
+  @override
   String get accountCaption => 'ライブラリをデバイス間で同期';
 
   @override

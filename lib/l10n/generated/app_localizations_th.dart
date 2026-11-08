@@ -875,6 +875,9 @@ class AppLocalizationsTh extends AppLocalizations {
   String get accountTitle => 'บัญชี';
 
   @override
+  String get waveLoading => 'กำลังค้นหาเพลงที่คล้ายกัน…';
+
+  @override
   String get accountCaption => 'ซิงก์คลังเพลงของคุณระหว่างอุปกรณ์';
 
   @override

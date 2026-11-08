@@ -887,6 +887,9 @@ class AppLocalizationsBn extends AppLocalizations {
   String get accountTitle => 'অ্যাকাউন্ট';
 
   @override
+  String get waveLoading => 'একই রকম গান খোঁজা হচ্ছে…';
+
+  @override
   String get accountCaption => 'আপনার লাইব্রেরি ডিভাইসের মধ্যে সিঙ্ক করুন';
 
   @override

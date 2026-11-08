@@ -889,6 +889,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get accountTitle => 'Akun';
 
   @override
+  String get waveLoading => 'Mencari lagu yang mirip…';
+
+  @override
   String get accountCaption => 'Sinkronkan pustakamu antar perangkat';
 
   @override

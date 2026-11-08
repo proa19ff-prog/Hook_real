@@ -852,6 +852,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get accountTitle => '계정';
 
   @override
+  String get waveLoading => '비슷한 곡을 찾고 있어요…';
+
+  @override
   String get accountCaption => '기기 간에 라이브러리 동기화';
 
   @override

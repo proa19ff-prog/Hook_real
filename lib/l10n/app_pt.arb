@@ -255,6 +255,7 @@
   "trackActions": "Ações da faixa",
   "updatesTitle": "Atualizações",
   "accountTitle": "Conta",
+  "waveLoading": "Encontrando músicas parecidas…",
   "accountCaption": "Sincronize sua biblioteca entre dispositivos",
   "nickname": "Apelido",
   "nicknameHint": "3–20 caracteres: letras, dígitos, . _ -",

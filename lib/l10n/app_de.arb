@@ -255,6 +255,7 @@
   "trackActions": "Titel-Aktionen",
   "updatesTitle": "Updates",
   "accountTitle": "Konto",
+  "waveLoading": "Ähnliche Titel werden gesucht…",
   "accountCaption": "Synchronisiere deine Bibliothek geräteübergreifend",
   "nickname": "Nickname",
   "nicknameHint": "3–20 Zeichen: Buchstaben, Ziffern, . _ -",

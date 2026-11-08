@@ -255,6 +255,7 @@
   "trackActions": "Acciones de pista",
   "updatesTitle": "Actualizaciones",
   "accountTitle": "Cuenta",
+  "waveLoading": "Buscando canciones similares…",
   "accountCaption": "Sincroniza tu biblioteca entre dispositivos",
   "nickname": "Apodo",
   "nicknameHint": "3–20 caracteres: letras, dígitos, . _ -",

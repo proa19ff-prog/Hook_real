@@ -255,6 +255,7 @@
   "trackActions": "트랙 작업",
   "updatesTitle": "업데이트",
   "accountTitle": "계정",
+  "waveLoading": "비슷한 곡을 찾고 있어요…",
   "accountCaption": "기기 간에 라이브러리 동기화",
   "nickname": "닉네임",
   "nicknameHint": "3–20자: 영문, 숫자, . _ -",

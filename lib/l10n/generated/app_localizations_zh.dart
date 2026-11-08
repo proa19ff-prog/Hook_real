@@ -834,6 +834,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get accountTitle => '账户';
 
   @override
+  String get waveLoading => '正在寻找相似歌曲…';
+
+  @override
   String get accountCaption => '在设备之间同步你的音乐库';
 
   @override

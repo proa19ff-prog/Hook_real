@@ -886,6 +886,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get accountTitle => 'الحساب';
 
   @override
+  String get waveLoading => 'جارٍ البحث عن أغانٍ مشابهة…';
+
+  @override
   String get accountCaption => 'مزامنة مكتبتك بين الأجهزة';
 
   @override

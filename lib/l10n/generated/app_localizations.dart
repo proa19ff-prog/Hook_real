@@ -1670,6 +1670,12 @@ abstract class AppLocalizations {
   /// **'Account'**
   String get accountTitle;
 
+  /// No description provided for @waveLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding similar tracks…'**
+  String get waveLoading;
+
   /// No description provided for @accountCaption.
   ///
   /// In en, this message translates to:

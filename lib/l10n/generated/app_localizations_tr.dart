@@ -890,6 +890,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get accountTitle => 'Hesap';
 
   @override
+  String get waveLoading => 'Benzer şarkılar bulunuyor…';
+
+  @override
   String get accountCaption => 'Kitaplığını cihazlar arasında eşitle';
 
   @override

@@ -92,16 +92,52 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                           padding: EdgeInsets.only(
                             bottom: MediaQuery.paddingOf(context).bottom + 16,
                           ),
-                          itemCount: queue.length,
-                          itemBuilder: (context, index) => SpotifyTrackTile(
-                            theme: widget.theme,
-                            track: queue[index],
-                            isCurrent: index == player.currentIndex,
-                            onTap: () {
-                              ref.read(queueProvider.notifier).playAt(index);
-                              Navigator.of(sheetContext).pop();
-                            },
-                          ),
+                          // The wave grows asynchronously: while the playing
+                          // track is the last one, the next batch is still
+                          // being fetched — say so instead of looking broken.
+                          itemCount:
+                              queue.length + (player.waveActive ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index >= queue.length) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 14,
+                                ),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 14,
+                                      height: 14,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: colors.accent,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      strings.waveLoading,
+                                      style: TextStyle(
+                                        color: colors.textSecondary,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return SpotifyTrackTile(
+                              theme: widget.theme,
+                              track: queue[index],
+                              isCurrent: index == player.currentIndex,
+                              onTap: () {
+                                ref
+                                    .read(queueProvider.notifier)
+                                    .playAt(index);
+                                Navigator.of(sheetContext).pop();
+                              },
+                            );
+                          },
                         ),
                 ),
               ],

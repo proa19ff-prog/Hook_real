@@ -897,6 +897,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accountTitle => 'Compte';
 
   @override
+  String get waveLoading => 'Recherche de titres similaires…';
+
+  @override
   String get accountCaption =>
       'Synchronisez votre bibliothèque entre appareils';
 

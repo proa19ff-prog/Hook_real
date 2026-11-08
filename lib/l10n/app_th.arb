@@ -255,6 +255,7 @@
   "trackActions": "การกระทำกับเพลง",
   "updatesTitle": "อัปเดต",
   "accountTitle": "บัญชี",
+  "waveLoading": "กำลังค้นหาเพลงที่คล้ายกัน…",
   "accountCaption": "ซิงก์คลังเพลงของคุณระหว่างอุปกรณ์",
   "nickname": "ชื่อเล่น",
   "nicknameHint": "3–20 ตัวอักษร: ตัวอักษร ตัวเลข . _ -",

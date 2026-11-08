@@ -888,6 +888,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get accountTitle => 'Tài khoản';
 
   @override
+  String get waveLoading => 'Đang tìm bài hát tương tự…';
+
+  @override
   String get accountCaption => 'Đồng bộ thư viện giữa các thiết bị';
 
   @override

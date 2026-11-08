@@ -893,6 +893,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accountTitle => 'Cuenta';
 
   @override
+  String get waveLoading => 'Buscando canciones similares…';
+
+  @override
   String get accountCaption => 'Sincroniza tu biblioteca entre dispositivos';
 
   @override

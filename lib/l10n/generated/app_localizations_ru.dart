@@ -895,6 +895,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountTitle => 'Аккаунт';
 
   @override
+  String get waveLoading => 'Подбираем похожие треки…';
+
+  @override
   String get accountCaption => 'Синхронизация библиотеки между устройствами';
 
   @override

@@ -890,6 +890,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountTitle => 'Account';
 
   @override
+  String get waveLoading => 'Finding similar tracks…';
+
+  @override
   String get accountCaption => 'Sync your library across devices';
 
   @override

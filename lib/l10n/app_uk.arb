@@ -255,6 +255,7 @@
   "trackActions": "Дії з треком",
   "updatesTitle": "Оновлення",
   "accountTitle": "Акаунт",
+  "waveLoading": "Шукаємо схожі треки…",
   "accountCaption": "Синхронізація бібліотеки між пристроями",
   "nickname": "Нік",
   "nicknameHint": "3–20 символів: букви, цифри, . _ -",

@@ -823,6 +823,14 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
           _queue.addAll(tracks);
           _notifyQueue();
           _prefetchNext();
+          // The wave may have gone silent while this batch was in flight:
+          // the playing track ended, next() found nothing, playback stopped.
+          // Resume exactly that case — an intentional pause is never touched.
+          if (!_player.playing &&
+              _player.processingState == ProcessingState.completed &&
+              _queue.length > _currentIndex + 1) {
+            unawaited(playAt(_currentIndex + 1));
+          }
         })
         .catchError((Object error) {
           PlaybackDiagnostics.record(
@@ -992,6 +1000,13 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
     if (_waveActive && _currentIndex + 1 >= _queue.length) {
       await _extendWave();
+      if (_currentIndex + 1 >= _queue.length) {
+        // The first fetch may have failed transiently (carrier throttling,
+        // a blocked endpoint). Give the batch one more chance before the
+        // wave dies at the end of the playing track.
+        await Future<void>.delayed(const Duration(milliseconds: 800));
+        await _extendWave();
+      }
     }
     if (_isShuffle && !_waveActive && _queue.length > 1) {
       final candidates = List<int>.generate(_queue.length, (index) => index)
