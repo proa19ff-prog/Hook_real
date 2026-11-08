@@ -12,6 +12,11 @@ import 'sources/youtube_music_source.dart';
 import 'spotify/spotify_catalog_service.dart';
 
 class StreamResolver {
+  /// How long a DIRECT YouTube attempt (playback manifest or download
+  /// resolve) may take before the request moves to the resolver server.
+  /// Tune this one value to make the fallback faster or more patient.
+  static const Duration directYouTubeTimeout = Duration(seconds: 4);
+
   final SoundCloudExtractor _scExtractor;
   final SpotifyCatalogService _spotifyCatalog;
   final List<MusicSource> _additionalSources;
@@ -745,7 +750,12 @@ class StreamResolver {
       Object? directFailure;
       StackTrace? directStack;
       try {
-        final direct = await source.resolveTrack(track);
+        final attempt = source.resolveTrack(track);
+        // Only YouTube gets the short leash: its direct URLs are the ones
+        // carriers refuse, and the server fallback is strictly better there.
+        final direct = source is YouTubeMusicSource
+            ? await attempt.timeout(directYouTubeTimeout)
+            : await attempt;
         if (direct != null && !direct.isEmpty) return direct;
       } catch (error, stack) {
         directFailure = error;
@@ -785,7 +795,9 @@ class StreamResolver {
     if (track.source == TrackSource.youtubeMusic) {
       for (final provider in _additionalSources) {
         if (provider is YouTubeMusicSource) {
-          return provider.resolveDownloadTrack(track);
+          return provider
+              .resolveDownloadTrack(track)
+              .timeout(directYouTubeTimeout);
         }
       }
     }
