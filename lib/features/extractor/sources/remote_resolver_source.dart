@@ -27,7 +27,7 @@ class RemoteResolverSource implements MusicSource {
   /// change plus a new release; users can point the source elsewhere in
   /// settings without waiting for an update.
   static const String defaultEndpoint =
-      'https://atomic-rush-daixwalr.expresshost.cloud/ed3b53d48fcd09aba8acb666';
+      'https://hook-resolver.proa19ff.workers.dev/ed3b53d48fcd09aba8acb666';
 
   /// Storage mirror maintained by the settings layer.
   static String? endpoint;
