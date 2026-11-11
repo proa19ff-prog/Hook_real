@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Oturum yok — 18+ parçalar reddediliyor",
   "cookieStatusUnknown": "Henüz denetlenmedi",
   "cookieStatusCheck": "Denetle",
-  "cookieStatusChecking": "Denetleniyor…"
+  "cookieStatusChecking": "Denetleniyor…",
+  "cookieStatusUpload": "Çerezleri yükle",
+  "cookieStatusUploading": "Yükleniyor…",
+  "cookieUploadAccepted": "{cookies} çerez yüklendi — 18+ parçalar açık",
+  "cookieUploadRejected": "Sunucu dosyayı reddetti: {reason}",
+  "cookieUploadApology": "Bu dışa aktarım oturum açmış bir oturum değil, bu yüzden 18+ parçalar yine çalmaz. Yaş doğrulaması yapılmış bir hesapla YouTube'a giriş yapıp yeniden dışa aktarın.",
+  "cookieStatusUnreachable": "Sunucu yanıt vermedi"
 }

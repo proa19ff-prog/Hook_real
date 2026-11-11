@@ -1489,4 +1489,27 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Memeriksa…';
+
+  @override
+  String get cookieStatusUpload => 'Unggah cookie';
+
+  @override
+  String get cookieStatusUploading => 'Mengunggah…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies cookie diunggah — trek 18+ aktif';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Server menolak berkas: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Ekspor ini bukan sesi masuk, jadi trek 18+ tetap tidak akan diputar. Masuk ke YouTube dengan akun terverifikasi usia lalu ekspor ulang.';
+
+  @override
+  String get cookieStatusUnreachable => 'Server tidak menjawab';
 }

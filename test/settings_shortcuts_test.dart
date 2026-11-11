@@ -167,4 +167,30 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('upload button reports a missing picker instead of throwing', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+
+    final upload = find.byKey(const ValueKey('cookie-status-upload'));
+    await tester.scrollUntilVisible(
+      upload,
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    // No plugin is registered in a widget test, so the picker answers null.
+    // Tapping must be a no-op, not a crash: the row keeps its state and the
+    // buttons stay usable.
+    await tester.tap(upload);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('cookie-status-message')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('cookie-status-subtitle')),
+      findsOneWidget,
+    );
+  });
 }

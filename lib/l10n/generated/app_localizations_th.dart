@@ -1473,4 +1473,27 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'กำลังตรวจสอบ…';
+
+  @override
+  String get cookieStatusUpload => 'อัปโหลดคุกกี้';
+
+  @override
+  String get cookieStatusUploading => 'กำลังอัปโหลด…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'อัปโหลดคุกกี้ $cookies รายการแล้ว — แทร็ก 18+ ใช้งานได้';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'เซิร์ฟเวอร์ปฏิเสธไฟล์: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'ไฟล์นีไม่ใช่เซสชันที่ลงชื่อเข้าใช้ แทร็ก 18+ จึงยังเล่นไม่ได้ ลงชื่อเข้าใช้ YouTube ด้วยบัญชีที่ยืนยันอายุแล้วและส่งออกใหม่';
+
+  @override
+  String get cookieStatusUnreachable => 'เซิร์ฟเวอร์ไม่ตอบสนอง';
 }

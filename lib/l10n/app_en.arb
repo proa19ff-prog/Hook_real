@@ -495,5 +495,17 @@
   "cookieStatusCheck": "Check",
   "@cookieStatusCheck": {"description": "Button that runs the live cookie check."},
   "cookieStatusChecking": "Checking…",
-  "@cookieStatusChecking": {"description": "Label while the live cookie check runs."}
+  "@cookieStatusChecking": {"description": "Label while the live cookie check runs."},
+  "cookieStatusUpload": "Upload cookies",
+  "@cookieStatusUpload": {"description": "Button that sends a cookies.txt export to the resolver server."},
+  "cookieStatusUploading": "Uploading…",
+  "@cookieStatusUploading": {"description": "Label while the cookie export is being sent to the server."},
+  "cookieUploadAccepted": "Uploaded {cookies} cookies — age-restricted tracks are enabled",
+  "@cookieUploadAccepted": {"description": "Confirmation after a cookie export unlocked age-restricted tracks.", "placeholders": {"cookies": {"type": "int"}}},
+  "cookieUploadRejected": "Server rejected the file: {reason}",
+  "@cookieUploadRejected": {"description": "Shown when the server refused the uploaded cookie file; the reason is the server message.", "placeholders": {"reason": {"type": "String"}}},
+  "cookieUploadApology": "The export is not a signed-in session, so 18+ tracks still will not play. Sign in to YouTube on an age-verified account and export again.",
+  "@cookieUploadApology": {"description": "Explains that an upload succeeded but the export was made while signed out."},
+  "cookieStatusUnreachable": "Resolver server did not answer",
+  "@cookieStatusUnreachable": {"description": "Shown when the cookie check could not reach the resolver at all."}
 }

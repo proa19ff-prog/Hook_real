@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Accesso non eseguito: i brani 18+ vengono rifiutati",
   "cookieStatusUnknown": "Non ancora verificato",
   "cookieStatusCheck": "Verifica",
-  "cookieStatusChecking": "Verifica in corso…"
+  "cookieStatusChecking": "Verifica in corso…",
+  "cookieStatusUpload": "Carica cookie",
+  "cookieStatusUploading": "Caricamento…",
+  "cookieUploadAccepted": "{cookies} cookie caricati: i brani 18+ sono attivi",
+  "cookieUploadRejected": "Il server ha rifiutato il file: {reason}",
+  "cookieUploadApology": "Questo export non è una sessione con accesso: i brani 18+ non funzioneranno comunque. Accedi a YouTube con un account verificato ed esporta di nuovo.",
+  "cookieStatusUnreachable": "Il server non ha risposto"
 }

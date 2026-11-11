@@ -1491,4 +1491,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Checking…';
+
+  @override
+  String get cookieStatusUpload => 'Upload cookies';
+
+  @override
+  String get cookieStatusUploading => 'Uploading…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'Uploaded $cookies cookies — age-restricted tracks are enabled';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Server rejected the file: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'The export is not a signed-in session, so 18+ tracks still will not play. Sign in to YouTube on an age-verified account and export again.';
+
+  @override
+  String get cookieStatusUnreachable => 'Resolver server did not answer';
 }

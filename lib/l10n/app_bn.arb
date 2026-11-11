@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "সাইন-ইন নেই — ১৮+ ট্র্যাক প্রত্যাখ্যাত হয়",
   "cookieStatusUnknown": "এখনও যাচাই হয়নি",
   "cookieStatusCheck": "যাচাই",
-  "cookieStatusChecking": "যাচাই চলছে…"
+  "cookieStatusChecking": "যাচাই চলছে…",
+  "cookieStatusUpload": "কুকি আপলোড করুন",
+  "cookieStatusUploading": "আপলোড হচ্ছে…",
+  "cookieUploadAccepted": "{cookies} কুকি আপলোড হয়েছে — ১৮+ ট্র্যাক চালু",
+  "cookieUploadRejected": "সার্ভার ফাইল প্রত্যাখ্যান করেছে: {reason}",
+  "cookieUploadApology": "এই এক্সপোর্ট সাইন-ইন সেশন নয়, তাই ১৮+ ট্র্যাক চলবে না। বয়স-যাচাইকৃত অ্যাকাউন্টে YouTube-এ সাইন-ইন করে আবার এক্সপোর্ট করুন।",
+  "cookieStatusUnreachable": "সার্ভার সাড়া দেয়নি"
 }

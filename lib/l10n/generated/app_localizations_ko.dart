@@ -1441,4 +1441,27 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => '확인 중…';
+
+  @override
+  String get cookieStatusUpload => '쿠키 업로드';
+
+  @override
+  String get cookieStatusUploading => '업로드 중…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '쿠키 $cookies개 업로드됨 — 18+ 트랙이 활성화되었습니다';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return '서버가 파일을 거부했습니다: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      '이 내보내기는 로그인 세션이 아니므로 18+ 트랙은 여전히 재생되지 않습니다. 연령 인증된 계정으로 YouTube에 로그인한 뒤 다시 내보내세요.';
+
+  @override
+  String get cookieStatusUnreachable => '서버가 응답하지 않았습니다';
 }

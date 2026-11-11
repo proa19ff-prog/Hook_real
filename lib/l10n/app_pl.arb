@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Nie zalogowano — utwory 18+ są odrzucane",
   "cookieStatusUnknown": "Jeszcze nie sprawdzono",
   "cookieStatusCheck": "Sprawdź",
-  "cookieStatusChecking": "Sprawdzanie…"
+  "cookieStatusChecking": "Sprawdzanie…",
+  "cookieStatusUpload": "Wgraj ciasteczka",
+  "cookieStatusUploading": "Wgrywanie…",
+  "cookieUploadAccepted": "Wgrano {cookies} ciasteczek — utwory 18+ są dostępne",
+  "cookieUploadRejected": "Serwer odrzucił plik: {reason}",
+  "cookieUploadApology": "Ten eksport nie jest zalogowaną sesją, więc utwory 18+ nadal nie zagrają. Zaloguj się do YouTube na zweryfikowanym koncie i wyeksportuj ponownie.",
+  "cookieStatusUnreachable": "Serwer nie odpowiedział"
 }

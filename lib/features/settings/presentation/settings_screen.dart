@@ -11,6 +11,8 @@ import '../../../core/localization/supported_languages.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../extractor/sources/remote_resolver_source.dart';
+import '../../import/import_file_picker.dart';
+import '../../import/music_import_service.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/theme_settings_screen.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
@@ -472,10 +474,20 @@ class _CookieStatusRow extends ConsumerStatefulWidget {
 class _CookieStatusRowState extends ConsumerState<_CookieStatusRow> {
   CookieJarHealth? _health;
   bool _checking = false;
+  bool _uploading = false;
+
+  /// The last upload's outcome, shown until the next check or upload. Kept
+  /// separate from [_health] because a rejection is not a jar state: the old
+  /// jar is still in place and still answering.
+  String? _uploadMessage;
+  bool _uploadMessageIsError = false;
 
   Future<void> _check() async {
-    if (_checking) return;
-    setState(() => _checking = true);
+    if (_checking || _uploading) return;
+    setState(() {
+      _checking = true;
+      _uploadMessage = null;
+    });
     final health = await ref.read(cookieHealthProvider.future);
     if (!mounted) return;
     setState(() {
@@ -484,14 +496,93 @@ class _CookieStatusRowState extends ConsumerState<_CookieStatusRow> {
     });
   }
 
+  /// Picks a Netscape export and posts it to the resolver.
+  ///
+  /// The file is never touched locally: it goes straight to the server, which
+  /// validates it before swapping, so a bad pick cannot break playback.
+  Future<void> _upload() async {
+    if (_checking || _uploading) return;
+    final source = RemoteResolverSource();
+    ImportTextFile? file;
+    try {
+      file = await ImportFilePicker.pick();
+    } on MusicImportFileException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _uploadMessage = _pickError(
+          strings: AppLocalizations.of(context),
+          error: error,
+        );
+        _uploadMessageIsError = true;
+      });
+      return;
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _uploadMessage = AppLocalizations.of(
+          context,
+        ).cookieUploadRejected('file picker is unavailable');
+        _uploadMessageIsError = true;
+      });
+      return;
+    }
+    if (file == null) return; // Dialog dismissed.
+    if (!mounted) return;
+    setState(() {
+      _uploading = true;
+      _uploadMessage = null;
+    });
+    final result = await source.uploadCookies(file.text);
+    if (!mounted) return;
+    final strings = AppLocalizations.of(context);
+    setState(() {
+      _uploading = false;
+      _uploadMessageIsError = result.isError || !result.ready;
+      if (result.isError) {
+        _uploadMessage = strings.cookieUploadRejected(result.error!);
+      } else if (result.ready) {
+        _uploadMessage = strings.cookieUploadAccepted(result.cookies);
+        _health = const CookieJarHealth(
+          configured: true,
+          healthy: true,
+          signedIn: true,
+          ageRestrictedReady: true,
+          detail: '',
+        );
+      } else {
+        // Accepted but still a visitor jar: say so plainly instead of leaving
+        // the user with a track that silently refuses to play.
+        _uploadMessage = strings.cookieUploadApology;
+      }
+    });
+  }
+
+  static String _pickError({
+    required AppLocalizations strings,
+    required MusicImportFileException error,
+  }) {
+    final reason = switch (error.kind) {
+      ImportFileError.tooLarge => 'file too large',
+      ImportFileError.unsupported => 'choose a .txt file',
+      ImportFileError.invalidEncoding => 'not UTF-8 text',
+      // Any other kind is a CSV import problem; it cannot come from a
+      // cookies.txt pick, so it only needs a truthful generic answer.
+      _ => 'not a cookie export',
+    };
+    return strings.cookieUploadRejected(reason);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = widget.theme.colors;
     final strings = AppLocalizations.of(context);
     final health = _health;
     final ready = health?.ageRestrictedReady ?? false;
+    final busy = _checking || _uploading;
     final subtitle = _checking
         ? strings.cookieStatusChecking
+        : _uploading
+        ? strings.cookieStatusUploading
         : health == null
         ? strings.cookieStatusUnknown
         : ready
@@ -542,27 +633,66 @@ class _CookieStatusRowState extends ConsumerState<_CookieStatusRow> {
               ),
             ],
           ),
-          // Under the text, not beside it: at 320 px with 2× text the label and
-          // the button cannot share a row without clipping.
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 24),
-              child: TextButton(
-                key: const ValueKey('cookie-status-check'),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: const Size(0, 40),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          // Both actions under the text, not beside it: at 320 px with 2× text
+          // two labels and the title cannot share a row without clipping.
+          Padding(
+            padding: const EdgeInsets.only(left: 24),
+            child: Wrap(
+              spacing: HookSpace.xs,
+              runSpacing: HookSpace.xs,
+              children: [
+                TextButton(
+                  key: const ValueKey('cookie-status-check'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 40),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: busy ? null : _check,
+                  child: Text(
+                    strings.cookieStatusCheck,
+                    style: TextStyle(color: colors.textPrimary),
+                  ),
                 ),
-                onPressed: _checking ? null : _check,
-                child: Text(
-                  strings.cookieStatusCheck,
-                  style: TextStyle(color: colors.textPrimary),
+                TextButton(
+                  key: const ValueKey('cookie-status-upload'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 40),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  // Only Android and Windows have a text-file picker wired up;
+                  // elsewhere the other platforms would only produce an error.
+                  onPressed: busy || !ImportFilePicker.isSupported
+                      ? null
+                      : _upload,
+                  child: Text(
+                    strings.cookieStatusUpload,
+                    style: TextStyle(color: colors.textPrimary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_uploadMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 24,
+                right: HookSpace.sm,
+                top: 2,
+              ),
+              child: Text(
+                _uploadMessage!,
+                key: const ValueKey('cookie-status-message'),
+                style: TextStyle(
+                  color: _uploadMessageIsError
+                      ? colors.danger
+                      : colors.textSecondary,
+                  fontSize: HookType.bodySmall,
+                  height: 1.4,
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

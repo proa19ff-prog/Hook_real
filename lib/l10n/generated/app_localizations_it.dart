@@ -1501,4 +1501,27 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Verifica in corso…';
+
+  @override
+  String get cookieStatusUpload => 'Carica cookie';
+
+  @override
+  String get cookieStatusUploading => 'Caricamento…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies cookie caricati: i brani 18+ sono attivi';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Il server ha rifiutato il file: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Questo export non è una sessione con accesso: i brani 18+ non funzioneranno comunque. Accedi a YouTube con un account verificato ed esporta di nuovo.';
+
+  @override
+  String get cookieStatusUnreachable => 'Il server non ha risposto';
 }

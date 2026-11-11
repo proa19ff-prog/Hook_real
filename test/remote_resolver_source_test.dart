@@ -57,6 +57,43 @@ void main() {
           request.uri.queryParameters['id'] == 'blocked') {
         response.statusCode = 403;
         response.write('<html>forbidden</html>');
+      } else if (request.uri.path == '/cookies/upload') {
+        final body = await utf8.decoder.bind(request).join();
+        if (body.contains('BAD')) {
+          response.statusCode = 400;
+          response.write(jsonEncode({'error': 'no youtube cookies in the file'}));
+        } else if (body.contains('VISITOR')) {
+          response.write(
+            jsonEncode({
+              'ok': true,
+              'cookies': 14,
+              'signed_in': false,
+              'logged_in': false,
+              'warning': 'this export is not a signed-in YouTube session',
+            }),
+          );
+        } else {
+          response.write(
+            jsonEncode({
+              'ok': true,
+              'cookies': 23,
+              'signed_in': true,
+              'logged_in': true,
+              'warning': '',
+            }),
+          );
+        }
+      } else if (request.uri.path == '/cookies/verify') {
+        response.write(
+          jsonEncode({
+            'configured': true,
+            'healthy': true,
+            'signed_in': true,
+            'age_restricted_ready': true,
+            'cookies': 23,
+            'detail': '',
+          }),
+        );
       } else {
         response.statusCode = 404;
       }
@@ -160,6 +197,35 @@ void main() {
       _track(id: 'blocked', source: TrackSource.remote),
     );
     expect(stream, isNull);
+  });
+
+  test('a signed-in export reports 18+ as unlocked', () async {
+    final result = await source.uploadCookies('SID\tsomething\nLOGIN_INFO\tx\n');
+    expect(result.isError, isFalse);
+    expect(result.cookies, 23);
+    expect(result.ready, isTrue);
+  });
+
+  test('a visitor export is accepted but does not claim 18+ works', () async {
+    final result = await source.uploadCookies('VISITOR\n');
+    expect(result.isError, isFalse);
+    expect(result.signedIn, isFalse);
+    expect(result.ready, isFalse);
+    expect(result.warning, isNotEmpty);
+  });
+
+  test('a rejected file surfaces the server reason and keeps the jar', () async {
+    final result = await source.uploadCookies('BAD\n');
+    expect(result.isError, isTrue);
+    expect(result.error, 'no youtube cookies in the file');
+    expect(result.ready, isFalse);
+  });
+
+  test('cookie health reports the live verdict, not just the file', () async {
+    final health = await source.cookieHealth();
+    expect(health, isNotNull);
+    expect(health!.ageRestrictedReady, isTrue);
+    expect(health.needsSignIn, isFalse);
   });
 }
 

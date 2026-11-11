@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "未サインイン — 18+ の曲は再生できません",
   "cookieStatusUnknown": "まだ確認していません",
   "cookieStatusCheck": "確認",
-  "cookieStatusChecking": "確認中…"
+  "cookieStatusChecking": "確認中…",
+  "cookieStatusUpload": "Cookie をアップロード",
+  "cookieStatusUploading": "アップロード中…",
+  "cookieUploadAccepted": "Cookie を {cookies} 件アップロードしました — 18+ の曲が利用できます",
+  "cookieUploadRejected": "サーバーがファイルを拒否しました: {reason}",
+  "cookieUploadApology": "このエクスポートはサインイン済みのセッションではないため、18+ の曲は再生できません。年齢確認済みのアカウントで YouTube にサインインし、再度エクスポートしてください。",
+  "cookieStatusUnreachable": "サーバーが応答しません"
 }

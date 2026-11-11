@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Sin sesión: las pistas 18+ se rechazan",
   "cookieStatusUnknown": "Aún no comprobado",
   "cookieStatusCheck": "Comprobar",
-  "cookieStatusChecking": "Comprobando…"
+  "cookieStatusChecking": "Comprobando…",
+  "cookieStatusUpload": "Subir cookies",
+  "cookieStatusUploading": "Subiendo…",
+  "cookieUploadAccepted": "{cookies} cookies subidos: las pistas 18+ están activas",
+  "cookieUploadRejected": "El servidor rechazó el archivo: {reason}",
+  "cookieUploadApology": "Esta exportación no es una sesión iniciada, así que las pistas 18+ seguirán sin sonar. Inicia sesión en YouTube con una cuenta verificada y vuelve a exportar.",
+  "cookieStatusUnreachable": "El servidor no respondió"
 }

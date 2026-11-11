@@ -375,6 +375,56 @@ class RemoteResolverSource implements MusicSource {
     );
   }
 
+  /// Replaces the server's cookie jar with a Netscape export.
+  ///
+  /// The server validates before swapping, so a wrong file leaves the working
+  /// jar alone; [CookieUploadResult.error] then explains what it rejected.
+  Future<CookieUploadResult> uploadCookies(String netscape) async {
+    if (!enabled) {
+      return const CookieUploadResult.failed('resolver is not configured');
+    }
+    Object? lastError;
+    for (final base in _candidates) {
+      try {
+        final uri = _buildFor(base, '/cookies/upload', const {});
+        final override = fetchOverride;
+        final response = await (override != null
+                ? override(uri)
+                : _client.post(
+                    uri,
+                    headers: const {'Content-Type': 'text/plain; charset=utf-8'},
+                    body: utf8.encode(netscape),
+                  ))
+            .timeout(const Duration(seconds: 40));
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decoded is! Map<String, dynamic>) {
+          lastError = 'unexpected answer (HTTP ${response.statusCode})';
+          continue;
+        }
+        if (response.statusCode != 200) {
+          // A validation refusal is final; only a transport failure rotates.
+          final error = decoded['error']?.toString();
+          if (error != null && error.isNotEmpty) {
+            return CookieUploadResult.failed(error);
+          }
+          lastError = 'HTTP ${response.statusCode}';
+          continue;
+        }
+        return CookieUploadResult(
+          cookies: (decoded['cookies'] as num?)?.toInt() ?? 0,
+          signedIn: decoded['signed_in'] == true,
+          loggedIn: decoded['logged_in'] != false,
+          warning: decoded['warning']?.toString() ?? '',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    return CookieUploadResult.failed(
+      lastError == null ? 'upload failed' : lastError.toString(),
+    );
+  }
+
   /// Whether the server's cookie jar is signed in to YouTube. Age-restricted
   /// tracks are refused without one, and this drives the settings hint.
   ///
@@ -428,6 +478,42 @@ class CookieJarHealth {
   /// only thing that says what is wrong.
   final String detail;
 
-  bool get needsSignIn => healthy && !ageRestrictedReady;
+  /// True when a sign-in jar is needed but absent or no longer accepted, so the
+  /// settings row can offer the upload button instead of a vague warning.
+  bool get needsSignIn => !ageRestrictedReady;
+}
+
+/// Outcome of posting a cookie export to the resolver.
+///
+/// [signedIn] says whether the file is a real account session; [loggedIn] says
+/// whether YouTube accepted it on a live request. Only both together unlock
+/// age-restricted tracks.
+class CookieUploadResult {
+  const CookieUploadResult({
+    required this.cookies,
+    required this.signedIn,
+    required this.loggedIn,
+    required this.warning,
+  }) : error = null;
+
+  const CookieUploadResult.failed(String message)
+    : error = message,
+      cookies = 0,
+      signedIn = false,
+      loggedIn = false,
+      warning = '';
+
+  final int cookies;
+  final bool signedIn;
+  final bool loggedIn;
+
+  /// Non-empty when the upload succeeded but the export cannot play 18+.
+  final String warning;
+
+  /// Non-null when the server rejected the file and kept the old jar.
+  final String? error;
+
+  bool get isError => error != null && error!.isNotEmpty;
+  bool get ready => !isError && signedIn && loggedIn;
 }
 

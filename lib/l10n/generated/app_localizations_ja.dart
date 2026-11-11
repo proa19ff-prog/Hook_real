@@ -1447,4 +1447,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => '確認中…';
+
+  @override
+  String get cookieStatusUpload => 'Cookie をアップロード';
+
+  @override
+  String get cookieStatusUploading => 'アップロード中…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'Cookie を $cookies 件アップロードしました — 18+ の曲が利用できます';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'サーバーがファイルを拒否しました: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'このエクスポートはサインイン済みのセッションではないため、18+ の曲は再生できません。年齢確認済みのアカウントで YouTube にサインインし、再度エクスポートしてください。';
+
+  @override
+  String get cookieStatusUnreachable => 'サーバーが応答しません';
 }

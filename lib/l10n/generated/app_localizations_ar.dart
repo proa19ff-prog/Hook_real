@@ -1483,4 +1483,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'جارٍ الفحص…';
+
+  @override
+  String get cookieStatusUpload => 'تحميل ملف الكوكيز';
+
+  @override
+  String get cookieStatusUploading => 'جارٍ التحميل…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'تم تحميل $cookies من ملفات الكوكيز — المقاطع +18 متاحة';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'رفض الخادم الملف: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'هذا التصدير ليس جلسة مسجَّلة، لذا لن تعمل المقاطع +18. سجّل الدخول إلى YouTube بحساب موثّق العمر ثم صدّر من جديد.';
+
+  @override
+  String get cookieStatusUnreachable => 'لم يستجب الخادم';
 }

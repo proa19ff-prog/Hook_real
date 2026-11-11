@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Sem sessão: as faixas 18+ são recusadas",
   "cookieStatusUnknown": "Ainda não verificado",
   "cookieStatusCheck": "Verificar",
-  "cookieStatusChecking": "Verificando…"
+  "cookieStatusChecking": "Verificando…",
+  "cookieStatusUpload": "Enviar cookies",
+  "cookieStatusUploading": "Enviando…",
+  "cookieUploadAccepted": "{cookies} cookies enviados: as faixas 18+ estão ativas",
+  "cookieUploadRejected": "O servidor recusou o arquivo: {reason}",
+  "cookieUploadApology": "Esta exportação não é uma sessão iniciada, então as faixas 18+ continuarão sem tocar. Entre no YouTube com uma conta verificada e exporte de novo.",
+  "cookieStatusUnreachable": "O servidor não respondeu"
 }

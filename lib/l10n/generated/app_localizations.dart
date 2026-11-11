@@ -2755,6 +2755,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checking…'**
   String get cookieStatusChecking;
+
+  /// Button that sends a cookies.txt export to the resolver server.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload cookies'**
+  String get cookieStatusUpload;
+
+  /// Label while the cookie export is being sent to the server.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading…'**
+  String get cookieStatusUploading;
+
+  /// Confirmation after a cookie export unlocked age-restricted tracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {cookies} cookies — age-restricted tracks are enabled'**
+  String cookieUploadAccepted(int cookies);
+
+  /// Shown when the server refused the uploaded cookie file; the reason is the server message.
+  ///
+  /// In en, this message translates to:
+  /// **'Server rejected the file: {reason}'**
+  String cookieUploadRejected(String reason);
+
+  /// Explains that an upload succeeded but the export was made while signed out.
+  ///
+  /// In en, this message translates to:
+  /// **'The export is not a signed-in session, so 18+ tracks still will not play. Sign in to YouTube on an age-verified account and export again.'**
+  String get cookieUploadApology;
+
+  /// Shown when the cookie check could not reach the resolver at all.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolver server did not answer'**
+  String get cookieStatusUnreachable;
 }
 
 class _AppLocalizationsDelegate

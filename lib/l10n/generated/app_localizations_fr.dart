@@ -1506,4 +1506,27 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Vérification…';
+
+  @override
+  String get cookieStatusUpload => 'Importer les cookies';
+
+  @override
+  String get cookieStatusUploading => 'Importation…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies cookies importés — les titres 18+ sont activés';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Le serveur a refusé le fichier : $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Cet export n\'est pas une session connectée : les titres 18+ ne fonctionneront toujours pas. Connectez-vous à YouTube avec un compte vérifié et exportez à nouveau.';
+
+  @override
+  String get cookieStatusUnreachable => 'Le serveur n\'a pas répondu';
 }

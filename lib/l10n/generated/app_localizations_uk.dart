@@ -1498,4 +1498,27 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Перевіряємо…';
+
+  @override
+  String get cookieStatusUpload => 'Завантажити куки';
+
+  @override
+  String get cookieStatusUploading => 'Завантажуємо…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'Завантажено кук: $cookies — треки 18+ доступні';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Сервер відхилив файл: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Цей експорт — не вхід в акаунт, тому треки 18+ все одно не заграють. Увійдіть у YouTube під акаунтом, що пройшов перевірку віку, і експортуйте ще раз.';
+
+  @override
+  String get cookieStatusUnreachable => 'Сервер не відповів';
 }

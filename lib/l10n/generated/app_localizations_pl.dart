@@ -1497,4 +1497,27 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Sprawdzanie…';
+
+  @override
+  String get cookieStatusUpload => 'Wgraj ciasteczka';
+
+  @override
+  String get cookieStatusUploading => 'Wgrywanie…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'Wgrano $cookies ciasteczek — utwory 18+ są dostępne';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Serwer odrzucił plik: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Ten eksport nie jest zalogowaną sesją, więc utwory 18+ nadal nie zagrają. Zaloguj się do YouTube na zweryfikowanym koncie i wyeksportuj ponownie.';
+
+  @override
+  String get cookieStatusUnreachable => 'Serwer nie odpowiedział';
 }

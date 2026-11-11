@@ -1418,4 +1418,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => '检查中…';
+
+  @override
+  String get cookieStatusUpload => '上传 Cookie';
+
+  @override
+  String get cookieStatusUploading => '上传中…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '已上传 $cookies 个 Cookie — 18+ 曲目已启用';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return '服务器拒绝了该文件：$reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      '该导出不是已登录会话，18+ 曲目仍然无法播放。请用已完成年龄验证的账号登录 YouTube 后重新导出。';
+
+  @override
+  String get cookieStatusUnreachable => '服务器没有响应';
 }

@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "未登录 — 18+ 曲目会被拒绝",
   "cookieStatusUnknown": "尚未检查",
   "cookieStatusCheck": "检查",
-  "cookieStatusChecking": "检查中…"
+  "cookieStatusChecking": "检查中…",
+  "cookieStatusUpload": "上传 Cookie",
+  "cookieStatusUploading": "上传中…",
+  "cookieUploadAccepted": "已上传 {cookies} 个 Cookie — 18+ 曲目已启用",
+  "cookieUploadRejected": "服务器拒绝了该文件：{reason}",
+  "cookieUploadApology": "该导出不是已登录会话，18+ 曲目仍然无法播放。请用已完成年龄验证的账号登录 YouTube 后重新导出。",
+  "cookieStatusUnreachable": "服务器没有响应"
 }

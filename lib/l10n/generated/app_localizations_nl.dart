@@ -1501,4 +1501,27 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Controleren…';
+
+  @override
+  String get cookieStatusUpload => 'Cookies uploaden';
+
+  @override
+  String get cookieStatusUploading => 'Uploaden…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies cookies geüpload — nummers van 18+ zijn vrij';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Server weigerde het bestand: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Deze export is geen aangemelde sessie, dus nummers van 18+ spelen nog steeds niet. Meld je aan bij YouTube met een geverifieerd account en exporteer opnieuw.';
+
+  @override
+  String get cookieStatusUnreachable => 'De server antwoordde niet';
 }

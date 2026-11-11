@@ -1484,4 +1484,27 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'যাচাই চলছে…';
+
+  @override
+  String get cookieStatusUpload => 'কুকি আপলোড করুন';
+
+  @override
+  String get cookieStatusUploading => 'আপলোড হচ্ছে…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies কুকি আপলোড হয়েছে — ১৮+ ট্র্যাক চালু';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'সার্ভার ফাইল প্রত্যাখ্যান করেছে: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'এই এক্সপোর্ট সাইন-ইন সেশন নয়, তাই ১৮+ ট্র্যাক চলবে না। বয়স-যাচাইকৃত অ্যাকাউন্টে YouTube-এ সাইন-ইন করে আবার এক্সপোর্ট করুন।';
+
+  @override
+  String get cookieStatusUnreachable => 'সার্ভার সাড়া দেয়নি';
 }

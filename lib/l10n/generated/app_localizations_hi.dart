@@ -1478,4 +1478,27 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'जाँच हो रही है…';
+
+  @override
+  String get cookieStatusUpload => 'कुकीज़ अपलोड करें';
+
+  @override
+  String get cookieStatusUploading => 'अपलोड हो रहा है…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies कुकीज़ अपलोड हुईं — 18+ ट्रैक उपलब्ध हैं';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'सर्वर ने फ़ाइल अस्वीकार की: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'यह एक्सपोर्ट साइन-इन सत्र नहीं है, इसलिए 18+ ट्रैक फिर भी नहीं चलेंगे। आयु-सत्यापित खाते से YouTube में साइन-इन करें और फिर से एक्सपोर्ट करें।';
+
+  @override
+  String get cookieStatusUnreachable => 'सर्वर ने उत्तर नहीं दिया';
 }

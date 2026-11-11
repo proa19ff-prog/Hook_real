@@ -1488,4 +1488,27 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Denetleniyor…';
+
+  @override
+  String get cookieStatusUpload => 'Çerezleri yükle';
+
+  @override
+  String get cookieStatusUploading => 'Yükleniyor…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies çerez yüklendi — 18+ parçalar açık';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Sunucu dosyayı reddetti: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Bu dışa aktarım oturum açmış bir oturum değil, bu yüzden 18+ parçalar yine çalmaz. Yaş doğrulaması yapılmış bir hesapla YouTube\'a giriş yapıp yeniden dışa aktarın.';
+
+  @override
+  String get cookieStatusUnreachable => 'Sunucu yanıt vermedi';
 }

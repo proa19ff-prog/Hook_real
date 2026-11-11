@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "لم يتم تسجيل الدخول — تُرفض المقاطع +18",
   "cookieStatusUnknown": "لم يُفحص بعد",
   "cookieStatusCheck": "فحص",
-  "cookieStatusChecking": "جارٍ الفحص…"
+  "cookieStatusChecking": "جارٍ الفحص…",
+  "cookieStatusUpload": "تحميل ملف الكوكيز",
+  "cookieStatusUploading": "جارٍ التحميل…",
+  "cookieUploadAccepted": "تم تحميل {cookies} من ملفات الكوكيز — المقاطع +18 متاحة",
+  "cookieUploadRejected": "رفض الخادم الملف: {reason}",
+  "cookieUploadApology": "هذا التصدير ليس جلسة مسجَّلة، لذا لن تعمل المقاطع +18. سجّل الدخول إلى YouTube بحساب موثّق العمر ثم صدّر من جديد.",
+  "cookieStatusUnreachable": "لم يستجب الخادم"
 }

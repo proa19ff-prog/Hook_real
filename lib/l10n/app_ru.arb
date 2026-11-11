@@ -468,5 +468,11 @@
   "cookieStatusVisitor": "Аккаунт не подключён — треки 18+ недоступны",
   "cookieStatusUnknown": "Ещё не проверялось",
   "cookieStatusCheck": "Проверить",
-  "cookieStatusChecking": "Проверяем…"
+  "cookieStatusChecking": "Проверяем…",
+  "cookieStatusUpload": "Загрузить куки",
+  "cookieStatusUploading": "Загружаем…",
+  "cookieUploadAccepted": "Загружено кук: {cookies} — треки 18+ доступны",
+  "cookieUploadRejected": "Сервер отклонил файл: {reason}",
+  "cookieUploadApology": "Этот экспорт — не вход в аккаунт, поэтому треки 18+ всё равно не заиграют. Войдите в YouTube под аккаунтом, который прошёл проверку возраста, и экспортируйте снова.",
+  "cookieStatusUnreachable": "Сервер не ответил"
 }

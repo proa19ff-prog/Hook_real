@@ -1499,4 +1499,27 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Wird geprüft…';
+
+  @override
+  String get cookieStatusUpload => 'Cookies hochladen';
+
+  @override
+  String get cookieStatusUploading => 'Wird hochgeladen…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies Cookies hochgeladen — Titel ab 18 sind freigeschaltet';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Server hat die Datei abgelehnt: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Der Export ist keine angemeldete Sitzung, daher laufen Titel ab 18 weiterhin nicht. Melde dich bei YouTube mit einem altersverifizierten Konto an und exportiere erneut.';
+
+  @override
+  String get cookieStatusUnreachable => 'Der Resolver hat nicht geantwortet';
 }

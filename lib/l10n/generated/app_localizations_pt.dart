@@ -1499,4 +1499,27 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Verificando…';
+
+  @override
+  String get cookieStatusUpload => 'Enviar cookies';
+
+  @override
+  String get cookieStatusUploading => 'Enviando…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return '$cookies cookies enviados: as faixas 18+ estão ativas';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'O servidor recusou o arquivo: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Esta exportação não é uma sessão iniciada, então as faixas 18+ continuarão sem tocar. Entre no YouTube com uma conta verificada e exporte de novo.';
+
+  @override
+  String get cookieStatusUnreachable => 'O servidor não respondeu';
 }

@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Belum masuk — trek 18+ ditolak",
   "cookieStatusUnknown": "Belum diperiksa",
   "cookieStatusCheck": "Periksa",
-  "cookieStatusChecking": "Memeriksa…"
+  "cookieStatusChecking": "Memeriksa…",
+  "cookieStatusUpload": "Unggah cookie",
+  "cookieStatusUploading": "Mengunggah…",
+  "cookieUploadAccepted": "{cookies} cookie diunggah — trek 18+ aktif",
+  "cookieUploadRejected": "Server menolak berkas: {reason}",
+  "cookieUploadApology": "Ekspor ini bukan sesi masuk, jadi trek 18+ tetap tidak akan diputar. Masuk ke YouTube dengan akun terverifikasi usia lalu ekspor ulang.",
+  "cookieStatusUnreachable": "Server tidak menjawab"
 }

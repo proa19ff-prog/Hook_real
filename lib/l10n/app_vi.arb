@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Chưa đăng nhập — bản nhạc 18+ bị từ chối",
   "cookieStatusUnknown": "Chưa kiểm tra",
   "cookieStatusCheck": "Kiểm tra",
-  "cookieStatusChecking": "Đang kiểm tra…"
+  "cookieStatusChecking": "Đang kiểm tra…",
+  "cookieStatusUpload": "Tải cookie lên",
+  "cookieStatusUploading": "Đang tải lên…",
+  "cookieUploadAccepted": "Đã tải lên {cookies} cookie — bản nhạc 18+ đã bật",
+  "cookieUploadRejected": "Máy chủ từ chối tệp: {reason}",
+  "cookieUploadApology": "Tệp này không phải phiên đã đăng nhập, nên bản nhạc 18+ vẫn không phát được. Đăng nhập YouTube bằng tài khoản đã xác minh tuổi rồi xuất lại.",
+  "cookieStatusUnreachable": "Máy chủ không phản hồi"
 }

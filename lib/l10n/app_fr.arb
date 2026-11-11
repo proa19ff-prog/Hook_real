@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Non connecté — les titres 18+ sont refusés",
   "cookieStatusUnknown": "Pas encore vérifié",
   "cookieStatusCheck": "Vérifier",
-  "cookieStatusChecking": "Vérification…"
+  "cookieStatusChecking": "Vérification…",
+  "cookieStatusUpload": "Importer les cookies",
+  "cookieStatusUploading": "Importation…",
+  "cookieUploadAccepted": "{cookies} cookies importés — les titres 18+ sont activés",
+  "cookieUploadRejected": "Le serveur a refusé le fichier : {reason}",
+  "cookieUploadApology": "Cet export n'est pas une session connectée : les titres 18+ ne fonctionneront toujours pas. Connectez-vous à YouTube avec un compte vérifié et exportez à nouveau.",
+  "cookieStatusUnreachable": "Le serveur n'a pas répondu"
 }

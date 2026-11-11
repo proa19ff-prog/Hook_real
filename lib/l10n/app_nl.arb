@@ -624,5 +624,11 @@
   "cookieStatusVisitor": "Niet aangemeld — nummers van 18+ worden geweigerd",
   "cookieStatusUnknown": "Nog niet gecontroleerd",
   "cookieStatusCheck": "Controleren",
-  "cookieStatusChecking": "Controleren…"
+  "cookieStatusChecking": "Controleren…",
+  "cookieStatusUpload": "Cookies uploaden",
+  "cookieStatusUploading": "Uploaden…",
+  "cookieUploadAccepted": "{cookies} cookies geüpload — nummers van 18+ zijn vrij",
+  "cookieUploadRejected": "Server weigerde het bestand: {reason}",
+  "cookieUploadApology": "Deze export is geen aangemelde sessie, dus nummers van 18+ spelen nog steeds niet. Meld je aan bij YouTube met een geverifieerd account en exporteer opnieuw.",
+  "cookieStatusUnreachable": "De server antwoordde niet"
 }

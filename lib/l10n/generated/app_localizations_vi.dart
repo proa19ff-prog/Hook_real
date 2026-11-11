@@ -1484,4 +1484,27 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get cookieStatusChecking => 'Đang kiểm tra…';
+
+  @override
+  String get cookieStatusUpload => 'Tải cookie lên';
+
+  @override
+  String get cookieStatusUploading => 'Đang tải lên…';
+
+  @override
+  String cookieUploadAccepted(int cookies) {
+    return 'Đã tải lên $cookies cookie — bản nhạc 18+ đã bật';
+  }
+
+  @override
+  String cookieUploadRejected(String reason) {
+    return 'Máy chủ từ chối tệp: $reason';
+  }
+
+  @override
+  String get cookieUploadApology =>
+      'Tệp này không phải phiên đã đăng nhập, nên bản nhạc 18+ vẫn không phát được. Đăng nhập YouTube bằng tài khoản đã xác minh tuổi rồi xuất lại.';
+
+  @override
+  String get cookieStatusUnreachable => 'Máy chủ không phản hồi';
 }
