@@ -1396,4 +1396,49 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get playPauseShortcut => '재생 / 일시정지';
+
+  @override
+  String get ageRestrictedTrack =>
+      '이 트랙은 연령 제한(18+)이 있습니다. 서버에 YouTube에 로그인한 계정의 쿠키가 필요합니다.';
+
+  @override
+  String get haptics => '진동 피드백';
+
+  @override
+  String get hapticsDescription => '탭으로 무언가 바뀔 때 짧게 진동합니다. Android와 iOS 전용.';
+
+  @override
+  String get reduceMotion => '동작 줄이기';
+
+  @override
+  String get reduceMotionDescription =>
+      '전환 효과와 애니메이션 배경을 건너뜁니다. 느린 기기나 움직임에 민감한 경우 유용합니다.';
+
+  @override
+  String get backgroundPrefetch => '다음 트랙 미리 불러오기';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      '다음 트랙을 미리 준비해 전환이 즉시 시작됩니다. 데이터를 조금 더 사용합니다.';
+
+  @override
+  String get playbackSettings => '재생';
+
+  @override
+  String get cookieStatus => 'YouTube 쿠키';
+
+  @override
+  String get cookieStatusReady => '로그인됨 — 18+ 트랙을 재생할 수 있습니다';
+
+  @override
+  String get cookieStatusVisitor => '로그인 안 됨 — 18+ 트랙이 거부됩니다';
+
+  @override
+  String get cookieStatusUnknown => '아직 확인하지 않음';
+
+  @override
+  String get cookieStatusCheck => '확인';
+
+  @override
+  String get cookieStatusChecking => '확인 중…';
 }

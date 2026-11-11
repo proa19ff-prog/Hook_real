@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Raccourcis clavier",
   "shortcutsCaption": "Fonctionnent partout sauf dans un champ de texte.",
   "shortcutsSeek": "Avancer de 10 secondes",
-  "playPauseShortcut": "Lecture / pause"
+  "playPauseShortcut": "Lecture / pause",
+  "ageRestrictedTrack": "Ce titre est réservé aux adultes (18+). Le serveur a besoin des cookies d’un compte YouTube connecté.",
+  "haptics": "Retour haptique",
+  "hapticsDescription": "Une courte vibration quand un appui change quelque chose. Android et iOS uniquement.",
+  "reduceMotion": "Réduire les animations",
+  "reduceMotionDescription": "Supprime les transitions et les fonds animés. Utile sur les appareils lents ou en cas de sensibilité au mouvement.",
+  "backgroundPrefetch": "Précharger les titres suivants",
+  "backgroundPrefetchDescription": "Prépare les titres suivants en arrière-plan pour que le changement démarre instantanément. Consomme un peu plus de données.",
+  "playbackSettings": "Lecture",
+  "cookieStatus": "Cookies YouTube",
+  "cookieStatusReady": "Connecté — les titres 18+ sont disponibles",
+  "cookieStatusVisitor": "Non connecté — les titres 18+ sont refusés",
+  "cookieStatusUnknown": "Pas encore vérifié",
+  "cookieStatusCheck": "Vérifier",
+  "cookieStatusChecking": "Vérification…"
 }

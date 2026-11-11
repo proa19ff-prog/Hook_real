@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Pintasan papan ketik",
   "shortcutsCaption": "Berfungsi di mana saja kecuali di kolom teks.",
   "shortcutsSeek": "Lompat 10 detik",
-  "playPauseShortcut": "Putar / jeda"
+  "playPauseShortcut": "Putar / jeda",
+  "ageRestrictedTrack": "Trek ini dibatasi usia (18+). Server memerlukan cookie dari akun YouTube yang sudah masuk.",
+  "haptics": "Getaran",
+  "hapticsDescription": "Getaran singkat saat ketukan mengubah sesuatu. Hanya Android dan iOS.",
+  "reduceMotion": "Kurangi gerakan",
+  "reduceMotionDescription": "Melewati transisi dan latar animasi. Berguna di perangkat lambat atau bagi yang sensitif terhadap gerakan.",
+  "backgroundPrefetch": "Pramuat trek berikutnya",
+  "backgroundPrefetchDescription": "Menyiapkan trek berikutnya di latar belakang agar pergantian langsung mulai. Memakai sedikit lebih banyak data.",
+  "playbackSettings": "Pemutaran",
+  "cookieStatus": "Cookie YouTube",
+  "cookieStatusReady": "Sudah masuk — trek 18+ dapat diputar",
+  "cookieStatusVisitor": "Belum masuk — trek 18+ ditolak",
+  "cookieStatusUnknown": "Belum diperiksa",
+  "cookieStatusCheck": "Periksa",
+  "cookieStatusChecking": "Memeriksa…"
 }

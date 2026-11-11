@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Tastenkürzel",
   "shortcutsCaption": "Funktionieren überall außer in Textfeldern.",
   "shortcutsSeek": "10 Sekunden springen",
-  "playPauseShortcut": "Wiedergabe / Pause"
+  "playPauseShortcut": "Wiedergabe / Pause",
+  "ageRestrictedTrack": "Dieser Titel ist altersbeschränkt (18+). Der Server braucht Cookies von einem angemeldeten YouTube-Konto.",
+  "haptics": "Vibrationsfeedback",
+  "hapticsDescription": "Kurze Vibration, wenn ein Tipp etwas ändert. Nur Android und iOS.",
+  "reduceMotion": "Bewegung reduzieren",
+  "reduceMotionDescription": "Überspringt Übergänge und animierte Hintergründe. Hilfreich auf schwachen Geräten oder bei Bewegungsempfindlichkeit.",
+  "backgroundPrefetch": "Nächste Titel vorladen",
+  "backgroundPrefetchDescription": "Bereitet die nächsten Titel im Hintergrund vor, damit der Wechsel sofort beginnt. Verbraucht etwas mehr Daten.",
+  "playbackSettings": "Wiedergabe",
+  "cookieStatus": "YouTube-Cookies",
+  "cookieStatusReady": "Angemeldet — Titel ab 18 können abgespielt werden",
+  "cookieStatusVisitor": "Nicht angemeldet — Titel ab 18 werden abgelehnt",
+  "cookieStatusUnknown": "Noch nicht geprüft",
+  "cookieStatusCheck": "Prüfen",
+  "cookieStatusChecking": "Wird geprüft…"
 }

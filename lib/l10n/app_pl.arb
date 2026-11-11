@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Skróty klawiszowe",
   "shortcutsCaption": "Działają wszędzie poza polami tekstowymi.",
   "shortcutsSeek": "Przeskok o 10 sekund",
-  "playPauseShortcut": "Odtwórz / pauza"
+  "playPauseShortcut": "Odtwórz / pauza",
+  "ageRestrictedTrack": "Ten utwór ma ograniczenie wiekowe (18+). Serwer potrzebuje ciasteczek z zalogowanego konta YouTube.",
+  "haptics": "Wibracje",
+  "hapticsDescription": "Krótka wibracja, gdy dotknięcie coś zmienia. Tylko Android i iOS.",
+  "reduceMotion": "Ogranicz animacje",
+  "reduceMotionDescription": "Pomija przejścia i animowane tła. Przydatne na słabych urządzeniach lub przy wrażliwości na ruch.",
+  "backgroundPrefetch": "Wczytuj kolejne utwory",
+  "backgroundPrefetchDescription": "Przygotowuje kolejne utwory w tle, aby przełączanie było natychmiastowe. Zużywa nieco więcej danych.",
+  "playbackSettings": "Odtwarzanie",
+  "cookieStatus": "Ciasteczka YouTube",
+  "cookieStatusReady": "Zalogowano — utwory 18+ są dostępne",
+  "cookieStatusVisitor": "Nie zalogowano — utwory 18+ są odrzucane",
+  "cookieStatusUnknown": "Jeszcze nie sprawdzono",
+  "cookieStatusCheck": "Sprawdź",
+  "cookieStatusChecking": "Sprawdzanie…"
 }

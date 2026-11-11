@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Scorciatoie da tastiera",
   "shortcutsCaption": "Funzionano ovunque tranne nei campi di testo.",
   "shortcutsSeek": "Salta di 10 secondi",
-  "playPauseShortcut": "Riproduci / pausa"
+  "playPauseShortcut": "Riproduci / pausa",
+  "ageRestrictedTrack": "Questo brano ha restrizioni di età (18+). Il server richiede i cookie di un account YouTube con accesso effettuato.",
+  "haptics": "Feedback aptico",
+  "hapticsDescription": "Una breve vibrazione quando un tocco cambia qualcosa. Solo Android e iOS.",
+  "reduceMotion": "Riduci animazioni",
+  "reduceMotionDescription": "Salta transizioni e sfondi animati. Utile su dispositivi lenti o per sensibilità al movimento.",
+  "backgroundPrefetch": "Precarica i brani successivi",
+  "backgroundPrefetchDescription": "Prepara i brani successivi in background così il cambio parte subito. Consuma un po’ più di dati.",
+  "playbackSettings": "Riproduzione",
+  "cookieStatus": "Cookie di YouTube",
+  "cookieStatusReady": "Accesso eseguito: i brani 18+ sono disponibili",
+  "cookieStatusVisitor": "Accesso non eseguito: i brani 18+ vengono rifiutati",
+  "cookieStatusUnknown": "Non ancora verificato",
+  "cookieStatusCheck": "Verifica",
+  "cookieStatusChecking": "Verifica in corso…"
 }

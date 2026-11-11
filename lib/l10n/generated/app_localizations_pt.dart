@@ -1452,4 +1452,51 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Reproduzir / pausar';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Esta faixa tem restrição de idade (18+). O servidor precisa de cookies de uma conta do YouTube com sessão iniciada.';
+
+  @override
+  String get haptics => 'Vibração';
+
+  @override
+  String get hapticsDescription =>
+      'Uma vibração curta quando um toque muda algo. Apenas Android e iOS.';
+
+  @override
+  String get reduceMotion => 'Reduzir movimento';
+
+  @override
+  String get reduceMotionDescription =>
+      'Ignora transições e fundos animados. Útil em aparelhos lentos ou com sensibilidade a movimento.';
+
+  @override
+  String get backgroundPrefetch => 'Pré-carregar próximas faixas';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Prepara as próximas faixas em segundo plano para a troca ser instantânea. Usa um pouco mais de dados.';
+
+  @override
+  String get playbackSettings => 'Reprodução';
+
+  @override
+  String get cookieStatus => 'Cookies do YouTube';
+
+  @override
+  String get cookieStatusReady =>
+      'Sessão iniciada: as faixas 18+ estão disponíveis';
+
+  @override
+  String get cookieStatusVisitor => 'Sem sessão: as faixas 18+ são recusadas';
+
+  @override
+  String get cookieStatusUnknown => 'Ainda não verificado';
+
+  @override
+  String get cookieStatusCheck => 'Verificar';
+
+  @override
+  String get cookieStatusChecking => 'Verificando…';
 }

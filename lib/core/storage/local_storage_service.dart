@@ -70,6 +70,31 @@ class LocalStorageService {
       ? _prefs.remove('hook_remote_resolver_url')
       : _prefs.setString('hook_remote_resolver_url', url.trim());
 
+  // --- PLAYBACK PREFERENCES ---
+
+  /// Haptics on taps. On by default: the rest of the UI was built assuming it.
+  bool getHapticsEnabled() => _prefs.getBool('hook_haptics') ?? true;
+  Future<void> saveHapticsEnabled(bool enabled) async {
+    await _prefs.setBool('hook_haptics', enabled);
+    _notify('haptics');
+  }
+
+  /// Forces the reduce-motion media query, whatever the OS says.
+  bool getReduceMotion() => _prefs.getBool('hook_reduce_motion') ?? false;
+  Future<void> saveReduceMotion(bool enabled) async {
+    await _prefs.setBool('hook_reduce_motion', enabled);
+    _notify('reduce_motion');
+  }
+
+  /// Warming the next tracks in the background. Defaults to on: skipping is
+  /// the whole reason it exists.
+  bool getBackgroundPrefetch() =>
+      _prefs.getBool('hook_background_prefetch') ?? true;
+  Future<void> saveBackgroundPrefetch(bool enabled) async {
+    await _prefs.setBool('hook_background_prefetch', enabled);
+    _notify('background_prefetch');
+  }
+
   // --- ONBOARDING ---
   bool getOnboardingDone() => _prefs.getBool('hook_onboarding_done') ?? false;
   Future<void> saveOnboardingDone() =>

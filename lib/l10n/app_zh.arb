@@ -610,5 +610,19 @@
   "keyboardShortcuts": "键盘快捷键",
   "shortcutsCaption": "除文本输入框外均可使用。",
   "shortcutsSeek": "快进 10 秒",
-  "playPauseShortcut": "播放 / 暂停"
+  "playPauseShortcut": "播放 / 暂停",
+  "ageRestrictedTrack": "该曲目有年龄限制（18+）。服务器需要已登录的 YouTube 账户 Cookie。",
+  "haptics": "振动反馈",
+  "hapticsDescription": "点击改变状态时短暂振动。仅限 Android 和 iOS。",
+  "reduceMotion": "减少动效",
+  "reduceMotionDescription": "跳过转场和动态背景。适合性能较弱的设备或对动态敏感的用户。",
+  "backgroundPrefetch": "预加载下一首",
+  "backgroundPrefetchDescription": "在后台准备下一首，切换时立即开始。会多用一点流量。",
+  "playbackSettings": "播放",
+  "cookieStatus": "YouTube Cookie",
+  "cookieStatusReady": "已登录 — 可播放 18+ 曲目",
+  "cookieStatusVisitor": "未登录 — 18+ 曲目会被拒绝",
+  "cookieStatusUnknown": "尚未检查",
+  "cookieStatusCheck": "检查",
+  "cookieStatusChecking": "检查中…"
 }

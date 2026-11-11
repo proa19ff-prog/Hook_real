@@ -610,5 +610,19 @@
   "keyboardShortcuts": "แป้นพิมพ์ลัด",
   "shortcutsCaption": "ใช้ได้ทุกที่ยกเว้นในช่องข้อความ",
   "shortcutsSeek": "เลื่อน 10 วินาที",
-  "playPauseShortcut": "เล่น / หยุดชั่วคราว"
+  "playPauseShortcut": "เล่น / หยุดชั่วคราว",
+  "ageRestrictedTrack": "แทร็กนี้มีข้อจำกัดด้านอายุ (18+) เซิร์ฟเวอร์ต้องใช้คุกกี้จากบัญชี YouTube ที่ลงชื่อเข้าใช้แล้ว",
+  "haptics": "การสั่นตอบสนอง",
+  "hapticsDescription": "สั่นสั้น ๆ เมื่อการแตะเปลี่ยนอะไรบางอย่าง ใช้ได้เฉพาะ Android และ iOS",
+  "reduceMotion": "ลดการเคลื่อนไหว",
+  "reduceMotionDescription": "ข้ามทรานซิชันและพื้นหลังแบบเคลื่อนไหว เหมาะกับอุปกรณ์ช้าหรือผู้ที่ไวต่อการเคลื่อนไหว",
+  "backgroundPrefetch": "โหลดแทร็กถัดไปล่วงหน้า",
+  "backgroundPrefetchDescription": "เตรียมแทร็กถัดไปไว้เบื้องหลังเพื่อให้เปลี่ยนเพลงได้ทันที ใช้ข้อมูลเพิ่มเล็กน้อย",
+  "playbackSettings": "การเล่น",
+  "cookieStatus": "คุกกี้ YouTube",
+  "cookieStatusReady": "ลงชื่อเข้าใช้แล้ว — เล่นแทร็ก 18+ ได้",
+  "cookieStatusVisitor": "ยังไม่ได้ลงชื่อเข้าใช้ — แทร็ก 18+ จะถูกปฏิเสธ",
+  "cookieStatusUnknown": "ยังไม่ได้ตรวจสอบ",
+  "cookieStatusCheck": "ตรวจสอบ",
+  "cookieStatusChecking": "กำลังตรวจสอบ…"
 }

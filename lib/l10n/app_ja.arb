@@ -610,5 +610,19 @@
   "keyboardShortcuts": "キーボードショートカット",
   "shortcutsCaption": "テキスト入力欄以外の場所で使えます。",
   "shortcutsSeek": "10秒シーク",
-  "playPauseShortcut": "再生 / 一時停止"
+  "playPauseShortcut": "再生 / 一時停止",
+  "ageRestrictedTrack": "このトラックは年齢制限（18+）です。サーバーには YouTube にサインイン済みのアカウントの Cookie が必要です。",
+  "haptics": "振動フィードバック",
+  "hapticsDescription": "タップで何かが変わったときに短く振動します。Android と iOS のみ。",
+  "reduceMotion": "モーションを減らす",
+  "reduceMotionDescription": "トランジションとアニメーション背景を省略します。低速な端末や動きに敏感な場合に有効です。",
+  "backgroundPrefetch": "次のトラックを先読み",
+  "backgroundPrefetchDescription": "次のトラックをバックグラウンドで準備し、切り替えを即座に始めます。データ使用量が少し増えます。",
+  "playbackSettings": "再生",
+  "cookieStatus": "YouTube Cookie",
+  "cookieStatusReady": "サインイン済み — 18+ の曲を再生できます",
+  "cookieStatusVisitor": "未サインイン — 18+ の曲は再生できません",
+  "cookieStatusUnknown": "まだ確認していません",
+  "cookieStatusCheck": "確認",
+  "cookieStatusChecking": "確認中…"
 }

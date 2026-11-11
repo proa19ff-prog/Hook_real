@@ -19,6 +19,7 @@ import 'features/onboarding/presentation/onboarding_screen.dart';
 import 'features/extractor/models/media_track.dart';
 import 'features/library/presentation/library_screen.dart';
 import 'features/search/presentation/search_screen.dart';
+import 'features/settings/presentation/settings_provider.dart';
 import 'features/settings/presentation/settings_screen.dart';
 import 'features/stats/stats_screen.dart';
 import 'features/theme_engine/domain/hook_theme.dart';
@@ -34,6 +35,11 @@ class HookApp extends ConsumerWidget {
     final theme = ref.watch(themeProvider);
     final locale = ref.watch(localeProvider);
     final onboardingDone = ref.watch(onboardingProvider);
+    // Watching these two here is what applies them: the providers mirror the
+    // stored value into the statics the code below the widget tree reads.
+    ref.watch(hapticsEnabledProvider);
+    ref.watch(backgroundPrefetchProvider);
+    final reduceMotion = ref.watch(reduceMotionProvider);
 
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
@@ -43,50 +49,60 @@ class HookApp extends ConsumerWidget {
       // `TextField` consumes almost nothing — so a bare `M` while typing in
       // search both muted the machine and swallowed the letter. Every binding
       // is therefore gated on "no text field has focus".
-      builder: (context, child) => CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.space):
-              HookShortcuts.whenNotTyping(
-                () => ref.read(audioPlayerServiceProvider).togglePlayPause(),
-              ),
-          const SingleActivator(LogicalKeyboardKey.arrowRight):
-              HookShortcuts.whenNotTyping(() async {
-                final player = ref.read(audioPlayerServiceProvider);
-                await player.seek(
-                  player.rawPlayer.position + const Duration(seconds: 10),
-                );
-              }),
-          const SingleActivator(LogicalKeyboardKey.arrowLeft):
-              HookShortcuts.whenNotTyping(() async {
-                final player = ref.read(audioPlayerServiceProvider);
-                await player.seek(
-                  player.rawPlayer.position - const Duration(seconds: 10),
-                );
-              }),
-          const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
-              HookShortcuts.whenNotTyping(
-                () => ref.read(audioPlayerServiceProvider).skipToNext(),
-              ),
-          const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
-              HookShortcuts.whenNotTyping(
-                () => ref.read(audioPlayerServiceProvider).skipToPrevious(),
-              ),
-          // Volume needs a modifier: bare ↑/↓ belong to list navigation.
-          const SingleActivator(LogicalKeyboardKey.arrowUp, control: true):
-              HookShortcuts.whenNotTyping(
-                () => ref.read(systemVolumeProvider.notifier).nudge(1),
-              ),
-          const SingleActivator(LogicalKeyboardKey.arrowDown, control: true):
-              HookShortcuts.whenNotTyping(
-                () => ref.read(systemVolumeProvider.notifier).nudge(-1),
-              ),
-          const SingleActivator(LogicalKeyboardKey.keyM):
-              HookShortcuts.whenNotTyping(
-                () => ref.read(systemVolumeProvider.notifier).toggleMute(),
-              ),
-        },
-        child: Focus(autofocus: true, child: child!),
-      ),
+      builder: (context, child) {
+        final tree = CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.space):
+                HookShortcuts.whenNotTyping(
+                  () => ref.read(audioPlayerServiceProvider).togglePlayPause(),
+                ),
+            const SingleActivator(LogicalKeyboardKey.arrowRight):
+                HookShortcuts.whenNotTyping(() async {
+                  final player = ref.read(audioPlayerServiceProvider);
+                  await player.seek(
+                    player.rawPlayer.position + const Duration(seconds: 10),
+                  );
+                }),
+            const SingleActivator(LogicalKeyboardKey.arrowLeft):
+                HookShortcuts.whenNotTyping(() async {
+                  final player = ref.read(audioPlayerServiceProvider);
+                  await player.seek(
+                    player.rawPlayer.position - const Duration(seconds: 10),
+                  );
+                }),
+            const SingleActivator(LogicalKeyboardKey.arrowRight, control: true):
+                HookShortcuts.whenNotTyping(
+                  () => ref.read(audioPlayerServiceProvider).skipToNext(),
+                ),
+            const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true):
+                HookShortcuts.whenNotTyping(
+                  () => ref.read(audioPlayerServiceProvider).skipToPrevious(),
+                ),
+            // Volume needs a modifier: bare ↑/↓ belong to list navigation.
+            const SingleActivator(LogicalKeyboardKey.arrowUp, control: true):
+                HookShortcuts.whenNotTyping(
+                  () => ref.read(systemVolumeProvider.notifier).nudge(1),
+                ),
+            const SingleActivator(LogicalKeyboardKey.arrowDown, control: true):
+                HookShortcuts.whenNotTyping(
+                  () => ref.read(systemVolumeProvider.notifier).nudge(-1),
+                ),
+            const SingleActivator(LogicalKeyboardKey.keyM):
+                HookShortcuts.whenNotTyping(
+                  () => ref.read(systemVolumeProvider.notifier).toggleMute(),
+                ),
+          },
+          child: Focus(autofocus: true, child: child!),
+        );
+        if (!reduceMotion) return tree;
+        // The settings toggle has to reach every implicit animation, and the
+        // media query is the single place the whole tree reads it from.
+        final media = MediaQuery.of(context);
+        return MediaQuery(
+          data: media.copyWith(disableAnimations: true),
+          child: tree,
+        );
+      },
       debugShowCheckedModeBanner: false,
       theme: theme.toThemeData(),
       locale: locale,
@@ -147,6 +163,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           strings.fullVersionUnavailable,
         AudioPlaybackErrorKind.sourceUnavailable =>
           strings.sourcePlaybackFailed(error.track.source.labelFor(strings)),
+        AudioPlaybackErrorKind.ageRestricted => strings.ageRestrictedTrack,
       };
 
       ScaffoldMessenger.of(context)

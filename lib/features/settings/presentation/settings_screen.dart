@@ -114,6 +114,50 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: HookSpace.xxl),
+                  _heading(strings.playbackSettings, colors),
+                  const SizedBox(height: HookSpace.sm),
+                  Material(
+                    color: colors.surface,
+                    borderRadius: HookRadius.smAll,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _toggle(
+                          key: 'haptics-setting',
+                          title: strings.haptics,
+                          description: strings.hapticsDescription,
+                          value: ref.watch(hapticsEnabledProvider),
+                          colors: colors,
+                          onChanged: (value) => ref
+                              .read(hapticsEnabledProvider.notifier)
+                              .setEnabled(value),
+                        ),
+                        _divider(colors),
+                        _toggle(
+                          key: 'background-prefetch-setting',
+                          title: strings.backgroundPrefetch,
+                          description: strings.backgroundPrefetchDescription,
+                          value: ref.watch(backgroundPrefetchProvider),
+                          colors: colors,
+                          onChanged: (value) => ref
+                              .read(backgroundPrefetchProvider.notifier)
+                              .setEnabled(value),
+                        ),
+                        _divider(colors),
+                        _toggle(
+                          key: 'reduce-motion-setting',
+                          title: strings.reduceMotion,
+                          description: strings.reduceMotionDescription,
+                          value: ref.watch(reduceMotionProvider),
+                          colors: colors,
+                          onChanged: (value) => ref
+                              .read(reduceMotionProvider.notifier)
+                              .setEnabled(value),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: HookSpace.xxl),
                   _heading(strings.language, colors),
                   const SizedBox(height: HookSpace.sm),
                   Text(
@@ -206,6 +250,11 @@ class SettingsScreen extends ConsumerWidget {
                     trailing: const Icon(HookIcons.chevron),
                     onTap: () => _editRemoteResolver(context, ref, colors),
                   ),
+                  if (RemoteResolverSource.enabled)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: _CookieStatusRow(theme: theme),
+                    ),
                   if (!kIsWeb &&
                       defaultTargetPlatform == TargetPlatform.windows)
                     Padding(
@@ -267,6 +316,61 @@ class SettingsScreen extends ConsumerWidget {
       fontSize: HookType.heading,
       fontWeight: FontWeight.w600,
     ),
+  );
+
+  Widget _divider(HookColors colors) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: HookSpace.lg),
+    child: Container(height: 1, color: colors.textSecondary.withValues(alpha: 0.12)),
+  );
+
+  /// One switch plus its explanation, in the card the player section uses.
+  Widget _toggle({
+    required String key,
+    required String title,
+    required String description,
+    required bool value,
+    required HookColors colors,
+    required ValueChanged<bool> onChanged,
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SwitchListTile.adaptive(
+        key: ValueKey(key),
+        contentPadding: const EdgeInsets.fromLTRB(
+          HookSpace.lg,
+          HookSpace.sm,
+          HookSpace.lg,
+          0,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: colors.textPrimary,
+            fontSize: HookType.heading,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        activeTrackColor: colors.textPrimary,
+        value: value,
+        onChanged: onChanged,
+      ),
+      Padding(
+        padding: const EdgeInsets.fromLTRB(
+          HookSpace.lg,
+          HookSpace.sm,
+          HookSpace.lg,
+          HookSpace.md,
+        ),
+        child: Text(
+          description,
+          style: TextStyle(
+            color: colors.textSecondary,
+            fontSize: HookType.body,
+            height: 1.5,
+          ),
+        ),
+      ),
+    ],
   );
 
   String _resolverSubtitle(WidgetRef ref, AppLocalizations strings) {
@@ -347,6 +451,120 @@ class SettingsScreen extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// The server's YouTube cookie state, with an on-demand live check.
+///
+/// Deliberately manual: `/cookies/verify` makes a real request to YouTube, so
+/// running it on every settings visit would be both slow and wasteful. The row
+/// explains itself without a tap, and the button answers "is it still true?".
+class _CookieStatusRow extends ConsumerStatefulWidget {
+  const _CookieStatusRow({required this.theme});
+
+  final HookTheme theme;
+
+  @override
+  ConsumerState<_CookieStatusRow> createState() => _CookieStatusRowState();
+}
+
+class _CookieStatusRowState extends ConsumerState<_CookieStatusRow> {
+  CookieJarHealth? _health;
+  bool _checking = false;
+
+  Future<void> _check() async {
+    if (_checking) return;
+    setState(() => _checking = true);
+    final health = await ref.read(cookieHealthProvider.future);
+    if (!mounted) return;
+    setState(() {
+      _health = health;
+      _checking = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
+    final health = _health;
+    final ready = health?.ageRestrictedReady ?? false;
+    final subtitle = _checking
+        ? strings.cookieStatusChecking
+        : health == null
+        ? strings.cookieStatusUnknown
+        : ready
+        ? strings.cookieStatusReady
+        : strings.cookieStatusVisitor;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: HookSpace.xl, bottom: HookSpace.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Icon(
+                  ready ? HookIcons.check : HookIcons.warning,
+                  size: 16,
+                  color: ready ? colors.textPrimary : colors.danger,
+                ),
+              ),
+              const SizedBox(width: HookSpace.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.cookieStatus,
+                      style: TextStyle(
+                        color: colors.textPrimary,
+                        fontSize: HookType.body,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      key: const ValueKey('cookie-status-subtitle'),
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: HookType.bodySmall,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // Under the text, not beside it: at 320 px with 2× text the label and
+          // the button cannot share a row without clipping.
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 24),
+              child: TextButton(
+                key: const ValueKey('cookie-status-check'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: _checking ? null : _check,
+                child: Text(
+                  strings.cookieStatusCheck,
+                  style: TextStyle(color: colors.textPrimary),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

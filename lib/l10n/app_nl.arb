@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Sneltoetsen",
   "shortcutsCaption": "Werken overal behalve in een tekstveld.",
   "shortcutsSeek": "10 seconden springen",
-  "playPauseShortcut": "Afspelen / pauzeren"
+  "playPauseShortcut": "Afspelen / pauzeren",
+  "ageRestrictedTrack": "Dit nummer is leeftijdsbeperkt (18+). De server heeft cookies nodig van een aangemeld YouTube-account.",
+  "haptics": "Trilfeedback",
+  "hapticsDescription": "Een korte trilling wanneer een tik iets verandert. Alleen Android en iOS.",
+  "reduceMotion": "Minder beweging",
+  "reduceMotionDescription": "Slaat overgangen en geanimeerde achtergronden over. Handig op trage apparaten of bij bewegingsgevoeligheid.",
+  "backgroundPrefetch": "Volgende nummers voorladen",
+  "backgroundPrefetchDescription": "Bereidt de volgende nummers voor zodat wisselen direct start. Gebruikt iets meer data.",
+  "playbackSettings": "Weergave",
+  "cookieStatus": "YouTube-cookies",
+  "cookieStatusReady": "Aangemeld — nummers van 18+ kunnen spelen",
+  "cookieStatusVisitor": "Niet aangemeld — nummers van 18+ worden geweigerd",
+  "cookieStatusUnknown": "Nog niet gecontroleerd",
+  "cookieStatusCheck": "Controleren",
+  "cookieStatusChecking": "Controleren…"
 }

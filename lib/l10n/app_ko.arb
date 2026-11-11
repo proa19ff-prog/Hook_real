@@ -610,5 +610,19 @@
   "keyboardShortcuts": "키보드 단축키",
   "shortcutsCaption": "텍스트 입력란을 제외한 모든 곳에서 동작합니다.",
   "shortcutsSeek": "10초 이동",
-  "playPauseShortcut": "재생 / 일시정지"
+  "playPauseShortcut": "재생 / 일시정지",
+  "ageRestrictedTrack": "이 트랙은 연령 제한(18+)이 있습니다. 서버에 YouTube에 로그인한 계정의 쿠키가 필요합니다.",
+  "haptics": "진동 피드백",
+  "hapticsDescription": "탭으로 무언가 바뀔 때 짧게 진동합니다. Android와 iOS 전용.",
+  "reduceMotion": "동작 줄이기",
+  "reduceMotionDescription": "전환 효과와 애니메이션 배경을 건너뜁니다. 느린 기기나 움직임에 민감한 경우 유용합니다.",
+  "backgroundPrefetch": "다음 트랙 미리 불러오기",
+  "backgroundPrefetchDescription": "다음 트랙을 미리 준비해 전환이 즉시 시작됩니다. 데이터를 조금 더 사용합니다.",
+  "playbackSettings": "재생",
+  "cookieStatus": "YouTube 쿠키",
+  "cookieStatusReady": "로그인됨 — 18+ 트랙을 재생할 수 있습니다",
+  "cookieStatusVisitor": "로그인 안 됨 — 18+ 트랙이 거부됩니다",
+  "cookieStatusUnknown": "아직 확인하지 않음",
+  "cookieStatusCheck": "확인",
+  "cookieStatusChecking": "확인 중…"
 }

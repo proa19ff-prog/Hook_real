@@ -1402,4 +1402,49 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get playPauseShortcut => '再生 / 一時停止';
+
+  @override
+  String get ageRestrictedTrack =>
+      'このトラックは年齢制限（18+）です。サーバーには YouTube にサインイン済みのアカウントの Cookie が必要です。';
+
+  @override
+  String get haptics => '振動フィードバック';
+
+  @override
+  String get hapticsDescription => 'タップで何かが変わったときに短く振動します。Android と iOS のみ。';
+
+  @override
+  String get reduceMotion => 'モーションを減らす';
+
+  @override
+  String get reduceMotionDescription =>
+      'トランジションとアニメーション背景を省略します。低速な端末や動きに敏感な場合に有効です。';
+
+  @override
+  String get backgroundPrefetch => '次のトラックを先読み';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      '次のトラックをバックグラウンドで準備し、切り替えを即座に始めます。データ使用量が少し増えます。';
+
+  @override
+  String get playbackSettings => '再生';
+
+  @override
+  String get cookieStatus => 'YouTube Cookie';
+
+  @override
+  String get cookieStatusReady => 'サインイン済み — 18+ の曲を再生できます';
+
+  @override
+  String get cookieStatusVisitor => '未サインイン — 18+ の曲は再生できません';
+
+  @override
+  String get cookieStatusUnknown => 'まだ確認していません';
+
+  @override
+  String get cookieStatusCheck => '確認';
+
+  @override
+  String get cookieStatusChecking => '確認中…';
 }

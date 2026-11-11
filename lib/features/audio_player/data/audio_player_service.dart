@@ -11,6 +11,7 @@ import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
 import '../../extractor/models/resolved_stream.dart';
+import '../../extractor/sources/remote_resolver_source.dart';
 import '../../extractor/stream_resolver.dart';
 import '../../recommendations/recommendation_service.dart';
 import '../../recommendations/track_wave_service.dart';
@@ -20,7 +21,15 @@ import '../../lyrics/data/lyrics_client.dart';
 
 enum PlayerLoopMode { off, all, one }
 
-enum AudioPlaybackErrorKind { forbidden, catalogUnavailable, sourceUnavailable }
+enum AudioPlaybackErrorKind {
+  forbidden,
+  catalogUnavailable,
+  sourceUnavailable,
+
+  /// YouTube refused the track because it is age-restricted and the server
+  /// has no signed-in cookie jar. The user can fix this one.
+  ageRestricted,
+}
 
 class AudioPlaybackError {
   final MediaTrack track;
@@ -51,6 +60,13 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     if (selected == 'en') return false;
     return Platform.localeName.toLowerCase().startsWith('ru');
   }
+
+  /// Whether to warm the next tracks in the background. Off means every tap
+  /// resolves its own stream: less data, slightly slower skips.
+  ///
+  /// A plain settable field rather than a provider read because resolution
+  /// happens deep inside the service, often outside the widget tree.
+  static bool prefetchEnabled = true;
 
   MediaTrack? _currentTrack;
   final List<MediaTrack> _queue = [];
@@ -290,13 +306,28 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
   /// Resolves streams ahead of a tap (e.g. the top search results), so the
   /// tap only has to buffer audio. Failures are ignored; a tap resolves again.
-  void prefetch(Iterable<MediaTrack> tracks) {
+  ///
+  /// [deep] caps how many tracks get a full resolve. A catalog resolve is
+  /// expensive (it matches a recording, then resolves a stream), so only the
+  /// first one is worth paying for; the rest just heat the server cache.
+  void prefetch(Iterable<MediaTrack> tracks, {int deep = 1}) {
+    if (!prefetchEnabled) return;
+    var resolved = 0;
+    final youtubeIds = <String>[];
     for (final track in tracks) {
-      if (track.source == TrackSource.local ||
-          track.source == TrackSource.youtubeMusic) {
+      if (track.source == TrackSource.local) continue;
+      if (track.source == TrackSource.youtubeMusic) {
+        // A prefetched direct YouTube url is wasted work: the signed link is
+        // short-lived and the player resolves again on tap anyway. The server
+        // hint is worth something though — it puts the audio in server RAM.
+        youtubeIds.add(track.id);
         continue;
       }
+      if (resolved++ >= deep) continue;
       _resolveUrl(track).catchError((_) => null).ignore();
+    }
+    if (youtubeIds.isNotEmpty) {
+      _resolver.remoteSource?.warm(youtubeIds).ignore();
     }
   }
 
@@ -451,6 +482,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         source: track.source.name,
         error: cause,
       );
+      final refusal = cause is AgeRestrictedStreamException ? cause : null;
       final forbidden =
           cause != null &&
           PlaybackDiagnostics.failureLabel(cause) == 'HTTP 403';
@@ -458,12 +490,16 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
         _errorController.add(
           AudioPlaybackError(
             track: track,
-            kind: forbidden
+            kind: refusal != null
+                ? AudioPlaybackErrorKind.ageRestricted
+                : forbidden
                 ? AudioPlaybackErrorKind.forbidden
                 : track.source.isCatalog
                 ? AudioPlaybackErrorKind.catalogUnavailable
                 : AudioPlaybackErrorKind.sourceUnavailable,
-            message: forbidden
+            message: refusal != null
+                ? 'Трек с возрастным ограничением (18+). Серверу нужны куки YouTube от аккаунта, который вошёл в систему.'
+                : forbidden
                 ? 'Сервер аудио отклонил доступ (HTTP 403). Трек найден, но поток недоступен. VPN не гарантирует доступ к аудио.'
                 : track.source.isCatalog
                 ? 'Полная версия не найдена в доступных источниках. Проверьте сеть или попробуйте позже.'

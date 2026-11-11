@@ -454,5 +454,19 @@
   "keyboardShortcuts": "Горячие клавиши",
   "shortcutsCaption": "Работают везде, кроме полей ввода.",
   "shortcutsSeek": "Перемотка на 10 секунд",
-  "playPauseShortcut": "Играть / пауза"
+  "playPauseShortcut": "Играть / пауза",
+  "ageRestrictedTrack": "Трек с возрастным ограничением (18+). Серверу нужны куки YouTube от аккаунта, который вошёл в систему.",
+  "haptics": "Вибрация",
+  "hapticsDescription": "Короткая вибрация, когда нажатие что-то меняет. Только Android и iOS.",
+  "reduceMotion": "Меньше анимации",
+  "reduceMotionDescription": "Отключает переходы и анимированные фоны. Помогает на слабых устройствах и при чувствительности к движению.",
+  "backgroundPrefetch": "Предзагрузка треков",
+  "backgroundPrefetchDescription": "Готовит следующие треки заранее, чтобы переключение начиналось мгновенно. Тратит немного больше трафика.",
+  "playbackSettings": "Воспроизведение",
+  "cookieStatus": "Куки YouTube",
+  "cookieStatusReady": "Аккаунт подключён — треки 18+ доступны",
+  "cookieStatusVisitor": "Аккаунт не подключён — треки 18+ недоступны",
+  "cookieStatusUnknown": "Ещё не проверялось",
+  "cookieStatusCheck": "Проверить",
+  "cookieStatusChecking": "Проверяем…"
 }

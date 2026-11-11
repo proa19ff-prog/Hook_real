@@ -39,7 +39,7 @@ class _Audio extends Fake implements AudioPlayerService {
   @override
   PlayerLoopMode get loopMode => PlayerLoopMode.off;
   @override
-  void prefetch(Iterable<MediaTrack> tracks) {}
+  void prefetch(Iterable<MediaTrack> tracks, {int deep = 1}) {}
   @override
   void toggleShuffle() {}
   @override

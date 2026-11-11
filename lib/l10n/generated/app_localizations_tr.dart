@@ -1442,4 +1442,50 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Çal / duraklat';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Bu parça yaş sınırlı (18+). Sunucunun oturum açmış bir YouTube hesabının çerezlerine ihtiyacı var.';
+
+  @override
+  String get haptics => 'Titreşim';
+
+  @override
+  String get hapticsDescription =>
+      'Bir dokunuş bir şeyi değiştirdiğinde kısa titreşim. Yalnızca Android ve iOS.';
+
+  @override
+  String get reduceMotion => 'Hareketi azalt';
+
+  @override
+  String get reduceMotionDescription =>
+      'Geçişleri ve hareketli arka planları atlar. Yavaş cihazlarda veya hareket hassasiyetinde yararlıdır.';
+
+  @override
+  String get backgroundPrefetch => 'Sonraki parçaları önceden yükle';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Sonraki parçaları arka planda hazırlar, böylece geçiş anında başlar. Biraz daha veri kullanır.';
+
+  @override
+  String get playbackSettings => 'Oynatma';
+
+  @override
+  String get cookieStatus => 'YouTube çerezleri';
+
+  @override
+  String get cookieStatusReady => 'Oturum açık — 18+ parçalar oynatılabilir';
+
+  @override
+  String get cookieStatusVisitor => 'Oturum yok — 18+ parçalar reddediliyor';
+
+  @override
+  String get cookieStatusUnknown => 'Henüz denetlenmedi';
+
+  @override
+  String get cookieStatusCheck => 'Denetle';
+
+  @override
+  String get cookieStatusChecking => 'Denetleniyor…';
 }

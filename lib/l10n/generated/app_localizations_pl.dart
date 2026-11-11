@@ -1451,4 +1451,50 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Odtwórz / pauza';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Ten utwór ma ograniczenie wiekowe (18+). Serwer potrzebuje ciasteczek z zalogowanego konta YouTube.';
+
+  @override
+  String get haptics => 'Wibracje';
+
+  @override
+  String get hapticsDescription =>
+      'Krótka wibracja, gdy dotknięcie coś zmienia. Tylko Android i iOS.';
+
+  @override
+  String get reduceMotion => 'Ogranicz animacje';
+
+  @override
+  String get reduceMotionDescription =>
+      'Pomija przejścia i animowane tła. Przydatne na słabych urządzeniach lub przy wrażliwości na ruch.';
+
+  @override
+  String get backgroundPrefetch => 'Wczytuj kolejne utwory';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Przygotowuje kolejne utwory w tle, aby przełączanie było natychmiastowe. Zużywa nieco więcej danych.';
+
+  @override
+  String get playbackSettings => 'Odtwarzanie';
+
+  @override
+  String get cookieStatus => 'Ciasteczka YouTube';
+
+  @override
+  String get cookieStatusReady => 'Zalogowano — utwory 18+ są dostępne';
+
+  @override
+  String get cookieStatusVisitor => 'Nie zalogowano — utwory 18+ są odrzucane';
+
+  @override
+  String get cookieStatusUnknown => 'Jeszcze nie sprawdzono';
+
+  @override
+  String get cookieStatusCheck => 'Sprawdź';
+
+  @override
+  String get cookieStatusChecking => 'Sprawdzanie…';
 }

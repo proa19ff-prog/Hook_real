@@ -747,8 +747,18 @@ class StreamResolver {
     }
     for (final source in _additionalSources) {
       if (source.source != track.source) continue;
+      final remote = remoteSource;
+      // YouTube is the one source where the direct url fails often enough to
+      // matter, and waiting out a 4 s timeout before asking the server was the
+      // longest single stall in the playback path. Ask both at once instead:
+      // the server answers a cached track in about a millisecond, the direct
+      // attempt wins whenever the carrier lets it through.
+      if (source is YouTubeMusicSource && remote != null) {
+        return _raceDirectAndServer(track, source, remote);
+      }
       Object? directFailure;
       StackTrace? directStack;
+      Object? ageFailure;
       try {
         final attempt = source.resolveTrack(track);
         // Only YouTube gets the short leash: its direct URLs are the ones
@@ -764,7 +774,6 @@ class StreamResolver {
       // A direct source answered 403/region-locked (everyday reality on
       // carrier networks): the server can still proxy the very same
       // recording, so a YouTube search result stays playable everywhere.
-      final remote = remoteSource;
       if (remote != null && remote != source) {
         try {
           final viaServer = await remote.resolveTrack(track);
@@ -775,14 +784,96 @@ class StreamResolver {
             );
             return viaServer;
           }
+        } on AgeRestrictedStreamException catch (error) {
+          // Keep the honest reason: the direct source failed too, and "needs
+          // signed-in cookies" is far more useful than "no stream".
+          ageFailure = error;
         } catch (_) {
           // Fall through to the original failure below.
         }
       }
+      if (ageFailure != null) throw ageFailure;
       if (directFailure != null) {
         Error.throwWithStackTrace(directFailure, directStack!);
       }
       return null;
+    }
+    return null;
+  }
+
+  /// Resolves a YouTube track through both paths at once and returns whichever
+  /// produces a playable url first. The direct attempt keeps its short leash;
+  /// the server call is only started for a real resolver, never in tests.
+  Future<ResolvedStream?> _raceDirectAndServer(
+    MediaTrack track,
+    MusicSource direct,
+    RemoteResolverSource remote,
+  ) async {
+    Object? directFailure;
+    StackTrace? directStack;
+    Object? serverAgeFailure;
+    var directFailed = false;
+
+    final directAttempt = () async {
+      try {
+        final stream = await direct.resolveTrack(track).timeout(directYouTubeTimeout);
+        if (stream != null && !stream.isEmpty) return stream;
+        directFailed = true;
+        return null;
+      } catch (error, stack) {
+        directFailure = error;
+        directStack = stack;
+        directFailed = true;
+        return null;
+      }
+    }();
+
+    final serverAttempt = () async {
+      try {
+        final stream = await remote.resolveTrack(track);
+        if (stream != null && !stream.isEmpty) return stream;
+      } on AgeRestrictedStreamException catch (error) {
+        serverAgeFailure = error;
+      } catch (_) {
+        // The direct result (or its error) still decides below.
+      }
+      return null;
+    }();
+
+    // Wait for the first success instead of a fixed order: a direct url that
+    // arrives in 300 ms beats a server url that arrives in 900 ms.
+    final first = await Future.any<ResolvedStream?>([
+      directAttempt,
+      serverAttempt,
+    ]);
+    if (first != null) {
+      if (directFailed) {
+        PlaybackDiagnostics.record(
+          'playback.server.fallback',
+          source: direct.source.name,
+        );
+      }
+      return first;
+    }
+    // Neither answered in time; give the remaining one a fair chance while
+    // still surfacing the original error if both are empty.
+    final settled = await Future.wait<ResolvedStream?>([
+      directAttempt,
+      serverAttempt,
+    ]);
+    final winner = settled.whereType<ResolvedStream>().firstOrNull;
+    if (winner != null) {
+      PlaybackDiagnostics.record(
+        'playback.server.fallback',
+        source: direct.source.name,
+      );
+      return winner;
+    }
+    // The server's refusal is the actionable one: cookies are missing or
+    // stale, which the user can fix, unlike a carrier-level 403.
+    if (serverAgeFailure != null) throw serverAgeFailure!;
+    if (directFailure != null) {
+      Error.throwWithStackTrace(directFailure!, directStack!);
     }
     return null;
   }

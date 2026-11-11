@@ -2671,6 +2671,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play / pause'**
   String get playPauseShortcut;
+
+  /// Shown when YouTube refuses a track for being age-restricted and the server has no signed-in cookie jar.
+  ///
+  /// In en, this message translates to:
+  /// **'This track is age-restricted (18+). The server needs a signed-in YouTube cookie to play it.'**
+  String get ageRestrictedTrack;
+
+  /// Plays a short vibration on transport and favourite buttons. Android and iOS only.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration feedback'**
+  String get haptics;
+
+  /// Explains what the haptics toggle does and where it applies.
+  ///
+  /// In en, this message translates to:
+  /// **'A short vibration when a tap changes something. Android and iOS only.'**
+  String get hapticsDescription;
+
+  /// Turns off transitions and animated backgrounds across the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce motion'**
+  String get reduceMotion;
+
+  /// Explains the reduce-motion toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skips transitions and animated backgrounds. Useful on slow devices or for motion sensitivity.'**
+  String get reduceMotionDescription;
+
+  /// Warms up the next tracks so skipping starts instantly.
+  ///
+  /// In en, this message translates to:
+  /// **'Preload next tracks'**
+  String get backgroundPrefetch;
+
+  /// Explains the preload toggle and its data cost.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepares the next tracks in the background so skipping starts instantly. Uses a little more data.'**
+  String get backgroundPrefetchDescription;
+
+  /// Settings section heading for the playback and feedback switches.
+  ///
+  /// In en, this message translates to:
+  /// **'Playback'**
+  String get playbackSettings;
+
+  /// Settings row showing the resolver server cookie state.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube cookies'**
+  String get cookieStatus;
+
+  /// Cookie row state when the server can play age-restricted tracks.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in — age-restricted (18+) tracks can play'**
+  String get cookieStatusReady;
+
+  /// Cookie row state when the server jar is a visitor-only jar.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in — age-restricted (18+) tracks are refused'**
+  String get cookieStatusVisitor;
+
+  /// Cookie row state before the live check has run.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked yet'**
+  String get cookieStatusUnknown;
+
+  /// Button that runs the live cookie check.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get cookieStatusCheck;
+
+  /// Label while the live cookie check runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get cookieStatusChecking;
 }
 
 class _AppLocalizationsDelegate

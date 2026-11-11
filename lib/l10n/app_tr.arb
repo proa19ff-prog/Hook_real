@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Klavye kısayolları",
   "shortcutsCaption": "Metin alanları dışında her yerde çalışır.",
   "shortcutsSeek": "10 saniye atla",
-  "playPauseShortcut": "Çal / duraklat"
+  "playPauseShortcut": "Çal / duraklat",
+  "ageRestrictedTrack": "Bu parça yaş sınırlı (18+). Sunucunun oturum açmış bir YouTube hesabının çerezlerine ihtiyacı var.",
+  "haptics": "Titreşim",
+  "hapticsDescription": "Bir dokunuş bir şeyi değiştirdiğinde kısa titreşim. Yalnızca Android ve iOS.",
+  "reduceMotion": "Hareketi azalt",
+  "reduceMotionDescription": "Geçişleri ve hareketli arka planları atlar. Yavaş cihazlarda veya hareket hassasiyetinde yararlıdır.",
+  "backgroundPrefetch": "Sonraki parçaları önceden yükle",
+  "backgroundPrefetchDescription": "Sonraki parçaları arka planda hazırlar, böylece geçiş anında başlar. Biraz daha veri kullanır.",
+  "playbackSettings": "Oynatma",
+  "cookieStatus": "YouTube çerezleri",
+  "cookieStatusReady": "Oturum açık — 18+ parçalar oynatılabilir",
+  "cookieStatusVisitor": "Oturum yok — 18+ parçalar reddediliyor",
+  "cookieStatusUnknown": "Henüz denetlenmedi",
+  "cookieStatusCheck": "Denetle",
+  "cookieStatusChecking": "Denetleniyor…"
 }

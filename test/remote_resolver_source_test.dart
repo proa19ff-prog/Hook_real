@@ -39,6 +39,24 @@ void main() {
             'ext': 'm4a',
           }),
         );
+      } else if (request.uri.path == '/resolve' &&
+          request.uri.queryParameters['id'] == 'aged') {
+        response.statusCode = 403;
+        response.write(
+          jsonEncode({
+            'error': 'age_restricted',
+            'detail': 'sign in to confirm your age',
+            'cookie_state': 'visitor_only',
+          }),
+        );
+      } else if (request.uri.path == '/resolve' &&
+          request.uri.queryParameters['id'] == 'stale') {
+        response.statusCode = 403;
+        response.write(jsonEncode({'error': 'cookies_stale'}));
+      } else if (request.uri.path == '/resolve' &&
+          request.uri.queryParameters['id'] == 'blocked') {
+        response.statusCode = 403;
+        response.write('<html>forbidden</html>');
       } else {
         response.statusCode = 404;
       }
@@ -111,6 +129,35 @@ void main() {
   test('resolve returns null when the server rejects the id', () async {
     final stream = await source.resolveTrack(
       _track(id: 'unknown', source: TrackSource.remote),
+    );
+    expect(stream, isNull);
+  });
+
+  test('an 18+ refusal surfaces instead of looking like a dead endpoint', () async {
+    await expectLater(
+      source.resolveTrack(_track(id: 'aged', source: TrackSource.remote)),
+      throwsA(
+        isA<AgeRestrictedStreamException>()
+            .having((e) => e.reason, 'reason', 'age_restricted')
+            .having((e) => e.isStaleCookies, 'isStaleCookies', isFalse),
+      ),
+    );
+  });
+
+  test('stale cookies are reported as their own reason', () async {
+    await expectLater(
+      source.resolveTrack(_track(id: 'stale', source: TrackSource.remote)),
+      throwsA(
+        isA<AgeRestrictedStreamException>()
+            .having((e) => e.reason, 'reason', 'cookies_stale')
+            .having((e) => e.isStaleCookies, 'isStaleCookies', isTrue),
+      ),
+    );
+  });
+
+  test('a plain 403 stays a failed endpoint, not an age refusal', () async {
+    final stream = await source.resolveTrack(
+      _track(id: 'blocked', source: TrackSource.remote),
     );
     expect(stream, isNull);
   });

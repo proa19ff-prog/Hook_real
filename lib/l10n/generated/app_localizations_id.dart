@@ -1443,4 +1443,50 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Putar / jeda';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Trek ini dibatasi usia (18+). Server memerlukan cookie dari akun YouTube yang sudah masuk.';
+
+  @override
+  String get haptics => 'Getaran';
+
+  @override
+  String get hapticsDescription =>
+      'Getaran singkat saat ketukan mengubah sesuatu. Hanya Android dan iOS.';
+
+  @override
+  String get reduceMotion => 'Kurangi gerakan';
+
+  @override
+  String get reduceMotionDescription =>
+      'Melewati transisi dan latar animasi. Berguna di perangkat lambat atau bagi yang sensitif terhadap gerakan.';
+
+  @override
+  String get backgroundPrefetch => 'Pramuat trek berikutnya';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Menyiapkan trek berikutnya di latar belakang agar pergantian langsung mulai. Memakai sedikit lebih banyak data.';
+
+  @override
+  String get playbackSettings => 'Pemutaran';
+
+  @override
+  String get cookieStatus => 'Cookie YouTube';
+
+  @override
+  String get cookieStatusReady => 'Sudah masuk — trek 18+ dapat diputar';
+
+  @override
+  String get cookieStatusVisitor => 'Belum masuk — trek 18+ ditolak';
+
+  @override
+  String get cookieStatusUnknown => 'Belum diperiksa';
+
+  @override
+  String get cookieStatusCheck => 'Periksa';
+
+  @override
+  String get cookieStatusChecking => 'Memeriksa…';
 }

@@ -610,5 +610,19 @@
   "keyboardShortcuts": "कीबोर्ड शॉर्टकट",
   "shortcutsCaption": "टेक्स्ट फ़ील्ड के अलावा हर जगह काम करते हैं।",
   "shortcutsSeek": "10 सेकंड आगे-पीछे",
-  "playPauseShortcut": "चलाएँ / रोकें"
+  "playPauseShortcut": "चलाएँ / रोकें",
+  "ageRestrictedTrack": "यह ट्रैक आयु-प्रतिबंधित (18+) है। सर्वर को साइन-इन किए गए YouTube खाते के कुकीज़ चाहिए।",
+  "haptics": "कंपन प्रतिक्रिया",
+  "hapticsDescription": "किसी टैप से कुछ बदलने पर छोटा कंपन। केवल Android और iOS।",
+  "reduceMotion": "गति कम करें",
+  "reduceMotionDescription": "ट्रांज़िशन और एनिमेटेड बैकग्राउंड छोड़ देता है। धीमे डिवाइस या गति-संवेदनशीलता में उपयोगी।",
+  "backgroundPrefetch": "अगले ट्रैक पहले से लोड करें",
+  "backgroundPrefetchDescription": "अगले ट्रैक पृष्ठभूमि में तैयार करता है ताकि अगला ट्रैक तुरंत शुरू हो। थोड़ा अधिक डेटा लेता है।",
+  "playbackSettings": "प्लेबैक",
+  "cookieStatus": "YouTube कुकीज़",
+  "cookieStatusReady": "साइन-इन है — 18+ ट्रैक चल सकते हैं",
+  "cookieStatusVisitor": "साइन-इन नहीं है — 18+ ट्रैक अस्वीकार होते हैं",
+  "cookieStatusUnknown": "अभी जाँचा नहीं गया",
+  "cookieStatusCheck": "जाँचें",
+  "cookieStatusChecking": "जाँच हो रही है…"
 }

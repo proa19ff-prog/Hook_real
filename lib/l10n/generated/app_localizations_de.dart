@@ -1451,4 +1451,52 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Wiedergabe / Pause';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Dieser Titel ist altersbeschränkt (18+). Der Server braucht Cookies von einem angemeldeten YouTube-Konto.';
+
+  @override
+  String get haptics => 'Vibrationsfeedback';
+
+  @override
+  String get hapticsDescription =>
+      'Kurze Vibration, wenn ein Tipp etwas ändert. Nur Android und iOS.';
+
+  @override
+  String get reduceMotion => 'Bewegung reduzieren';
+
+  @override
+  String get reduceMotionDescription =>
+      'Überspringt Übergänge und animierte Hintergründe. Hilfreich auf schwachen Geräten oder bei Bewegungsempfindlichkeit.';
+
+  @override
+  String get backgroundPrefetch => 'Nächste Titel vorladen';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Bereitet die nächsten Titel im Hintergrund vor, damit der Wechsel sofort beginnt. Verbraucht etwas mehr Daten.';
+
+  @override
+  String get playbackSettings => 'Wiedergabe';
+
+  @override
+  String get cookieStatus => 'YouTube-Cookies';
+
+  @override
+  String get cookieStatusReady =>
+      'Angemeldet — Titel ab 18 können abgespielt werden';
+
+  @override
+  String get cookieStatusVisitor =>
+      'Nicht angemeldet — Titel ab 18 werden abgelehnt';
+
+  @override
+  String get cookieStatusUnknown => 'Noch nicht geprüft';
+
+  @override
+  String get cookieStatusCheck => 'Prüfen';
+
+  @override
+  String get cookieStatusChecking => 'Wird geprüft…';
 }

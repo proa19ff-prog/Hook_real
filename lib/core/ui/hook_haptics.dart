@@ -10,8 +10,12 @@ import 'package:flutter/services.dart';
 /// hardware, so nothing is attempted there and no platform channel is touched
 /// in tests.
 abstract final class HookHaptics {
+  /// Master switch, mirrored from the settings toggle. Defaults to on, which
+  /// is the behaviour every existing screen already expects.
+  static bool enabled = true;
+
   static bool get _available =>
-      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+      enabled && !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
   /// A control that acts immediately: play, next, mute.
   static void tap() {

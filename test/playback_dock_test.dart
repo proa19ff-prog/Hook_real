@@ -44,7 +44,7 @@ class _Audio extends Fake implements AudioPlayerService {
   @override
   Stream<int> get queueChanges => const Stream.empty();
   @override
-  void prefetch(Iterable<MediaTrack> tracks) {}
+  void prefetch(Iterable<MediaTrack> tracks, {int deep = 1}) {}
   @override
   Future<void> togglePlayPause() async {
     toggles++;

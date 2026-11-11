@@ -27,7 +27,7 @@ class _IdleAudioService extends Fake implements AudioPlayerService {
   Stream<int> get queueChanges => const Stream.empty();
 
   @override
-  void prefetch(Iterable<MediaTrack> tracks) {}
+  void prefetch(Iterable<MediaTrack> tracks, {int deep = 1}) {}
 }
 
 class _SearchResolver extends Fake implements StreamResolver {

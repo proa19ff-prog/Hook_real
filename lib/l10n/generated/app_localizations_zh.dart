@@ -1376,4 +1376,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get playPauseShortcut => '播放 / 暂停';
+
+  @override
+  String get ageRestrictedTrack => '该曲目有年龄限制（18+）。服务器需要已登录的 YouTube 账户 Cookie。';
+
+  @override
+  String get haptics => '振动反馈';
+
+  @override
+  String get hapticsDescription => '点击改变状态时短暂振动。仅限 Android 和 iOS。';
+
+  @override
+  String get reduceMotion => '减少动效';
+
+  @override
+  String get reduceMotionDescription => '跳过转场和动态背景。适合性能较弱的设备或对动态敏感的用户。';
+
+  @override
+  String get backgroundPrefetch => '预加载下一首';
+
+  @override
+  String get backgroundPrefetchDescription => '在后台准备下一首，切换时立即开始。会多用一点流量。';
+
+  @override
+  String get playbackSettings => '播放';
+
+  @override
+  String get cookieStatus => 'YouTube Cookie';
+
+  @override
+  String get cookieStatusReady => '已登录 — 可播放 18+ 曲目';
+
+  @override
+  String get cookieStatusVisitor => '未登录 — 18+ 曲目会被拒绝';
+
+  @override
+  String get cookieStatusUnknown => '尚未检查';
+
+  @override
+  String get cookieStatusCheck => '检查';
+
+  @override
+  String get cookieStatusChecking => '检查中…';
 }

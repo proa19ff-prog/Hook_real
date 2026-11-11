@@ -30,6 +30,25 @@ import 'music_source.dart';
 ///   null (never configured) → the pool
 ///   '' (disabled in settings) → source off
 ///   custom url → that url only (no rotation)
+/// The server answered `403 {"error":"age_restricted"}` (or `cookies_stale`):
+/// the track exists but YouTube refuses it without a signed-in cookie jar.
+/// Distinct from a plain failure because the user can actually fix this one,
+/// and because retrying another endpoint cannot help — the whole pool shares
+/// the same session.
+class AgeRestrictedStreamException implements Exception {
+  const AgeRestrictedStreamException(this.reason, {this.detail});
+
+  /// `age_restricted` or `cookies_stale`, as reported by the server.
+  final String reason;
+  final String? detail;
+
+  bool get isStaleCookies => reason == 'cookies_stale';
+
+  @override
+  String toString() =>
+      detail == null || detail!.isEmpty ? reason : '$reason: $detail';
+}
+
 class RemoteResolverSource implements MusicSource {
   /// Ordered resolver endpoints shipped with the build. Adding a worker is
   /// one line here plus a release.
@@ -46,6 +65,7 @@ class RemoteResolverSource implements MusicSource {
 
   static const _searchTimeout = Duration(seconds: 9);
   static const _resolveTimeout = Duration(seconds: 20);
+  static const _warmTimeout = Duration(seconds: 4);
 
   @override
   TrackSource get source => TrackSource.remote;
@@ -135,7 +155,57 @@ class RemoteResolverSource implements MusicSource {
   Future<http.Response> _get(Uri uri, Duration timeout) {
     final override = fetchOverride;
     if (override != null) return override(uri);
-    return http.get(uri).timeout(timeout);
+    return _client.get(uri).timeout(timeout);
+  }
+
+  /// One pooled client for the whole app. `http.get` builds a fresh client per
+  /// call, so every search and resolve paid for its own TLS handshake — the
+  /// single largest fixed cost on a cold tap.
+  static http.Client? _sharedClient;
+  static http.Client get _client => _sharedClient ??= http.Client();
+
+  @visibleForTesting
+  static void resetClient() {
+    _sharedClient?.close();
+    _sharedClient = null;
+  }
+
+  /// Tells the server which tracks are about to play, so it can pull them into
+  /// RAM and its disk cache before the tap. Fire and forget: the answer only
+  /// reports how many ids were queued.
+  Future<void> warm(Iterable<String> ids) async {
+    if (!enabled) return;
+    final wanted = ids
+        .map((id) => id.trim())
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .take(12)
+        .toList(growable: false);
+    if (wanted.isEmpty) return;
+    try {
+      await _getRotating('/warm', {'ids': wanted.join(',')}, _warmTimeout);
+    } catch (_) {
+      // Prewarming is an optimisation; a failed hint changes nothing.
+    }
+  }
+
+  /// The server's most played tracks, already resolved and usually resident in
+  /// its RAM cache. Empty on any failure — the home rail simply stays hidden.
+  Future<List<MediaTrack>> popular({int limit = 12}) async {
+    if (!enabled || limit <= 0) return const [];
+    final response = await _getRotating(
+      '/popular',
+      {'limit': '$limit'},
+      _searchTimeout,
+    );
+    if (response == null) return const [];
+    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+    if (decoded is! List) return const [];
+    return decoded
+        .whereType<Map<String, dynamic>>()
+        .map(_trackFromJson)
+        .whereType<MediaTrack>()
+        .toList(growable: false);
   }
 
   /// Rotates across the pool: 429 cools the endpoint until the next UTC
@@ -144,8 +214,9 @@ class RemoteResolverSource implements MusicSource {
   Future<http.Response?> _getRotating(
     String path,
     Map<String, String> query,
-    Duration timeout,
-  ) async {
+    Duration timeout, {
+    bool throwOnRefusal = false,
+  }) async {
     Object? lastError;
     for (final base in _candidates) {
       try {
@@ -160,12 +231,20 @@ class RemoteResolverSource implements MusicSource {
           lastError = 'endpoint quota exhausted';
           continue;
         }
+        if (throwOnRefusal && response.statusCode == 403) {
+          final refusal = _refusalFrom(response);
+          // Both flavours are final: every pool entry talks to a server that
+          // holds the same cookie jar, so rotating would only repeat the wait.
+          if (refusal != null) throw refusal;
+        }
         if (response.statusCode != 200) {
           lastError = StateError('HTTP ${response.statusCode}');
           continue;
         }
         if (endpoint?.trim() == null) _stickTo(base);
         return response;
+      } on AgeRestrictedStreamException {
+        rethrow;
       } catch (error) {
         lastError = error;
         continue;
@@ -184,6 +263,24 @@ class RemoteResolverSource implements MusicSource {
   static void _stickTo(String endpoint) {
     final index = defaultEndpoints.indexOf(endpoint);
     if (index >= 0) _activeIndex = index;
+  }
+
+  /// Reads the honest refusal out of a 403. The server sends
+  /// `{"error":"age_restricted","detail":…}`; anything else (a Cloudflare
+  /// block page, a bare 403) is just a failed endpoint and stays one.
+  static AgeRestrictedStreamException? _refusalFrom(http.Response response) {
+    try {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      if (decoded is! Map<String, dynamic>) return null;
+      final code = decoded['error']?.toString();
+      if (code != 'age_restricted' && code != 'cookies_stale') return null;
+      return AgeRestrictedStreamException(
+        code!,
+        detail: decoded['detail']?.toString() ?? decoded['cookie_state']?.toString(),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   /// A server-side packaged download for a track we only know by its page
@@ -232,6 +329,7 @@ class RemoteResolverSource implements MusicSource {
       '/resolve',
       {'id': track.id},
       _resolveTimeout,
+      throwOnRefusal: true,
     );
     if (response == null) return null;
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -277,7 +375,59 @@ class RemoteResolverSource implements MusicSource {
     );
   }
 
+  /// Whether the server's cookie jar is signed in to YouTube. Age-restricted
+  /// tracks are refused without one, and this drives the settings hint.
+  ///
+  /// `/cookies/verify` makes a live request with the jar, so it costs a couple
+  /// of seconds; `/cookies/status` only inspects the file. Both are read here:
+  /// `signed_in` from the cheap one, then the live verdict when available.
+  Future<CookieJarHealth?> cookieHealth() async {
+    if (!enabled) return null;
+    try {
+      final response = await _getRotating(
+        '/cookies/verify',
+        const {},
+        const Duration(seconds: 15),
+      );
+      if (response == null) return null;
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      if (decoded is! Map<String, dynamic>) return null;
+      return CookieJarHealth(
+        configured: decoded['configured'] != false,
+        healthy: decoded['healthy'] == true,
+        signedIn: decoded['signed_in'] == true,
+        ageRestrictedReady: decoded['age_restricted_ready'] == true,
+        detail: decoded['detail']?.toString() ?? '',
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void close() {}
+}
+
+/// What the server says about its YouTube cookie jar. [ageRestrictedReady] is
+/// the only field that decides whether 18+ tracks can play.
+class CookieJarHealth {
+  const CookieJarHealth({
+    required this.configured,
+    required this.healthy,
+    required this.signedIn,
+    required this.ageRestrictedReady,
+    required this.detail,
+  });
+
+  final bool configured;
+  final bool healthy;
+  final bool signedIn;
+  final bool ageRestrictedReady;
+
+  /// The server's own explanation, in English. Shown verbatim when it is the
+  /// only thing that says what is wrong.
+  final String detail;
+
+  bool get needsSignIn => healthy && !ageRestrictedReady;
 }
 

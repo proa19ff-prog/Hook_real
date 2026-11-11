@@ -1443,4 +1443,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Play / pause';
+
+  @override
+  String get ageRestrictedTrack =>
+      'This track is age-restricted (18+). The server needs a signed-in YouTube cookie to play it.';
+
+  @override
+  String get haptics => 'Vibration feedback';
+
+  @override
+  String get hapticsDescription =>
+      'A short vibration when a tap changes something. Android and iOS only.';
+
+  @override
+  String get reduceMotion => 'Reduce motion';
+
+  @override
+  String get reduceMotionDescription =>
+      'Skips transitions and animated backgrounds. Useful on slow devices or for motion sensitivity.';
+
+  @override
+  String get backgroundPrefetch => 'Preload next tracks';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Prepares the next tracks in the background so skipping starts instantly. Uses a little more data.';
+
+  @override
+  String get playbackSettings => 'Playback';
+
+  @override
+  String get cookieStatus => 'YouTube cookies';
+
+  @override
+  String get cookieStatusReady =>
+      'Signed in — age-restricted (18+) tracks can play';
+
+  @override
+  String get cookieStatusVisitor =>
+      'Not signed in — age-restricted (18+) tracks are refused';
+
+  @override
+  String get cookieStatusUnknown => 'Not checked yet';
+
+  @override
+  String get cookieStatusCheck => 'Check';
+
+  @override
+  String get cookieStatusChecking => 'Checking…';
 }

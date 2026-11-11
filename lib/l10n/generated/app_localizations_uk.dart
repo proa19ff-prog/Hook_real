@@ -1451,4 +1451,51 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Грати / пауза';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Трек із віковим обмеженням (18+). Серверу потрібні куки YouTube від акаунта, який увійшов у систему.';
+
+  @override
+  String get haptics => 'Вібрація';
+
+  @override
+  String get hapticsDescription =>
+      'Коротка вібрація, коли натискання щось змінює. Лише Android та iOS.';
+
+  @override
+  String get reduceMotion => 'Менше анімації';
+
+  @override
+  String get reduceMotionDescription =>
+      'Вимикає переходи та анімовані фони. Допомагає на слабких пристроях і при чутливості до руху.';
+
+  @override
+  String get backgroundPrefetch => 'Попереднє завантаження';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Готує наступні треки заздалегідь, щоб перемикання починалося миттєво. Витрачає трохи більше трафіку.';
+
+  @override
+  String get playbackSettings => 'Відтворення';
+
+  @override
+  String get cookieStatus => 'Куки YouTube';
+
+  @override
+  String get cookieStatusReady => 'Акаунт підключено — треки 18+ доступні';
+
+  @override
+  String get cookieStatusVisitor =>
+      'Акаунт не підключено — треки 18+ недоступні';
+
+  @override
+  String get cookieStatusUnknown => 'Ще не перевірялося';
+
+  @override
+  String get cookieStatusCheck => 'Перевірити';
+
+  @override
+  String get cookieStatusChecking => 'Перевіряємо…';
 }

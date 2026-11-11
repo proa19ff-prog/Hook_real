@@ -1426,4 +1426,51 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'เล่น / หยุดชั่วคราว';
+
+  @override
+  String get ageRestrictedTrack =>
+      'แทร็กนี้มีข้อจำกัดด้านอายุ (18+) เซิร์ฟเวอร์ต้องใช้คุกกี้จากบัญชี YouTube ที่ลงชื่อเข้าใช้แล้ว';
+
+  @override
+  String get haptics => 'การสั่นตอบสนอง';
+
+  @override
+  String get hapticsDescription =>
+      'สั่นสั้น ๆ เมื่อการแตะเปลี่ยนอะไรบางอย่าง ใช้ได้เฉพาะ Android และ iOS';
+
+  @override
+  String get reduceMotion => 'ลดการเคลื่อนไหว';
+
+  @override
+  String get reduceMotionDescription =>
+      'ข้ามทรานซิชันและพื้นหลังแบบเคลื่อนไหว เหมาะกับอุปกรณ์ช้าหรือผู้ที่ไวต่อการเคลื่อนไหว';
+
+  @override
+  String get backgroundPrefetch => 'โหลดแทร็กถัดไปล่วงหน้า';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'เตรียมแทร็กถัดไปไว้เบื้องหลังเพื่อให้เปลี่ยนเพลงได้ทันที ใช้ข้อมูลเพิ่มเล็กน้อย';
+
+  @override
+  String get playbackSettings => 'การเล่น';
+
+  @override
+  String get cookieStatus => 'คุกกี้ YouTube';
+
+  @override
+  String get cookieStatusReady => 'ลงชื่อเข้าใช้แล้ว — เล่นแทร็ก 18+ ได้';
+
+  @override
+  String get cookieStatusVisitor =>
+      'ยังไม่ได้ลงชื่อเข้าใช้ — แทร็ก 18+ จะถูกปฏิเสธ';
+
+  @override
+  String get cookieStatusUnknown => 'ยังไม่ได้ตรวจสอบ';
+
+  @override
+  String get cookieStatusCheck => 'ตรวจสอบ';
+
+  @override
+  String get cookieStatusChecking => 'กำลังตรวจสอบ…';
 }

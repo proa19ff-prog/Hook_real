@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Atalhos de teclado",
   "shortcutsCaption": "Funcionam em qualquer lugar, exceto em campos de texto.",
   "shortcutsSeek": "Avançar 10 segundos",
-  "playPauseShortcut": "Reproduzir / pausar"
+  "playPauseShortcut": "Reproduzir / pausar",
+  "ageRestrictedTrack": "Esta faixa tem restrição de idade (18+). O servidor precisa de cookies de uma conta do YouTube com sessão iniciada.",
+  "haptics": "Vibração",
+  "hapticsDescription": "Uma vibração curta quando um toque muda algo. Apenas Android e iOS.",
+  "reduceMotion": "Reduzir movimento",
+  "reduceMotionDescription": "Ignora transições e fundos animados. Útil em aparelhos lentos ou com sensibilidade a movimento.",
+  "backgroundPrefetch": "Pré-carregar próximas faixas",
+  "backgroundPrefetchDescription": "Prepara as próximas faixas em segundo plano para a troca ser instantânea. Usa um pouco mais de dados.",
+  "playbackSettings": "Reprodução",
+  "cookieStatus": "Cookies do YouTube",
+  "cookieStatusReady": "Sessão iniciada: as faixas 18+ estão disponíveis",
+  "cookieStatusVisitor": "Sem sessão: as faixas 18+ são recusadas",
+  "cookieStatusUnknown": "Ainda não verificado",
+  "cookieStatusCheck": "Verificar",
+  "cookieStatusChecking": "Verificando…"
 }

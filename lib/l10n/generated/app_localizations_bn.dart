@@ -1437,4 +1437,51 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'চালান / বিরতি';
+
+  @override
+  String get ageRestrictedTrack =>
+      'এই ট্র্যাকটি বয়স-সীমাবদ্ধ (১৮+)। সার্ভারের একটি সাইন-ইন করা YouTube অ্যাকাউন্টের কুকি দরকার।';
+
+  @override
+  String get haptics => 'কম্পন প্রতিক্রিয়া';
+
+  @override
+  String get hapticsDescription =>
+      'একটি ট্যাপ কিছু বদলালে ছোট কম্পন। শুধু Android ও iOS।';
+
+  @override
+  String get reduceMotion => 'গতি কমান';
+
+  @override
+  String get reduceMotionDescription =>
+      'ট্রানজিশন ও অ্যানিমেটেড ব্যাকগ্রাউন্ড বাদ দেয়। ধীর ডিভাইস বা গতি-সংবেদনশীলতায় উপকারী।';
+
+  @override
+  String get backgroundPrefetch => 'পরের ট্র্যাক আগে লোড করুন';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'পরের ট্র্যাক ব্যাকগ্রাউন্ডে প্রস্তুত করে যাতে পরিবর্তন সঙ্গে সঙ্গে শুরু হয়। একটু বেশি ডেটা লাগে।';
+
+  @override
+  String get playbackSettings => 'প্লেব্যাক';
+
+  @override
+  String get cookieStatus => 'YouTube কুকি';
+
+  @override
+  String get cookieStatusReady => 'সাইন-ইন আছে — ১৮+ ট্র্যাক চলবে';
+
+  @override
+  String get cookieStatusVisitor =>
+      'সাইন-ইন নেই — ১৮+ ট্র্যাক প্রত্যাখ্যাত হয়';
+
+  @override
+  String get cookieStatusUnknown => 'এখনও যাচাই হয়নি';
+
+  @override
+  String get cookieStatusCheck => 'যাচাই';
+
+  @override
+  String get cookieStatusChecking => 'যাচাই চলছে…';
 }

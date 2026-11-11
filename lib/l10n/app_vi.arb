@@ -610,5 +610,19 @@
   "keyboardShortcuts": "Phím tắt",
   "shortcutsCaption": "Hoạt động mọi nơi trừ ô nhập văn bản.",
   "shortcutsSeek": "Tua 10 giây",
-  "playPauseShortcut": "Phát / tạm dừng"
+  "playPauseShortcut": "Phát / tạm dừng",
+  "ageRestrictedTrack": "Bản nhạc này bị giới hạn độ tuổi (18+). Máy chủ cần cookie từ một tài khoản YouTube đã đăng nhập.",
+  "haptics": "Phản hồi rung",
+  "hapticsDescription": "Rung nhẹ khi một cú chạm thay đổi điều gì đó. Chỉ trên Android và iOS.",
+  "reduceMotion": "Giảm chuyển động",
+  "reduceMotionDescription": "Bỏ qua hiệu ứng chuyển cảnh và nền động. Hữu ích trên máy chậm hoặc khi nhạy cảm với chuyển động.",
+  "backgroundPrefetch": "Tải trước bản nhạc kế tiếp",
+  "backgroundPrefetchDescription": "Chuẩn bị sẵn các bản nhạc kế tiếp để chuyển bài tức thì. Dùng thêm một chút dữ liệu.",
+  "playbackSettings": "Phát lại",
+  "cookieStatus": "Cookie YouTube",
+  "cookieStatusReady": "Đã đăng nhập — phát được bản nhạc 18+",
+  "cookieStatusVisitor": "Chưa đăng nhập — bản nhạc 18+ bị từ chối",
+  "cookieStatusUnknown": "Chưa kiểm tra",
+  "cookieStatusCheck": "Kiểm tra",
+  "cookieStatusChecking": "Đang kiểm tra…"
 }

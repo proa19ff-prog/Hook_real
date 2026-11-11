@@ -1452,4 +1452,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Reproducir / pausar';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Esta pista tiene restricción de edad (18+). El servidor necesita cookies de una cuenta de YouTube con sesión iniciada.';
+
+  @override
+  String get haptics => 'Vibración';
+
+  @override
+  String get hapticsDescription =>
+      'Una vibración corta cuando un toque cambia algo. Solo Android e iOS.';
+
+  @override
+  String get reduceMotion => 'Reducir movimiento';
+
+  @override
+  String get reduceMotionDescription =>
+      'Omite transiciones y fondos animados. Útil en dispositivos lentos o con sensibilidad al movimiento.';
+
+  @override
+  String get backgroundPrefetch => 'Precargar siguientes pistas';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Prepara las siguientes pistas en segundo plano para que el cambio sea instantáneo. Usa un poco más de datos.';
+
+  @override
+  String get playbackSettings => 'Reproducción';
+
+  @override
+  String get cookieStatus => 'Cookies de YouTube';
+
+  @override
+  String get cookieStatusReady =>
+      'Sesión iniciada: las pistas 18+ están disponibles';
+
+  @override
+  String get cookieStatusVisitor => 'Sin sesión: las pistas 18+ se rechazan';
+
+  @override
+  String get cookieStatusUnknown => 'Aún no comprobado';
+
+  @override
+  String get cookieStatusCheck => 'Comprobar';
+
+  @override
+  String get cookieStatusChecking => 'Comprobando…';
 }

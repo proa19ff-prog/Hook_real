@@ -1454,4 +1454,51 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Afspelen / pauzeren';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Dit nummer is leeftijdsbeperkt (18+). De server heeft cookies nodig van een aangemeld YouTube-account.';
+
+  @override
+  String get haptics => 'Trilfeedback';
+
+  @override
+  String get hapticsDescription =>
+      'Een korte trilling wanneer een tik iets verandert. Alleen Android en iOS.';
+
+  @override
+  String get reduceMotion => 'Minder beweging';
+
+  @override
+  String get reduceMotionDescription =>
+      'Slaat overgangen en geanimeerde achtergronden over. Handig op trage apparaten of bij bewegingsgevoeligheid.';
+
+  @override
+  String get backgroundPrefetch => 'Volgende nummers voorladen';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Bereidt de volgende nummers voor zodat wisselen direct start. Gebruikt iets meer data.';
+
+  @override
+  String get playbackSettings => 'Weergave';
+
+  @override
+  String get cookieStatus => 'YouTube-cookies';
+
+  @override
+  String get cookieStatusReady => 'Aangemeld — nummers van 18+ kunnen spelen';
+
+  @override
+  String get cookieStatusVisitor =>
+      'Niet aangemeld — nummers van 18+ worden geweigerd';
+
+  @override
+  String get cookieStatusUnknown => 'Nog niet gecontroleerd';
+
+  @override
+  String get cookieStatusCheck => 'Controleren';
+
+  @override
+  String get cookieStatusChecking => 'Controleren…';
 }

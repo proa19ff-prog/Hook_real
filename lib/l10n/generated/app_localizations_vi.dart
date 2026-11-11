@@ -1438,4 +1438,50 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Phát / tạm dừng';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Bản nhạc này bị giới hạn độ tuổi (18+). Máy chủ cần cookie từ một tài khoản YouTube đã đăng nhập.';
+
+  @override
+  String get haptics => 'Phản hồi rung';
+
+  @override
+  String get hapticsDescription =>
+      'Rung nhẹ khi một cú chạm thay đổi điều gì đó. Chỉ trên Android và iOS.';
+
+  @override
+  String get reduceMotion => 'Giảm chuyển động';
+
+  @override
+  String get reduceMotionDescription =>
+      'Bỏ qua hiệu ứng chuyển cảnh và nền động. Hữu ích trên máy chậm hoặc khi nhạy cảm với chuyển động.';
+
+  @override
+  String get backgroundPrefetch => 'Tải trước bản nhạc kế tiếp';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Chuẩn bị sẵn các bản nhạc kế tiếp để chuyển bài tức thì. Dùng thêm một chút dữ liệu.';
+
+  @override
+  String get playbackSettings => 'Phát lại';
+
+  @override
+  String get cookieStatus => 'Cookie YouTube';
+
+  @override
+  String get cookieStatusReady => 'Đã đăng nhập — phát được bản nhạc 18+';
+
+  @override
+  String get cookieStatusVisitor => 'Chưa đăng nhập — bản nhạc 18+ bị từ chối';
+
+  @override
+  String get cookieStatusUnknown => 'Chưa kiểm tra';
+
+  @override
+  String get cookieStatusCheck => 'Kiểm tra';
+
+  @override
+  String get cookieStatusChecking => 'Đang kiểm tra…';
 }

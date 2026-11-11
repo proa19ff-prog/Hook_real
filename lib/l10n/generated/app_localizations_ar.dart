@@ -1437,4 +1437,50 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'تشغيل / إيقاف مؤقت';
+
+  @override
+  String get ageRestrictedTrack =>
+      'هذا المقطع مقيّد بالعمر (+18). يحتاج الخادم إلى ملفات تعريف ارتباط من حساب YouTube مسجّل الدخول.';
+
+  @override
+  String get haptics => 'اهتزاز اللمس';
+
+  @override
+  String get hapticsDescription =>
+      'اهتزاز قصير عندما تغيّر اللمسة شيئًا. على Android و iOS فقط.';
+
+  @override
+  String get reduceMotion => 'تقليل الحركة';
+
+  @override
+  String get reduceMotionDescription =>
+      'يتجاوز الانتقالات والخلفيات المتحركة. مفيد على الأجهزة البطيئة أو عند الحساسية للحركة.';
+
+  @override
+  String get backgroundPrefetch => 'تحميل المقاطع التالية مسبقًا';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'يهيّئ المقاطع التالية في الخلفية لينتقل التشغيل فورًا. يستهلك بيانات أكثر قليلًا.';
+
+  @override
+  String get playbackSettings => 'التشغيل';
+
+  @override
+  String get cookieStatus => 'ملفات تعريف ارتباط YouTube';
+
+  @override
+  String get cookieStatusReady => 'تم تسجيل الدخول — يمكن تشغيل المقاطع +18';
+
+  @override
+  String get cookieStatusVisitor => 'لم يتم تسجيل الدخول — تُرفض المقاطع +18';
+
+  @override
+  String get cookieStatusUnknown => 'لم يُفحص بعد';
+
+  @override
+  String get cookieStatusCheck => 'فحص';
+
+  @override
+  String get cookieStatusChecking => 'جارٍ الفحص…';
 }

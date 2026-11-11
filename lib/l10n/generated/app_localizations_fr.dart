@@ -1459,4 +1459,51 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get playPauseShortcut => 'Lecture / pause';
+
+  @override
+  String get ageRestrictedTrack =>
+      'Ce titre est réservé aux adultes (18+). Le serveur a besoin des cookies d’un compte YouTube connecté.';
+
+  @override
+  String get haptics => 'Retour haptique';
+
+  @override
+  String get hapticsDescription =>
+      'Une courte vibration quand un appui change quelque chose. Android et iOS uniquement.';
+
+  @override
+  String get reduceMotion => 'Réduire les animations';
+
+  @override
+  String get reduceMotionDescription =>
+      'Supprime les transitions et les fonds animés. Utile sur les appareils lents ou en cas de sensibilité au mouvement.';
+
+  @override
+  String get backgroundPrefetch => 'Précharger les titres suivants';
+
+  @override
+  String get backgroundPrefetchDescription =>
+      'Prépare les titres suivants en arrière-plan pour que le changement démarre instantanément. Consomme un peu plus de données.';
+
+  @override
+  String get playbackSettings => 'Lecture';
+
+  @override
+  String get cookieStatus => 'Cookies YouTube';
+
+  @override
+  String get cookieStatusReady => 'Connecté — les titres 18+ sont disponibles';
+
+  @override
+  String get cookieStatusVisitor =>
+      'Non connecté — les titres 18+ sont refusés';
+
+  @override
+  String get cookieStatusUnknown => 'Pas encore vérifié';
+
+  @override
+  String get cookieStatusCheck => 'Vérifier';
+
+  @override
+  String get cookieStatusChecking => 'Vérification…';
 }
