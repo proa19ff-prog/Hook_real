@@ -1377,4 +1377,70 @@ class AppLocalizationsId extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get systemVolume => 'Sistem';
+
+  @override
+  String get appVolume => 'Level Hook';
+
+  @override
+  String get mute => 'Bisukan';
+
+  @override
+  String get unmute => 'Nyalakan suara';
+
+  @override
+  String get volumeMixer => 'Suara dan volume';
+
+  @override
+  String get systemVolumeCaption =>
+      'Tingkat keluaran Windows, dipakai bersama semua aplikasi';
+
+  @override
+  String get appVolumeCaption => 'Hanya di dalam Hook, di atas tingkat sistem';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ volume · M bisu';
+
+  @override
+  String get volumeUnavailable =>
+      'Volume sistem tidak tersedia di perangkat ini';
+
+  @override
+  String get cacheFolder => 'Folder penyimpanan';
+
+  @override
+  String get copyPath => 'Salin jalur';
+
+  @override
+  String get pathCopied => 'Jalur disalin ke papan klip';
+
+  @override
+  String get previousTrack => 'Trek sebelumnya';
+
+  @override
+  String get repeatPlayback => 'Ulangi';
+
+  @override
+  String get openPlayer => 'Buka pemutar';
+
+  @override
+  String get statsWeek => '7 hari terakhir';
+
+  @override
+  String get keyboardShortcuts => 'Pintasan papan ketik';
+
+  @override
+  String get shortcutsCaption =>
+      'Berfungsi di mana saja kecuali di kolom teks.';
+
+  @override
+  String get shortcutsSeek => 'Lompat 10 detik';
+
+  @override
+  String get playPauseShortcut => 'Putar / jeda';
 }

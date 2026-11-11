@@ -139,6 +139,13 @@ final durationStreamProvider = StreamProvider<Duration?>((ref) {
   return service.durationStream;
 });
 
+/// How far the buffer has filled. Drawn as a separate faint layer behind the
+/// played part so seeking shows what is already downloaded.
+final bufferedPositionStreamProvider = StreamProvider<Duration>((ref) {
+  final service = ref.watch(audioPlayerServiceProvider);
+  return service.bufferedPositionStream;
+});
+
 final playbackErrorProvider = StreamProvider<AudioPlaybackError?>((ref) {
   final service = ref.watch(audioPlayerServiceProvider);
   return service.errorStream;

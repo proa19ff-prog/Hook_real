@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/localization/localized_labels.dart';
+import '../../../core/ui/hook_haptics.dart';
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../lyrics/presentation/karaoke_lyrics_view.dart';
 import '../../lyrics/presentation/lyrics_mode_selector.dart';
+import '../../settings/presentation/settings_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
-import '../../settings/presentation/settings_provider.dart';
 import 'lyrics_focus_frame.dart';
 import 'playback_controls.dart';
 import 'player_state_provider.dart';
@@ -21,14 +23,18 @@ import 'track_downloads_provider.dart';
 
 class FullscreenPlayer extends ConsumerStatefulWidget {
   final HookTheme theme;
-  const FullscreenPlayer({super.key, required this.theme});
+  const FullscreenPlayer({super.key, required this.theme, this.initialLyrics = false});
+
+  /// Opens straight into the lyrics panel, used by the "lyrics" button on the
+  /// desktop player bar.
+  final bool initialLyrics;
 
   @override
   ConsumerState<FullscreenPlayer> createState() => _FullscreenPlayerState();
 }
 
 class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
-  bool _showLyrics = false;
+  late bool _showLyrics = widget.initialLyrics;
   bool _isChangingTrack = false;
   bool _randomBusy = false;
   final Set<String> _recentRandomKeys = <String>{};
@@ -105,7 +111,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                       IconButton(
                         tooltip: strings.close,
                         onPressed: () => Navigator.of(sheetContext).pop(),
-                        icon: const Icon(Icons.close_rounded),
+                        icon: const Icon(HookIcons.close),
                       ),
                     ],
                   ),
@@ -150,7 +156,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       strings.waveLoading,
                                       style: TextStyle(
                                         color: colors.textSecondary,
-                                        fontSize: 13,
+                                        fontSize: HookType.bodySmall,
                                       ),
                                     ),
                                   ],
@@ -270,7 +276,11 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
               children: [
                 Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
+                    // A phone-width column centred in a desktop window; the
+                    // artwork and the lyrics line stay in one readable column.
+                    constraints: const BoxConstraints(
+                      maxWidth: HookBreakpoints.readingMax,
+                    ),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
                         final ambient = AmbientThemeScope.of(context);
@@ -288,7 +298,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                 tooltip: strings.collapsePlayer,
                                 onPressed: () => Navigator.of(context).pop(),
                                 icon: Icon(
-                                  MingCuteIcons.mgc_down_line,
+                                  HookIcons.collapse,
                                   color: text,
                                 ),
                               ),
@@ -299,7 +309,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       'Hook',
                                       style: TextStyle(
                                         color: text,
-                                        fontSize: 16,
+                                        fontSize: HookType.heading,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -310,7 +320,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: muted,
-                                        fontSize: 12,
+                                        fontSize: HookType.label,
                                       ),
                                     ),
                                   ],
@@ -354,42 +364,58 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       )
                                     : Icon(
                                         isDownloaded
-                                            ? MingCuteIcons
-                                                  .mgc_download_2_fill
-                                            : MingCuteIcons.mgc_download_2_line,
+                                            ? HookIcons.downloadDone
+                                            : HookIcons.download,
                                         color: isDownloaded
                                             ? colors.primary
                                             : isFailed
-                                            ? Colors.redAccent
+                                            ? colors.danger
                                             : text,
                                       ),
                               ),
-                              IconButton(
-                                tooltip: strings.randomPick,
-                                onPressed: _randomBusy
-                                    ? null
-                                    : _playRandomPick,
-                                icon: _randomBusy
-                                    ? SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: text,
+                              // The header used to carry five icons and the
+                              // eye could not tell queue from shuffle from
+                              // download. Two verbs stay visible — download
+                              // and everything-else — and the third opens a
+                              // named menu instead of another glyph.
+                              PopupMenuButton<String>(
+                                tooltip: strings.moreActions,
+                                icon: Icon(HookIcons.moreVertical, color: text),
+                                onSelected: (value) {
+                                  if (value == 'queue') _showQueueSheet();
+                                  if (value == 'random') _playRandomPick();
+                                },
+                                itemBuilder: (menuContext) => [
+                                  PopupMenuItem(
+                                    value: 'queue',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          HookIcons.queue,
+                                          size: 18,
+                                          color: colors.textSecondary,
                                         ),
-                                      )
-                                    : Icon(
-                                        Icons.casino_outlined,
-                                        color: text,
-                                      ),
-                              ),
-                              IconButton(
-                                tooltip: strings.queue,
-                                onPressed: _showQueueSheet,
-                                icon: Icon(
-                                  MingCuteIcons.mgc_playlist_line,
-                                  color: text,
-                                ),
+                                        const SizedBox(width: HookSpace.md),
+                                        Text(strings.queue),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'random',
+                                    enabled: !_randomBusy,
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          HookIcons.dice,
+                                          size: 18,
+                                          color: colors.textSecondary,
+                                        ),
+                                        const SizedBox(width: HookSpace.md),
+                                        Text(strings.randomPick),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -409,7 +435,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: muted,
-                                          fontSize: 16,
+                                          fontSize: HookType.heading,
                                         ),
                                       ),
                                     ),
@@ -475,7 +501,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: muted,
-                                        fontSize: 14,
+                                        fontSize: HookType.body,
                                       ),
                                     ),
                                   ],
@@ -487,13 +513,16 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                     : strings.addFavorite,
                                 onPressed: track == null
                                     ? null
-                                    : () => ref
-                                          .read(favoritesProvider.notifier)
-                                          .toggleFavorite(track),
+                                    : () {
+                                        HookHaptics.tap();
+                                        ref
+                                            .read(favoritesProvider.notifier)
+                                            .toggleFavorite(track);
+                                      },
                                 icon: Icon(
                                   isFavorite
-                                      ? MingCuteIcons.mgc_heart_fill
-                                      : MingCuteIcons.mgc_heart_line,
+                                      ? HookIcons.heartFilled
+                                      : HookIcons.heart,
                                   color: isFavorite ? colors.accent : muted,
                                 ),
                               ),
@@ -523,8 +552,8 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                 ),
                                 icon: Icon(
                                   _showLyrics
-                                      ? MingCuteIcons.mgc_disc_line
-                                      : MingCuteIcons.mgc_subtitle_line,
+                                      ? HookIcons.disc
+                                      : HookIcons.lyrics,
                                   size: 20,
                                 ),
                                 label: Text(
@@ -555,7 +584,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                   minimumSize: const Size(48, 48),
                                 ),
                                 icon: const Icon(
-                                  MingCuteIcons.mgc_sound_line_fill,
+                                  HookIcons.waveform,
                                   size: 20,
                                 ),
                                 label: Text(strings.startWave),
@@ -678,7 +707,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                           minHeight: 48,
                         ),
                         color: colors.textPrimary,
-                        icon: const Icon(Icons.unfold_more_rounded),
+                        icon: const Icon(HookIcons.collapse),
                         onPressed: restore,
                       ),
                     ),

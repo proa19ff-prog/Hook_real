@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../data/equalizer_controller.dart';
+import '../../../core/ui/hook_icons.dart';
 
 Future<void> showEqualizerSheet(
   BuildContext context, {
@@ -81,7 +83,7 @@ class EqualizerSheet extends StatelessWidget {
                   style: TextStyle(
                     color: colors.textPrimary,
                     fontFamily: 'Inter',
-                    fontSize: 14,
+                    fontSize: HookType.body,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,7 +104,7 @@ class EqualizerSheet extends StatelessWidget {
                                 .closeButtonTooltip,
                             onPressed: () => Navigator.of(context).pop(),
                             icon: Icon(
-                              Icons.close,
+                              HookIcons.close,
                               color: colors.textSecondary,
                             ),
                           ),
@@ -225,7 +227,7 @@ class EqualizerSheet extends StatelessWidget {
                                             decibels(gains[index]),
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: HookType.label,
                                               color: colors.textSecondary,
                                               fontFeatures: const [
                                                 FontFeature.tabularFigures(),
@@ -264,7 +266,7 @@ class EqualizerSheet extends StatelessWidget {
                                             ),
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: HookType.label,
                                               color: colors.textSecondary,
                                             ),
                                           ),

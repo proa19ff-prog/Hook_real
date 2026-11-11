@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../audio_player/presentation/mini_player.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
@@ -11,6 +11,7 @@ import 'playlist_export.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/playlist_artwork.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/ui/hook_icons.dart';
 
 class PlaylistDetailScreen extends ConsumerWidget {
   final HookTheme theme;
@@ -45,7 +46,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                     IconButton(
                       tooltip: strings.back,
                       icon: Icon(
-                        MingCuteIcons.mgc_arrow_left_line,
+                        HookIcons.back,
                         color: colors.textPrimary,
                       ),
                       onPressed: () => Navigator.of(context).pop(),
@@ -56,7 +57,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                         strings.playlists,
                         style: TextStyle(
                           color: colors.textSecondary,
-                          fontSize: 14,
+                          fontSize: HookType.body,
                         ),
                       ),
                     ),
@@ -103,7 +104,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                         IconButton(
                           tooltip: strings.shuffle,
                           icon: Icon(
-                            MingCuteIcons.mgc_shuffle_2_line,
+                            HookIcons.shuffle,
                             color: colors.primary,
                           ),
                           onPressed: tracks.isEmpty
@@ -119,7 +120,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                         IconButton(
                           tooltip: strings.exportPlaylist,
                           icon: Icon(
-                            MingCuteIcons.mgc_share_2_line,
+                            HookIcons.share,
                             color: colors.textPrimary,
                           ),
                           onPressed: tracks.isEmpty
@@ -154,7 +155,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                           tooltip: strings.downloadAll,
                           icon: playlistDownloads.progress == null
                               ? Icon(
-                                  MingCuteIcons.mgc_download_2_line,
+                                  HookIcons.download,
                                   color: colors.textPrimary,
                                 )
                               : SizedBox(
@@ -185,7 +186,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                             minimumSize: const Size(54, 54),
                           ),
                           icon: const Icon(
-                            MingCuteIcons.mgc_play_fill,
+                            HookIcons.play,
                             size: 28,
                           ),
                           onPressed: tracks.isEmpty

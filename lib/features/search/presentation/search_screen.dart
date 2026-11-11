@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/localization/localized_labels.dart';
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_skeleton.dart';
+import '../../../core/ui/hook_tokens.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
@@ -15,7 +19,6 @@ import '../../theme_engine/presentation/track_artwork.dart';
 import '../data/lyrics_search_service.dart';
 import 'artist_screen.dart';
 import 'search_history_provider.dart';
-import '../../../l10n/generated/app_localizations.dart';
 
 final lyricsSearchServiceProvider = Provider<LyricsSearchService>((ref) {
   final service = LyricsSearchService();
@@ -188,12 +191,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         bottom: false,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
+            constraints: const BoxConstraints(
+              maxWidth: HookBreakpoints.readingMax,
+            ),
             child: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 18, 20, 4),
+                    padding: const EdgeInsets.fromLTRB(
+                      HookSpace.xxl,
+                      HookSpace.lg,
+                      HookSpace.xl,
+                      HookSpace.xs,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -201,7 +211,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             strings.findYourMusic,
                             style: TextStyle(
                               color: colors.textPrimary,
-                              fontSize: 28,
+                              fontSize: HookType.display,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -0.7,
                             ),
@@ -212,7 +222,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           onPressed: () =>
                               ImportBottomSheet.show(context, widget.theme),
                           icon: Icon(
-                            MingCuteIcons.mgc_link_line,
+                            HookIcons.link,
                             color: colors.textSecondary,
                           ),
                         ),
@@ -225,7 +235,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   pinned: true,
                   delegate: _PinnedSearchFieldDelegate(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      padding: const EdgeInsets.fromLTRB(
+                        HookSpace.xl,
+                        HookSpace.md,
+                        HookSpace.xl,
+                        HookSpace.md,
+                      ),
                       child: _buildSearchField(strings, colors),
                     ),
                     background: colors.background,
@@ -257,7 +272,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             strings.lyricsSearchCaption,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: HookType.label,
                             ),
                           ),
                         ),
@@ -280,17 +295,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       controller: _searchController,
       focusNode: _focusNode,
       maxLength: 200,
-      style: TextStyle(color: colors.textPrimary, fontSize: 16),
+      style: TextStyle(color: colors.textPrimary, fontSize: HookType.heading),
       cursorColor: colors.primary,
       decoration: InputDecoration(
         counterText: '',
         hintText: _mode == MusicSearchMode.lyrics
             ? strings.rememberedLyricsHint
             : strings.trackArtistHint,
-        hintStyle: TextStyle(color: colors.textSecondary, fontSize: 14),
+        hintStyle: TextStyle(color: colors.textSecondary, fontSize: HookType.body),
         filled: true,
         fillColor: colors.surface,
-        prefixIcon: Icon(Icons.search_rounded, color: colors.textSecondary),
+        prefixIcon: Icon(HookIcons.search, color: colors.textSecondary),
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: _searchController,
           builder: (_, value, __) => value.text.isEmpty
@@ -298,7 +313,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               : IconButton(
                   tooltip: strings.clear,
                   onPressed: _clear,
-                  icon: Icon(Icons.close_rounded, color: colors.textSecondary),
+                  icon: Icon(HookIcons.close, color: colors.textSecondary),
                 ),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -364,7 +379,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         smallSize: 7,
         backgroundColor: colors.primary,
         child: Icon(
-          MingCuteIcons.mgc_filter_line,
+          HookIcons.filter,
           size: 21,
           color: _source == null
               ? colors.textSecondary
@@ -412,12 +427,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 dense: true,
                 leading: Icon(
                   switch (source) {
-                    null => MingCuteIcons.mgc_appstore_line,
-                    TrackSource.spotify => MingCuteIcons.mgc_music_2_line,
-                    TrackSource.youtubeMusic => MingCuteIcons.mgc_youtube_line,
-                    TrackSource.soundcloud => MingCuteIcons.mgc_cloud_line,
-                    TrackSource.remote => MingCuteIcons.mgc_server_line,
-                    _ => MingCuteIcons.mgc_music_line,
+                    null => HookIcons.apps,
+                    TrackSource.spotify => HookIcons.music,
+                    TrackSource.youtubeMusic => HookIcons.youtube,
+                    TrackSource.soundcloud => HookIcons.syncCloud,
+                    TrackSource.remote => HookIcons.server,
+                    _ => HookIcons.note,
                   },
                   size: 21,
                   color: colors.primary,
@@ -428,7 +443,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       : source.labelFor(strings),
                   style: TextStyle(
                     color: colors.textPrimary,
-                    fontSize: 15,
+                    fontSize: HookType.body,
                     fontWeight: source == _source
                         ? FontWeight.w700
                         : FontWeight.w500,
@@ -436,7 +451,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
                 trailing: source == _source
                     ? Icon(
-                        MingCuteIcons.mgc_check_line,
+                        HookIcons.check,
                         size: 20,
                         color: colors.primary,
                       )
@@ -461,30 +476,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final colors = widget.theme.colors;
     final strings = AppLocalizations.of(context);
     if (_isLoading) {
-      return Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: colors.primary,
-                ),
+      return SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(8, HookSpace.lg, 8, HookSpace.xxl),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                HookSpace.md,
+                0,
+                HookSpace.md,
+                HookSpace.md,
               ),
-              const SizedBox(height: 16),
-              Text(
-                _mode == MusicSearchMode.lyrics
-                    ? strings.searchingLyrics
-                    : strings.searchingSources,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colors.textSecondary, fontSize: 13),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.primary,
+                    ),
+                  ),
+                  const SizedBox(width: HookSpace.sm),
+                  Expanded(
+                    child: Text(
+                      _mode == MusicSearchMode.lyrics
+                          ? strings.searchingLyrics
+                          : strings.searchingSources,
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: HookType.label,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            // The result rows keep their exact final footprint while the
+            // query runs, so nothing jumps when the answer lands.
+            SkeletonTrackList(label: strings.loading),
+          ],
         ),
       );
     }
@@ -495,8 +526,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           children: [
             Icon(
               _error != null
-                  ? Icons.wifi_off_rounded
-                  : Icons.search_off_rounded,
+                  ? HookIcons.offline
+                  : HookIcons.noResults,
               size: 38,
               color: colors.textSecondary,
             ),
@@ -522,7 +553,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             const SizedBox(height: 16),
             TextButton.icon(
               onPressed: () => _search(_searchController.text),
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(HookIcons.refresh),
               label: Text(strings.repeatSearch),
             ),
           ],
@@ -546,7 +577,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   : strings.tracksUpper,
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 12,
+                fontSize: HookType.label,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,
               ),
@@ -573,7 +604,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colors.textSecondary,
-                    fontSize: 12,
+                    fontSize: HookType.label,
                     height: 1.4,
                   ),
                 ),
@@ -615,7 +646,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     : strings.bestMatchUpper,
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 12,
+                  fontSize: HookType.label,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
                 ),
@@ -654,7 +685,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 14,
+                            fontSize: HookType.body,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -665,7 +696,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ].where((value) => value.isNotEmpty).join(' · '),
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: HookType.label,
                           ),
                         ),
                       ],
@@ -681,7 +712,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: colors.textSecondary,
-                    fontSize: 14,
+                    fontSize: HookType.body,
                     height: 1.5,
                   ),
                 ),
@@ -690,7 +721,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 const SizedBox(height: 14),
                 Text(
                   strings.fullVersionOnPlayback,
-                  style: TextStyle(color: colors.textSecondary, fontSize: 11),
+                  style: TextStyle(color: colors.textSecondary, fontSize: HookType.caption),
                 ),
               ],
             ],
@@ -734,7 +765,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           strings.startAsYouRemember,
           style: TextStyle(
             color: colors.textSecondary,
-            fontSize: 14,
+            fontSize: HookType.body,
             height: 1.6,
           ),
         ),
@@ -747,7 +778,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   strings.recentQueriesUpper,
                   style: TextStyle(
                     color: colors.textSecondary,
-                    fontSize: 12,
+                    fontSize: HookType.label,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.2,
                   ),
@@ -759,7 +790,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 onPressed: () =>
                     ref.read(searchHistoryProvider.notifier).clear(),
                 icon: Icon(
-                  MingCuteIcons.mgc_delete_2_line,
+                  HookIcons.deleteForever,
                   size: 19,
                   color: colors.textSecondary,
                 ),
@@ -775,7 +806,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 InputChip(
                   label: Text(query),
                   avatar: Icon(
-                    Icons.history_rounded,
+                    HookIcons.history,
                     size: 16,
                     color: colors.textSecondary,
                   ),
@@ -786,7 +817,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   side: BorderSide.none,
                   labelStyle: TextStyle(
                     color: colors.textPrimary,
-                    fontSize: 13,
+                    fontSize: HookType.bodySmall,
                   ),
                 ),
             ],
@@ -798,7 +829,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             strings.yourArtistsUpper,
             style: TextStyle(
               color: colors.textSecondary,
-              fontSize: 12,
+              fontSize: HookType.label,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.2,
             ),
@@ -833,7 +864,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 11,
+                            fontSize: HookType.caption,
                           ),
                         ),
                       ],
@@ -846,13 +877,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         ],
         const SizedBox(height: 24),
         _discoveryAction(
-          Icons.language_rounded,
+          HookIcons.language,
           strings.foreignNameExample,
           strings.foreignNamesCaption,
           () => _quickSearch(strings.foreignNameExample),
         ),
         _discoveryAction(
-          Icons.lyrics_outlined,
+          HookIcons.lyrics,
           strings.rememberOnlyLine,
           strings.findSongByWords,
           () {
@@ -862,7 +893,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           },
         ),
         _discoveryAction(
-          Icons.album_outlined,
+          HookIcons.disc,
           'Sunflower',
           'Post Malone & Swae Lee',
           () => _quickSearch('Post Malone Swae Lee Sunflower'),
@@ -886,7 +917,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         title,
         style: TextStyle(
           color: colors.textPrimary,
-          fontSize: 16,
+          fontSize: HookType.heading,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -894,12 +925,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         subtitle,
         style: TextStyle(
           color: colors.textSecondary,
-          fontSize: 12,
+          fontSize: HookType.label,
           height: 1.5,
         ),
       ),
       trailing: Icon(
-        Icons.north_east_rounded,
+        HookIcons.external,
         color: colors.textSecondary,
         size: 18,
       ),
@@ -928,10 +959,17 @@ class _PinnedSearchFieldDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    // A near-opaque backdrop so result rows do not show through the field.
-    return Container(
-      color: background.withValues(alpha: 0.94),
-      child: child,
+    // A blurred backdrop instead of a 94%-opaque sheet: rows scrolling under a
+    // barely-transparent header used to show through as smudged text. Blurring
+    // says "this is a surface above the list" and stays legible on any theme.
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: ColoredBox(
+          color: background.withValues(alpha: 0.82),
+          child: child,
+        ),
+      ),
     );
   }
 

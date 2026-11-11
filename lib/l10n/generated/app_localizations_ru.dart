@@ -1385,4 +1385,69 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Громкость';
+
+  @override
+  String get systemVolume => 'Система';
+
+  @override
+  String get appVolume => 'Уровень Hook';
+
+  @override
+  String get mute => 'Без звука';
+
+  @override
+  String get unmute => 'Включить звук';
+
+  @override
+  String get volumeMixer => 'Звук и громкость';
+
+  @override
+  String get systemVolumeCaption =>
+      'Общий уровень вывода Windows для всех приложений';
+
+  @override
+  String get appVolumeCaption => 'Только внутри Hook, поверх системного уровня';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ — громкость · M — без звука';
+
+  @override
+  String get volumeUnavailable =>
+      'Системная громкость недоступна на этом устройстве';
+
+  @override
+  String get cacheFolder => 'Папка хранения';
+
+  @override
+  String get copyPath => 'Скопировать путь';
+
+  @override
+  String get pathCopied => 'Путь скопирован в буфер обмена';
+
+  @override
+  String get previousTrack => 'Предыдущий трек';
+
+  @override
+  String get repeatPlayback => 'Повтор';
+
+  @override
+  String get openPlayer => 'Открыть плеер';
+
+  @override
+  String get statsWeek => 'Последние 7 дней';
+
+  @override
+  String get keyboardShortcuts => 'Горячие клавиши';
+
+  @override
+  String get shortcutsCaption => 'Работают везде, кроме полей ввода.';
+
+  @override
+  String get shortcutsSeek => 'Перемотка на 10 секунд';
+
+  @override
+  String get playPauseShortcut => 'Играть / пауза';
 }

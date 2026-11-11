@@ -1,0 +1,25 @@
+{
+  "id": "windows_11",
+  "name": "Windows 11",
+  "author": "Hook Core Team",
+  "version": "1.0.0",
+  "isDark": true,
+  "colors": {
+    "background": "#202020",
+    "surface": "#2C2C2C",
+    "surfaceGlass": "#332C2C2C",
+    "primary": "#60CDFF",
+    "secondary": "#99EBFF",
+    "accent": "#60CDFF",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#C8C8C8",
+    "border": "#3D3D3D"
+  },
+  "styling": {
+    "borderRadius": 8.0,
+    "cardBlur": 28.0,
+    "shaderMeshEnabled": false,
+    "shaderNoiseIntensity": 0.0,
+    "fontFamily": "Segoe UI"
+  }
+}

@@ -1368,4 +1368,67 @@ class AppLocalizationsHi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'वॉल्यूम';
+
+  @override
+  String get systemVolume => 'सिस्टम';
+
+  @override
+  String get appVolume => 'Hook स्तर';
+
+  @override
+  String get mute => 'म्यूट करें';
+
+  @override
+  String get unmute => 'ध्वनि चालू करें';
+
+  @override
+  String get volumeMixer => 'ध्वनि और वॉल्यूम';
+
+  @override
+  String get systemVolumeCaption => 'Windows का आउटपुट स्तर, हर ऐप के साथ साझा';
+
+  @override
+  String get appVolumeCaption => 'केवल Hook के अंदर, सिस्टम स्तर के ऊपर';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ वॉल्यूम · M म्यूट';
+
+  @override
+  String get volumeUnavailable => 'इस डिवाइस पर सिस्टम वॉल्यूम उपलब्ध नहीं है';
+
+  @override
+  String get cacheFolder => 'संग्रहण फ़ोल्डर';
+
+  @override
+  String get copyPath => 'पथ कॉपी करें';
+
+  @override
+  String get pathCopied => 'पथ क्लिपबोर्ड पर कॉपी हो गया';
+
+  @override
+  String get previousTrack => 'पिछला ट्रैक';
+
+  @override
+  String get repeatPlayback => 'दोहराएँ';
+
+  @override
+  String get openPlayer => 'प्लेयर खोलें';
+
+  @override
+  String get statsWeek => 'पिछले 7 दिन';
+
+  @override
+  String get keyboardShortcuts => 'कीबोर्ड शॉर्टकट';
+
+  @override
+  String get shortcutsCaption => 'टेक्स्ट फ़ील्ड के अलावा हर जगह काम करते हैं।';
+
+  @override
+  String get shortcutsSeek => '10 सेकंड आगे-पीछे';
+
+  @override
+  String get playPauseShortcut => 'चलाएँ / रोकें';
 }

@@ -1333,4 +1333,67 @@ class AppLocalizationsKo extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => '볼륨';
+
+  @override
+  String get systemVolume => '시스템';
+
+  @override
+  String get appVolume => 'Hook 음량';
+
+  @override
+  String get mute => '음소거';
+
+  @override
+  String get unmute => '소리 켜기';
+
+  @override
+  String get volumeMixer => '소리 및 음량';
+
+  @override
+  String get systemVolumeCaption => '모든 앱과 공유되는 Windows 출력 음량';
+
+  @override
+  String get appVolumeCaption => 'Hook 내부에서만, 시스템 음량 위에 적용';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ 음량 · M 음소거';
+
+  @override
+  String get volumeUnavailable => '이 기기에서는 시스템 음량을 사용할 수 없습니다';
+
+  @override
+  String get cacheFolder => '저장 폴더';
+
+  @override
+  String get copyPath => '경로 복사';
+
+  @override
+  String get pathCopied => '경로를 클립보드에 복사했습니다';
+
+  @override
+  String get previousTrack => '이전 곡';
+
+  @override
+  String get repeatPlayback => '반복';
+
+  @override
+  String get openPlayer => '플레이어 열기';
+
+  @override
+  String get statsWeek => '최근 7일';
+
+  @override
+  String get keyboardShortcuts => '키보드 단축키';
+
+  @override
+  String get shortcutsCaption => '텍스트 입력란을 제외한 모든 곳에서 동작합니다.';
+
+  @override
+  String get shortcutsSeek => '10초 이동';
+
+  @override
+  String get playPauseShortcut => '재생 / 일시정지';
 }

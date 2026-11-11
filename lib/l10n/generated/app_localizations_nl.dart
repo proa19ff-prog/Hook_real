@@ -1389,4 +1389,69 @@ class AppLocalizationsNl extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get systemVolume => 'Systeem';
+
+  @override
+  String get appVolume => 'Hook-niveau';
+
+  @override
+  String get mute => 'Dempen';
+
+  @override
+  String get unmute => 'Geluid aanzetten';
+
+  @override
+  String get volumeMixer => 'Geluid en volume';
+
+  @override
+  String get systemVolumeCaption =>
+      'Het Windows-uitgangsniveau, gedeeld met alle apps';
+
+  @override
+  String get appVolumeCaption => 'Alleen binnen Hook, boven het systeemniveau';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ volume · M dempen';
+
+  @override
+  String get volumeUnavailable =>
+      'Systeemvolume is niet beschikbaar op dit apparaat';
+
+  @override
+  String get cacheFolder => 'Opslagmap';
+
+  @override
+  String get copyPath => 'Pad kopiëren';
+
+  @override
+  String get pathCopied => 'Pad naar het klembord gekopieerd';
+
+  @override
+  String get previousTrack => 'Vorig nummer';
+
+  @override
+  String get repeatPlayback => 'Herhalen';
+
+  @override
+  String get openPlayer => 'Speler openen';
+
+  @override
+  String get statsWeek => 'Laatste 7 dagen';
+
+  @override
+  String get keyboardShortcuts => 'Sneltoetsen';
+
+  @override
+  String get shortcutsCaption => 'Werken overal behalve in een tekstveld.';
+
+  @override
+  String get shortcutsSeek => '10 seconden springen';
+
+  @override
+  String get playPauseShortcut => 'Afspelen / pauzeren';
 }

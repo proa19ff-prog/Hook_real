@@ -1,9 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/localization/localized_labels.dart';
+import '../../../core/ui/hook_haptics.dart';
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../search/presentation/artist_screen.dart';
@@ -12,7 +15,6 @@ import '../../theme_engine/presentation/track_artwork.dart';
 import 'player_state_provider.dart';
 import 'sleep_timer_provider.dart';
 import 'track_downloads_provider.dart';
-import '../../../l10n/generated/app_localizations.dart';
 
 /// Spotify-inspired, reusable track row used by discovery, collections and the
 /// play queue. One visual language also means a long press exposes the same
@@ -115,7 +117,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                           ),
                           child: Center(
                             child: Icon(
-                              MingCuteIcons.mgc_sound_line_fill,
+                              HookIcons.waveform,
                               size: 22,
                               color: colors.primary,
                             ),
@@ -139,7 +141,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                         color: isPlayingTrack
                             ? colors.primary
                             : colors.textPrimary,
-                        fontSize: 15,
+                        fontSize: HookType.body,
                         height: 1.15,
                         fontWeight: isPlayingTrack
                             ? FontWeight.w700
@@ -157,7 +159,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                       ].where((part) => part.isNotEmpty).join(' • '),
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 13,
+                        fontSize: HookType.bodySmall,
                         height: 1.15,
                       ),
                       onTap: onFindArtist ??
@@ -174,7 +176,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 8),
                   child: Icon(
-                    MingCuteIcons.mgc_download_2_fill,
+                    HookIcons.downloadDone,
                     color: colors.primary,
                     size: 17,
                   ),
@@ -183,7 +185,7 @@ class SpotifyTrackTile extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 8),
                   child: Icon(
-                    MingCuteIcons.mgc_heart_fill,
+                    HookIcons.heartFilled,
                     color: colors.primary,
                     size: 18,
                   ),
@@ -193,14 +195,14 @@ class SpotifyTrackTile extends ConsumerWidget {
                   padding: const EdgeInsets.only(left: 10),
                   child: Text(
                     duration,
-                    style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                    style: TextStyle(color: colors.textSecondary, fontSize: HookType.label),
                   ),
                 ),
               IconButton(
                 tooltip: strings.trackActions,
                 visualDensity: VisualDensity.compact,
                 icon: Icon(
-                  MingCuteIcons.mgc_more_2_line,
+                  HookIcons.more,
                   color: colors.textSecondary,
                   size: 21,
                 ),
@@ -300,7 +302,7 @@ Future<void> showSpotifyTrackActions(
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: colors.textPrimary,
-                              fontSize: 16,
+                              fontSize: HookType.heading,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -319,8 +321,8 @@ Future<void> showSpotifyTrackActions(
                 const SizedBox(height: 10),
                 _TrackAction(
                   icon: isDownloaded
-                      ? MingCuteIcons.mgc_download_2_fill
-                      : MingCuteIcons.mgc_download_2_line,
+                      ? HookIcons.downloadDone
+                      : HookIcons.download,
                   label: isDownloading
                       ? strings.downloading
                       : isDownloaded
@@ -332,7 +334,7 @@ Future<void> showSpotifyTrackActions(
                   color: isDownloaded
                       ? colors.primary
                       : isFailed
-                      ? Colors.redAccent
+                      ? colors.danger
                       : null,
                   busy: isDownloading,
                   onTap: () {
@@ -355,7 +357,7 @@ Future<void> showSpotifyTrackActions(
                   },
                 ),
                 _TrackAction(
-                  icon: MingCuteIcons.mgc_sound_line_fill,
+                  icon: HookIcons.waveform,
                   label: strings.startWaveFromTrack,
                   onTap: () {
                     Navigator.of(sheetContext).pop();
@@ -363,7 +365,7 @@ Future<void> showSpotifyTrackActions(
                   },
                 ),
                 _TrackAction(
-                  icon: MingCuteIcons.mgc_playlist_line,
+                  icon: HookIcons.playlist,
                   label: strings.addToQueue,
                   onTap: () {
                     ref.read(queueProvider.notifier).addToQueue(track);
@@ -378,19 +380,20 @@ Future<void> showSpotifyTrackActions(
                 ),
                 _TrackAction(
                   icon: isFavorite
-                      ? MingCuteIcons.mgc_heart_fill
-                      : MingCuteIcons.mgc_heart_line,
+                      ? HookIcons.heartFilled
+                      : HookIcons.heart,
                   label: isFavorite
                       ? strings.removeFavorite
                       : strings.addFavorite,
                   color: isFavorite ? colors.primary : null,
                   onTap: () {
+                    HookHaptics.tap();
                     ref.read(favoritesProvider.notifier).toggleFavorite(track);
                     Navigator.of(sheetContext).pop();
                   },
                 ),
                 _TrackAction(
-                  icon: MingCuteIcons.mgc_playlist_2_line,
+                  icon: HookIcons.queue,
                   label: strings.addToPlaylist,
                   onTap: () async {
                     Navigator.of(sheetContext).pop();
@@ -398,7 +401,7 @@ Future<void> showSpotifyTrackActions(
                   },
                 ),
                 _TrackAction(
-                  icon: MingCuteIcons.mgc_user_3_line,
+                  icon: HookIcons.social,
                   label: strings.goToArtist,
                   onTap: () {
                     Navigator.of(sheetContext).pop();
@@ -408,7 +411,7 @@ Future<void> showSpotifyTrackActions(
                   },
                 ),
                 _TrackAction(
-                  icon: Icons.casino_outlined,
+                  icon: HookIcons.dice,
                   label: strings.sleepTimer,
                   onTap: () => _showSleepTimerSheet(
                     context,
@@ -418,12 +421,12 @@ Future<void> showSpotifyTrackActions(
                 ),
                 _TrackAction(
                   icon: isDisliked
-                      ? Icons.thumb_down
-                      : Icons.thumb_down_outlined,
+                      ? HookIcons.thumbDown
+                      : HookIcons.thumbDown,
                   label: isDisliked
                       ? strings.dislikeRemove
                       : strings.dislike,
-                  color: isDisliked ? Colors.redAccent : null,
+                  color: isDisliked ? colors.danger : null,
                   onTap: () {
                     ref
                         .read(localStorageServiceProvider)
@@ -599,7 +602,7 @@ Future<void> _choosePlaylist(
           for (final entry in playlists.entries)
             ListTile(
               leading: Icon(
-                MingCuteIcons.mgc_playlist_line,
+                HookIcons.playlist,
                 color: colors.primary,
               ),
               title: Text(
@@ -653,14 +656,14 @@ class _TrackAction extends StatelessWidget {
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
       leading: Icon(icon, color: textColor, size: 22),
-      title: Text(label, style: TextStyle(color: textColor, fontSize: 15)),
+      title: Text(label, style: TextStyle(color: textColor, fontSize: HookType.body)),
       subtitle: subtitle == null
           ? null
           : Text(
               subtitle!,
               style: TextStyle(
                 color: textColor.withValues(alpha: 0.75),
-                fontSize: 12,
+                fontSize: HookType.label,
               ),
             ),
       trailing: busy

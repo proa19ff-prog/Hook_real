@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/storage/audio_cache_manager.dart';
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_skeleton.dart';
+import '../../../core/ui/hook_tokens.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
@@ -11,10 +15,9 @@ import '../../stats/stats_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/playlist_artwork.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
-import 'playlist_detail_screen.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
 import 'library_provider.dart';
-import '../../../l10n/generated/app_localizations.dart';
+import 'playlist_detail_screen.dart';
 
 class LibraryScreen extends ConsumerStatefulWidget {
   final HookTheme theme;
@@ -28,6 +31,10 @@ class LibraryScreen extends ConsumerStatefulWidget {
 class _LibraryScreenState extends ConsumerState<LibraryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  /// Resolved once per screen: the directory does not move while the app runs,
+  /// and asking the filesystem on every rebuild would make the tab flicker.
+  Future<String>? _cachePathFuture;
 
   @override
   void initState() {
@@ -87,7 +94,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: HookType.bodySmall,
                             color: colors.textSecondary,
                           ),
                         ),
@@ -99,7 +106,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     key: const ValueKey('library-stats'),
                     tooltip: strings.statsTitle,
                     icon: Icon(
-                      Icons.bar_chart_rounded,
+                      HookIcons.stats,
                       color: colors.textSecondary,
                     ),
                     onPressed: () => Navigator.of(context).push(
@@ -112,7 +119,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     key: const ValueKey('library-youtube-account'),
                     tooltip: strings.youtubeAccount,
                     icon: Icon(
-                      Icons.account_circle_outlined,
+                      HookIcons.accountCircle,
                       color: colors.textSecondary,
                     ),
                     onPressed: () => Navigator.of(context).push(
@@ -130,7 +137,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       minHeight: 48,
                     ),
                     icon: Icon(
-                      MingCuteIcons.mgc_download_2_line,
+                      HookIcons.download,
                       color: colors.textPrimary,
                     ),
                     onPressed: () =>
@@ -154,11 +161,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 unselectedLabelColor: colors.textSecondary,
                 labelStyle: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: HookType.body,
                 ),
                 unselectedLabelStyle: const TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: HookType.body,
                 ),
                 dividerColor: colors.border.withValues(alpha: 0.2),
                 tabs: [
@@ -179,7 +186,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   _buildTrackList(
                     tracks: favorites,
                     emptyMessage: strings.favoritesEmpty,
-                    emptyIcon: MingCuteIcons.mgc_heart_line,
+                    emptyIcon: HookIcons.heart,
                     onPlayAll: favorites.isNotEmpty
                         ? () => queueNotifier.playQueue(favorites)
                         : null,
@@ -201,14 +208,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   _buildTrackList(
                     tracks: history,
                     emptyMessage: strings.historyEmpty,
-                    emptyIcon: MingCuteIcons.mgc_history_line,
+                    emptyIcon: HookIcons.history,
                     onPlayAll: history.isNotEmpty
                         ? () => queueNotifier.playQueue(history)
                         : null,
                     trailingHeaderAction: history.isNotEmpty
                         ? TextButton.icon(
                             icon: const Icon(
-                              MingCuteIcons.mgc_delete_2_line,
+                              HookIcons.deleteForever,
                               size: 16,
                             ),
                             label: Text(strings.clear),
@@ -265,7 +272,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         child: Column(
           children: [
             Icon(
-              MingCuteIcons.mgc_playlist_line,
+              HookIcons.playlist,
               size: 40,
               color: colors.textSecondary,
             ),
@@ -285,13 +292,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 14,
+                fontSize: HookType.body,
                 height: 1.5,
               ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
-              icon: const Icon(MingCuteIcons.mgc_download_2_line, size: 20),
+              icon: const Icon(HookIcons.download, size: 20),
               label: Text(strings.importMusicAction),
               style: FilledButton.styleFrom(
                 backgroundColor: colors.textPrimary,
@@ -343,17 +350,17 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 style: TextStyle(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: HookType.body,
                 ),
               ),
               subtitle: Text(
                 strings.tracksCount(tracks.length),
-                style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                style: TextStyle(color: colors.textSecondary, fontSize: HookType.label),
               ),
               trailing: PopupMenuButton<String>(
                 tooltip: strings.playlistActions,
                 icon: Icon(
-                  MingCuteIcons.mgc_more_2_line,
+                  HookIcons.more,
                   color: colors.textSecondary,
                 ),
                 onSelected: (value) {
@@ -372,7 +379,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     value: 'delete',
                     child: Text(
                       strings.deletePlaylist,
-                      style: const TextStyle(color: Colors.redAccent),
+                      style: TextStyle(color: widget.theme.colors.danger),
                     ),
                   ),
                 ],
@@ -420,7 +427,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 14,
+                fontSize: HookType.body,
                 height: 1.5,
               ),
             ),
@@ -442,7 +449,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               children: [
                 if (onPlayAll != null)
                   FilledButton.icon(
-                    icon: const Icon(MingCuteIcons.mgc_play_fill, size: 20),
+                    icon: const Icon(HookIcons.play, size: 20),
                     label: Text(strings.playAll),
                     style: FilledButton.styleFrom(
                       backgroundColor: colors.textPrimary,
@@ -463,7 +470,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       minHeight: 48,
                     ),
                     icon: const Icon(
-                      MingCuteIcons.mgc_shuffle_2_line,
+                      HookIcons.shuffle,
                       size: 22,
                     ),
                     color: colors.textPrimary,
@@ -510,6 +517,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   Widget _buildCacheTab() {
     final cacheManager = ref.watch(audioCacheManagerProvider);
     final colors = widget.theme.colors;
+    final danger = colors.danger;
     final strings = AppLocalizations.of(context);
 
     return FutureBuilder<List<CachedTrack>>(
@@ -541,7 +549,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 child: Column(
                   children: [
                     Icon(
-                      MingCuteIcons.mgc_download_2_line,
+                      HookIcons.download,
                       size: 32,
                       color: colors.textSecondary,
                     ),
@@ -559,7 +567,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       strings.cacheDescription,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: HookType.bodySmall,
                         color: colors.textSecondary,
                         height: 1.4,
                       ),
@@ -580,7 +588,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                       child: Text(
                         strings.deviceUsage(_formatBytes(bytes)),
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: HookType.bodySmall,
                           fontWeight: FontWeight.bold,
                           color: colors.primary,
                         ),
@@ -588,16 +596,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      icon: const Icon(MingCuteIcons.mgc_delete_line, size: 18),
+                      icon: const Icon(HookIcons.delete, size: 18),
                       label: Text(strings.clearCache),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(48, 48),
                         elevation: 0,
-                        backgroundColor: Colors.redAccent.withValues(
-                          alpha: 0.15,
-                        ),
-                        foregroundColor: Colors.redAccent,
-                        side: const BorderSide(color: Colors.redAccent),
+                        backgroundColor: danger.withValues(alpha: 0.15),
+                        foregroundColor: danger,
+                        side: BorderSide(color: danger),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -613,7 +619,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               Text(
                 strings.savedTracksUpper(cachedTracks.length),
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: HookType.label,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.1,
                   color: colors.textSecondary,
@@ -621,7 +627,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               const SizedBox(height: 12),
               if (snapshot.connectionState == ConnectionState.waiting)
-                Center(child: CircularProgressIndicator(color: colors.primary))
+                SkeletonTrackList(count: 3, label: strings.loading)
               else if (cachedTracks.isEmpty)
                 _buildEmptyCacheList()
               else
@@ -629,29 +635,30 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                   (cachedTrack) =>
                       _buildCachedTrackTile(cachedTrack, cacheManager),
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: HookSpace.xxl),
               Text(
                 strings.cacheFeaturesUpper,
                 style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontSize: HookType.caption,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
                   color: colors.textSecondary,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: HookSpace.md),
+              _buildStoragePanel(cacheManager),
               _buildFeatureTile(
-                MingCuteIcons.mgc_wifi_off_line,
+                HookIcons.offline,
                 strings.offlineFirst,
                 strings.offlineFirstDescription,
               ),
               _buildFeatureTile(
-                MingCuteIcons.mgc_diamond_line,
+                HookIcons.premium,
                 strings.maximumBitrate,
                 strings.maximumBitrateDescription,
               ),
               _buildFeatureTile(
-                MingCuteIcons.mgc_battery_charging_line,
+                HookIcons.battery,
                 strings.trafficAndBattery,
                 strings.trafficAndBatteryDescription,
               ),
@@ -660,6 +667,111 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         );
       },
     );
+  }
+
+  /// The folder the files actually live in. The old copy here only advertised
+  /// "offline first" and "maximum bitrate" with nothing a listener could act
+  /// on; a path they can copy is worth more than three slogans.
+  Widget _buildStoragePanel(AudioCacheManager cacheManager) {
+    final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: HookSpace.md),
+      child: Material(
+        color: colors.surface,
+        borderRadius: HookRadius.mdAll,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            HookSpace.lg,
+            HookSpace.md,
+            HookSpace.sm,
+            HookSpace.md,
+          ),
+          child: Row(
+            children: [
+              Icon(HookIcons.folder, size: 20, color: colors.textSecondary),
+              const SizedBox(width: HookSpace.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      strings.cacheFolder,
+                      style: TextStyle(
+                        fontSize: HookType.bodySmall,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: HookSpace.hair),
+                    FutureBuilder<String>(
+                      future: _cachePathFuture ??= _resolveCachePath(
+                        cacheManager,
+                      ),
+                      builder: (context, snapshot) {
+                        // No resolvable directory (unsupported platform, fake
+                        // in a widget test): say nothing rather than show a
+                        // path that does not exist.
+                        final path = snapshot.data;
+                        if (path == null || path.isEmpty) {
+                          return Text(
+                            snapshot.connectionState ==
+                                    ConnectionState.waiting
+                                ? strings.loading
+                                : '',
+                            style: TextStyle(
+                              fontSize: HookType.label,
+                              color: colors.textSecondary,
+                            ),
+                          );
+                        }
+                        return Text(
+                          path,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: HookType.label,
+                            color: colors.textSecondary,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: strings.copyPath,
+                icon: Icon(HookIcons.copy, size: 18),
+                color: colors.textSecondary,
+                onPressed: () async {
+                  final path = await _resolveCachePath(cacheManager);
+                  if (path.isEmpty) return;
+                  await Clipboard.setData(ClipboardData(text: path));
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(strings.pathCopied)));
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Wraps the lookup so a platform without a cache directory (or a test
+  /// double that does not implement it) degrades to "no path", not a red
+  /// screen.
+  Future<String> _resolveCachePath(AudioCacheManager cacheManager) async {
+    try {
+      return await cacheManager.getCacheDirectoryPath();
+    } catch (_) {
+      return '';
+    }
   }
 
   Widget _buildEmptyCacheList() {
@@ -676,7 +788,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       child: Column(
         children: [
           Icon(
-            MingCuteIcons.mgc_file_download_line,
+            HookIcons.downloadFile,
             size: 36,
             color: colors.textSecondary.withValues(alpha: 0.6),
           ),
@@ -691,7 +803,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           const SizedBox(height: 4),
           Text(
             strings.cachedTracksAppear,
-            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+            style: TextStyle(color: colors.textSecondary, fontSize: HookType.label),
           ),
         ],
       ),
@@ -734,12 +846,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
             '${track.artist} · ${_formatBytes(cachedTrack.sizeBytes)}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: colors.textSecondary, fontSize: 12),
+            style: TextStyle(color: colors.textSecondary, fontSize: HookType.label),
           ),
           trailing: IconButton(
             tooltip: strings.removeFromCache,
-            icon: const Icon(MingCuteIcons.mgc_delete_line),
-            color: Colors.redAccent.withValues(alpha: 0.8),
+            icon: const Icon(HookIcons.delete),
+            color: widget.theme.colors.danger.withValues(alpha: 0.8),
             onPressed: () =>
                 _confirmRemoveCachedTrack(cacheManager, cachedTrack),
           ),
@@ -756,6 +868,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
     CachedTrack cachedTrack,
   ) async {
     final strings = AppLocalizations.of(context);
+    final dialogColors = widget.theme.colors;
     final shouldRemove = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -770,8 +883,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
+              backgroundColor: dialogColors.danger,
+              foregroundColor: dialogColors.onDanger,
             ),
             child: Text(strings.delete),
           ),
@@ -791,6 +904,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
   Future<void> _confirmClearCache(AudioCacheManager cacheManager) async {
     final strings = AppLocalizations.of(context);
+    final dialogColors = widget.theme.colors;
     final shouldClear = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -805,8 +919,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
+              backgroundColor: dialogColors.danger,
+              foregroundColor: dialogColors.onDanger,
             ),
             child: Text(strings.delete),
           ),
@@ -843,7 +957,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: HookType.bodySmall,
                     fontWeight: FontWeight.bold,
                     color: colors.textPrimary,
                   ),
@@ -852,7 +966,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
                 Text(
                   subtitle,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: HookType.label,
                     color: colors.textSecondary,
                     height: 1.3,
                   ),

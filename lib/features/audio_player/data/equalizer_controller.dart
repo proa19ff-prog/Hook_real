@@ -202,6 +202,10 @@ class AndroidEqualizerBackend implements EqualizerBackend {
 
 class EqualizerController extends ChangeNotifier {
   static const _key = 'hook_equalizer_v1';
+
+  /// The listener's own level. It lives beside the curve rather than inside it:
+  /// the curve is a sound profile, the level is a preference.
+  static const _volumeKey = 'hook_app_volume';
   final EqualizerBackend _backend;
   EqualizerController({EqualizerBackend? backend})
     : _backend = backend ?? AndroidEqualizerBackend();
@@ -226,6 +230,7 @@ class EqualizerController extends ChangeNotifier {
   Future<void> _operations = Future.value();
   Future<void> _writes = Future.value();
   Timer? _saveTimer;
+  Timer? _volumeTimer;
 
   List<double> get bandGains =>
       _hardware?.bands
@@ -272,11 +277,23 @@ class EqualizerController extends ChangeNotifier {
           jsonDecode(saved) as Map<String, dynamic>,
         );
       }
+      // The chosen output level is a preference, so it must outlive the
+      // process; otherwise the slider silently snaps back to 100% every
+      // launch and the quiet listener has to fix it each time.
+      final savedVolume = _prefs!.getDouble(_volumeKey);
+      if (savedVolume != null && savedVolume.isFinite) {
+        _volume = savedVolume.clamp(0.0, 1.0);
+      }
     } catch (_) {
       // Corrupt or unavailable preferences must not break audio playback.
     }
     if (_disposed) return;
     _loaded = true;
+    // Push the restored level to the player before any curve is applied, so a
+    // quiet listener never hears the first second at full volume.
+    try {
+      await _updateVolume();
+    } catch (_) {}
     if (!_backend.supported) {
       _status = EqualizerStatus.unsupported;
       notifyListeners();
@@ -404,7 +421,27 @@ class EqualizerController extends ChangeNotifier {
   Future<void> setVolume(double value) {
     if (!value.isFinite) return Future.value();
     _volume = value.clamp(0, 1);
+    _queueVolumeSave();
     return _enqueue(_updateVolume);
+  }
+
+  /// A slider drag emits dozens of values per second; only the value the user
+  /// settles on has to reach the disk.
+  void _queueVolumeSave() {
+    if (_prefs == null) return;
+    _volumeTimer?.cancel();
+    _volumeTimer = Timer(const Duration(milliseconds: 250), _saveVolume);
+  }
+
+  void _saveVolume() {
+    final prefs = _prefs;
+    if (prefs == null) return;
+    final value = _volume;
+    _writes = _writes.then((_) async {
+      try {
+        await prefs.setDouble(_volumeKey, value);
+      } catch (_) {}
+    });
   }
 
   void _save() {
@@ -420,7 +457,9 @@ class EqualizerController extends ChangeNotifier {
 
   Future<void> flush() async {
     _saveTimer?.cancel();
+    _volumeTimer?.cancel();
     _save();
+    _saveVolume();
     await _writes;
     await _operations;
   }
@@ -429,7 +468,9 @@ class EqualizerController extends ChangeNotifier {
   void dispose() {
     if (_disposed) return;
     _saveTimer?.cancel();
+    _volumeTimer?.cancel();
     _save();
+    _saveVolume();
     _disposed = true;
     unawaited(_sessionSubscription?.cancel());
     // Drain an in-flight native call before releasing its effects.

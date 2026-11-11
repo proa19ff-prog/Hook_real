@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
+import '../../../core/ui/hook_haptics.dart';
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../data/audio_player_service.dart';
-import 'player_state_provider.dart';
 import 'equalizer_sheet.dart';
-import '../../../l10n/generated/app_localizations.dart';
+import 'player_state_provider.dart';
 
 class PlaybackControls extends ConsumerWidget {
   final HookTheme theme;
@@ -169,7 +171,7 @@ class PlaybackControls extends ConsumerWidget {
             PopupMenuButton<String>(
               tooltip: strings.moreActions,
               icon: Icon(
-                MingCuteIcons.mgc_more_1_line,
+                HookIcons.moreVertical,
                 color: textSecondary,
                 size: 24,
               ),
@@ -198,7 +200,7 @@ class PlaybackControls extends ConsumerWidget {
 
             // Previous
             _ControlButton(
-              icon: MingCuteIcons.mgc_skip_previous_fill,
+              icon: HookIcons.previous,
               size: 36,
               color: textPrimary,
               onTap: onPrevious ?? playerService.previous,
@@ -227,20 +229,23 @@ class PlaybackControls extends ConsumerWidget {
                         duration: const Duration(milliseconds: 200),
                         child: Icon(
                           isPlaying
-                              ? MingCuteIcons.mgc_pause_fill
-                              : MingCuteIcons.mgc_play_fill,
+                              ? HookIcons.pause
+                              : HookIcons.play,
                           key: ValueKey(isPlaying),
                           color: playBtnFg,
                           size: 42,
                         ),
                       ),
-                      onPressed: playerService.togglePlayPause,
+                      onPressed: () {
+                        HookHaptics.impact();
+                        playerService.togglePlayPause();
+                      },
                     ),
             ),
 
             // Next
             _ControlButton(
-              icon: MingCuteIcons.mgc_skip_forward_fill,
+              icon: HookIcons.next,
               size: 36,
               color: textPrimary,
               onTap: onNext ?? playerService.next,
@@ -252,8 +257,8 @@ class PlaybackControls extends ConsumerWidget {
                 final mode = playerService.loopMode;
                 return _ControlButton(
                   icon: mode == PlayerLoopMode.one
-                      ? MingCuteIcons.mgc_repeat_one_fill
-                      : MingCuteIcons.mgc_repeat_line,
+                      ? HookIcons.repeatOne
+                      : HookIcons.repeat,
                   size: 24,
                   color: mode != PlayerLoopMode.off
                       ? theme.colors.accent
@@ -291,7 +296,12 @@ class _ControlButton extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: onTap == null
+            ? null
+            : () {
+                HookHaptics.tap();
+                onTap!();
+              },
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Icon(icon, color: color, size: size),
@@ -316,6 +326,11 @@ class _SeekBar extends ConsumerStatefulWidget {
 class _SeekBarState extends ConsumerState<_SeekBar> {
   double? _dragValue;
 
+  /// Elapsed, or time left. Tapping either timecode flips both, which is the
+  /// convention every desktop player grew into: the same two numbers, chosen
+  /// by whoever is listening.
+  bool _showRemaining = false;
+
   @override
   Widget build(BuildContext context) {
     final theme = widget.theme;
@@ -331,12 +346,20 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
             ? position.inMilliseconds.toDouble().clamp(0.0, totalMs)
             : 0.0);
     final shownPosition = Duration(milliseconds: sliderVal.toInt());
+    final remaining = duration - shownPosition;
 
     final ambient = AmbientThemeScope.of(context);
     final textSecondary = ambient?.textSecondary ?? theme.colors.textSecondary;
     final inactiveTrack = ambient?.isLight == true
         ? Colors.black.withValues(alpha: 0.16)
         : theme.colors.border.withValues(alpha: 0.5);
+
+    final timeStyle = TextStyle(
+      color: textSecondary,
+      fontSize: HookType.label,
+      fontWeight: FontWeight.w500,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -359,6 +382,7 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
                 ? (val) => setState(() => _dragValue = val)
                 : null,
             onChangeEnd: (val) {
+              HookHaptics.tap();
               ref
                   .read(audioPlayerServiceProvider)
                   .seek(Duration(milliseconds: val.toInt()));
@@ -367,26 +391,34 @@ class _SeekBarState extends ConsumerState<_SeekBar> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: HookSpace.xxl),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                widget.formatDuration(shownPosition),
-                style: TextStyle(
-                  color: textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () =>
+                    setState(() => _showRemaining = !_showRemaining),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: HookSpace.xs),
+                  child: Text(
+                    _showRemaining
+                        ? '-${widget.formatDuration(remaining)}'
+                        : widget.formatDuration(shownPosition),
+                    style: timeStyle,
+                  ),
                 ),
               ),
-              Text(
-                widget.formatDuration(duration),
-                style: TextStyle(
-                  color: textSecondary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () =>
+                    setState(() => _showRemaining = !_showRemaining),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: HookSpace.xs),
+                  child: Text(
+                    widget.formatDuration(duration),
+                    style: timeStyle,
+                  ),
                 ),
               ),
             ],

@@ -1373,4 +1373,68 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'مستوى الصوت';
+
+  @override
+  String get systemVolume => 'النظام';
+
+  @override
+  String get appVolume => 'مستوى Hook';
+
+  @override
+  String get mute => 'كتم الصوت';
+
+  @override
+  String get unmute => 'تشغيل الصوت';
+
+  @override
+  String get volumeMixer => 'الصوت ومستواه';
+
+  @override
+  String get systemVolumeCaption =>
+      'مستوى إخراج Windows المشترك مع كل التطبيقات';
+
+  @override
+  String get appVolumeCaption => 'داخل Hook فقط، فوق مستوى النظام';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ الصوت · M كتم';
+
+  @override
+  String get volumeUnavailable => 'مستوى صوت النظام غير متاح على هذا الجهاز';
+
+  @override
+  String get cacheFolder => 'مجلد التخزين';
+
+  @override
+  String get copyPath => 'نسخ المسار';
+
+  @override
+  String get pathCopied => 'تم نسخ المسار إلى الحافظة';
+
+  @override
+  String get previousTrack => 'المقطع السابق';
+
+  @override
+  String get repeatPlayback => 'تكرار';
+
+  @override
+  String get openPlayer => 'فتح المشغل';
+
+  @override
+  String get statsWeek => 'آخر 7 أيام';
+
+  @override
+  String get keyboardShortcuts => 'اختصارات لوحة المفاتيح';
+
+  @override
+  String get shortcutsCaption => 'تعمل في كل مكان عدا حقول النص.';
+
+  @override
+  String get shortcutsSeek => 'التقديم 10 ثوانٍ';
+
+  @override
+  String get playPauseShortcut => 'تشغيل / إيقاف مؤقت';
 }

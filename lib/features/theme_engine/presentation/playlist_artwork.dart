@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import 'track_artwork.dart';
+import '../../../core/ui/hook_icons.dart';
 
 /// Cover for a playlist: a collage of the first distinct track artworks,
 /// a single cover when only one is available, or a music-note placeholder.
@@ -94,7 +94,7 @@ class PlaylistArtwork extends StatelessWidget {
   Widget _placeholder() => ColoredBox(
         color: placeholderColor,
         child: Icon(
-          MingCuteIcons.mgc_music_line,
+          HookIcons.note,
           color: iconColor,
           size: size * 0.4,
         ),
@@ -127,7 +127,7 @@ class _Cell extends StatelessWidget {
         cacheHeight: target,
         filterQuality: FilterQuality.medium,
         errorBuilder: (_, __, ___) => Center(
-          child: Icon(MingCuteIcons.mgc_music_line, color: iconColor),
+          child: Icon(HookIcons.note, color: iconColor),
         ),
       ),
     );

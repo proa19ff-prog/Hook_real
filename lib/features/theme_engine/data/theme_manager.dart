@@ -7,6 +7,8 @@ class ThemeManager {
     'assets/themes/default_dark.json',
     'assets/themes/cyberpunk_neon.json',
     'assets/themes/minimal_oled.json',
+    'assets/themes/windows_11.json',
+    'assets/themes/windows_11_light.json',
   ];
 
   final Map<String, HookTheme> _loadedThemes = {};

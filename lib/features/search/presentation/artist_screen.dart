@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../audio_player/presentation/mini_player.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
@@ -9,6 +9,7 @@ import '../../extractor/models/media_track.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/ui/hook_icons.dart';
 
 /// Pushes the artist page from any track tile or sheet.
 void openArtistScreen(BuildContext context, HookTheme theme, String artistName) {
@@ -96,7 +97,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                     IconButton(
                       tooltip: strings.back,
                       icon: Icon(
-                        MingCuteIcons.mgc_arrow_left_line,
+                        HookIcons.back,
                         color: colors.textPrimary,
                       ),
                       onPressed: () => Navigator.of(context).pop(),
@@ -107,7 +108,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                         strings.goToArtist,
                         style: TextStyle(
                           color: colors.textSecondary,
-                          fontSize: 14,
+                          fontSize: HookType.body,
                         ),
                       ),
                     ),
@@ -162,7 +163,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                             minimumSize: const Size(54, 54),
                           ),
                           icon: const Icon(
-                            MingCuteIcons.mgc_sound_line_fill,
+                            HookIcons.waveform,
                             size: 26,
                           ),
                           onPressed: tracks == null || tracks.isEmpty
@@ -185,7 +186,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                     strings.popularTracksUpper,
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 12,
+                      fontSize: HookType.label,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.2,
                     ),

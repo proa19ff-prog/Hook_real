@@ -2545,6 +2545,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =0{no tracks yet} =1{1 track} other{{count} tracks}}'**
   String artistTracksCount(int count);
+
+  /// No description provided for @volume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get volume;
+
+  /// No description provided for @systemVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemVolume;
+
+  /// No description provided for @appVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Hook level'**
+  String get appVolume;
+
+  /// No description provided for @mute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get mute;
+
+  /// No description provided for @unmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn sound on'**
+  String get unmute;
+
+  /// No description provided for @volumeMixer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound and volume'**
+  String get volumeMixer;
+
+  /// No description provided for @systemVolumeCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'The Windows output level, shared with every app'**
+  String get systemVolumeCaption;
+
+  /// No description provided for @appVolumeCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Only inside Hook, above the system level'**
+  String get appVolumeCaption;
+
+  /// No description provided for @volumeKeysHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ctrl + ↑ ↓ volume · M mute'**
+  String get volumeKeysHint;
+
+  /// No description provided for @volumeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'System volume is unavailable on this device'**
+  String get volumeUnavailable;
+
+  /// Label above the on-disk path of the audio cache
+  ///
+  /// In en, this message translates to:
+  /// **'Storage folder'**
+  String get cacheFolder;
+
+  /// Button that copies the cache folder path
+  ///
+  /// In en, this message translates to:
+  /// **'Copy path'**
+  String get copyPath;
+
+  /// Snackbar after copying the cache folder path
+  ///
+  /// In en, this message translates to:
+  /// **'Path copied to the clipboard'**
+  String get pathCopied;
+
+  /// Tooltip on the previous-track button
+  ///
+  /// In en, this message translates to:
+  /// **'Previous track'**
+  String get previousTrack;
+
+  /// Tooltip on the repeat-mode button
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat'**
+  String get repeatPlayback;
+
+  /// Tooltip on the button that opens the full player
+  ///
+  /// In en, this message translates to:
+  /// **'Open player'**
+  String get openPlayer;
+
+  /// Heading of the seven-day play chart
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get statsWeek;
+
+  /// Settings section heading listing keyboard shortcuts
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard shortcuts'**
+  String get keyboardShortcuts;
+
+  /// Explains when keyboard shortcuts do not fire
+  ///
+  /// In en, this message translates to:
+  /// **'Work anywhere except inside a text field.'**
+  String get shortcutsCaption;
+
+  /// Keyboard shortcut row: arrow keys move playback position
+  ///
+  /// In en, this message translates to:
+  /// **'Seek 10 seconds'**
+  String get shortcutsSeek;
+
+  /// Keyboard shortcut row: the space key toggles playback
+  ///
+  /// In en, this message translates to:
+  /// **'Play / pause'**
+  String get playPauseShortcut;
 }
 
 class _AppLocalizationsDelegate

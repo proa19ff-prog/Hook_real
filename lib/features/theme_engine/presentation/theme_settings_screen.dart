@@ -3,14 +3,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/supported_languages.dart';
+import '../../../core/ui/hook_haptics.dart';
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
-import '../domain/hook_theme.dart';
 import '../../youtube_account/presentation/youtube_account_screen.dart';
+import '../domain/hook_theme.dart';
 
 class ThemeSettingsScreen extends ConsumerStatefulWidget {
   final HookTheme theme;
@@ -60,7 +62,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                   maxLines: 8,
                   style: TextStyle(
                     color: colors.textPrimary,
-                    fontSize: 13,
+                    fontSize: HookType.bodySmall,
                     fontFamily: 'monospace',
                   ),
                   decoration: InputDecoration(
@@ -117,7 +119,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
           width: 420,
           child: SelectableText(
             json,
-            style: const TextStyle(fontSize: 13, fontFamily: 'monospace'),
+            style: const TextStyle(fontSize: HookType.bodySmall, fontFamily: 'monospace'),
           ),
         ),
         actions: [
@@ -126,7 +128,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
             child: Text(strings.close),
           ),
           FilledButton.icon(
-            icon: const Icon(MingCuteIcons.mgc_copy_line, size: 20),
+            icon: const Icon(HookIcons.copy, size: 20),
             label: Text(strings.copyJson),
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: json));
@@ -167,13 +169,13 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
             IconButton(
               tooltip: strings.exportJson,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              icon: const Icon(MingCuteIcons.mgc_file_upload_line),
+              icon: const Icon(HookIcons.importFile),
               onPressed: () => _showExportJsonDialog(theme),
             ),
             IconButton(
               tooltip: strings.importJson,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              icon: const Icon(MingCuteIcons.mgc_file_download_line),
+              icon: const Icon(HookIcons.downloadFile),
               onPressed: _showImportJsonDialog,
             ),
             const SizedBox(width: 8),
@@ -183,25 +185,32 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
           top: false,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: const BoxConstraints(
+                maxWidth: HookBreakpoints.readingMax,
+              ),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                padding: const EdgeInsets.fromLTRB(
+                  HookSpace.xl,
+                  HookSpace.sm,
+                  HookSpace.xl,
+                  HookSpace.xxxl,
+                ),
                 children: [
                   Text(
                     strings.themesAndShaders,
                     style: TextStyle(
                       color: colors.textPrimary,
-                      fontSize: 28,
+                      fontSize: HookType.display,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.7,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: HookSpace.sm),
                   Text(
                     strings.themesSubtitle,
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 14,
+                      fontSize: HookType.body,
                       height: 1.5,
                     ),
                   ),
@@ -210,12 +219,12 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                     key: const ValueKey('youtube-account-settings'),
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(
-                      Icons.account_circle_outlined,
+                      HookIcons.accountCircle,
                       color: colors.textPrimary,
                     ),
                     title: Text(strings.youtubeAccount),
                     subtitle: Text(strings.youtubeAccountSubtitle),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const Icon(HookIcons.chevron),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => YouTubeAccountScreen(theme: theme),
@@ -229,7 +238,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                     strings.languageCaption,
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 13,
+                      fontSize: HookType.bodySmall,
                       height: 1.4,
                     ),
                   ),
@@ -261,10 +270,13 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Material(
                         color: colors.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: HookRadius.smAll,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () => themeNotifier.setTheme(preset.id),
+                          borderRadius: HookRadius.smAll,
+                          onTap: () {
+                            HookHaptics.tap();
+                            themeNotifier.setTheme(preset.id);
+                          },
                           child: Semantics(
                             selected: preset.id == theme.id,
                             child: Padding(
@@ -275,7 +287,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                                     width: 44,
                                     height: 44,
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: HookRadius.xsAll,
                                       child: Row(
                                         children: [
                                           Expanded(
@@ -310,7 +322,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                                           preset.name,
                                           style: TextStyle(
                                             color: colors.textPrimary,
-                                            fontSize: 15,
+                                            fontSize: HookType.body,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -319,7 +331,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                                           preset.author,
                                           style: TextStyle(
                                             color: colors.textSecondary,
-                                            fontSize: 12,
+                                            fontSize: HookType.label,
                                           ),
                                         ),
                                       ],
@@ -328,7 +340,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                                   const SizedBox(width: 12),
                                   if (preset.id == theme.id)
                                     Icon(
-                                      MingCuteIcons.mgc_check_line,
+                                      HookIcons.check,
                                       color: colors.textPrimary,
                                       size: 22,
                                     ),
@@ -344,7 +356,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                   const SizedBox(height: 12),
                   Material(
                     color: colors.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: HookRadius.smAll,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -356,7 +368,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
                               strings.meshGradient,
                               style: TextStyle(
                                 color: colors.textPrimary,
-                                fontSize: 14,
+                                fontSize: HookType.body,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -424,7 +436,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
     label,
     style: TextStyle(
       color: colors.textPrimary,
-      fontSize: 16,
+      fontSize: HookType.heading,
       fontWeight: FontWeight.w600,
     ),
   );
@@ -443,7 +455,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(color: colors.textPrimary, fontSize: 14),
+              style: TextStyle(color: colors.textPrimary, fontSize: HookType.body),
             ),
           ),
           const SizedBox(width: 12),
@@ -451,7 +463,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
             valueLabel,
             style: TextStyle(
               color: colors.textSecondary,
-              fontSize: 13,
+              fontSize: HookType.bodySmall,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
@@ -487,7 +499,7 @@ class _ThemeSettingsScreenState extends ConsumerState<ThemeSettingsScreen> {
     side: BorderSide.none,
     labelStyle: TextStyle(
       color: selected ? colors.background : colors.textPrimary,
-      fontSize: 14,
+      fontSize: HookType.body,
       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
     ),
   );

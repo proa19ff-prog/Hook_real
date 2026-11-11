@@ -1374,4 +1374,68 @@ class AppLocalizationsVi extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Âm lượng';
+
+  @override
+  String get systemVolume => 'Hệ thống';
+
+  @override
+  String get appVolume => 'Mức Hook';
+
+  @override
+  String get mute => 'Tắt tiếng';
+
+  @override
+  String get unmute => 'Bật âm thanh';
+
+  @override
+  String get volumeMixer => 'Âm thanh và âm lượng';
+
+  @override
+  String get systemVolumeCaption =>
+      'Mức âm lượng đầu ra của Windows, dùng chung cho mọi ứng dụng';
+
+  @override
+  String get appVolumeCaption => 'Chỉ trong Hook, cộng thêm trên mức hệ thống';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ âm lượng · M tắt tiếng';
+
+  @override
+  String get volumeUnavailable => 'Thiết bị này không hỗ trợ âm lượng hệ thống';
+
+  @override
+  String get cacheFolder => 'Thư mục lưu trữ';
+
+  @override
+  String get copyPath => 'Sao chép đường dẫn';
+
+  @override
+  String get pathCopied => 'Đã sao chép đường dẫn vào clipboard';
+
+  @override
+  String get previousTrack => 'Bài trước';
+
+  @override
+  String get repeatPlayback => 'Lặp lại';
+
+  @override
+  String get openPlayer => 'Mở trình phát';
+
+  @override
+  String get statsWeek => '7 ngày qua';
+
+  @override
+  String get keyboardShortcuts => 'Phím tắt';
+
+  @override
+  String get shortcutsCaption => 'Hoạt động mọi nơi trừ ô nhập văn bản.';
+
+  @override
+  String get shortcutsSeek => 'Tua 10 giây';
+
+  @override
+  String get playPauseShortcut => 'Phát / tạm dừng';
 }

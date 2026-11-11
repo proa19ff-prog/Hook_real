@@ -1313,4 +1313,67 @@ class AppLocalizationsZh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => '音量';
+
+  @override
+  String get systemVolume => '系统';
+
+  @override
+  String get appVolume => 'Hook 音量';
+
+  @override
+  String get mute => '静音';
+
+  @override
+  String get unmute => '开启声音';
+
+  @override
+  String get volumeMixer => '声音与音量';
+
+  @override
+  String get systemVolumeCaption => 'Windows 输出音量，与所有应用共用';
+
+  @override
+  String get appVolumeCaption => '仅在 Hook 内叠加在系统音量之上';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ 音量 · M 静音';
+
+  @override
+  String get volumeUnavailable => '此设备不支持系统音量';
+
+  @override
+  String get cacheFolder => '存储文件夹';
+
+  @override
+  String get copyPath => '复制路径';
+
+  @override
+  String get pathCopied => '路径已复制到剪贴板';
+
+  @override
+  String get previousTrack => '上一首';
+
+  @override
+  String get repeatPlayback => '重复';
+
+  @override
+  String get openPlayer => '打开播放器';
+
+  @override
+  String get statsWeek => '最近 7 天';
+
+  @override
+  String get keyboardShortcuts => '键盘快捷键';
+
+  @override
+  String get shortcutsCaption => '除文本输入框外均可使用。';
+
+  @override
+  String get shortcutsSeek => '快进 10 秒';
+
+  @override
+  String get playPauseShortcut => '播放 / 暂停';
 }

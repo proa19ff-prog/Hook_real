@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../account/account_service.dart';
 import '../../account/sync_provider.dart';
+import '../../../core/ui/hook_icons.dart';
 
 /// The account section in settings: sign in / create account when signed
 /// out; nickname, sync status and controls when signed in.
@@ -49,8 +51,8 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
               children: [
                 Icon(
                   state.stage == AccountStage.signedIn
-                      ? Icons.cloud_sync_outlined
-                      : Icons.person_outline,
+                      ? HookIcons.syncCloud
+                      : HookIcons.account,
                   size: 20,
                   color: colors.primary,
                 ),
@@ -60,7 +62,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                     strings.accountTitle,
                     style: TextStyle(
                       color: colors.onSurface,
-                      fontSize: 16,
+                      fontSize: HookType.heading,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -72,7 +74,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
               strings.accountCaption,
               style: TextStyle(
                 color: colors.onSurfaceVariant,
-                fontSize: 12.5,
+                fontSize: HookType.label,
               ),
             ),
             const SizedBox(height: 12),
@@ -122,7 +124,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
             border: const OutlineInputBorder(),
             suffixIcon: IconButton(
               icon: Icon(
-                _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                _obscure ? HookIcons.visibility : HookIcons.visibilityOff,
                 size: 20,
               ),
               onPressed: () => setState(() => _obscure = !_obscure),
@@ -133,7 +135,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
           const SizedBox(height: 8),
           Text(
             errorText,
-            style: TextStyle(color: colors.error, fontSize: 12.5),
+            style: TextStyle(color: colors.error, fontSize: HookType.label),
           ),
         ],
         const SizedBox(height: 12),
@@ -162,7 +164,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                 _busy ? null : () => setState(() => _isSignUp = !_isSignUp),
             child: Text(
               _isSignUp ? strings.haveAccountToggle : strings.noAccountToggle,
-              style: TextStyle(fontSize: 12.5, color: colors.primary),
+              style: TextStyle(fontSize: HookType.label, color: colors.primary),
             ),
           ),
         ),
@@ -195,7 +197,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                     state.nickname ?? '',
                     style: TextStyle(
                       color: colors.onSurface,
-                      fontSize: 14,
+                      fontSize: HookType.body,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -204,7 +206,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                     status,
                     style: TextStyle(
                       color: colors.onSurfaceVariant,
-                      fontSize: 12.5,
+                      fontSize: HookType.label,
                     ),
                   ),
                 ],
@@ -227,7 +229,7 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
                 onPressed: state.syncing ? null : () {
                   ref.read(accountProvider.notifier).syncNow();
                 },
-                icon: const Icon(Icons.sync, size: 18),
+                icon: const Icon(HookIcons.sync, size: 18),
                 label: Text(strings.syncNow),
               ),
             ),

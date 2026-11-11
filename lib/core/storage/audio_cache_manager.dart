@@ -356,6 +356,10 @@ class AudioCacheManager {
     return total;
   }
 
+  /// Where the files live, so the UI can offer "reveal in folder" instead of
+  /// telling the listener that a cache exists somewhere.
+  Future<String> getCacheDirectoryPath() => _getCacheDirectoryPath();
+
   Future<void> clearAllCache() async {
     final cacheDir = Directory(await _getCacheDirectoryPath());
     if (await cacheDir.exists()) await cacheDir.delete(recursive: true);

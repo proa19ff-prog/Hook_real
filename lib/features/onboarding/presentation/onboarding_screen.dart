@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/localization/supported_languages.dart';
@@ -11,6 +12,7 @@ import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../../youtube_account/data/youtube_account_service.dart';
 import '../onboarding_provider.dart';
+import '../../../core/ui/hook_icons.dart';
 
 const _microgReleasesUrl = 'https://github.com/microg/GmsCore/releases';
 
@@ -150,7 +152,7 @@ class _LanguagePage extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colors.textSecondary,
-            fontSize: 15,
+            fontSize: HookType.body,
             height: 1.4,
           ),
         ),
@@ -209,7 +211,7 @@ class _LanguageChip extends StatelessWidget {
       ),
       labelStyle: TextStyle(
         color: selected ? colors.onAccent : colors.textPrimary,
-        fontSize: 14.5,
+        fontSize: HookType.body,
         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
       ),
     );
@@ -243,7 +245,7 @@ class _MicrogPage extends ConsumerWidget {
             color: colors.accent.withValues(alpha: 0.14),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.shield_outlined, color: colors.accent, size: 38),
+          child: Icon(HookIcons.shield, color: colors.accent, size: 38),
         ),
         const SizedBox(height: 20),
         Text(
@@ -262,7 +264,7 @@ class _MicrogPage extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colors.textSecondary,
-            fontSize: 14.5,
+            fontSize: HookType.body,
             height: 1.45,
           ),
         ),
@@ -295,7 +297,7 @@ class _MicrogPage extends ConsumerWidget {
                       strings.onboardingMicrogStatusChecking,
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 13.5,
+                        fontSize: HookType.bodySmall,
                       ),
                     ),
                   ),
@@ -332,7 +334,7 @@ class _MicrogPage extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: colors.textSecondary,
-            fontSize: 12.5,
+            fontSize: HookType.label,
             height: 1.4,
           ),
         ),
@@ -350,7 +352,7 @@ class _MicrogPage extends ConsumerWidget {
           ),
           child: Text(
             strings.onboardingMicrogDownload,
-            style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: HookType.body, fontWeight: FontWeight.w700),
           ),
         ),
         const SizedBox(height: 10),
@@ -367,7 +369,7 @@ class _MicrogPage extends ConsumerWidget {
           ),
           child: Text(
             strings.onboardingStart,
-            style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
+            style: const TextStyle(fontSize: HookType.body, fontWeight: FontWeight.w700),
           ),
         ),
       ],
@@ -376,7 +378,7 @@ class _MicrogPage extends ConsumerWidget {
 
   Widget _statusText(Color color, String text) => Text(
     text,
-    style: TextStyle(color: color, fontSize: 13.5, height: 1.4),
+    style: TextStyle(color: color, fontSize: HookType.bodySmall, height: 1.4),
   );
 }
 

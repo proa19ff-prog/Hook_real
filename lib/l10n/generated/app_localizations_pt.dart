@@ -1385,4 +1385,71 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get systemVolume => 'Sistema';
+
+  @override
+  String get appVolume => 'Nível do Hook';
+
+  @override
+  String get mute => 'Silenciar';
+
+  @override
+  String get unmute => 'Ativar o som';
+
+  @override
+  String get volumeMixer => 'Som e volume';
+
+  @override
+  String get systemVolumeCaption =>
+      'O nível de saída do Windows, partilhado com todas as aplicações';
+
+  @override
+  String get appVolumeCaption =>
+      'Apenas dentro do Hook, acima do nível do sistema';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ volume · M silêncio';
+
+  @override
+  String get volumeUnavailable =>
+      'O volume do sistema não está disponível neste dispositivo';
+
+  @override
+  String get cacheFolder => 'Pasta de armazenamento';
+
+  @override
+  String get copyPath => 'Copiar caminho';
+
+  @override
+  String get pathCopied => 'Caminho copiado para a área de transferência';
+
+  @override
+  String get previousTrack => 'Faixa anterior';
+
+  @override
+  String get repeatPlayback => 'Repetir';
+
+  @override
+  String get openPlayer => 'Abrir reprodutor';
+
+  @override
+  String get statsWeek => 'Últimos 7 dias';
+
+  @override
+  String get keyboardShortcuts => 'Atalhos de teclado';
+
+  @override
+  String get shortcutsCaption =>
+      'Funcionam em qualquer lugar, exceto em campos de texto.';
+
+  @override
+  String get shortcutsSeek => 'Avançar 10 segundos';
+
+  @override
+  String get playPauseShortcut => 'Reproduzir / pausar';
 }

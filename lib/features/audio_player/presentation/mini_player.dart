@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
+import 'desktop_player_bar.dart';
 import 'fullscreen_player.dart';
 import 'player_state_provider.dart';
 
 /// The player and navigation share one measured layout, including the device's
 /// bottom safe area exactly once. Use as Scaffold.bottomNavigationBar so page
 /// content cannot disappear under either control.
+///
+/// On a wide window the dock is replaced by [DesktopPlayerBar]: a three-zone
+/// bar with inline volume, because a 320px-wide mini player in a 1400px window
+/// hides every control that makes a desktop music app usable.
 class PlaybackDock extends ConsumerWidget {
   const PlaybackDock({super.key, required this.theme, this.navigation});
 
@@ -20,7 +26,14 @@ class PlaybackDock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasTrack = ref.watch(currentTrackProvider) != null;
+    final desktop = HookBreakpoints.isDesktop(context);
     if (!hasTrack && navigation == null) return const SizedBox.shrink();
+    if (desktop) {
+      return ColoredBox(
+        color: theme.colors.background,
+        child: DesktopPlayerBar(theme: theme),
+      );
+    }
     return ColoredBox(
       color: theme.colors.background,
       child: SafeArea(
@@ -37,6 +50,8 @@ class PlaybackDock extends ConsumerWidget {
   }
 }
 
+/// The phone-sized player. Kept deliberately spare: artwork, title, play and
+/// next. Everything else is one tap away in the full-screen player.
 class MiniPlayer extends ConsumerWidget {
   final HookTheme theme;
   const MiniPlayer({super.key, required this.theme});
@@ -51,10 +66,15 @@ class MiniPlayer extends ConsumerWidget {
     final strings = AppLocalizations.of(context);
     final colors = theme.colors;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      padding: const EdgeInsets.fromLTRB(
+        HookSpace.md,
+        0,
+        HookSpace.md,
+        HookSpace.sm,
+      ),
       child: Material(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: HookRadius.mdAll,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => Navigator.of(context).push(
@@ -62,7 +82,7 @@ class MiniPlayer extends ConsumerWidget {
               pageBuilder: (_, __, ___) => FullscreenPlayer(theme: theme),
               transitionDuration: MediaQuery.disableAnimationsOf(context)
                   ? Duration.zero
-                  : const Duration(milliseconds: 300),
+                  : HookMotion.slow,
               transitionsBuilder: (_, animation, __, child) => SlideTransition(
                 position:
                     Tween<Offset>(
@@ -71,7 +91,7 @@ class MiniPlayer extends ConsumerWidget {
                     ).animate(
                       CurvedAnimation(
                         parent: animation,
-                        curve: Curves.easeOutCubic,
+                        curve: HookMotion.enter,
                       ),
                     ),
                 child: child,
@@ -82,7 +102,12 @@ class MiniPlayer extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 4, 10),
+                padding: const EdgeInsets.fromLTRB(
+                  HookSpace.md,
+                  HookSpace.sm,
+                  HookSpace.xs,
+                  HookSpace.sm,
+                ),
                 child: Row(
                   children: [
                     Hero(
@@ -90,15 +115,16 @@ class MiniPlayer extends ConsumerWidget {
                       child: TrackArtwork(
                         url: track.artworkUrl,
                         size: 44,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: HookRadius.xsAll,
                         placeholderColor: colors.background,
                         iconColor: colors.textSecondary,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: HookSpace.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             track.title,
@@ -106,30 +132,30 @@ class MiniPlayer extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: colors.textPrimary,
-                              fontSize: 14,
+                              fontSize: HookType.bodySmall,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: HookSpace.xs),
                           Text(
                             loading ? strings.loading : track.artist,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: HookType.label,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: HookSpace.xs),
                     SizedBox(
                       width: 48,
                       height: 48,
                       child: loading
                           ? Padding(
-                              padding: const EdgeInsets.all(14),
+                              padding: const EdgeInsets.all(HookSpace.md),
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: colors.accent,
@@ -139,9 +165,7 @@ class MiniPlayer extends ConsumerWidget {
                           : IconButton(
                               tooltip: playing ? strings.pause : strings.play,
                               icon: Icon(
-                                playing
-                                    ? MingCuteIcons.mgc_pause_fill
-                                    : MingCuteIcons.mgc_play_fill,
+                                playing ? HookIcons.pause : HookIcons.play,
                                 color: colors.textPrimary,
                                 size: 28,
                               ),
@@ -152,7 +176,7 @@ class MiniPlayer extends ConsumerWidget {
                       tooltip: strings.next,
                       onPressed: service.next,
                       icon: Icon(
-                        MingCuteIcons.mgc_skip_forward_fill,
+                        HookIcons.next,
                         color: colors.textPrimary,
                         size: 24,
                       ),

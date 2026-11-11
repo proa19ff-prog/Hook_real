@@ -163,8 +163,7 @@ void main() {
 
   test(
     'session replacement reapplies saved curve and failure restores volume',
-    () async {
-      await bind();
+    () async {      await bind();
       controller.setEnabled(true);
       controller.setPreset(EqualizerPreset.rock);
       await controller.flush();
@@ -190,6 +189,25 @@ void main() {
     await controller.setVolume(0.4);
     expect(volumes.last, 0.4);
     expect(backend.sessions, isEmpty);
+  });
+
+  test('the listener volume is restored on the next launch', () async {
+    await bind();
+    await controller.setVolume(0.35);
+    await controller.flush();
+    expect(volumes.last, 0.35);
+
+    final restoredVolume = <double>[];
+    final restored = EqualizerController(backend: _Backend());
+    addTearDown(restored.dispose);
+    await restored.bind(
+      sessionIds: const Stream.empty(),
+      initialSessionId: null,
+      writeVolume: (value) async => restoredVolume.add(value),
+    );
+    expect(restored.volume, closeTo(0.35, 0.0001));
+    // Restoring the level must also reach the player, not just the field.
+    expect(restoredVolume.first, closeTo(0.35, 0.0001));
   });
 
   test(

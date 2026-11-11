@@ -1362,4 +1362,68 @@ class AppLocalizationsTh extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'ระดับเสียง';
+
+  @override
+  String get systemVolume => 'ระบบ';
+
+  @override
+  String get appVolume => 'ระดับ Hook';
+
+  @override
+  String get mute => 'ปิดเสียง';
+
+  @override
+  String get unmute => 'เปิดเสียง';
+
+  @override
+  String get volumeMixer => 'เสียงและระดับเสียง';
+
+  @override
+  String get systemVolumeCaption =>
+      'ระดับเสียงออกของ Windows ที่ใช้ร่วมกับทุกแอป';
+
+  @override
+  String get appVolumeCaption => 'เฉพาะใน Hook เหนือระดับระบบ';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ ระดับเสียง · M ปิดเสียง';
+
+  @override
+  String get volumeUnavailable => 'อุปกรณ์นี้ไม่รองรับระดับเสียงของระบบ';
+
+  @override
+  String get cacheFolder => 'โฟลเดอร์จัดเก็บ';
+
+  @override
+  String get copyPath => 'คัดลอกพาธ';
+
+  @override
+  String get pathCopied => 'คัดลอกพาธไปยังคลิปบอร์ดแล้ว';
+
+  @override
+  String get previousTrack => 'เพลงก่อนหน้า';
+
+  @override
+  String get repeatPlayback => 'เล่นซ้ำ';
+
+  @override
+  String get openPlayer => 'เปิดเครื่องเล่น';
+
+  @override
+  String get statsWeek => '7 วันที่ผ่านมา';
+
+  @override
+  String get keyboardShortcuts => 'แป้นพิมพ์ลัด';
+
+  @override
+  String get shortcutsCaption => 'ใช้ได้ทุกที่ยกเว้นในช่องข้อความ';
+
+  @override
+  String get shortcutsSeek => 'เลื่อน 10 วินาที';
+
+  @override
+  String get playPauseShortcut => 'เล่น / หยุดชั่วคราว';
 }

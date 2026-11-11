@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
@@ -10,6 +10,7 @@ import '../../library/presentation/library_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../import_file_picker.dart';
 import '../music_import_service.dart';
+import '../../../core/ui/hook_icons.dart';
 
 enum _ImportInput { link, text, file }
 
@@ -278,7 +279,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
       foregroundColor: colors.surface,
       minimumSize: const Size(double.infinity, 48),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+      textStyle: const TextStyle(fontSize: HookType.body, fontWeight: FontWeight.w700),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     );
     return PopScope(
@@ -332,7 +333,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           onPressed: _isSaving
                               ? null
                               : () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close_rounded),
+                          icon: const Icon(HookIcons.close),
                           color: colors.textSecondary,
                         ),
                       ],
@@ -342,7 +343,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                       result == null ? strings.importIntro : sourceLabel,
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 14,
+                        fontSize: HookType.body,
                         height: 1.4,
                       ),
                     ),
@@ -384,7 +385,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           strings.importFileHint,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 14,
+                            fontSize: HookType.body,
                             height: 1.5,
                           ),
                         ),
@@ -394,7 +395,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           onPressed: _busy ? null : _chooseFile,
                           style: buttonStyle,
                           icon: const Icon(
-                            MingCuteIcons.mgc_folder_open_line,
+                            HookIcons.folderOpen,
                             size: 20,
                           ),
                           label: Text(strings.importChooseFile),
@@ -422,7 +423,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           autocorrect: false,
                           style: TextStyle(
                             color: colors.textPrimary,
-                            fontSize: 14,
+                            fontSize: HookType.body,
                           ),
                           onChanged: (_) =>
                               setState(() => _errorMessage = null),
@@ -435,7 +436,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                               tooltip: strings.pasteFromClipboard,
                               onPressed: _busy ? null : _pasteFromClipboard,
                               icon: const Icon(
-                                MingCuteIcons.mgc_paste_line,
+                                HookIcons.paste,
                                 size: 20,
                               ),
                             ),
@@ -447,7 +448,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                             strings.importTextHint,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: HookType.label,
                               height: 1.4,
                             ),
                           ),
@@ -458,7 +459,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                             strings.importFileAndroidOnly,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: HookType.label,
                               height: 1.4,
                             ),
                           ),
@@ -488,7 +489,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: HookType.label,
                           ),
                         ),
                       ],
@@ -505,7 +506,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                                   '${i + 1}',
                                   style: TextStyle(
                                     color: colors.textSecondary,
-                                    fontSize: 13,
+                                    fontSize: HookType.bodySmall,
                                   ),
                                 ),
                               ),
@@ -519,7 +520,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: colors.textPrimary,
-                                        fontSize: 14,
+                                        fontSize: HookType.body,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -530,7 +531,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: colors.textSecondary,
-                                          fontSize: 12,
+                                          fontSize: HookType.label,
                                         ),
                                       ),
                                   ],
@@ -546,7 +547,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                             strings.importMoreTracks(result.tracks.length - 4),
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: HookType.label,
                             ),
                           ),
                         ),
@@ -576,7 +577,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                         strings.importMetadataHint,
                         style: TextStyle(
                           color: colors.textSecondary,
-                          fontSize: 12,
+                          fontSize: HookType.label,
                           height: 1.4,
                         ),
                       ),
@@ -586,7 +587,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                         onPressed: _busy ? null : _saveToPlaylists,
                         style: buttonStyle,
                         icon: const Icon(
-                          MingCuteIcons.mgc_list_check_line,
+                          HookIcons.playlistCheck,
                           size: 20,
                         ),
                         label: Text(strings.addToPlaylists),
@@ -599,7 +600,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                               ? null
                               : () => _playImported(result.tracks),
                           icon: const Icon(
-                            MingCuteIcons.mgc_play_fill,
+                            HookIcons.play,
                             size: 20,
                           ),
                           label: Text(strings.listen),
@@ -653,7 +654,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                                     : strings.importReading,
                                 style: TextStyle(
                                   color: colors.textSecondary,
-                                  fontSize: 13,
+                                  fontSize: HookType.bodySmall,
                                 ),
                               ),
                             ),
@@ -670,7 +671,7 @@ class _ImportBottomSheetState extends ConsumerState<ImportBottomSheet> {
                           key: const ValueKey('import-error'),
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,
-                            fontSize: 14,
+                            fontSize: HookType.body,
                             height: 1.4,
                           ),
                         ),

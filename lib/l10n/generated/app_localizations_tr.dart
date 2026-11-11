@@ -1377,4 +1377,69 @@ class AppLocalizationsTr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Ses düzeyi';
+
+  @override
+  String get systemVolume => 'Sistem';
+
+  @override
+  String get appVolume => 'Hook düzeyi';
+
+  @override
+  String get mute => 'Sessize al';
+
+  @override
+  String get unmute => 'Sesi aç';
+
+  @override
+  String get volumeMixer => 'Ses ve düzey';
+
+  @override
+  String get systemVolumeCaption =>
+      'Tüm uygulamalarla paylaşılan Windows çıkış düzeyi';
+
+  @override
+  String get appVolumeCaption =>
+      'Yalnızca Hook içinde, sistem düzeyinin üzerinde';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ düzey · M sessiz';
+
+  @override
+  String get volumeUnavailable => 'Bu cihazda sistem ses düzeyi kullanılamıyor';
+
+  @override
+  String get cacheFolder => 'Depolama klasörü';
+
+  @override
+  String get copyPath => 'Yolu kopyala';
+
+  @override
+  String get pathCopied => 'Yol panoya kopyalandı';
+
+  @override
+  String get previousTrack => 'Önceki parça';
+
+  @override
+  String get repeatPlayback => 'Tekrarla';
+
+  @override
+  String get openPlayer => 'Oynatıcıyı aç';
+
+  @override
+  String get statsWeek => 'Son 7 gün';
+
+  @override
+  String get keyboardShortcuts => 'Klavye kısayolları';
+
+  @override
+  String get shortcutsCaption => 'Metin alanları dışında her yerde çalışır.';
+
+  @override
+  String get shortcutsSeek => '10 saniye atla';
+
+  @override
+  String get playPauseShortcut => 'Çal / duraklat';
 }

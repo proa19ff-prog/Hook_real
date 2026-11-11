@@ -1379,4 +1379,68 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get systemVolume => 'System';
+
+  @override
+  String get appVolume => 'Hook level';
+
+  @override
+  String get mute => 'Mute';
+
+  @override
+  String get unmute => 'Turn sound on';
+
+  @override
+  String get volumeMixer => 'Sound and volume';
+
+  @override
+  String get systemVolumeCaption =>
+      'The Windows output level, shared with every app';
+
+  @override
+  String get appVolumeCaption => 'Only inside Hook, above the system level';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ volume · M mute';
+
+  @override
+  String get volumeUnavailable => 'System volume is unavailable on this device';
+
+  @override
+  String get cacheFolder => 'Storage folder';
+
+  @override
+  String get copyPath => 'Copy path';
+
+  @override
+  String get pathCopied => 'Path copied to the clipboard';
+
+  @override
+  String get previousTrack => 'Previous track';
+
+  @override
+  String get repeatPlayback => 'Repeat';
+
+  @override
+  String get openPlayer => 'Open player';
+
+  @override
+  String get statsWeek => 'Last 7 days';
+
+  @override
+  String get keyboardShortcuts => 'Keyboard shortcuts';
+
+  @override
+  String get shortcutsCaption => 'Work anywhere except inside a text field.';
+
+  @override
+  String get shortcutsSeek => 'Seek 10 seconds';
+
+  @override
+  String get playPauseShortcut => 'Play / pause';
 }

@@ -1386,4 +1386,69 @@ class AppLocalizationsUk extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Гучність';
+
+  @override
+  String get systemVolume => 'Система';
+
+  @override
+  String get appVolume => 'Рівень Hook';
+
+  @override
+  String get mute => 'Без звуку';
+
+  @override
+  String get unmute => 'Увімкнути звук';
+
+  @override
+  String get volumeMixer => 'Звук і гучність';
+
+  @override
+  String get systemVolumeCaption =>
+      'Загальний рівень виводу Windows для всіх програм';
+
+  @override
+  String get appVolumeCaption => 'Лише всередині Hook, поверх системного рівня';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ — гучність · M — без звуку';
+
+  @override
+  String get volumeUnavailable =>
+      'Системна гучність недоступна на цьому пристрої';
+
+  @override
+  String get cacheFolder => 'Тека зберігання';
+
+  @override
+  String get copyPath => 'Копіювати шлях';
+
+  @override
+  String get pathCopied => 'Шлях скопійовано до буфера обміну';
+
+  @override
+  String get previousTrack => 'Попередній трек';
+
+  @override
+  String get repeatPlayback => 'Повтор';
+
+  @override
+  String get openPlayer => 'Відкрити плеєр';
+
+  @override
+  String get statsWeek => 'Останні 7 днів';
+
+  @override
+  String get keyboardShortcuts => 'Гарячі клавіші';
+
+  @override
+  String get shortcutsCaption => 'Працюють усюди, крім полів введення.';
+
+  @override
+  String get shortcutsSeek => 'Перемотування на 10 секунд';
+
+  @override
+  String get playPauseShortcut => 'Грати / пауза';
 }

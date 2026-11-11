@@ -10,6 +10,7 @@ import '../../import/presentation/import_bottom_sheet.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 import '../data/youtube_account_service.dart';
+import '../../../core/ui/hook_icons.dart';
 
 class YouTubeAccountScreen extends ConsumerStatefulWidget {
   const YouTubeAccountScreen({super.key, required this.theme});
@@ -254,7 +255,7 @@ class _YouTubeAccountScreenState extends ConsumerState<YouTubeAccountScreen> {
           IconButton(
             tooltip: strings.checkAgain,
             onPressed: _busy ? null : _reload,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(HookIcons.refresh),
           ),
         ],
       ),
@@ -317,7 +318,7 @@ class _YouTubeAccountScreenState extends ConsumerState<YouTubeAccountScreen> {
                         onPressed: _busy || _status?.supported != true
                             ? null
                             : _connect,
-                        icon: const Icon(Icons.account_circle_outlined),
+                        icon: const Icon(HookIcons.accountCircle),
                         label: Text(strings.youtubeAccountConnect),
                       ),
                     if (profile != null)
@@ -490,7 +491,7 @@ class _YouTubeAccountScreenState extends ConsumerState<YouTubeAccountScreen> {
                               onPressed: _busy
                                   ? null
                                   : () => _prepareImport(playlist),
-                              icon: const Icon(Icons.playlist_add_rounded),
+                              icon: const Icon(HookIcons.playlistAdd),
                               label: Text(strings.youtubeAccountPreview),
                             ),
                           ),

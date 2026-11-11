@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 import 'package:window_manager/window_manager.dart';
+
+import '../../../core/ui/hook_tokens.dart';
 import 'updates_section.dart';
 
 import '../../../core/localization/locale_provider.dart';
@@ -16,6 +17,7 @@ import '../../youtube_account/presentation/youtube_account_screen.dart';
 import 'account_section.dart';
 import '../../library/presentation/library_provider.dart';
 import 'settings_provider.dart';
+import '../../../core/ui/hook_icons.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -42,40 +44,47 @@ class SettingsScreen extends ConsumerWidget {
           top: false,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: const BoxConstraints(
+                maxWidth: HookBreakpoints.readingMax,
+              ),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                padding: const EdgeInsets.fromLTRB(
+                  HookSpace.xl,
+                  HookSpace.sm,
+                  HookSpace.xl,
+                  HookSpace.xxxl,
+                ),
                 children: [
                   Text(
                     strings.settingsCaption,
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 14,
+                      fontSize: HookType.body,
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: HookSpace.xxl),
                   _heading(strings.playerSettings, colors),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: HookSpace.sm),
                   Material(
                     color: colors.surface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: HookRadius.smAll,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SwitchListTile.adaptive(
                           key: const ValueKey('lyrics-auto-hide-setting'),
                           contentPadding: const EdgeInsets.fromLTRB(
-                            16,
-                            8,
-                            16,
+                            HookSpace.lg,
+                            HookSpace.sm,
+                            HookSpace.lg,
                             0,
                           ),
                           title: Text(
                             strings.lyricsAutoHide,
                             style: TextStyle(
                               color: colors.textPrimary,
-                              fontSize: 16,
+                              fontSize: HookType.heading,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -86,12 +95,17 @@ class SettingsScreen extends ConsumerWidget {
                               .setEnabled(value),
                         ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(
+                            HookSpace.lg,
+                            HookSpace.sm,
+                            HookSpace.lg,
+                            HookSpace.lg,
+                          ),
                           child: Text(
                             strings.lyricsAutoHideDescription,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 14,
+                              fontSize: HookType.body,
                               height: 1.5,
                             ),
                           ),
@@ -99,18 +113,18 @@ class SettingsScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: HookSpace.xxl),
                   _heading(strings.language, colors),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: HookSpace.sm),
                   Text(
                     strings.languageCaption,
                     style: TextStyle(
                       color: colors.textSecondary,
-                      fontSize: 14,
+                      fontSize: HookType.body,
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: HookSpace.md),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
@@ -142,57 +156,54 @@ class SettingsScreen extends ConsumerWidget {
                                     : locale?.languageCode == code)
                                 ? colors.background
                                 : colors.textPrimary,
-                            fontSize: 14,
+                            fontSize: HookType.body,
                           ),
                         ),
                     ],
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: HookSpace.xxl),
                   ListTile(
                     key: const ValueKey('appearance-settings-link'),
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      MingCuteIcons.mgc_palette_line,
-                      color: colors.textPrimary,
-                    ),
+                    leading: Icon(HookIcons.palette, color: colors.textPrimary),
                     title: Text(strings.themeSettings),
                     subtitle: Text(strings.themesSubtitle),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const Icon(HookIcons.chevron),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => ThemeSettingsScreen(theme: theme),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: HookSpace.md),
                   ListTile(
                     key: const ValueKey('youtube-account-general-settings'),
                     contentPadding: EdgeInsets.zero,
                     leading: Icon(
-                      Icons.account_circle_outlined,
+                      HookIcons.accountCircle,
                       color: colors.textPrimary,
                     ),
                     title: Text(strings.youtubeAccount),
                     subtitle: Text(strings.youtubeAccountSubtitle),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    trailing: const Icon(HookIcons.chevron),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => YouTubeAccountScreen(theme: theme),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: HookSpace.md),
                   ListTile(
                     key: const ValueKey('remote-resolver-setting'),
                     contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      Icons.dns_outlined,
-                      color: colors.textPrimary,
-                    ),
+                    leading: Icon(HookIcons.server, color: colors.textPrimary),
                     title: Text(strings.serverResolver),
-                    subtitle: Text(_resolverSubtitle(ref, strings),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: const Icon(Icons.chevron_right_rounded),
+                    subtitle: Text(
+                      _resolverSubtitle(ref, strings),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: const Icon(HookIcons.chevron),
                     onTap: () => _editRemoteResolver(context, ref, colors),
                   ),
                   if (!kIsWeb &&
@@ -201,10 +212,10 @@ class SettingsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Material(
                         color: colors.surface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: HookRadius.smAll,
                         child: SwitchListTile.adaptive(
                           secondary: Icon(
-                            Icons.picture_in_picture_alt_rounded,
+                            HookIcons.pip,
                             color: colors.textPrimary,
                           ),
                           title: Text(
@@ -223,9 +234,22 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: HookSpace.xxl),
+                  _heading(strings.keyboardShortcuts, colors),
+                  const SizedBox(height: HookSpace.sm),
+                  Text(
+                    strings.shortcutsCaption,
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      fontSize: HookType.bodySmall,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: HookSpace.md),
+                  _ShortcutList(theme: theme),
+                  const SizedBox(height: HookSpace.xxl),
                   const AccountSection(),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: HookSpace.md),
                   const UpdatesSection(),
                 ],
               ),
@@ -240,15 +264,12 @@ class SettingsScreen extends ConsumerWidget {
     title,
     style: TextStyle(
       color: colors.textPrimary,
-      fontSize: 16,
+      fontSize: HookType.heading,
       fontWeight: FontWeight.w600,
     ),
   );
 
-  String _resolverSubtitle(
-    WidgetRef ref,
-    AppLocalizations strings,
-  ) {
+  String _resolverSubtitle(WidgetRef ref, AppLocalizations strings) {
     final stored = ref.watch(remoteResolverProvider);
     if (stored == null) return RemoteResolverSource.defaultEndpoint;
     if (stored.trim().isEmpty) return strings.serverResolverDisabled;
@@ -279,18 +300,21 @@ class SettingsScreen extends ConsumerWidget {
                 strings.serverResolverCaption,
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 13,
+                  fontSize: HookType.bodySmall,
                   height: 1.4,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: HookSpace.md),
               TextField(
                 key: const ValueKey('remote-resolver-input'),
                 controller: controller,
                 keyboardType: TextInputType.url,
                 autocorrect: false,
                 enableSuggestions: false,
-                style: TextStyle(color: colors.textPrimary, fontSize: 14),
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontSize: HookType.body,
+                ),
                 decoration: InputDecoration(
                   hintText: strings.serverResolverHint,
                   hintStyle: TextStyle(color: colors.textSecondary),
@@ -323,6 +347,119 @@ class SettingsScreen extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// Reference sheet for the global shortcuts bound in `app.dart`.
+///
+/// The bindings live above the navigator, so a user cannot discover them from
+/// the UI alone; this list is the only place they are documented in the app.
+class _ShortcutList extends StatelessWidget {
+  const _ShortcutList({required this.theme});
+
+  final HookTheme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = theme.colors;
+    final strings = AppLocalizations.of(context);
+    final rows = <(String, String)>[
+      ('Space', strings.playPauseShortcut),
+      ('←  →', strings.shortcutsSeek),
+      ('Ctrl + ←  →', '${strings.previousTrack} / ${strings.next}'),
+      ('Ctrl + ↑  ↓', strings.volume),
+      ('M', strings.mute),
+    ];
+
+    // A key cap is as wide as the shortcut printed on it, so at accessibility
+    // text sizes the row runs out of room for the label. Above ~1.3x the keys
+    // move onto their own line instead of squeezing the description to nothing.
+    final stacked =
+        MediaQuery.textScalerOf(context).scale(HookType.label) >
+        HookType.label * 1.3;
+
+    return Material(
+      color: colors.surface,
+      borderRadius: HookRadius.smAll,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: HookSpace.lg,
+          vertical: HookSpace.sm,
+        ),
+        child: Column(
+          children: [
+            for (final (keys, label) in rows)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: HookSpace.sm),
+                child: stacked
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _KeyCaps(theme: theme, text: keys),
+                          const SizedBox(height: HookSpace.xs),
+                          Text(
+                            label,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: HookType.bodySmall,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          _KeyCaps(theme: theme, text: keys),
+                          const SizedBox(width: HookSpace.md),
+                          Expanded(
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                color: colors.textSecondary,
+                                fontSize: HookType.bodySmall,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KeyCaps extends StatelessWidget {
+  const _KeyCaps({required this.theme, required this.text});
+
+  final HookTheme theme;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = theme.colors;
+    return Container(
+      constraints: const BoxConstraints(minWidth: 92),
+      padding: const EdgeInsets.symmetric(
+        horizontal: HookSpace.sm,
+        vertical: HookSpace.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.raised,
+        borderRadius: HookRadius.xsAll,
+        border: Border.all(color: colors.border),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: colors.textPrimary,
+          fontSize: HookType.label,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
+      ),
     );
   }
 }

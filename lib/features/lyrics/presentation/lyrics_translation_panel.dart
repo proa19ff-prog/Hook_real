@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../theme_engine/domain/hook_theme.dart';
@@ -10,6 +11,7 @@ import '../data/lyrics_client.dart';
 import '../data/lyrics_translation_service.dart';
 import '../domain/lyric_line.dart';
 import 'lyrics_chrome.dart';
+import '../../../core/ui/hook_icons.dart';
 
 List<String> translationLines(LyricsResult lyrics) {
   final output = <String>[];
@@ -223,7 +225,7 @@ class _LyricsTranslationPanelState
                           dropdownColor: colors.surface,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: HookType.label,
                           ),
                           items: [
                             DropdownMenuItem(
@@ -260,7 +262,7 @@ class _LyricsTranslationPanelState
                       ),
                       color: _visible ? colors.accent : colors.textPrimary,
                       icon: Icon(
-                        _busy ? Icons.close_rounded : Icons.translate_rounded,
+                        _busy ? HookIcons.close : HookIcons.language,
                       ),
                       onPressed: _toggle,
                     ),
@@ -288,7 +290,7 @@ class _LyricsTranslationPanelState
                             strings.translationLoading,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 12,
+                              fontSize: HookType.label,
                             ),
                           ),
                         ),
@@ -305,7 +307,7 @@ class _LyricsTranslationPanelState
                       _error!,
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 12,
+                        fontSize: HookType.label,
                       ),
                     ),
                   ),
@@ -319,7 +321,7 @@ class _LyricsTranslationPanelState
                       strings.translationAttribution,
                       style: TextStyle(
                         color: colors.textSecondary,
-                        fontSize: 11,
+                        fontSize: HookType.caption,
                       ),
                     ),
                   ),

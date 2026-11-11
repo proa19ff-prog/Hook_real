@@ -1386,4 +1386,71 @@ class AppLocalizationsIt extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Volume';
+
+  @override
+  String get systemVolume => 'Sistema';
+
+  @override
+  String get appVolume => 'Livello Hook';
+
+  @override
+  String get mute => 'Disattiva audio';
+
+  @override
+  String get unmute => 'Riattiva l\'audio';
+
+  @override
+  String get volumeMixer => 'Audio e volume';
+
+  @override
+  String get systemVolumeCaption =>
+      'Il livello di uscita di Windows, condiviso con tutte le app';
+
+  @override
+  String get appVolumeCaption =>
+      'Solo dentro Hook, sopra il livello di sistema';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ volume · M muto';
+
+  @override
+  String get volumeUnavailable =>
+      'Il volume di sistema non è disponibile su questo dispositivo';
+
+  @override
+  String get cacheFolder => 'Cartella di archiviazione';
+
+  @override
+  String get copyPath => 'Copia percorso';
+
+  @override
+  String get pathCopied => 'Percorso copiato negli appunti';
+
+  @override
+  String get previousTrack => 'Brano precedente';
+
+  @override
+  String get repeatPlayback => 'Ripeti';
+
+  @override
+  String get openPlayer => 'Apri lettore';
+
+  @override
+  String get statsWeek => 'Ultimi 7 giorni';
+
+  @override
+  String get keyboardShortcuts => 'Scorciatoie da tastiera';
+
+  @override
+  String get shortcutsCaption =>
+      'Funzionano ovunque tranne nei campi di testo.';
+
+  @override
+  String get shortcutsSeek => 'Salta di 10 secondi';
+
+  @override
+  String get playPauseShortcut => 'Riproduci / pausa';
 }

@@ -1339,4 +1339,67 @@ class AppLocalizationsJa extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => '音量';
+
+  @override
+  String get systemVolume => 'システム';
+
+  @override
+  String get appVolume => 'Hook の音量';
+
+  @override
+  String get mute => 'ミュート';
+
+  @override
+  String get unmute => '音を出す';
+
+  @override
+  String get volumeMixer => 'サウンドと音量';
+
+  @override
+  String get systemVolumeCaption => 'すべてのアプリと共有する Windows の出力レベル';
+
+  @override
+  String get appVolumeCaption => 'Hook 内のみ。システムレベルに重ねて適用';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ 音量 · M ミュート';
+
+  @override
+  String get volumeUnavailable => 'このデバイスではシステム音量を利用できません';
+
+  @override
+  String get cacheFolder => '保存先フォルダー';
+
+  @override
+  String get copyPath => 'パスをコピー';
+
+  @override
+  String get pathCopied => 'パスをクリップボードにコピーしました';
+
+  @override
+  String get previousTrack => '前の曲';
+
+  @override
+  String get repeatPlayback => 'リピート';
+
+  @override
+  String get openPlayer => 'プレーヤーを開く';
+
+  @override
+  String get statsWeek => '過去7日間';
+
+  @override
+  String get keyboardShortcuts => 'キーボードショートカット';
+
+  @override
+  String get shortcutsCaption => 'テキスト入力欄以外の場所で使えます。';
+
+  @override
+  String get shortcutsSeek => '10秒シーク';
+
+  @override
+  String get playPauseShortcut => '再生 / 一時停止';
 }

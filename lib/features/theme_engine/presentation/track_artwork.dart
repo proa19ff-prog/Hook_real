@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
+import '../../../core/ui/hook_icons.dart';
 
 /// Small, bounded artwork widget used in scrolling lists and player chrome.
 ///
@@ -90,6 +90,6 @@ class TrackArtwork extends StatelessWidget {
   Widget _placeholder() => SizedBox(
         width: size,
         height: size,
-        child: Icon(MingCuteIcons.mgc_music_line, color: iconColor),
+        child: Icon(HookIcons.note, color: iconColor),
       );
 }

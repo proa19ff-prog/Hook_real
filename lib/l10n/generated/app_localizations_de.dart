@@ -1385,4 +1385,70 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'Lautstärke';
+
+  @override
+  String get systemVolume => 'System';
+
+  @override
+  String get appVolume => 'Hook-Pegel';
+
+  @override
+  String get mute => 'Stummschalten';
+
+  @override
+  String get unmute => 'Ton einschalten';
+
+  @override
+  String get volumeMixer => 'Ton und Lautstärke';
+
+  @override
+  String get systemVolumeCaption =>
+      'Die Windows-Ausgangslautstärke, geteilt mit allen Apps';
+
+  @override
+  String get appVolumeCaption =>
+      'Nur innerhalb von Hook, oberhalb des Systempegels';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ Lautstärke · M stumm';
+
+  @override
+  String get volumeUnavailable =>
+      'Systemlautstärke ist auf diesem Gerät nicht verfügbar';
+
+  @override
+  String get cacheFolder => 'Speicherordner';
+
+  @override
+  String get copyPath => 'Pfad kopieren';
+
+  @override
+  String get pathCopied => 'Pfad in die Zwischenablage kopiert';
+
+  @override
+  String get previousTrack => 'Vorheriger Titel';
+
+  @override
+  String get repeatPlayback => 'Wiederholen';
+
+  @override
+  String get openPlayer => 'Player öffnen';
+
+  @override
+  String get statsWeek => 'Letzte 7 Tage';
+
+  @override
+  String get keyboardShortcuts => 'Tastenkürzel';
+
+  @override
+  String get shortcutsCaption => 'Funktionieren überall außer in Textfeldern.';
+
+  @override
+  String get shortcutsSeek => '10 Sekunden springen';
+
+  @override
+  String get playPauseShortcut => 'Wiedergabe / Pause';
 }

@@ -1373,4 +1373,68 @@ class AppLocalizationsBn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get volume => 'ভলিউম';
+
+  @override
+  String get systemVolume => 'সিস্টেম';
+
+  @override
+  String get appVolume => 'Hook স্তর';
+
+  @override
+  String get mute => 'মিউট করুন';
+
+  @override
+  String get unmute => 'শব্দ চালু করুন';
+
+  @override
+  String get volumeMixer => 'শব্দ ও ভলিউম';
+
+  @override
+  String get systemVolumeCaption =>
+      'Windows-এর আউটপুট লেভেল, সব অ্যাপের সঙ্গে শেয়ার করা';
+
+  @override
+  String get appVolumeCaption => 'শুধু Hook-এর ভিতরে, সিস্টেম লেভেলের উপরে';
+
+  @override
+  String get volumeKeysHint => 'Ctrl + ↑ ↓ ভলিউম · M মিউট';
+
+  @override
+  String get volumeUnavailable => 'এই ডিভাইসে সিস্টেম ভলিউম উপলব্ধ নয়';
+
+  @override
+  String get cacheFolder => 'স্টোরেজ ফোল্ডার';
+
+  @override
+  String get copyPath => 'পাথ কপি করুন';
+
+  @override
+  String get pathCopied => 'পাথ ক্লিপবোর্ডে কপি হয়েছে';
+
+  @override
+  String get previousTrack => 'আগের ট্র্যাক';
+
+  @override
+  String get repeatPlayback => 'পুনরাবৃত্তি';
+
+  @override
+  String get openPlayer => 'প্লেয়ার খুলুন';
+
+  @override
+  String get statsWeek => 'শেষ ৭ দিন';
+
+  @override
+  String get keyboardShortcuts => 'কীবোর্ড শর্টকাট';
+
+  @override
+  String get shortcutsCaption => 'টেক্সট ফিল্ড ছাড়া সব জায়গায় কাজ করে।';
+
+  @override
+  String get shortcutsSeek => '১০ সেকেন্ড লাফ';
+
+  @override
+  String get playPauseShortcut => 'চালান / বিরতি';
 }

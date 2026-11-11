@@ -1,7 +1,7 @@
 name: hook
 description: "Hook — Android local-first music player with search across sources, synced lyrics and live GLSL themes"
 publish_to: "none"
-version: 0.6.0+6
+version: 0.6.1+7
 
 environment:
   sdk: ">=3.13.0 <4.0.0"
@@ -45,6 +45,10 @@ dependencies:
   file_picker: ^13.3.2
   share_plus: ^13.3.1
   window_manager: 0.5.1
+  # Native system mixer on Windows (IAudioEndpointVolume) and the OS volume
+  # keys on Android. The in-app volume panel writes through to the same level
+  # the Windows mixer shows, instead of faking a second private volume.
+  flutter_volume_controller: ^2.0.2
 
 # smtc_windows 1.1.0 ships Rust codegen for FRB 2.11.1; a newer runtime
 # aborts SMTC init (and with it main()) with a version sanity check.

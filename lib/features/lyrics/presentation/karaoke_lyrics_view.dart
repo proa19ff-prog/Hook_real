@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 
@@ -19,6 +19,7 @@ import '../domain/lyrics_display_mode.dart';
 import 'lyrics_preferences_provider.dart';
 import 'lyrics_chrome.dart';
 import 'lyrics_translation_panel.dart';
+import '../../../core/ui/hook_icons.dart';
 
 const _easeOut = Cubic(0.23, 1, 0.32, 1);
 
@@ -257,14 +258,14 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
           Center(child: CircularProgressIndicator(color: colors.primary)),
       error: (_, __) => _buildMessage(
         colors,
-        MingCuteIcons.mgc_forbid_circle_line,
+        HookIcons.block,
         strings.lyricsNotFound,
       ),
       data: (LyricsResult? result) {
         if (result == null || result.isEmpty) {
           return _buildMessage(
             colors,
-            MingCuteIcons.mgc_mic_line,
+            HookIcons.mic,
             strings.karaokeUnavailable,
           );
         }
@@ -313,7 +314,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
             textAlign: TextAlign.center,
             style: TextStyle(
               color: colors.textSecondary,
-              fontSize: 15,
+              fontSize: HookType.body,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -466,7 +467,7 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
                             color: colors.border.withValues(alpha: 0.45),
                           ),
                         ),
-                        icon: const Icon(MingCuteIcons.mgc_settings_3_line),
+                        icon: const Icon(HookIcons.settings),
                         onPressed: () {
                           setState(() => _showOffsetControls = true);
                         },
@@ -598,25 +599,25 @@ class _KaraokeLyricsViewState extends ConsumerState<KaraokeLyricsView>
           IconButton(
             tooltip: strings.decreaseLyricsOffset,
             onPressed: () => _shiftOffset(-0.1),
-            icon: Icon(Icons.remove_rounded, color: colors.textPrimary),
+            icon: Icon(HookIcons.remove, color: colors.textPrimary),
           ),
           TextButton(
             onPressed: () => _setOffset(0),
             child: Text(
               strings.lyricsOffset(offset),
-              style: TextStyle(color: colors.textPrimary, fontSize: 12),
+              style: TextStyle(color: colors.textPrimary, fontSize: HookType.label),
             ),
           ),
           IconButton(
             tooltip: strings.increaseLyricsOffset,
             onPressed: () => _shiftOffset(0.1),
-            icon: Icon(Icons.add_rounded, color: colors.textPrimary),
+            icon: Icon(HookIcons.add, color: colors.textPrimary),
           ),
           IconButton(
             tooltip: strings.hideSetting,
             onPressed: () => setState(() => _showOffsetControls = false),
             icon: Icon(
-              Icons.close_rounded,
+              HookIcons.close,
               color: colors.textSecondary,
               size: 18,
             ),
@@ -705,6 +706,8 @@ class _TranslationText extends StatelessWidget {
       textAlign: alignment,
       style: TextStyle(
         color: color,
+        // Lyrics use their own ramp (18 / 27) that is larger than the app type
+        // scale on purpose; the translation sits just under the 18px echo.
         fontSize: 16,
         height: 1.4,
         fontWeight: FontWeight.w400,

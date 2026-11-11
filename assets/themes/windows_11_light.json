@@ -1,0 +1,25 @@
+{
+  "id": "windows_11_light",
+  "name": "Windows 11 Light",
+  "author": "Hook Core Team",
+  "version": "1.0.0",
+  "isDark": false,
+  "colors": {
+    "background": "#F3F3F3",
+    "surface": "#FFFFFF",
+    "surfaceGlass": "#CCFFFFFF",
+    "primary": "#0067C0",
+    "secondary": "#003E92",
+    "accent": "#0067C0",
+    "textPrimary": "#1A1A1A",
+    "textSecondary": "#5C5C5C",
+    "border": "#DFDFDF"
+  },
+  "styling": {
+    "borderRadius": 8.0,
+    "cardBlur": 24.0,
+    "shaderMeshEnabled": false,
+    "shaderNoiseIntensity": 0.0,
+    "fontFamily": "Segoe UI"
+  }
+}

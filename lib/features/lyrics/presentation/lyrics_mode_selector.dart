@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../core/localization/localized_labels.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../domain/lyrics_display_mode.dart';
 import 'lyrics_preferences_provider.dart';
+import '../../../core/ui/hook_icons.dart';
 
 class LyricsModeButton extends ConsumerWidget {
   final HookTheme theme;
@@ -25,11 +27,11 @@ class LyricsModeButton extends ConsumerWidget {
         backgroundColor: theme.colors.surface,
         builder: (_) => LyricsModeSelector(theme: theme),
       ),
-      icon: const Icon(Icons.tune_rounded, size: 16),
+      icon: const Icon(HookIcons.mixer, size: 16),
       label: Text(strings.lyricsView(mode.labelFor(strings))),
       style: TextButton.styleFrom(
         foregroundColor: theme.colors.textSecondary,
-        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(fontSize: HookType.label, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -67,7 +69,7 @@ class LyricsModeSelector extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 strings.lyricsModeSubtitle,
-                style: TextStyle(color: colors.textSecondary, fontSize: 14),
+                style: TextStyle(color: colors.textSecondary, fontSize: HookType.body),
               ),
               const SizedBox(height: 22),
               for (final mode in LyricsDisplayMode.values) ...[
@@ -120,8 +122,8 @@ class LyricsModeSelector extends ConsumerWidget {
                                     height: 64,
                                     child: Icon(
                                       mode == LyricsDisplayMode.focus
-                                          ? Icons.center_focus_strong_rounded
-                                          : Icons.lyrics_outlined,
+                                          ? HookIcons.lyricsFocus
+                                          : HookIcons.lyrics,
                                     ),
                                   ),
                                 ),
@@ -146,7 +148,7 @@ class LyricsModeSelector extends ConsumerWidget {
                                   mode.descriptionFor(strings),
                                   style: TextStyle(
                                     color: colors.textSecondary,
-                                    fontSize: 12,
+                                    fontSize: HookType.label,
                                     height: 1.4,
                                   ),
                                 ),
@@ -156,8 +158,8 @@ class LyricsModeSelector extends ConsumerWidget {
                           const SizedBox(width: 12),
                           Icon(
                             selected == mode
-                                ? Icons.check_circle_rounded
-                                : Icons.circle_outlined,
+                                ? HookIcons.checkCircle
+                                : HookIcons.circle,
                             size: 22,
                             color: selected == mode
                                 ? colors.textPrimary
@@ -175,7 +177,7 @@ class LyricsModeSelector extends ConsumerWidget {
                 strings.lyricsModeFootnote,
                 style: TextStyle(
                   color: colors.textSecondary,
-                  fontSize: 12,
+                  fontSize: HookType.label,
                   height: 1.5,
                 ),
               ),

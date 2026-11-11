@@ -3,8 +3,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 
+import '../../../core/ui/hook_icons.dart';
+import '../../../core/ui/hook_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
@@ -12,7 +13,6 @@ import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../theme_engine/domain/hook_theme.dart';
-import '../../theme_engine/presentation/theme_settings_screen.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -45,12 +45,21 @@ class HomeScreen extends ConsumerWidget {
         bottom: false,
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
+            // Reading width on a phone; a wide window gets more room without
+            // stretching a single column of track rows to 1400px.
+            constraints: const BoxConstraints(
+              maxWidth: HookBreakpoints.readingMax,
+            ),
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                    padding: const EdgeInsets.fromLTRB(
+                      HookSpace.xl,
+                      HookSpace.lg,
+                      HookSpace.md,
+                      HookSpace.lg,
+                    ),
                     child: Row(
                       children: [
                         Image.asset(
@@ -60,30 +69,23 @@ class HomeScreen extends ConsumerWidget {
                           color: colors.textPrimary,
                           excludeFromSemantics: true,
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: HookSpace.sm),
                         Expanded(
                           child: Text(
                             'Hook',
                             style: TextStyle(
                               color: colors.textPrimary,
-                              fontSize: 28,
+                              fontSize: HookType.display,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -1,
                             ),
                           ),
                         ),
-                        IconButton(
-                          tooltip: strings.themeSettings,
-                          icon: Icon(
-                            MingCuteIcons.mgc_palette_line,
-                            color: colors.textSecondary,
-                          ),
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => ThemeSettingsScreen(theme: theme),
-                            ),
-                          ),
-                        ),
+                        // One way into settings. The theme editor used to sit
+                        // beside it as a second identical-looking gear, which
+                        // nobody could tell apart; it now lives inside
+                        // settings, where the rest of the appearance options
+                        // already are.
                         IconButton(
                           key: const ValueKey('home-settings-button'),
                           tooltip: strings.settings,
@@ -92,12 +94,25 @@ class HomeScreen extends ConsumerWidget {
                             minHeight: 48,
                           ),
                           icon: Icon(
-                            Icons.settings_outlined,
+                            HookIcons.settings,
                             color: colors.textSecondary,
                           ),
                           onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const SettingsScreen(),
+                            PageRouteBuilder<void>(
+                              pageBuilder: (_, __, ___) =>
+                                  const SettingsScreen(),
+                              transitionDuration:
+                                  MediaQuery.disableAnimationsOf(context)
+                                  ? Duration.zero
+                                  : HookMotion.base,
+                              transitionsBuilder: (_, animation, __, child) =>
+                                  FadeTransition(
+                                    opacity: CurvedAnimation(
+                                      parent: animation,
+                                      curve: HookMotion.enter,
+                                    ),
+                                    child: child,
+                                  ),
                             ),
                           ),
                         ),
@@ -108,29 +123,31 @@ class HomeScreen extends ConsumerWidget {
                 const SliverToBoxAdapter(child: _ResumeCard()),
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: HookSpace.xl,
+                    ),
                     child: Material(
                       color: colors.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: HookRadius.lgAll,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: HookRadius.lgAll,
                         onTap: onOpenSearch,
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(HookSpace.lg),
                           child: Row(
                             children: [
                               Icon(
-                                MingCuteIcons.mgc_search_2_line,
+                                HookIcons.search,
                                 color: colors.textSecondary,
                                 size: 22,
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: HookSpace.md),
                               Expanded(
                                 child: Text(
                                   strings.homeSearchHint,
                                   style: TextStyle(
                                     color: colors.textSecondary,
-                                    fontSize: 14,
+                                    fontSize: HookType.body,
                                   ),
                                 ),
                               ),
@@ -163,9 +180,12 @@ class HomeScreen extends ConsumerWidget {
                           MediaQuery.textScalerOf(context).scale(14) * 3.6,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: HookSpace.xl,
+                        ),
                         itemCount: recent.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 16),
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: HookSpace.lg),
                         itemBuilder: (context, index) {
                           final track = recent[index];
                           return SizedBox(
@@ -173,7 +193,7 @@ class HomeScreen extends ConsumerWidget {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: HookRadius.mdAll,
                                 onTap: () => ref
                                     .read(queueProvider.notifier)
                                     .playQueue(recent, startIndex: index),
@@ -183,29 +203,29 @@ class HomeScreen extends ConsumerWidget {
                                     TrackArtwork(
                                       url: track.artworkUrl,
                                       size: 144,
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: HookRadius.mdAll,
                                       placeholderColor: colors.surface,
                                       iconColor: colors.textSecondary,
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: HookSpace.sm),
                                     Text(
                                       track.title,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: colors.textPrimary,
-                                        fontSize: 14,
+                                        fontSize: HookType.body,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    const SizedBox(height: 3),
+                                    const SizedBox(height: HookSpace.hair),
                                     Text(
                                       track.artist,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: colors.textSecondary,
-                                        fontSize: 12,
+                                        fontSize: HookType.label,
                                       ),
                                     ),
                                   ],
@@ -232,7 +252,9 @@ class HomeScreen extends ConsumerWidget {
                 if (favorites.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: HookSpace.xl,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -240,15 +262,15 @@ class HomeScreen extends ConsumerWidget {
                             strings.favoriteWaveHint,
                             style: TextStyle(
                               color: colors.textSecondary,
-                              fontSize: 14,
+                              fontSize: HookType.body,
                               height: 1.5,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: HookSpace.lg),
                           OutlinedButton.icon(
                             onPressed: onOpenSearch,
                             icon: const Icon(
-                              MingCuteIcons.mgc_search_2_line,
+                              HookIcons.search,
                               size: 20,
                             ),
                             label: Text(strings.openSearch),
@@ -264,15 +286,15 @@ class HomeScreen extends ConsumerWidget {
                       theme: theme,
                       track: favorites[index],
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
+                        horizontal: HookSpace.xl,
+                        vertical: HookSpace.sm,
                       ),
                       onTap: () => ref
                           .read(queueProvider.notifier)
                           .playQueue(favorites, startIndex: index),
                     ),
                   ),
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                const SliverToBoxAdapter(child: SizedBox(height: HookSpace.xxl)),
               ],
             ),
           ),
@@ -307,13 +329,18 @@ class _WaveField extends ConsumerWidget {
         : null;
     final effectiveSeed = seed ?? personalSeed;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      padding: const EdgeInsets.fromLTRB(
+        HookSpace.xl,
+        HookSpace.xxl,
+        HookSpace.xl,
+        0,
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: HookRadius.xlAll,
         ),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(HookSpace.xl),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -324,17 +351,17 @@ class _WaveField extends ConsumerWidget {
                     strings.yourWaveLabel,
                     style: TextStyle(
                       color: colors.textPrimary,
-                      fontSize: 16,
+                      fontSize: HookType.body,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 if (effectiveSeed != null) ...[
-                  const SizedBox(width: 12),
+                  const SizedBox(width: HookSpace.md),
                   TrackArtwork(
                     url: effectiveSeed.artworkUrl,
                     size: 40,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: HookRadius.smAll,
                     placeholderColor: colors.background,
                     iconColor: colors.textSecondary,
                   ),
@@ -342,7 +369,7 @@ class _WaveField extends ConsumerWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: HookSpace.xl),
               child: WaveRibbon(
                 color: colors.accent,
                 animate: active && playing && !loading,
@@ -354,13 +381,13 @@ class _WaveField extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: 26,
+                fontSize: HookType.title + 4,
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.7,
                 height: 1.15,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: HookSpace.sm),
             Text(
               effectiveSeed == null
                   ? strings.chooseTrackWaveDetail
@@ -369,11 +396,11 @@ class _WaveField extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: colors.textSecondary,
-                fontSize: 14,
+                fontSize: HookType.body,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: HookSpace.xl),
             FilledButton.icon(
               key: const ValueKey('home-wave-button'),
               onPressed: loading
@@ -394,8 +421,8 @@ class _WaveField extends ConsumerWidget {
                     )
                   : Icon(
                       effectiveSeed == null
-                          ? MingCuteIcons.mgc_search_2_line
-                          : MingCuteIcons.mgc_play_fill,
+                          ? HookIcons.search
+                          : HookIcons.play,
                       size: 20,
                     ),
               label: Text(
@@ -519,7 +546,12 @@ class _SectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+    padding: const EdgeInsets.fromLTRB(
+      HookSpace.xl,
+      HookSpace.xxl + HookSpace.xs,
+      HookSpace.xl,
+      HookSpace.lg,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -527,15 +559,18 @@ class _SectionHeading extends StatelessWidget {
           title,
           style: TextStyle(
             color: theme.colors.textPrimary,
-            fontSize: 22,
+            fontSize: HookType.title,
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: HookSpace.xs),
         Text(
           detail,
-          style: TextStyle(color: theme.colors.textSecondary, fontSize: 13),
+          style: TextStyle(
+            color: theme.colors.textSecondary,
+            fontSize: HookType.bodySmall,
+          ),
         ),
       ],
     ),
@@ -577,16 +612,23 @@ class _ResumeCard extends ConsumerWidget {
     }
 
     final strings = AppLocalizations.of(context);
+    final theme = ref.watch(themeProvider);
+    final colors = theme.colors;
     final minutes = (positionMs ~/ 60000);
     final position = '$minutes min';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      padding: const EdgeInsets.fromLTRB(
+        HookSpace.xl,
+        0,
+        HookSpace.xl,
+        HookSpace.lg,
+      ),
       child: Material(
-        color: Colors.white.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14),
+        color: colors.raised,
+        borderRadius: HookRadius.mdAll,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: HookRadius.mdAll,
           onTap: () async {
             final notifier = ref.read(queueProvider.notifier);
             await notifier.playTrack(track);
@@ -595,11 +637,11 @@ class _ResumeCard extends ConsumerWidget {
                 .seek(Duration(milliseconds: positionMs.round()));
           },
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(HookSpace.md),
             child: Row(
               children: [
-                const Icon(Icons.cast_rounded, size: 22),
-                const SizedBox(width: 12),
+                Icon(HookIcons.output, size: 22, color: colors.textSecondary),
+                const SizedBox(width: HookSpace.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,25 +650,26 @@ class _ResumeCard extends ConsumerWidget {
                         strings.resumeTitle(device),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13.5,
+                        style: TextStyle(
+                          color: colors.textPrimary,
+                          fontSize: HookType.bodySmall,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: HookSpace.hair),
                       Text(
                         '${track.artist} — ${track.title} · $position',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: HookType.label,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.play_arrow_rounded, size: 26),
+                Icon(HookIcons.play, size: 26, color: colors.textPrimary),
               ],
             ),
           ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
+
+import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../updates/update_provider.dart';
+import '../../../core/ui/hook_icons.dart';
 
 /// The OTA section in settings: current version, an automatic check on
 /// open (gated to once per six hours), and the full download-and-install
@@ -45,27 +47,27 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           children: [
             Row(
               children: [
-                Icon(
-                  MingCuteIcons.mgc_download_2_line,
-                  size: 20,
-                  color: colors.primary,
-                ),
+                Icon(HookIcons.download, size: 20, color: colors.primary),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     strings.updatesTitle,
                     style: TextStyle(
                       color: colors.onSurface,
-                      fontSize: 16,
+                      fontSize: HookType.heading,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                Text(
-                  strings.currentVersion(version),
-                  style: TextStyle(
-                    color: colors.onSurfaceVariant,
-                    fontSize: 12,
+                Flexible(
+                  child: Text(
+                    strings.currentVersion(version),
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      fontSize: HookType.label,
+                    ),
                   ),
                 ),
               ],
@@ -73,52 +75,59 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             const SizedBox(height: 10),
             ...switch (state.stage) {
               UpdateStage.checking => [
-                  Row(
-                    children: [
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
+                Row(
+                  children: [
+                    const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
                         strings.checkingForUpdates,
                         style: TextStyle(
                           color: colors.onSurfaceVariant,
-                          fontSize: 13,
+                          fontSize: HookType.bodySmall,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
+              ],
               UpdateStage.upToDate => [
-                  Row(
-                    children: [
-                      Icon(
-                        MingCuteIcons.mgc_check_circle_line,
-                        size: 17,
-                        color: colors.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
+                Row(
+                  children: [
+                    Icon(
+                      HookIcons.checkCircle,
+                      size: 17,
+                      color: colors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
                         strings.upToDate,
                         style: TextStyle(
                           color: colors.onSurfaceVariant,
-                          fontSize: 13,
+                          fontSize: HookType.bodySmall,
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
+              ],
               UpdateStage.available ||
               UpdateStage.downloading ||
               UpdateStage.downloaded => _buildUpdateFlow(context, state),
               UpdateStage.failed => [
-                  Text(
-                    strings.updateCheckFailed,
-                    style: TextStyle(color: colors.error, fontSize: 13),
+                Text(
+                  strings.updateCheckFailed,
+                  style: TextStyle(
+                    color: colors.error,
+                    fontSize: HookType.bodySmall,
                   ),
-                ],
+                ),
+              ],
               UpdateStage.idle => const [],
             },
             const SizedBox(height: 10),
@@ -126,7 +135,8 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
               alignment: Alignment.centerRight,
               child: TextButton(
                 key: const ValueKey('updates-check-button'),
-                onPressed: state.stage == UpdateStage.checking ||
+                onPressed:
+                    state.stage == UpdateStage.checking ||
                         state.stage == UpdateStage.downloading
                     ? null
                     : () => ref.read(updateProvider.notifier).check(),
@@ -148,7 +158,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       return [
         Text(
           strings.downloadingUpdate,
-          style: TextStyle(color: colors.onSurfaceVariant, fontSize: 13),
+          style: TextStyle(
+            color: colors.onSurfaceVariant,
+            fontSize: HookType.bodySmall,
+          ),
         ),
         const SizedBox(height: 8),
         LinearProgressIndicator(
@@ -161,7 +174,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           alignment: Alignment.centerRight,
           child: Text(
             '${(state.progress * 100).round()}%',
-            style: TextStyle(color: colors.onSurfaceVariant, fontSize: 11),
+            style: TextStyle(
+              color: colors.onSurfaceVariant,
+              fontSize: HookType.caption,
+            ),
           ),
         ),
       ];
@@ -172,7 +188,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
         strings.updateAvailable(update.version),
         style: TextStyle(
           color: colors.onSurface,
-          fontSize: 14,
+          fontSize: HookType.body,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -184,7 +200,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: colors.onSurfaceVariant,
-            fontSize: 12.5,
+            fontSize: HookType.label,
             height: 1.4,
           ),
         ),
@@ -193,7 +209,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
         const SizedBox(height: 8),
         Text(
           strings.installPermissionNeeded,
-          style: TextStyle(color: colors.error, fontSize: 12.5),
+          style: TextStyle(color: colors.error, fontSize: HookType.label),
         ),
       ],
       const SizedBox(height: 12),
@@ -204,7 +220,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           onPressed: state.stage == UpdateStage.downloaded
               ? ref.read(updateProvider.notifier).openInstaller
               : ref.read(updateProvider.notifier).downloadAndInstall,
-          icon: const Icon(MingCuteIcons.mgc_download_2_fill, size: 18),
+          icon: const Icon(HookIcons.downloadDone, size: 18),
           label: Text(strings.installUpdate),
         ),
       ),
