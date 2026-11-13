@@ -399,6 +399,8 @@
   "lyricsOffset": "Desfase: {value} s",
   "increaseLyricsOffset": "Aumentar desfase en 0,1 s",
   "hideSetting": "Ocultar ajuste",
+  "fullscreenLyrics": "Pantalla completa",
+  "exitFullscreenLyrics": "Salir de pantalla completa",
   "lyricsOffsetSaveFailed": "No se pudo guardar el desfase de la letra.",
   "audioForbidden": "El servidor de audio denegó el acceso (HTTP 403). La pista se encontró, pero su flujo no está disponible. Una VPN no garantiza el acceso al audio.",
   "fullVersionUnavailable": "No se encontró una versión completa en las fuentes disponibles. Comprueba tu conexión o inténtalo más tarde.",

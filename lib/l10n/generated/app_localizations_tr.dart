@@ -1340,6 +1340,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get hideSetting => 'Ayarı gizle';
 
   @override
+  String get fullscreenLyrics => 'Tam ekran';
+
+  @override
+  String get exitFullscreenLyrics => 'Tam ekrandan çık';
+
+  @override
   String get lyricsOffsetSaveFailed => 'Söz kaydırması kaydedilemedi.';
 
   @override

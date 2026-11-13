@@ -399,6 +399,8 @@
   "lyricsOffset": "오프셋: {value}초",
   "increaseLyricsOffset": "오프셋 0.1초 늘리기",
   "hideSetting": "설정 숨기기",
+  "fullscreenLyrics": "전체 화면",
+  "exitFullscreenLyrics": "전체 화면 닫기",
   "lyricsOffsetSaveFailed": "가사 오프셋을 저장하지 못했습니다.",
   "audioForbidden": "오디오 서버가 접근을 거부했습니다(HTTP 403). 트랙은 찾았지만 스트림을 이용할 수 없습니다. VPN도 오디오 접근을 보장하지 않습니다.",
   "fullVersionUnavailable": "이용 가능한 소스에서 완전판을 찾지 못했습니다. 연결을 확인하거나 나중에 다시 시도하세요.",

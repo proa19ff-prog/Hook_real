@@ -94,8 +94,7 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   /// second is enough for SoundCloud's CDN and starts playback sooner.
   /// The Android tuning is meaningless on desktop engines (WinRT MediaPlayer),
   /// which are given no custom load configuration at all.
-  static AudioLoadConfiguration? get _loadConfiguration =>
-      Platform.isAndroid
+  static AudioLoadConfiguration? get _loadConfiguration => Platform.isAndroid
       ? const AudioLoadConfiguration(
           androidLoadControl: AndroidLoadControl(
             minBufferDuration: Duration(seconds: 15),
@@ -335,8 +334,17 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
 
   /// Resolves the next queue item in the background so skipping is instant.
   void _prefetchNext() {
-    if (_waveActive && _currentIndex >= _queue.length - 3) {
-      unawaited(_extendWave());
+    if (_currentIndex >= _queue.length - 3) {
+      if (!_waveActive && _currentTrack != null) {
+        _waveActive = true;
+        _waveSeed = _currentTrack;
+        _playbackContext =
+            '${_usesRussian ? 'Похожие треки' : 'Similar tracks'}: ${_currentTrack!.title}';
+        _waveSeen.addAll(_queue.map(TrackWaveService.trackKey));
+      }
+      if (_waveActive) {
+        unawaited(_extendWave());
+      }
     }
     if (_isShuffle || _currentIndex + 1 >= _queue.length) return;
     prefetch([_queue[_currentIndex + 1]]);
@@ -427,7 +435,23 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     _notifyQueue();
 
     if (_queue.isNotEmpty) {
-      await playTrack(_queue[_currentIndex]);
+      final current = _queue[_currentIndex];
+      // When a single track is selected to play, or starting at the end of a queue,
+      // start smart recommendations immediately so the next tracks are chosen
+      // right away without needing any buttons!
+      if (_queue.length <= 1) {
+        _waveActive = true;
+        _waveSeed = current;
+        _waveSeen.add(TrackWaveService.trackKey(current));
+        for (final track
+            in _storageService?.getHistory() ?? const <MediaTrack>[]) {
+          _waveSeen.add(TrackWaveService.trackKey(track));
+        }
+        _playbackContext =
+            '${_usesRussian ? 'Похожие треки' : 'Similar tracks'}: ${current.title}';
+        unawaited(_extendWave());
+      }
+      await playTrack(current);
     } else {
       _setCurrentTrack(null);
       await stop();
@@ -640,12 +664,16 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
             }
           }),
         );
-        // Mask the hard source swap with a soft entry.
-        unawaited(_fadeIn());
+        final target = equalizer.volume.clamp(0.0, 1.0);
+        if (target > 0) {
+          unawaited(_player.setVolume(target));
+        }
       }
       unawaited(_storageService?.addToHistory(track));
       // Real replay signal for the personal recommendations engine.
-      unawaited(_storageService?.registerPlay(TrackWaveService.trackKey(track)));
+      unawaited(
+        _storageService?.registerPlay(TrackWaveService.trackKey(track)),
+      );
       _saveResumeState(track);
       _prefetchNext();
       return true;
@@ -1084,22 +1112,6 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     });
   }
 
-  /// Ramps the player from silence up to the listener's volume after a
-  /// track switch, softening the instant a new source is attached. Direct
-  /// player-volume writes are safe here: the equalizer only rewrites the
-  /// level when the user moves their own control.
-  Future<void> _fadeIn({
-    Duration length = const Duration(milliseconds: 280),
-  }) async {
-    final target = equalizer.volume.clamp(0.0, 1.0);
-    if (target <= 0) return;
-    const steps = 10;
-    for (var i = 1; i <= steps; i++) {
-      await _player.setVolume(target * i / steps);
-      await Future<void>.delayed(length ~/ steps);
-    }
-  }
-
   /// Slides to silence before an automated pause (sleep timer) and restores
   /// the listener's volume afterwards, so the next play is not silent.
   Future<void> fadeOutAndPause({
@@ -1146,14 +1158,23 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   Future<void> next() async {
     if (_queue.isEmpty) return;
 
-    if (_waveActive && _currentIndex + 1 >= _queue.length) {
-      await _extendWave();
-      if (_currentIndex + 1 >= _queue.length) {
-        // The first fetch may have failed transiently (carrier throttling,
-        // a blocked endpoint). Give the batch one more chance before the
-        // wave dies at the end of the playing track.
-        await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (_currentIndex + 1 >= _queue.length) {
+      if (!_waveActive && _currentTrack != null) {
+        _waveActive = true;
+        _waveSeed = _currentTrack;
+        _playbackContext =
+            '${_usesRussian ? 'Похожие треки' : 'Similar tracks'}: ${_currentTrack!.title}';
+        _waveSeen.addAll(_queue.map(TrackWaveService.trackKey));
+      }
+      if (_waveActive) {
         await _extendWave();
+        if (_currentIndex + 1 >= _queue.length) {
+          // The first fetch may have failed transiently (carrier throttling,
+          // a blocked endpoint). Give the batch one more chance before the
+          // wave dies at the end of the playing track.
+          await Future<void>.delayed(const Duration(milliseconds: 800));
+          await _extendWave();
+        }
       }
     }
     if (_isShuffle && !_waveActive && _queue.length > 1) {

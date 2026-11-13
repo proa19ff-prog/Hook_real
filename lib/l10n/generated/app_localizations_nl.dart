@@ -1350,6 +1350,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get hideSetting => 'Instelling verbergen';
 
   @override
+  String get fullscreenLyrics => 'Volledig scherm';
+
+  @override
+  String get exitFullscreenLyrics => 'Volledig scherm sluiten';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'Kon de songtekst-verschiving niet opslaan.';
 

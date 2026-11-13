@@ -15,6 +15,8 @@ import '../../settings/presentation/settings_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
+import '../data/audio_player_service.dart';
+import 'fullscreen_lyrics_bottom_bar.dart';
 import 'lyrics_focus_frame.dart';
 import 'playback_controls.dart';
 import 'player_state_provider.dart';
@@ -24,7 +26,11 @@ import 'track_downloads_provider.dart';
 
 class FullscreenPlayer extends ConsumerStatefulWidget {
   final HookTheme theme;
-  const FullscreenPlayer({super.key, required this.theme, this.initialLyrics = false});
+  const FullscreenPlayer({
+    super.key,
+    required this.theme,
+    this.initialLyrics = false,
+  });
 
   /// Opens straight into the lyrics panel, used by the "lyrics" button on the
   /// desktop player bar.
@@ -36,6 +42,7 @@ class FullscreenPlayer extends ConsumerStatefulWidget {
 
 class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
   late bool _showLyrics = widget.initialLyrics;
+  bool _lyricsFullscreen = false;
   bool _isChangingTrack = false;
   bool _randomBusy = false;
   final Set<String> _recentRandomKeys = <String>{};
@@ -133,8 +140,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                           // The wave grows asynchronously: while the playing
                           // track is the last one, the next batch is still
                           // being fetched — say so instead of looking broken.
-                          itemCount:
-                              queue.length + (player.waveActive ? 1 : 0),
+                          itemCount: queue.length + (player.waveActive ? 1 : 0),
                           itemBuilder: (context, index) {
                             if (index >= queue.length) {
                               return Padding(
@@ -169,9 +175,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                               track: queue[index],
                               isCurrent: index == player.currentIndex,
                               onTap: () {
-                                ref
-                                    .read(queueProvider.notifier)
-                                    .playAt(index);
+                                ref.read(queueProvider.notifier).playAt(index);
                                 Navigator.of(sheetContext).pop();
                               },
                             );
@@ -182,6 +186,91 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFullscreenLyricsView({
+    required BuildContext context,
+    required AppLocalizations strings,
+    required HookColors colors,
+    required MediaTrack? track,
+    required AudioPlayerService player,
+  }) {
+    final ambient = AmbientThemeScope.of(context);
+    final text = ambient?.textPrimary ?? colors.textPrimary;
+
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          // Top bar for fullscreen lyrics
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 6, 8, 4),
+            child: Row(
+              children: [
+                IconButton(
+                  key: const ValueKey('player-fullscreen-lyrics-collapse-top'),
+                  tooltip: strings.exitFullscreenLyrics,
+                  icon: Icon(HookIcons.collapse, color: text),
+                  onPressed: () {
+                    HookHaptics.tap();
+                    setState(() => _lyricsFullscreen = false);
+                  },
+                ),
+                Expanded(
+                  child: Center(
+                    child: LyricsModeButton(theme: widget.theme),
+                  ),
+                ),
+                IconButton(
+                  key: const ValueKey('player-fullscreen-lyrics-exit-top'),
+                  tooltip: strings.exitFullscreenLyrics,
+                  icon: Icon(HookIcons.fullscreenExit, color: text),
+                  onPressed: () {
+                    HookHaptics.tap();
+                    setState(() => _lyricsFullscreen = false);
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Main Expanded Lyrics Area
+          Expanded(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: HookBreakpoints.readingMax,
+                ),
+                child: KaraokeLyricsView(theme: widget.theme),
+              ),
+            ),
+          ),
+
+          // Persistent Bottom Player Bar
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: HookBreakpoints.readingMax,
+              ),
+              child: FullscreenLyricsBottomBar(
+                theme: widget.theme,
+                track: track,
+                onCollapse: () {
+                  HookHaptics.tap();
+                  setState(() => _lyricsFullscreen = false);
+                },
+                onNext: () => _trackTransitionKey.currentState
+                    ?.navigate(TrackSwipeDirection.next),
+                onPrevious: () => _trackTransitionKey.currentState?.navigate(
+                  TrackSwipeDirection.previous,
+                  action: player.previous,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -214,15 +303,15 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
               (downloads) => downloads[TrackDownloadsNotifier.keyOf(track)],
             ),
           );
-    final isDownloading =
-        dlState?.status == TrackDownloadStatus.downloading;
+    final isDownloading = dlState?.status == TrackDownloadStatus.downloading;
     final isDownloaded = dlState?.status == TrackDownloadStatus.downloaded;
     final isFailed = dlState?.status == TrackDownloadStatus.failed;
     // Announce the outcome once per state change, outside the sheet.
     ref.listen(
       trackDownloadsProvider.select(
-        (downloads) =>
-            track == null ? null : downloads[TrackDownloadsNotifier.keyOf(track)]?.status,
+        (downloads) => track == null
+            ? null
+            : downloads[TrackDownloadsNotifier.keyOf(track)]?.status,
       ),
       (previous, next) {
         if (track == null || !context.mounted) return;
@@ -259,21 +348,45 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
             ? strings.selectingSource
             : track.source.labelFor(strings));
 
-    return Scaffold(
-      body: DynamicShaderBackground(
-        theme: widget.theme,
-        artworkUrl: track?.artworkUrl,
-        child: SafeArea(
-          child: LyricsFocusFrame(
-            active:
-                _showLyrics &&
-                track != null &&
-                lyrics != null &&
-                !lyrics.isEmpty,
-            enabled: autoHide,
-            trackKey: _trackKey(track),
-            builder: (context, hidden, restore) => Stack(
-              fit: StackFit.expand,
+    return PopScope(
+      canPop: !_lyricsFullscreen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _lyricsFullscreen) {
+          setState(() => _lyricsFullscreen = false);
+        }
+      },
+      child: Scaffold(
+        body: DynamicShaderBackground(
+          theme: widget.theme,
+          artworkUrl: track?.artworkUrl,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            switchInCurve: Curves.easeInOutCubic,
+            switchOutCurve: Curves.easeInOutCubic,
+            child: _lyricsFullscreen
+                ? KeyedSubtree(
+                    key: const ValueKey('lyrics-fullscreen-view'),
+                    child: _buildFullscreenLyricsView(
+                      context: context,
+                      strings: strings,
+                      colors: colors,
+                      track: track,
+                      player: player,
+                    ),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('player-standard-view'),
+                    child: SafeArea(
+                      child: LyricsFocusFrame(
+                        active:
+                            _showLyrics &&
+                            track != null &&
+                            lyrics != null &&
+                            !lyrics.isEmpty,
+                        enabled: autoHide,
+                        trackKey: _trackKey(track),
+                        builder: (context, hidden, restore) => Stack(
+                          fit: StackFit.expand,
               children: [
                 Center(
                   child: ConstrainedBox(
@@ -298,10 +411,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                               IconButton(
                                 tooltip: strings.collapsePlayer,
                                 onPressed: () => Navigator.of(context).pop(),
-                                icon: Icon(
-                                  HookIcons.collapse,
-                                  color: text,
-                                ),
+                                icon: Icon(HookIcons.collapse, color: text),
                               ),
                               Expanded(
                                 child: Column(
@@ -392,6 +502,12 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                   }
                                   if (value == 'queue') _showQueueSheet();
                                   if (value == 'random') _playRandomPick();
+                                  if (value == 'fullscreen_lyrics') {
+                                    setState(() {
+                                      _showLyrics = true;
+                                      _lyricsFullscreen = true;
+                                    });
+                                  }
                                 },
                                 itemBuilder: (menuContext) => [
                                   if (track != null)
@@ -406,6 +522,21 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                           ),
                                           const SizedBox(width: HookSpace.md),
                                           Text(strings.goToArtist),
+                                        ],
+                                      ),
+                                    ),
+                                  if (track != null)
+                                    PopupMenuItem(
+                                      value: 'fullscreen_lyrics',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            HookIcons.fullscreen,
+                                            size: 18,
+                                            color: colors.textSecondary,
+                                          ),
+                                          const SizedBox(width: HookSpace.md),
+                                          Text(strings.fullscreenLyrics),
                                         ],
                                       ),
                                     ),
@@ -472,21 +603,17 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       final size = (bounds.maxHeight - 16)
                                           .clamp(0.0, width);
                                       return Center(
-                                        child: Hero(
-                                          tag:
-                                              'current_artwork_${_trackKey(track)}',
-                                          child: TrackArtwork(
-                                            url: track.artworkUrl,
-                                            artist: track.artist,
-                                            title: track.title,
-                                            duration: track.duration,
-                                            size: size,
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            placeholderColor: colors.surface,
-                                            iconColor: colors.textSecondary,
+                                        child: TrackArtwork(
+                                          url: track.artworkUrl,
+                                          artist: track.artist,
+                                          title: track.title,
+                                          duration: track.duration,
+                                          size: size,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
+                                          placeholderColor: colors.surface,
+                                          iconColor: colors.textSecondary,
                                         ),
                                       );
                                     },
@@ -598,6 +725,27 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       : strings.karaokeLyrics,
                                 ),
                               ),
+                              if (_showLyrics)
+                                TextButton.icon(
+                                  key: const ValueKey(
+                                    'player-lyrics-fullscreen-button',
+                                  ),
+                                  onPressed: track == null
+                                      ? null
+                                      : () => setState(
+                                          () => _lyricsFullscreen = true,
+                                        ),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: text,
+                                    backgroundColor: colors.surface,
+                                    minimumSize: const Size(48, 48),
+                                  ),
+                                  icon: const Icon(
+                                    HookIcons.fullscreen,
+                                    size: 20,
+                                  ),
+                                  label: Text(strings.fullscreenLyrics),
+                                ),
                               TextButton.icon(
                                 onPressed: track == null || _isChangingTrack
                                     ? null
@@ -619,10 +767,7 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                   foregroundColor: muted,
                                   minimumSize: const Size(48, 48),
                                 ),
-                                icon: const Icon(
-                                  HookIcons.waveform,
-                                  size: 20,
-                                ),
+                                icon: const Icon(HookIcons.waveform, size: 20),
                                 label: Text(strings.startWave),
                               ),
                             ],
@@ -697,7 +842,33 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                             children: [
                               header,
                               if (_showLyrics)
-                                LyricsModeButton(theme: widget.theme),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 6),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    children: [
+                                      LyricsModeButton(theme: widget.theme),
+                                      IconButton(
+                                        key: const ValueKey(
+                                          'player-lyrics-fullscreen-expand',
+                                        ),
+                                        tooltip: strings.fullscreenLyrics,
+                                        icon: Icon(
+                                          HookIcons.fullscreen,
+                                          color: text,
+                                          size: 20,
+                                        ),
+                                        onPressed: () => setState(
+                                          () => _lyricsFullscreen = true,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                             ],
                           ),
                         );
@@ -753,6 +924,9 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+),
+);
   }
 }

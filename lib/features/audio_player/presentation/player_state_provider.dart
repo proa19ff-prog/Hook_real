@@ -164,9 +164,10 @@ final playbackSourceProvider = Provider<TrackSource?>((ref) {
 // State Notifier for Current Track & Queue
 class QueueNotifier extends StateNotifier<List<MediaTrack>> {
   final AudioPlayerService _service;
+  final Ref? _ref;
   late final StreamSubscription<int> _queueSubscription;
 
-  QueueNotifier(this._service) : super(_service.trackQueue) {
+  QueueNotifier(this._service, [this._ref]) : super(_service.trackQueue) {
     // Radio may extend the queue asynchronously after the user presses play.
     // Mirror every service mutation so queue sheets and shared track rows stay
     // in sync instead of showing the initial one-track seed forever.
@@ -196,6 +197,41 @@ class QueueNotifier extends StateNotifier<List<MediaTrack>> {
     state = _service.trackQueue;
   }
 
+  Future<void> playRandom() async {
+    final ref = _ref;
+    final pool = <MediaTrack>[];
+    if (ref != null) {
+      final favorites = ref.read(favoritesProvider);
+      final history = ref.read(historyProvider);
+      pool.addAll(favorites);
+      pool.addAll(history);
+
+      final remote = ref.read(streamResolverProvider).remoteSource;
+      if (remote != null) {
+        try {
+          final popular = await remote.popular(limit: 25);
+          pool.addAll(popular);
+        } catch (_) {}
+      }
+
+      if (pool.isEmpty) {
+        try {
+          final recs = await ref
+              .read(recommendationServiceProvider)
+              .getPersonalizedRecommendations(limit: 30)
+              .timeout(const Duration(seconds: 10));
+          pool.addAll(recs);
+        } catch (_) {}
+      }
+    }
+
+    final current = _service.currentTrack;
+    final chosen = pickRandomTrack(pool, current: current);
+    if (chosen != null) {
+      await startWave(chosen);
+    }
+  }
+
   Future<void> playAt(int index) async {
     await _service.playAt(index);
     state = _service.trackQueue;
@@ -218,7 +254,7 @@ final queueProvider = StateNotifierProvider<QueueNotifier, List<MediaTrack>>((
   ref,
 ) {
   final service = ref.watch(audioPlayerServiceProvider);
-  return QueueNotifier(service);
+  return QueueNotifier(service, ref);
 });
 
 final queueChangesProvider = StreamProvider<int>((ref) {

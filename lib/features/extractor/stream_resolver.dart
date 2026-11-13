@@ -681,7 +681,10 @@ class StreamResolver {
   /// keeps its relevance order at the top, canonical album tracks follow.
   /// Anything not actually by the wanted performer is dropped — text search
   /// freely returns same-titled songs by someone else.
-  Future<List<MediaTrack>> artistTracks(String artistName, {int limit = 50}) async {
+  Future<List<MediaTrack>> artistTracks(
+    String artistName, {
+    int limit = 50,
+  }) async {
     final name = artistName.trim();
     if (name.isEmpty || _disposed) return const [];
     final results = await Future.wait([
@@ -702,8 +705,9 @@ class StreamResolver {
     bool byArtist(MediaTrack track) {
       final wanted = _artists(name);
       final got = _artists(track.artist);
-      return wanted.any((w) =>
-          got.any((g) => _hasArtist(g, w) || _hasArtist(w, g)));
+      return wanted.any(
+        (w) => got.any((g) => _hasArtist(g, w) || _hasArtist(w, g)),
+      );
     }
 
     String dedupKey(MediaTrack track) =>
@@ -726,7 +730,8 @@ class StreamResolver {
 
   /// Source-specific entries retain their identity. Only catalog entries are
   /// matched across providers; a selected upload never silently becomes another.
-  Future<ResolvedStream?> resolveStream(MediaTrack track) async {    if (_disposed) return null;
+  Future<ResolvedStream?> resolveStream(MediaTrack track) async {
+    if (_disposed) return null;
     if (track.source.isCatalog) return resolveSpotifyTrack(track);
     if (track.source == TrackSource.local) {
       final url = track.streamUrl;
@@ -738,7 +743,7 @@ class StreamResolver {
       final url = track.streamUrl;
       if (url != null && url.isNotEmpty) {
         return ResolvedStream(
-          url,
+          RemoteResolverSource.canonicalStreamUrl(url),
           source: track.source,
           duration: track.duration,
         );
@@ -830,7 +835,9 @@ class StreamResolver {
 
     final directAttempt = () async {
       try {
-        final stream = await direct.resolveTrack(track).timeout(directYouTubeTimeout);
+        final stream = await direct
+            .resolveTrack(track)
+            .timeout(directYouTubeTimeout);
         if (stream != null && !stream.isEmpty) return stream;
         directFailed = true;
         return null;

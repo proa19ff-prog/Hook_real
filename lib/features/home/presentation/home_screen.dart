@@ -126,35 +126,43 @@ class HomeScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(
                       horizontal: HookSpace.xl,
                     ),
-                    child: Material(
-                      color: colors.surface,
-                      borderRadius: HookRadius.lgAll,
-                      child: InkWell(
-                        borderRadius: HookRadius.lgAll,
-                        onTap: onOpenSearch,
-                        child: Padding(
-                          padding: const EdgeInsets.all(HookSpace.lg),
-                          child: Row(
-                            children: [
-                              Icon(
-                                HookIcons.search,
-                                color: colors.textSecondary,
-                                size: 22,
-                              ),
-                              const SizedBox(width: HookSpace.md),
-                              Expanded(
-                                child: Text(
-                                  strings.homeSearchHint,
-                                  style: TextStyle(
-                                    color: colors.textSecondary,
-                                    fontSize: HookType.body,
-                                  ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Material(
+                            color: colors.surface,
+                            borderRadius: HookRadius.lgAll,
+                            child: InkWell(
+                              borderRadius: HookRadius.lgAll,
+                              onTap: onOpenSearch,
+                              child: Padding(
+                                padding: const EdgeInsets.all(HookSpace.lg),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      HookIcons.search,
+                                      color: colors.textSecondary,
+                                      size: 22,
+                                    ),
+                                    const SizedBox(width: HookSpace.md),
+                                    Expanded(
+                                      child: Text(
+                                        strings.homeSearchHint,
+                                        style: TextStyle(
+                                          color: colors.textSecondary,
+                                          fontSize: HookType.body,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: HookSpace.sm),
+                        _HomeRandomButton(theme: theme),
+                      ],
                     ),
                   ),
                 ),
@@ -272,10 +280,7 @@ class HomeScreen extends ConsumerWidget {
                           const SizedBox(height: HookSpace.lg),
                           OutlinedButton.icon(
                             onPressed: onOpenSearch,
-                            icon: const Icon(
-                              HookIcons.search,
-                              size: 20,
-                            ),
+                            icon: const Icon(HookIcons.search, size: 20),
                             label: Text(strings.openSearch),
                           ),
                         ],
@@ -297,7 +302,9 @@ class HomeScreen extends ConsumerWidget {
                           .playQueue(favorites, startIndex: index),
                     ),
                   ),
-                const SliverToBoxAdapter(child: SizedBox(height: HookSpace.xxl)),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: HookSpace.xxl),
+                ),
               ],
             ),
           ),
@@ -382,7 +389,10 @@ class _WaveField extends ConsumerWidget {
               ),
             ),
             Text(
-              effectiveSeed?.title ?? strings.findFirstTrack,
+              effectiveSeed?.title ??
+                  (effectiveSeed == null
+                      ? 'Не знаете, что послушать?'
+                      : strings.findFirstTrack),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -396,7 +406,7 @@ class _WaveField extends ConsumerWidget {
             const SizedBox(height: HookSpace.sm),
             Text(
               effectiveSeed == null
-                  ? strings.chooseTrackWaveDetail
+                  ? 'Включите случайный микс — мы сразу запустим трек и подберём отличную волну продолжения.'
                   : strings.continuationAfter(effectiveSeed.artist),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -407,33 +417,68 @@ class _WaveField extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: HookSpace.xl),
-            FilledButton.icon(
-              key: const ValueKey('home-wave-button'),
-              onPressed: loading
-                  ? null
-                  : effectiveSeed == null
-                  ? onOpenSearch
-                  : () =>
-                        ref.read(queueProvider.notifier).startWave(effectiveSeed),
-              style: FilledButton.styleFrom(
-                backgroundColor: colors.textPrimary,
-                foregroundColor: colors.background,
-              ),
-              icon: loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Icon(
-                      effectiveSeed == null
-                          ? HookIcons.search
-                          : HookIcons.play,
-                      size: 20,
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    key: const ValueKey('home-wave-button'),
+                    onPressed: loading
+                        ? null
+                        : effectiveSeed == null
+                        ? () => ref.read(queueProvider.notifier).playRandom()
+                        : () => ref
+                              .read(queueProvider.notifier)
+                              .startWave(effectiveSeed),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colors.textPrimary,
+                      foregroundColor: colors.background,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: HookSpace.lg,
+                        vertical: HookSpace.md,
+                      ),
                     ),
-              label: Text(
-                effectiveSeed == null ? strings.chooseTrack : strings.continueWave,
-              ),
+                    icon: loading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            effectiveSeed == null
+                                ? HookIcons.shuffle
+                                : HookIcons.play,
+                            size: 20,
+                          ),
+                    label: Text(
+                      effectiveSeed == null
+                          ? strings.randomPick
+                          : strings.continueWave,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: HookSpace.sm),
+                IconButton.filledTonal(
+                  tooltip: effectiveSeed == null
+                      ? strings.chooseTrack
+                      : strings.randomPick,
+                  onPressed: loading
+                      ? null
+                      : effectiveSeed == null
+                      ? onOpenSearch
+                      : () => ref.read(queueProvider.notifier).playRandom(),
+                  style: IconButton.styleFrom(
+                    backgroundColor: colors.textPrimary.withValues(alpha: 0.08),
+                    foregroundColor: colors.textPrimary,
+                    padding: const EdgeInsets.all(HookSpace.md),
+                  ),
+                  icon: Icon(
+                    effectiveSeed == null
+                        ? HookIcons.search
+                        : HookIcons.shuffle,
+                    size: 20,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -595,9 +640,7 @@ class _ResumeCard extends ConsumerWidget {
     if (state == null) return const SizedBox.shrink();
     final device = state['device'];
     final at = state['at'];
-    if (device is! String ||
-        device == Platform.localHostname ||
-        at is! num) {
+    if (device is! String || device == Platform.localHostname || at is! num) {
       return const SizedBox.shrink();
     }
     if (DateTime.now().millisecondsSinceEpoch - at > 48 * 3600 * 1000) {
@@ -678,6 +721,58 @@ class _ResumeCard extends ConsumerWidget {
                 Icon(HookIcons.play, size: 26, color: colors.textPrimary),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeRandomButton extends ConsumerStatefulWidget {
+  final HookTheme theme;
+  const _HomeRandomButton({required this.theme});
+
+  @override
+  ConsumerState<_HomeRandomButton> createState() => _HomeRandomButtonState();
+}
+
+class _HomeRandomButtonState extends ConsumerState<_HomeRandomButton> {
+  bool _isLoading = false;
+
+  Future<void> _playRandom() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(queueProvider.notifier).playRandom();
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = widget.theme.colors;
+    final strings = AppLocalizations.of(context);
+    return Material(
+      color: colors.surface,
+      borderRadius: HookRadius.lgAll,
+      child: InkWell(
+        borderRadius: HookRadius.lgAll,
+        onTap: _isLoading ? null : _playRandom,
+        child: Tooltip(
+          message: strings.randomPick,
+          child: Padding(
+            padding: const EdgeInsets.all(HookSpace.lg),
+            child: _isLoading
+                ? SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.accent,
+                    ),
+                  )
+                : Icon(HookIcons.shuffle, color: colors.accent, size: 22),
           ),
         ),
       ),

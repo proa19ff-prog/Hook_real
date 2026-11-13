@@ -179,7 +179,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   void _play(int index) {
     _focusNode.unfocus();
-    ref.read(queueProvider.notifier).playQueue(_results, startIndex: index);
+    final track = _results[index];
+    ref.read(queueProvider.notifier).startWave(track);
   }
 
   @override
@@ -245,6 +246,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       child: _buildSearchField(strings, colors),
                     ),
                     background: colors.background,
+                    borderColor: colors.border,
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -252,23 +254,49 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
+                        padding: const EdgeInsets.fromLTRB(
+                          HookSpace.xl,
+                          HookSpace.xs,
+                          HookSpace.xl,
+                          HookSpace.sm,
+                        ),
                         child: Row(
                           children: [
-                            _modeButton(MusicSearchMode.tracks, strings.music),
-                            const SizedBox(width: 8),
-                            _modeButton(
-                              MusicSearchMode.lyrics,
-                              strings.byLyrics,
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  color: colors.surface.withValues(alpha: 0.7),
+                                  borderRadius: HookRadius.mdAll,
+                                  border: Border.all(
+                                    color: colors.border.withValues(
+                                      alpha: 0.35,
+                                    ),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    _modeButton(
+                                      MusicSearchMode.tracks,
+                                      strings.music,
+                                    ),
+                                    _modeButton(
+                                      MusicSearchMode.lyrics,
+                                      strings.byLyrics,
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            const Spacer(),
+                            const SizedBox(width: HookSpace.sm),
                             _sourceFilterButton(strings),
                           ],
                         ),
                       ),
                       if (_mode == MusicSearchMode.lyrics)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 6, 24, 12),
+                          padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
                           child: Text(
                             strings.lyricsSearchCaption,
                             style: TextStyle(
@@ -296,17 +324,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       controller: _searchController,
       focusNode: _focusNode,
       maxLength: 200,
-      style: TextStyle(color: colors.textPrimary, fontSize: HookType.heading),
+      style: TextStyle(
+        color: colors.textPrimary,
+        fontSize: HookType.body,
+        fontWeight: FontWeight.w500,
+      ),
       cursorColor: colors.primary,
       decoration: InputDecoration(
         counterText: '',
         hintText: _mode == MusicSearchMode.lyrics
             ? strings.rememberedLyricsHint
             : strings.trackArtistHint,
-        hintStyle: TextStyle(color: colors.textSecondary, fontSize: HookType.body),
+        hintStyle: TextStyle(
+          color: colors.textSecondary,
+          fontSize: HookType.body,
+        ),
         filled: true,
         fillColor: colors.surface,
-        prefixIcon: Icon(HookIcons.search, color: colors.textSecondary),
+        prefixIcon: Icon(
+          HookIcons.search,
+          color: colors.textSecondary,
+          size: 22,
+        ),
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: _searchController,
           builder: (_, value, __) => value.text.isEmpty
@@ -314,17 +353,34 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               : IconButton(
                   tooltip: strings.clear,
                   onPressed: _clear,
-                  icon: Icon(HookIcons.close, color: colors.textSecondary),
+                  icon: Icon(
+                    HookIcons.close,
+                    color: colors.textSecondary,
+                    size: 20,
+                  ),
                 ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: HookSpace.lg,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: HookRadius.lgAll,
+          borderSide: BorderSide(
+            color: colors.border.withValues(alpha: 0.45),
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: HookRadius.lgAll,
+          borderSide: BorderSide(
+            color: colors.border.withValues(alpha: 0.45),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: colors.primary.withValues(alpha: 0.65)),
+          borderRadius: HookRadius.lgAll,
+          borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
       ),
       textInputAction: TextInputAction.search,
@@ -342,24 +398,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Expanded(
       child: Semantics(
         selected: selected,
-        child: TextButton(
-          onPressed: () => _changeMode(mode),
-          style: TextButton.styleFrom(
-            foregroundColor: selected
-                ? colors.textPrimary
-                : colors.textSecondary,
-            backgroundColor: selected
-                ? colors.textPrimary.withValues(alpha: 0.08)
-                : Colors.transparent,
-            minimumSize: const Size(48, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: HookRadius.smAll,
+          onTap: () => _changeMode(mode),
+          child: AnimatedContainer(
+            duration: HookMotion.fast,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: selected
+                  ? colors.textPrimary.withValues(alpha: 0.12)
+                  : Colors.transparent,
+              borderRadius: HookRadius.smAll,
             ),
-            textStyle: TextStyle(
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected ? colors.textPrimary : colors.textSecondary,
+                fontSize: HookType.bodySmall,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
             ),
           ),
-          child: Text(label, textAlign: TextAlign.center),
         ),
       ),
     );
@@ -369,22 +429,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   /// live in a sheet, so the header stays a single tidy line.
   Widget _sourceFilterButton(AppLocalizations strings) {
     final colors = widget.theme.colors;
-    return IconButton(
-      tooltip: _source == null
-          ? strings.allSources
-          : '${strings.allSources}: ${_source!.labelFor(strings)}',
-      visualDensity: VisualDensity.compact,
-      onPressed: _showSourceSheet,
-      icon: Badge(
-        isLabelVisible: _source != null,
-        smallSize: 7,
-        backgroundColor: colors.primary,
-        child: Icon(
-          HookIcons.filter,
-          size: 21,
-          color: _source == null
-              ? colors.textSecondary
-              : colors.textPrimary,
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface.withValues(alpha: 0.7),
+        borderRadius: HookRadius.mdAll,
+        border: Border.all(
+          color: colors.border.withValues(alpha: 0.35),
+          width: 1,
+        ),
+      ),
+      child: IconButton(
+        tooltip: _source == null
+            ? strings.allSources
+            : '${strings.allSources}: ${_source!.labelFor(strings)}',
+        visualDensity: VisualDensity.compact,
+        onPressed: _showSourceSheet,
+        icon: Badge(
+          isLabelVisible: _source != null,
+          smallSize: 7,
+          backgroundColor: colors.primary,
+          child: Icon(
+            HookIcons.filter,
+            size: 20,
+            color: _source == null ? colors.textSecondary : colors.textPrimary,
+          ),
         ),
       ),
     );
@@ -451,11 +519,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                 ),
                 trailing: source == _source
-                    ? Icon(
-                        HookIcons.check,
-                        size: 20,
-                        color: colors.primary,
-                      )
+                    ? Icon(HookIcons.check, size: 20, color: colors.primary)
                     : null,
                 onTap: () {
                   Navigator.of(sheetContext).pop();
@@ -526,9 +590,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         child: Column(
           children: [
             Icon(
-              _error != null
-                  ? HookIcons.offline
-                  : HookIcons.noResults,
+              _error != null ? HookIcons.offline : HookIcons.noResults,
               size: 38,
               color: colors.textSecondary,
             ),
@@ -639,98 +701,101 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ),
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _mode == MusicSearchMode.lyrics
-                    ? strings.familiarLinesUpper
-                    : strings.bestMatchUpper,
-                style: TextStyle(
-                  color: colors.textSecondary,
-                  fontSize: HookType.label,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.2,
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  TrackArtwork(
-                    url: track.artworkUrl,
-                    artist: track.artist,
-                    title: track.title,
-                    duration: track.duration,
-                    size: 84,
-                    borderRadius: BorderRadius.circular(12),
-                    placeholderColor: colors.surface,
-                    iconColor: colors.textSecondary,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _mode == MusicSearchMode.lyrics
+                      ? strings.familiarLinesUpper
+                      : strings.bestMatchUpper,
+                  style: TextStyle(
+                    color: colors.textSecondary,
+                    fontSize: HookType.label,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          track.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: colors.textPrimary,
-                            fontSize: 23,
-                            height: 1.1,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.6,
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    TrackArtwork(
+                      url: track.artworkUrl,
+                      artist: track.artist,
+                      title: track.title,
+                      duration: track.duration,
+                      size: 84,
+                      borderRadius: BorderRadius.circular(12),
+                      placeholderColor: colors.surface,
+                      iconColor: colors.textSecondary,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            track.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: colors.textPrimary,
+                              fontSize: 23,
+                              height: 1.1,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.6,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          track.artist,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: colors.textSecondary,
-                            fontSize: HookType.body,
+                          const SizedBox(height: 6),
+                          Text(
+                            track.artist,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: HookType.body,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          [
-                            track.source.labelFor(strings),
-                            SpotifyTrackTile.formatDuration(track.duration),
-                          ].where((value) => value.isNotEmpty).join(' · '),
-                          style: TextStyle(
-                            color: colors.textSecondary,
-                            fontSize: HookType.label,
+                          const SizedBox(height: 8),
+                          Text(
+                            [
+                              track.source.labelFor(strings),
+                              SpotifyTrackTile.formatDuration(track.duration),
+                            ].where((value) => value.isNotEmpty).join(' · '),
+                            style: TextStyle(
+                              color: colors.textSecondary,
+                              fontSize: HookType.label,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (_snippets[track] case final String snippet) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    '«$snippet»',
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      fontSize: HookType.body,
+                      height: 1.5,
                     ),
                   ),
                 ],
-              ),
-              if (_snippets[track] case final String snippet) ...[
-                const SizedBox(height: 16),
-                Text(
-                  '«$snippet»',
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontSize: HookType.body,
-                    height: 1.5,
+                if (track.source.isCatalog) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    strings.fullVersionOnPlayback,
+                    style: TextStyle(
+                      color: colors.textSecondary,
+                      fontSize: HookType.caption,
+                    ),
                   ),
-                ),
+                ],
               ],
-              if (track.source.isCatalog) ...[
-                const SizedBox(height: 14),
-                Text(
-                  strings.fullVersionOnPlayback,
-                  style: TextStyle(color: colors.textSecondary, fontSize: HookType.caption),
-                ),
-              ],
-            ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -953,11 +1018,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           height: 1.5,
         ),
       ),
-      trailing: Icon(
-        HookIcons.external,
-        color: colors.textSecondary,
-        size: 18,
-      ),
+      trailing: Icon(HookIcons.external, color: colors.textSecondary, size: 18),
       onTap: action,
     );
   }
@@ -965,10 +1026,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
 /// Keeps the search field on screen while results scroll underneath.
 class _PinnedSearchFieldDelegate extends SliverPersistentHeaderDelegate {
-  _PinnedSearchFieldDelegate({required this.child, required this.background});
+  _PinnedSearchFieldDelegate({
+    required this.child,
+    required this.background,
+    required this.borderColor,
+  });
 
   final Widget child;
   final Color background;
+  final Color borderColor;
   static const double _extent = 74;
 
   @override
@@ -983,14 +1049,34 @@ class _PinnedSearchFieldDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    // A blurred backdrop instead of a 94%-opaque sheet: rows scrolling under a
-    // barely-transparent header used to show through as smudged text. Blurring
-    // says "this is a surface above the list" and stays legible on any theme.
+    // When rested at top, let the wallpaper/shader show cleanly with no edge-to-edge
+    // dark bar. As content scrolls underneath, smoothly introduce frosted blur and
+    // a gentle boundary line so rows don't clash with the search bar.
+    final progress = (shrinkOffset / 20.0).clamp(0.0, 1.0);
+    final hasBackdrop = shrinkOffset > 0 || overlapsContent;
+
     return ClipRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: ColoredBox(
-          color: background.withValues(alpha: 0.82),
+        filter: ImageFilter.blur(
+          sigmaX: 16.0 * progress,
+          sigmaY: 16.0 * progress,
+        ),
+        child: Container(
+          width: double.infinity,
+          height: _extent,
+          decoration: BoxDecoration(
+            color: hasBackdrop
+                ? background.withValues(alpha: 0.82 * progress)
+                : Colors.transparent,
+            border: hasBackdrop
+                ? Border(
+                    bottom: BorderSide(
+                      color: borderColor.withValues(alpha: 0.25 * progress),
+                      width: 0.5,
+                    ),
+                  )
+                : null,
+          ),
           child: child,
         ),
       ),
@@ -999,5 +1085,7 @@ class _PinnedSearchFieldDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant _PinnedSearchFieldDelegate oldDelegate) =>
-      oldDelegate.background != background;
+      oldDelegate.background != background ||
+      oldDelegate.borderColor != borderColor ||
+      oldDelegate.child != child;
 }

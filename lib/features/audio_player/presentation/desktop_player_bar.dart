@@ -277,18 +277,15 @@ class _TrackBlock extends StatelessWidget {
           padding: const EdgeInsets.all(HookSpace.xs),
           child: Row(
             children: [
-              Hero(
-                tag: 'current_artwork_${track.source.name}:${track.id}',
-                child: TrackArtwork(
-                  url: track.artworkUrl,
-                  artist: track.artist,
-                  title: track.title,
-                  duration: track.duration,
-                  size: 48,
-                  borderRadius: HookRadius.xsAll,
-                  placeholderColor: colors.background,
-                  iconColor: colors.textSecondary,
-                ),
+              TrackArtwork(
+                url: track.artworkUrl,
+                artist: track.artist,
+                title: track.title,
+                duration: track.duration,
+                size: 48,
+                borderRadius: HookRadius.xsAll,
+                placeholderColor: colors.background,
+                iconColor: colors.textSecondary,
               ),
               const SizedBox(width: HookSpace.md),
               Expanded(

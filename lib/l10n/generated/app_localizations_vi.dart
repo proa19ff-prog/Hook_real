@@ -1337,6 +1337,12 @@ class AppLocalizationsVi extends AppLocalizations {
   String get hideSetting => 'Ẩn cài đặt';
 
   @override
+  String get fullscreenLyrics => 'Toàn màn hình';
+
+  @override
+  String get exitFullscreenLyrics => 'Thoát toàn màn hình';
+
+  @override
   String get lyricsOffsetSaveFailed => 'Không lưu được độ lệch lời bài hát.';
 
   @override

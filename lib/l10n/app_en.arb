@@ -423,6 +423,8 @@
   "@lyricsOffset": {"placeholders": {"value": {"type": "String"}}},
   "increaseLyricsOffset": "Increase offset by 0.1 s",
   "hideSetting": "Hide setting",
+  "fullscreenLyrics": "Fullscreen",
+  "exitFullscreenLyrics": "Exit fullscreen lyrics",
   "lyricsOffsetSaveFailed": "Couldn't save the lyrics offset.",
   "audioForbidden": "The audio server denied access (HTTP 403). The track was found, but its stream is unavailable. A VPN doesn't guarantee audio access.",
   "fullVersionUnavailable": "No full version was found in the available sources. Check your connection or try again later.",

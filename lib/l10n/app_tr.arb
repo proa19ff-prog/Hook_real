@@ -399,6 +399,8 @@
   "lyricsOffset": "Kaydırma: {value} sn",
   "increaseLyricsOffset": "Kaydırmayı 0,1 sn artır",
   "hideSetting": "Ayarı gizle",
+  "fullscreenLyrics": "Tam ekran",
+  "exitFullscreenLyrics": "Tam ekrandan çık",
   "lyricsOffsetSaveFailed": "Söz kaydırması kaydedilemedi.",
   "audioForbidden": "Ses sunucusu erişimi reddetti (HTTP 403). Parça bulundu ama akışı kullanılamıyor. Bir VPN ses erişimini garanti etmez.",
   "fullVersionUnavailable": "Kullanılabilir kaynaklarda tam sürüm bulunamadı. Bağlantınızı kontrol edin veya daha sonra deneyin.",

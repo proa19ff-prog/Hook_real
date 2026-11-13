@@ -1,9 +1,10 @@
+import '../artwork/artwork_service.dart';
 import '../extractor/models/media_track.dart';
 import '../extractor/stream_resolver.dart';
 
-/// Builds repeat-free batches for track radio. Four clean catalog tracks from
-/// the seed artist anchor each batch; up to eight filtered related SoundCloud
-/// tracks keep the wave surprising and playable.
+/// Builds repeat-free batches for track radio. Clean catalog tracks from the
+/// seed artist anchor each batch; related tracks, collaborating artists, and
+/// personal taste tracks keep the wave surprising, varied, and playable.
 class TrackWaveService {
   final StreamResolver _resolver;
 
@@ -20,65 +21,99 @@ class TrackWaveService {
     List<String> personalArtists = const [],
   }) async {
     final sourceForRelated = relatedSeed ?? seed;
-    final results = await Future.wait([
+    final split = ArtworkService.splitArtists(seed.artist);
+    final primary = split.isNotEmpty ? split.first : seed.artist;
+    final secondary = split.length > 1 ? split[1] : null;
+
+    final searchFutures = <Future<List<MediaTrack>>>[
       _resolver.relatedTracks(sourceForRelated, limit: 24),
-      _resolver.search(
-        query: seed.artist,
-        sources: {TrackSource.spotify},
-      ),
-      // The listener's own heavy rotation: one clean catalog pick per
-      // personal artist keeps the radio anchored to their taste.
+      _resolver.search(query: primary, sources: {TrackSource.spotify}),
+      if (secondary != null)
+        _resolver.search(query: secondary, sources: {TrackSource.spotify}),
       for (final artist in personalArtists.take(2))
         _resolver.search(query: artist, sources: {TrackSource.spotify}),
-    ]);
+    ];
+
+    final results = await Future.wait(searchFutures);
+
     final related = results[0];
-    final artistTracks = results[1];
-    final personalBatches = results.skip(2).toList(growable: false);
+    final primaryTracks = results[1];
+    var secondaryTracks = const <MediaTrack>[];
+    var personalStartIdx = 2;
+    if (secondary != null) {
+      secondaryTracks = results[2];
+      personalStartIdx = 3;
+    }
+    final personalBatches = results
+        .skip(personalStartIdx)
+        .toList(growable: false);
 
     final seen = <String>{
       ...excluded.map((key) => key.toLowerCase().trim()),
       trackKey(seed),
     };
-    final artists = artistTracks
-        .where((track) => _eligible(track, seed, seen))
-        .take(4)
-        .toList(growable: false);
-    final relatedTracks = related
-        .where((track) => _eligible(track, seed, seen))
-        .take(8)
-        .toList(growable: false);
-    final personalTracks = [
-      for (final batch in personalBatches)
-        for (final track in batch)
-          if (_eligible(track, seed, seen)) track,
-    ].take(2).toList(growable: false);
 
-    // Alternate two related discoveries with one familiar artist release and
-    // one personal rotation pick. This lands near the intended 8:4:2 ratio
-    // without grouping same-artist tracks together.
+    final eligibleRelated = related
+        .where((t) => _eligible(t, seed, seen))
+        .toList();
+    final eligiblePrimary = primaryTracks
+        .where((t) => _eligible(t, seed, seen))
+        .toList();
+    final eligibleSecondary = secondaryTracks
+        .where((t) => _eligible(t, seed, seen))
+        .toList();
+    final eligiblePersonal = [
+      for (final batch in personalBatches)
+        for (final t in batch)
+          if (_eligible(t, seed, seen)) t,
+    ];
+
     final output = <MediaTrack>[];
-    var artistIndex = 0;
-    var relatedIndex = 0;
-    var personalIndex = 0;
+    var rIdx = 0, pIdx = 0, sIdx = 0, persIdx = 0;
+
     while (output.length < limit &&
-        (artistIndex < artists.length ||
-            relatedIndex < relatedTracks.length ||
-            personalIndex < personalTracks.length)) {
-      for (var i = 0;
-          i < 2 && relatedIndex < relatedTracks.length && output.length < limit;
-          i++) {
-        final track = relatedTracks[relatedIndex++];
+        (rIdx < eligibleRelated.length ||
+            pIdx < eligiblePrimary.length ||
+            sIdx < eligibleSecondary.length ||
+            persIdx < eligiblePersonal.length)) {
+      // 1. Up to two related discoveries
+      for (
+        var i = 0;
+        i < 2 && rIdx < eligibleRelated.length && output.length < limit;
+        i++
+      ) {
+        final track = eligibleRelated[rIdx++];
         if (seen.add(trackKey(track))) output.add(track);
       }
-      if (artistIndex < artists.length && output.length < limit) {
-        final track = artists[artistIndex++];
+      // 2. One familiar artist release
+      if (pIdx < eligiblePrimary.length && output.length < limit) {
+        final track = eligiblePrimary[pIdx++];
         if (seen.add(trackKey(track))) output.add(track);
       }
-      if (personalIndex < personalTracks.length && output.length < limit) {
-        final track = personalTracks[personalIndex++];
+      // 3. One collaborating artist track if present
+      if (sIdx < eligibleSecondary.length && output.length < limit) {
+        final track = eligibleSecondary[sIdx++];
+        if (seen.add(trackKey(track))) output.add(track);
+      }
+      // 4. One personal rotation track
+      if (persIdx < eligiblePersonal.length && output.length < limit) {
+        final track = eligiblePersonal[persIdx++];
         if (seen.add(trackKey(track))) output.add(track);
       }
     }
+
+    // Fallback: if output hasn't reached limit, drain any remaining candidates
+    final remaining = [
+      ...eligiblePrimary.skip(pIdx),
+      ...eligibleSecondary.skip(sIdx),
+      ...eligibleRelated.skip(rIdx),
+      ...eligiblePersonal.skip(persIdx),
+    ];
+    for (final track in remaining) {
+      if (output.length >= limit) break;
+      if (seen.add(trackKey(track))) output.add(track);
+    }
+
     return output;
   }
 
@@ -95,8 +130,9 @@ class TrackWaveService {
     // useful only when the seed itself explicitly asks for an alternate version.
     final raw = '${track.title} ${track.artist}'.toLowerCase();
     if (seedTags.isEmpty &&
-        RegExp(r'\b(cover|tribute|karaoke|nightcore|slowed|reverb|sped|bootleg|mash ?up)\b')
-            .hasMatch(raw)) {
+        RegExp(
+          r'\b(cover|tribute|karaoke|nightcore|slowed|reverb|sped|bootleg|mash ?up)\b',
+        ).hasMatch(raw)) {
       return false;
     }
     return true;

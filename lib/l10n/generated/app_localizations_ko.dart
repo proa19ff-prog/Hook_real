@@ -1296,6 +1296,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get hideSetting => '설정 숨기기';
 
   @override
+  String get fullscreenLyrics => '전체 화면';
+
+  @override
+  String get exitFullscreenLyrics => '전체 화면 닫기';
+
+  @override
   String get lyricsOffsetSaveFailed => '가사 오프셋을 저장하지 못했습니다.';
 
   @override

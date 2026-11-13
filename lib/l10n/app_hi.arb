@@ -399,6 +399,8 @@
   "lyricsOffset": "ऑफ़सेट: {value} से",
   "increaseLyricsOffset": "ऑफ़सेट 0.1 से बढ़ाएँ",
   "hideSetting": "सेटिंग छिपाएँ",
+  "fullscreenLyrics": "पूर्ण स्क्रीन",
+  "exitFullscreenLyrics": "पूर्ण स्क्रीन से बाहर निकलें",
   "lyricsOffsetSaveFailed": "गीत ऑफ़सेट सहेजा नहीं जा सका।",
   "audioForbidden": "ऑडियो सर्वर ने पहुँच अस्वीकार की (HTTP 403)। ट्रैक मिला, पर उसकी स्ट्रीम उपलब्ध नहीं। VPN ऑडियो पहुँच की गारंटी नहीं देता।",
   "fullVersionUnavailable": "उपलब्ध स्रोतों में पूरा संस्करण नहीं मिला। कनेक्शन जाँचें या बाद में कोशिश करें।",

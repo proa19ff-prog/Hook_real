@@ -399,6 +399,8 @@
   "lyricsOffset": "Verschiving: {value} s",
   "increaseLyricsOffset": "Verschiving 0,1 s vergroten",
   "hideSetting": "Instelling verbergen",
+  "fullscreenLyrics": "Volledig scherm",
+  "exitFullscreenLyrics": "Volledig scherm sluiten",
   "lyricsOffsetSaveFailed": "Kon de songtekst-verschiving niet opslaan.",
   "audioForbidden": "De audioserver weigerde toegang (HTTP 403). Het nummer is gevonden, maar zijn stream is niet beschikbaar. Een VPN garandeert geen toegang tot audio.",
   "fullVersionUnavailable": "Er is geen volledige versie gevonden in de beschikbare bronnen. Controleer je verbinding of probeer het later.",

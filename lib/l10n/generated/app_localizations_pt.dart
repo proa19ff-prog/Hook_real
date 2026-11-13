@@ -1346,6 +1346,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hideSetting => 'Ocultar ajuste';
 
   @override
+  String get fullscreenLyrics => 'Tela cheia';
+
+  @override
+  String get exitFullscreenLyrics => 'Sair da tela cheia';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'Não foi possível salvar o atraso da letra.';
 

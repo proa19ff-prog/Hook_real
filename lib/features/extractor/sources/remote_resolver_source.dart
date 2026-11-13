@@ -78,6 +78,7 @@ class RemoteResolverSource implements MusicSource {
   /// an endpoint is known to be exhausted (429) or unreachable.
   static int _activeIndex = 0;
   static final Map<String, DateTime> _cooldownUntil = {};
+  static String? _lastSuccessfulBase;
 
   @visibleForTesting
   static String get debugActiveEndpoint =>
@@ -113,6 +114,7 @@ class RemoteResolverSource implements MusicSource {
     _activeIndex = 0;
     _cooldownUntil.clear();
     _warmIds.clear();
+    _lastSuccessfulBase = null;
   }
 
   static bool _cooling(String endpoint) {
@@ -135,6 +137,45 @@ class RemoteResolverSource implements MusicSource {
         }
       }
     }
+  }
+
+  /// Cooldown unreachable or erroring endpoints briefly so they don't block
+  /// every subsequent user action.
+  static void _markUnreachable(String endpoint) {
+    _cooldownUntil[endpoint] = DateTime.now().toUtc().add(
+      const Duration(minutes: 5),
+    );
+    if (defaultEndpoints.indexOf(endpoint) == _activeIndex) {
+      for (var i = 1; i < defaultEndpoints.length; i++) {
+        final candidate =
+            defaultEndpoints[(_activeIndex + i) % defaultEndpoints.length];
+        if (!_cooling(candidate)) {
+          _activeIndex = defaultEndpoints.indexOf(candidate);
+          break;
+        }
+      }
+    }
+  }
+
+  /// Canonicalizes a stream URL to point to the active working base endpoint
+  /// instead of an unreachable internal origin.
+  static String canonicalStreamUrl(String rawUrl, {String? baseEndpoint}) {
+    if (rawUrl.isEmpty) return rawUrl;
+    final base =
+        baseEndpoint ??
+        (endpoint?.trim().isNotEmpty == true
+            ? endpoint!.trim()
+            : effectiveEndpoint);
+    if (base.isEmpty) return rawUrl;
+    final uri = Uri.tryParse(rawUrl);
+    if (uri == null) return rawUrl;
+    if (uri.path.endsWith('/stream') || uri.queryParameters.containsKey('id')) {
+      final id = uri.queryParameters['id'];
+      if (id != null && id.isNotEmpty) {
+        return _buildFor(base, '/stream', {'id': id}).toString();
+      }
+    }
+    return rawUrl;
   }
 
   /// Endpoints in try order: the sticky active one first, then the rest.
@@ -285,14 +326,17 @@ class RemoteResolverSource implements MusicSource {
         }
         if (response.statusCode != 200) {
           lastError = StateError('HTTP ${response.statusCode}');
+          _markUnreachable(base);
           continue;
         }
+        _lastSuccessfulBase = base;
         if (endpoint?.trim() == null) _stickTo(base);
         return response;
       } on AgeRestrictedStreamException {
         rethrow;
       } catch (error) {
         lastError = error;
+        _markUnreachable(base);
         continue;
       }
     }
@@ -389,8 +433,9 @@ class RemoteResolverSource implements MusicSource {
     if (response == null) return null;
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! Map<String, dynamic>) return null;
-    final url = decoded['url']?.toString();
+    var url = decoded['url']?.toString();
     if (url == null || url.isEmpty) return null;
+    url = canonicalStreamUrl(url, baseEndpoint: _lastSuccessfulBase);
     final headers = <String, String>{};
     final userAgent = decoded['user_agent']?.toString();
     if (userAgent != null && userAgent.isNotEmpty) {
@@ -421,7 +466,13 @@ class RemoteResolverSource implements MusicSource {
     final seconds = item['duration'] is num
         ? (item['duration'] as num).toInt()
         : null;
-    final streamUrl = item['url']?.toString();
+    var streamUrl = item['url']?.toString();
+    if (streamUrl != null && streamUrl.isNotEmpty) {
+      streamUrl = canonicalStreamUrl(
+        streamUrl,
+        baseEndpoint: _lastSuccessfulBase,
+      );
+    }
     return MediaTrack(
       id: id,
       title: title,

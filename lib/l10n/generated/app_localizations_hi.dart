@@ -1330,6 +1330,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hideSetting => 'सेटिंग छिपाएँ';
 
   @override
+  String get fullscreenLyrics => 'पूर्ण स्क्रीन';
+
+  @override
+  String get exitFullscreenLyrics => 'पूर्ण स्क्रीन से बाहर निकलें';
+
+  @override
   String get lyricsOffsetSaveFailed => 'गीत ऑफ़सेट सहेजा नहीं जा सका।';
 
   @override

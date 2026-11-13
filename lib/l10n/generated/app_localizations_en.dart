@@ -1341,6 +1341,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hideSetting => 'Hide setting';
 
   @override
+  String get fullscreenLyrics => 'Fullscreen';
+
+  @override
+  String get exitFullscreenLyrics => 'Exit fullscreen lyrics';
+
+  @override
   String get lyricsOffsetSaveFailed => 'Couldn\'t save the lyrics offset.';
 
   @override

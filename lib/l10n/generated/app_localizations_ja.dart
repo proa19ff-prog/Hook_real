@@ -1302,6 +1302,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get hideSetting => '設定を隠す';
 
   @override
+  String get fullscreenLyrics => '全画面';
+
+  @override
+  String get exitFullscreenLyrics => '全画面を閉じる';
+
+  @override
   String get lyricsOffsetSaveFailed => '歌詞のオフセットを保存できませんでした。';
 
   @override

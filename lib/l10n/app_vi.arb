@@ -399,6 +399,8 @@
   "lyricsOffset": "Lệch: {value} giây",
   "increaseLyricsOffset": "Tăng lệch 0,1 giây",
   "hideSetting": "Ẩn cài đặt",
+  "fullscreenLyrics": "Toàn màn hình",
+  "exitFullscreenLyrics": "Thoát toàn màn hình",
   "lyricsOffsetSaveFailed": "Không lưu được độ lệch lời bài hát.",
   "audioForbidden": "Máy chủ âm thanh từ chối truy cập (HTTP 403). Đã tìm thấy bản nhạc nhưng luồng của nó không khả dụng. VPN không đảm bảo truy cập âm thanh.",
   "fullVersionUnavailable": "Không tìm thấy bản đầy đủ trong các nguồn khả dụng. Kiểm tra kết nối hoặc thử lại sau.",

@@ -1325,6 +1325,12 @@ class AppLocalizationsTh extends AppLocalizations {
   String get hideSetting => 'ซ่อนการตั้งค่า';
 
   @override
+  String get fullscreenLyrics => 'เต็มจอ';
+
+  @override
+  String get exitFullscreenLyrics => 'ออกจากโหมดเต็มจอ';
+
+  @override
   String get lyricsOffsetSaveFailed => 'บันทึกออฟเซ็ตเนื้อร้องไม่สำเร็จ';
 
   @override

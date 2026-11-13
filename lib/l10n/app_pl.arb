@@ -399,6 +399,8 @@
   "lyricsOffset": "Przesunięcie: {value} s",
   "increaseLyricsOffset": "Zwiększ przesunięcie o 0,1 s",
   "hideSetting": "Ukryj ustawienie",
+  "fullscreenLyrics": "Pełny ekran",
+  "exitFullscreenLyrics": "Zwiń tekst",
   "lyricsOffsetSaveFailed": "Nie udało się zapisać przesunięcia tekstu.",
   "audioForbidden": "Serwer audio odmówił dostępu (HTTP 403). Utwór znaleziono, ale jego strumień jest niedostępny. VPN nie gwarantuje dostępu do audio.",
   "fullVersionUnavailable": "W dostępnych źródłach nie znaleziono pełnej wersji. Sprawdź połączenie albo spróbuj później.",

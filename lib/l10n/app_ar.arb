@@ -399,6 +399,8 @@
   "lyricsOffset": "الإزاحة: {value} ث",
   "increaseLyricsOffset": "زيادة الإزاحة بمقدار 0.1 ثانية",
   "hideSetting": "إخفاء الإعداد",
+  "fullscreenLyrics": "ملء الشاشة",
+  "exitFullscreenLyrics": "تصغير كلمات الأغاني",
   "lyricsOffsetSaveFailed": "تعذّر حفظ إزاحة الكلمات.",
   "audioForbidden": "رفض خادم الصوت الوصول (HTTP 403). وُجدت المقطوعة لكن تدفقها غير متاح. لا يضمن VPN الوصول إلى الصوت.",
   "fullVersionUnavailable": "لم يُعثَر على نسخة كاملة في المصادر المتاحة. تحقق من اتصالك أو حاول لاحقاً.",

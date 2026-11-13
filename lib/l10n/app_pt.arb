@@ -399,6 +399,8 @@
   "lyricsOffset": "Atraso: {value} s",
   "increaseLyricsOffset": "Aumentar o atraso em 0,1 s",
   "hideSetting": "Ocultar ajuste",
+  "fullscreenLyrics": "Tela cheia",
+  "exitFullscreenLyrics": "Sair da tela cheia",
   "lyricsOffsetSaveFailed": "Não foi possível salvar o atraso da letra.",
   "audioForbidden": "O servidor de áudio negou o acesso (HTTP 403). A faixa foi encontrada, mas o fluxo dela está indisponível. Uma VPN não garante acesso ao áudio.",
   "fullVersionUnavailable": "Nenhuma versão completa foi encontrada nas fontes disponíveis. Verifique sua conexão ou tente mais tarde.",

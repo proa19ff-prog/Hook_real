@@ -1335,6 +1335,12 @@ class AppLocalizationsBn extends AppLocalizations {
   String get hideSetting => 'সেটিং লুকান';
 
   @override
+  String get fullscreenLyrics => 'পূর্ণ পর্দা';
+
+  @override
+  String get exitFullscreenLyrics => 'পূর্ণ পর্দা প্রস্থান করুন';
+
+  @override
   String get lyricsOffsetSaveFailed => 'গানের অফসেট সংরক্ষণ করা গেল না।';
 
   @override

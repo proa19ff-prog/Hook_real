@@ -399,6 +399,8 @@
   "lyricsOffset": "Offset: {value} dtk",
   "increaseLyricsOffset": "Naikkan offset 0,1 dtk",
   "hideSetting": "Sembunyikan pengaturan",
+  "fullscreenLyrics": "Layar penuh",
+  "exitFullscreenLyrics": "Keluar dari layar penuh",
   "lyricsOffsetSaveFailed": "Offset lirik tidak bisa disimpan.",
   "audioForbidden": "Server audio menolak akses (HTTP 403). Lagu ditemukan, tetapi alirannya tidak tersedia. VPN tidak menjamin akses audio.",
   "fullVersionUnavailable": "Tidak ada versi lengkap di sumber yang tersedia. Periksa koneksi atau coba nanti.",

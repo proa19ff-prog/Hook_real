@@ -399,6 +399,8 @@
   "lyricsOffset": "Décalage : {value} s",
   "increaseLyricsOffset": "Augmenter le décalage de 0,1 s",
   "hideSetting": "Masquer le réglage",
+  "fullscreenLyrics": "Plein écran",
+  "exitFullscreenLyrics": "Quitter le plein écran",
   "lyricsOffsetSaveFailed": "Impossible d'enregistrer le décalage des paroles.",
   "audioForbidden": "Le serveur audio a refusé l'accès (HTTP 403). La piste a été trouvée, mais son flux est indisponible. Un VPN ne garantit pas l'accès à l'audio.",
   "fullVersionUnavailable": "Aucune version complète trouvée dans les sources disponibles. Vérifiez votre connexion ou réessayez plus tard.",

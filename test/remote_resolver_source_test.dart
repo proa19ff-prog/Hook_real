@@ -15,8 +15,7 @@ void main() {
     busyHits = 0;
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     server.listen((request) async {
-      final response = request.response
-        ..headers.contentType = ContentType.json;
+      final response = request.response..headers.contentType = ContentType.json;
       if (request.uri.path == '/search') {
         response.write(
           jsonEncode([
@@ -98,7 +97,9 @@ void main() {
         final body = await utf8.decoder.bind(request).join();
         if (body.contains('BAD')) {
           response.statusCode = 400;
-          response.write(jsonEncode({'error': 'no youtube cookies in the file'}));
+          response.write(
+            jsonEncode({'error': 'no youtube cookies in the file'}),
+          );
         } else if (body.contains('VISITOR')) {
           response.write(
             jsonEncode({
@@ -149,7 +150,9 @@ void main() {
     expect(RemoteResolverSource.enabled, isFalse);
     expect(await source.searchTracks('anything'), isEmpty);
     expect(
-      await source.resolveTrack(_track(id: 'srv-1', source: TrackSource.remote)),
+      await source.resolveTrack(
+        _track(id: 'srv-1', source: TrackSource.remote),
+      ),
       isNull,
     );
   });
@@ -165,11 +168,15 @@ void main() {
 
   test('custom endpoint overrides the built-in one', () {
     RemoteResolverSource.endpoint = 'http://127.0.0.1:${server.port}/';
-    expect(RemoteResolverSource.effectiveEndpoint,
-        'http://127.0.0.1:${server.port}/');
+    expect(
+      RemoteResolverSource.effectiveEndpoint,
+      'http://127.0.0.1:${server.port}/',
+    );
     RemoteResolverSource.endpoint = null;
-    expect(RemoteResolverSource.effectiveEndpoint,
-        RemoteResolverSource.defaultEndpoint);
+    expect(
+      RemoteResolverSource.effectiveEndpoint,
+      RemoteResolverSource.defaultEndpoint,
+    );
   });
 
   test('search maps server items and skips malformed entries', () async {
@@ -207,16 +214,19 @@ void main() {
     expect(stream, isNull);
   });
 
-  test('an 18+ refusal surfaces instead of looking like a dead endpoint', () async {
-    await expectLater(
-      source.resolveTrack(_track(id: 'aged', source: TrackSource.remote)),
-      throwsA(
-        isA<AgeRestrictedStreamException>()
-            .having((e) => e.reason, 'reason', 'age_restricted')
-            .having((e) => e.isStaleCookies, 'isStaleCookies', isFalse),
-      ),
-    );
-  });
+  test(
+    'an 18+ refusal surfaces instead of looking like a dead endpoint',
+    () async {
+      await expectLater(
+        source.resolveTrack(_track(id: 'aged', source: TrackSource.remote)),
+        throwsA(
+          isA<AgeRestrictedStreamException>()
+              .having((e) => e.reason, 'reason', 'age_restricted')
+              .having((e) => e.isStaleCookies, 'isStaleCookies', isFalse),
+        ),
+      );
+    },
+  );
 
   test('stale cookies are reported as their own reason', () async {
     await expectLater(
@@ -254,7 +264,9 @@ void main() {
   });
 
   test('a signed-in export reports 18+ as unlocked', () async {
-    final result = await source.uploadCookies('SID\tsomething\nLOGIN_INFO\tx\n');
+    final result = await source.uploadCookies(
+      'SID\tsomething\nLOGIN_INFO\tx\n',
+    );
     expect(result.isError, isFalse);
     expect(result.cookies, 23);
     expect(result.ready, isTrue);
@@ -268,12 +280,15 @@ void main() {
     expect(result.warning, isNotEmpty);
   });
 
-  test('a rejected file surfaces the server reason and keeps the jar', () async {
-    final result = await source.uploadCookies('BAD\n');
-    expect(result.isError, isTrue);
-    expect(result.error, 'no youtube cookies in the file');
-    expect(result.ready, isFalse);
-  });
+  test(
+    'a rejected file surfaces the server reason and keeps the jar',
+    () async {
+      final result = await source.uploadCookies('BAD\n');
+      expect(result.isError, isTrue);
+      expect(result.error, 'no youtube cookies in the file');
+      expect(result.ready, isFalse);
+    },
+  );
 
   test('cookie health reports the live verdict, not just the file', () async {
     final health = await source.cookieHealth();
@@ -282,22 +297,43 @@ void main() {
     expect(health.needsSignIn, isFalse);
   });
 
-  test('popular maps server tracks, marks warm IDs, and captures streamUrl', () async {
-    expect(RemoteResolverSource.isWarm('pop-1'), isFalse);
-    final popular = await source.popular();
-    expect(popular, hasLength(1));
-    final track = popular.first;
-    expect(track.id, 'pop-1');
-    expect(track.title, 'Sweet & Bitter');
-    expect(track.artist, 'Kush Kush');
-    expect(track.streamUrl, 'http://127.0.0.1:${server.port}/stream?id=pop-1');
-    expect(RemoteResolverSource.isWarm('pop-1'), isTrue);
-  });
+  test(
+    'popular maps server tracks, marks warm IDs, and captures streamUrl',
+    () async {
+      expect(RemoteResolverSource.isWarm('pop-1'), isFalse);
+      final popular = await source.popular();
+      expect(popular, hasLength(1));
+      final track = popular.first;
+      expect(track.id, 'pop-1');
+      expect(track.title, 'Sweet & Bitter');
+      expect(track.artist, 'Kush Kush');
+      expect(
+        track.streamUrl,
+        'http://127.0.0.1:${server.port}/stream?id=pop-1',
+      );
+      expect(RemoteResolverSource.isWarm('pop-1'), isTrue);
+    },
+  );
 
   test('warm marks requested track IDs as warm', () async {
     expect(RemoteResolverSource.isWarm('w-1'), isFalse);
     await source.warm(['w-1']);
     expect(RemoteResolverSource.isWarm('w-1'), isTrue);
+  });
+
+  test('canonicalStreamUrl rewrites stream URLs to active base endpoint', () {
+    const raw =
+        'https://atomic-rush-daixwalr.expresshost.cloud/ed3b53d48fcd09aba8acb666/stream?id=J7NFL-eOxiQ';
+    const activeBase =
+        'https://hook-resolver.proa19ff.workers.dev/ed3b53d48fcd09aba8acb666';
+    final canonical = RemoteResolverSource.canonicalStreamUrl(
+      raw,
+      baseEndpoint: activeBase,
+    );
+    expect(
+      canonical,
+      'https://hook-resolver.proa19ff.workers.dev/ed3b53d48fcd09aba8acb666/stream?id=J7NFL-eOxiQ',
+    );
   });
 }
 

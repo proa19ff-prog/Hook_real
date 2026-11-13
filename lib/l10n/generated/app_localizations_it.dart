@@ -1347,6 +1347,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get hideSetting => 'Nascondi impostazione';
 
   @override
+  String get fullscreenLyrics => 'Schermo intero';
+
+  @override
+  String get exitFullscreenLyrics => 'Esci da schermo intero';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'Impossibile salvare lo scarto del testo.';
 

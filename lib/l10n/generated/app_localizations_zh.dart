@@ -1277,6 +1277,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hideSetting => '隐藏设置';
 
   @override
+  String get fullscreenLyrics => '全屏歌词';
+
+  @override
+  String get exitFullscreenLyrics => '退出全屏';
+
+  @override
   String get lyricsOffsetSaveFailed => '无法保存歌词偏移。';
 
   @override

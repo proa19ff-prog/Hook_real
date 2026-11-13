@@ -399,6 +399,8 @@
   "lyricsOffset": "偏移：{value} 秒",
   "increaseLyricsOffset": "偏移增加 0.1 秒",
   "hideSetting": "隐藏设置",
+  "fullscreenLyrics": "全屏歌词",
+  "exitFullscreenLyrics": "退出全屏",
   "lyricsOffsetSaveFailed": "无法保存歌词偏移。",
   "audioForbidden": "音频服务器拒绝访问（HTTP 403）。曲目已找到，但其音频流不可用。VPN 不保证能访问音频。",
   "fullVersionUnavailable": "在可用来源中未找到完整版本。请检查连接或稍后再试。",

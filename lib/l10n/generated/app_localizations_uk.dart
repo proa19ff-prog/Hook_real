@@ -1346,6 +1346,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get hideSetting => 'Сховати налаштування';
 
   @override
+  String get fullscreenLyrics => 'На весь екран';
+
+  @override
+  String get exitFullscreenLyrics => 'Згорнути текст';
+
+  @override
   String get lyricsOffsetSaveFailed => 'Не вдалося зберегти зміщення тексту.';
 
   @override

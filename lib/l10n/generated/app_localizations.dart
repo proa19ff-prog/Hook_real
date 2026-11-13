@@ -2492,6 +2492,18 @@ abstract class AppLocalizations {
   /// **'Hide setting'**
   String get hideSetting;
 
+  /// No description provided for @fullscreenLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen'**
+  String get fullscreenLyrics;
+
+  /// No description provided for @exitFullscreenLyrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit fullscreen lyrics'**
+  String get exitFullscreenLyrics;
+
   /// No description provided for @lyricsOffsetSaveFailed.
   ///
   /// In en, this message translates to:

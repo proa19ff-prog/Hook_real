@@ -1345,6 +1345,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get hideSetting => 'Ukryj ustawienie';
 
   @override
+  String get fullscreenLyrics => 'Pełny ekran';
+
+  @override
+  String get exitFullscreenLyrics => 'Zwiń tekst';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'Nie udało się zapisać przesunięcia tekstu.';
 

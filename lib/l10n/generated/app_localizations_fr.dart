@@ -1353,6 +1353,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hideSetting => 'Masquer le réglage';
 
   @override
+  String get fullscreenLyrics => 'Plein écran';
+
+  @override
+  String get exitFullscreenLyrics => 'Quitter le plein écran';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'Impossible d\'enregistrer le décalage des paroles.';
 

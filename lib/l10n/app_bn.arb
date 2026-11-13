@@ -399,6 +399,8 @@
   "lyricsOffset": "অফসেট: {value} সে",
   "increaseLyricsOffset": "অফসেট ০.১ সে বাড়ান",
   "hideSetting": "সেটিং লুকান",
+  "fullscreenLyrics": "পূর্ণ পর্দা",
+  "exitFullscreenLyrics": "পূর্ণ পর্দা প্রস্থান করুন",
   "lyricsOffsetSaveFailed": "গানের অফসেট সংরক্ষণ করা গেল না।",
   "audioForbidden": "অডিও সার্ভার প্রবেশ অস্বীকার করেছে (HTTP 403)। ট্র্যাক পাওয়া গেছে, কিন্তু তার স্ট্রিম অপ্রাপ্য। VPN অডিও অ্যাক্সেসের গ্যারান্টি দেয় না।",
   "fullVersionUnavailable": "উপলব্ধ উৎসে পূর্ণ সংস্করণ পাওয়া যায়নি। সংযোগ পরীক্ষা করুন বা পরে চেষ্টা করুন।",

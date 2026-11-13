@@ -1346,6 +1346,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get hideSetting => 'Ocultar ajuste';
 
   @override
+  String get fullscreenLyrics => 'Pantalla completa';
+
+  @override
+  String get exitFullscreenLyrics => 'Salir de pantalla completa';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'No se pudo guardar el desfase de la letra.';
 

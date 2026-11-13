@@ -1345,6 +1345,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get hideSetting => 'Скрыть настройку';
 
   @override
+  String get fullscreenLyrics => 'На весь экран';
+
+  @override
+  String get exitFullscreenLyrics => 'Свернуть текст';
+
+  @override
   String get lyricsOffsetSaveFailed => 'Не удалось сохранить сдвиг текста.';
 
   @override

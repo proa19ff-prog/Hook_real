@@ -1346,6 +1346,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get hideSetting => 'Einstellung ausblenden';
 
   @override
+  String get fullscreenLyrics => 'Vollbild';
+
+  @override
+  String get exitFullscreenLyrics => 'Vollbild beenden';
+
+  @override
   String get lyricsOffsetSaveFailed =>
       'Text-Versatz konnte nicht gespeichert werden.';
 

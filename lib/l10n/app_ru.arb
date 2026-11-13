@@ -423,6 +423,8 @@
   "@lyricsOffset": {"placeholders": {"value": {"type": "String"}}},
   "increaseLyricsOffset": "Увеличить сдвиг на 0.1 с",
   "hideSetting": "Скрыть настройку",
+  "fullscreenLyrics": "На весь экран",
+  "exitFullscreenLyrics": "Свернуть текст",
   "lyricsOffsetSaveFailed": "Не удалось сохранить сдвиг текста.",
   "audioForbidden": "Сервер аудио отклонил доступ (HTTP 403). Трек найден, но поток недоступен. VPN не гарантирует доступ к аудио.",
   "fullVersionUnavailable": "Полная версия не найдена в доступных источниках. Проверьте сеть или попробуйте позже.",

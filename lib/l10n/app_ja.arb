@@ -399,6 +399,8 @@
   "lyricsOffset": "オフセット: {value} 秒",
   "increaseLyricsOffset": "オフセットを 0.1 秒増やす",
   "hideSetting": "設定を隠す",
+  "fullscreenLyrics": "全画面",
+  "exitFullscreenLyrics": "全画面を閉じる",
   "lyricsOffsetSaveFailed": "歌詞のオフセットを保存できませんでした。",
   "audioForbidden": "オーディオサーバーがアクセスを拒否しました（HTTP 403）。曲は見つかりましたが、そのストリームは利用できません。VPN でもオーディオへのアクセスは保証されません。",
   "fullVersionUnavailable": "利用可能なソースにフルバージョンが見つかりませんでした。接続を確認するか、後でもう一度お試しください。",

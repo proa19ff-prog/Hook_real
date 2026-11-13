@@ -1332,6 +1332,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hideSetting => 'إخفاء الإعداد';
 
   @override
+  String get fullscreenLyrics => 'ملء الشاشة';
+
+  @override
+  String get exitFullscreenLyrics => 'تصغير كلمات الأغاني';
+
+  @override
   String get lyricsOffsetSaveFailed => 'تعذّر حفظ إزاحة الكلمات.';
 
   @override

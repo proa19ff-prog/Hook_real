@@ -399,6 +399,8 @@
   "lyricsOffset": "Scarto: {value} s",
   "increaseLyricsOffset": "Aumenta lo scarto di 0,1 s",
   "hideSetting": "Nascondi impostazione",
+  "fullscreenLyrics": "Schermo intero",
+  "exitFullscreenLyrics": "Esci da schermo intero",
   "lyricsOffsetSaveFailed": "Impossibile salvare lo scarto del testo.",
   "audioForbidden": "Il server audio ha negato l'accesso (HTTP 403). Il brano è stato trovato, ma il suo flusso non è disponibile. Una VPN non garantisce l'accesso all'audio.",
   "fullVersionUnavailable": "Nessuna versione completa trovata nelle fonti disponibili. Controlla la connessione o riprova più tardi.",

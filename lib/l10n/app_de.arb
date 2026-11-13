@@ -399,6 +399,8 @@
   "lyricsOffset": "Versatz: {value} s",
   "increaseLyricsOffset": "Versatz um 0,1 s erhöhen",
   "hideSetting": "Einstellung ausblenden",
+  "fullscreenLyrics": "Vollbild",
+  "exitFullscreenLyrics": "Vollbild beenden",
   "lyricsOffsetSaveFailed": "Text-Versatz konnte nicht gespeichert werden.",
   "audioForbidden": "Der Audioserver hat den Zugriff verweigert (HTTP 403). Der Titel wurde gefunden, aber sein Stream ist nicht verfügbar. Ein VPN garantiert keinen Audiozugriff.",
   "fullVersionUnavailable": "In den verfügbaren Quellen wurde keine vollständige Version gefunden. Prüfe deine Verbindung oder versuche es später.",

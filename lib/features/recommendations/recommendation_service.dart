@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import '../../core/storage/local_storage_service.dart';
 import '../extractor/models/media_track.dart';
 import '../extractor/stream_resolver.dart';
@@ -7,10 +8,7 @@ class RecommendationService {
   final LocalStorageService _storage;
   final StreamResolver _resolver;
 
-  RecommendationService({
-    required this._storage,
-    required this._resolver,
-  });
+  RecommendationService({required this._storage, required this._resolver});
 
   /// Artist names with the strongest listening signals — the wave blends one
   /// catalog track per artist into every batch so radio gravitates toward
@@ -62,7 +60,7 @@ class RecommendationService {
     });
   }
 
-  static const List<String> _popularStarters = [
+  static const List<String> popularStarters = [
     'The Weeknd',
     'Alan Walker',
     'Imagine Dragons',
@@ -120,7 +118,8 @@ class RecommendationService {
       if (artist.isNotEmpty) {
         // More recent history items carry higher weight
         final recencyFactor = 1.0 / (1.0 + (idx * 0.05));
-        artistScores[artist] = (artistScores[artist] ?? 0.0) + (1.2 * recencyFactor);
+        artistScores[artist] =
+            (artistScores[artist] ?? 0.0) + (1.2 * recencyFactor);
         artistPlayCount[artist] = (artistPlayCount[artist] ?? 0) + 1;
       }
     }
@@ -145,10 +144,10 @@ class RecommendationService {
     final recentTracks = history.take(5).toList();
     final avgSessionDurationSec = recentTracks.isNotEmpty
         ? recentTracks
-                .map((t) => t.duration.inSeconds)
-                .where((s) => s > 30)
-                .fold<int>(0, (a, b) => a + b) ~/
-            (recentTracks.isNotEmpty ? recentTracks.length : 1)
+                  .map((t) => t.duration.inSeconds)
+                  .where((s) => s > 30)
+                  .fold<int>(0, (a, b) => a + b) ~/
+              (recentTracks.isNotEmpty ? recentTracks.length : 1)
         : 210;
 
     // 2. Select query seeds for candidate generation
@@ -163,7 +162,7 @@ class RecommendationService {
 
     // Ensure we always have diverse seeds
     if (seedQueries.length < 3) {
-      final shuffledStarters = List<String>.from(_popularStarters)..shuffle();
+      final shuffledStarters = List<String>.from(popularStarters)..shuffle();
       for (final starter in shuffledStarters) {
         if (!seedQueries.contains(starter)) {
           seedQueries.add(starter);
@@ -211,12 +210,17 @@ class RecommendationService {
     // 4. Compute Dynamic Alpha, Beta, Gamma Weights
     // Niche sessions with long tracks favor acoustic resonance (Beta),
     // mainstream sessions favor collaborative graph (Alpha).
-    final isNicheSession = avgSessionDurationSec > 300 ||
-        seedQueries.any((q) => q.toLowerCase().contains('phonk') || q.toLowerCase().contains('ambient'));
+    final isNicheSession =
+        avgSessionDurationSec > 300 ||
+        seedQueries.any(
+          (q) =>
+              q.toLowerCase().contains('phonk') ||
+              q.toLowerCase().contains('ambient'),
+        );
 
     final double alpha = isNicheSession ? 0.25 : 0.50; // Sim_collab
-    final double beta = isNicheSession ? 0.50 : 0.25;  // Sim_audio
-    final double gamma = 0.25;                         // Seq_trans
+    final double beta = isNicheSession ? 0.50 : 0.25; // Sim_audio
+    final double gamma = 0.25; // Seq_trans
 
     // 5. Score Each Candidate i for User u at time t
     final totalHistorySize = max(1, history.length);
@@ -237,7 +241,8 @@ class RecommendationService {
       // 2. Sim_audio: Acoustic resonance (duration & tempo profile match)
       final trackDurSec = track.duration.inSeconds;
       final durDiff = (trackDurSec - avgSessionDurationSec).abs();
-      final simAudio = exp(-durDiff / max(60, avgSessionDurationSec)).clamp(0.1, 1.0);
+      final simAudio = exp(-durDiff / max(60, avgSessionDurationSec))
+          .clamp(0.1, 1.0);
 
       // 3. Seq_trans: Sequential context & time-of-day alignment
       double seqTrans = 0.5;
@@ -249,14 +254,23 @@ class RecommendationService {
       // Time-of-day context: Morning vs Day vs Night
       final hour = now.hour;
       final titleLower = track.title.toLowerCase();
-      if ((hour >= 22 || hour < 6) && (titleLower.contains('night') || titleLower.contains('lo-fi') || titleLower.contains('phonk') || titleLower.contains('chill'))) {
+      if ((hour >= 22 || hour < 6) &&
+          (titleLower.contains('night') ||
+              titleLower.contains('lo-fi') ||
+              titleLower.contains('phonk') ||
+              titleLower.contains('chill'))) {
         seqTrans += 0.25;
-      } else if (hour >= 6 && hour < 12 && (titleLower.contains('acoustic') || titleLower.contains('morning') || titleLower.contains('pop'))) {
+      } else if (hour >= 6 &&
+          hour < 12 &&
+          (titleLower.contains('acoustic') ||
+              titleLower.contains('morning') ||
+              titleLower.contains('pop'))) {
         seqTrans += 0.2;
       }
       seqTrans = seqTrans.clamp(0.1, 1.0);
 
-      final compatibilityCore = (alpha * simCollab) + (beta * simAudio) + (gamma * seqTrans);
+      final compatibilityCore =
+          (alpha * simCollab) + (beta * simAudio) + (gamma * seqTrans);
 
       // B. Multi-task Engagement Multiplier: Phi_reward(u, i)
       // w1 * P(Complete) + w2 * P(Save) + w3 * P(Repeat) - w4 * P(Skip<15s)
@@ -309,7 +323,10 @@ class RecommendationService {
   /// DJ-Curator Post-Processing Filter:
   /// Enforces DPP diversification (spreading same artist at least 3-4 tracks apart)
   /// and eliminates abrupt jarring duration jumps.
-  List<MediaTrack> _applyDjCurator(List<MediaTrack> rawCandidates, {required int limit}) {
+  List<MediaTrack> _applyDjCurator(
+    List<MediaTrack> rawCandidates, {
+    required int limit,
+  }) {
     if (rawCandidates.isEmpty) return const [];
 
     final curatedQueue = <MediaTrack>[];
@@ -332,7 +349,9 @@ class RecommendationService {
 
         // Determinantal Point Process (DPP): Penalize recent artists in last 3 positions
         for (int back = 0; back < min(3, curatedQueue.length); back++) {
-          final pastArtist = _cleanArtistName(curatedQueue[curatedQueue.length - 1 - back].artist);
+          final pastArtist = _cleanArtistName(
+            curatedQueue[curatedQueue.length - 1 - back].artist,
+          );
           if (candArtist == pastArtist) {
             penalty += (3 - back) * 15.0; // Heavy separation penalty
           }
@@ -367,7 +386,10 @@ class RecommendationService {
     return artist
         .split(RegExp(r'[,&]'))
         .first
-        .replaceAll(RegExp(r'\s*(feat\.|ft\.|prod\.).*', caseSensitive: false), '')
+        .replaceAll(
+          RegExp(r'\s*(feat\.|ft\.|prod\.).*', caseSensitive: false),
+          '',
+        )
         .trim();
   }
 }

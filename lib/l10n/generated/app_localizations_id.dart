@@ -1340,6 +1340,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get hideSetting => 'Sembunyikan pengaturan';
 
   @override
+  String get fullscreenLyrics => 'Layar penuh';
+
+  @override
+  String get exitFullscreenLyrics => 'Keluar dari layar penuh';
+
+  @override
   String get lyricsOffsetSaveFailed => 'Offset lirik tidak bisa disimpan.';
 
   @override
