@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "쿠키 {cookies}개 업로드됨 — 18+ 트랙이 활성화되었습니다",
   "cookieUploadRejected": "서버가 파일을 거부했습니다: {reason}",
   "cookieUploadApology": "이 내보내기는 로그인 세션이 아니므로 18+ 트랙은 여전히 재생되지 않습니다. 연령 인증된 계정으로 YouTube에 로그인한 뒤 다시 내보내세요.",
-  "cookieStatusUnreachable": "서버가 응답하지 않았습니다"
+  "cookieStatusUnreachable": "서버가 응답하지 않았습니다",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

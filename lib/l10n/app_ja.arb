@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "Cookie を {cookies} 件アップロードしました — 18+ の曲が利用できます",
   "cookieUploadRejected": "サーバーがファイルを拒否しました: {reason}",
   "cookieUploadApology": "このエクスポートはサインイン済みのセッションではないため、18+ の曲は再生できません。年齢確認済みのアカウントで YouTube にサインインし、再度エクスポートしてください。",
-  "cookieStatusUnreachable": "サーバーが応答しません"
+  "cookieStatusUnreachable": "サーバーが応答しません",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

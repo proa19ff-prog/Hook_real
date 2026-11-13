@@ -9,6 +9,7 @@ import '../../../core/ui/hook_icons.dart';
 import '../../../core/ui/hook_skeleton.dart';
 import '../../../core/ui/hook_tokens.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../artwork/artwork_service.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
 import '../../extractor/models/media_track.dart';
@@ -656,6 +657,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 children: [
                   TrackArtwork(
                     url: track.artworkUrl,
+                    artist: track.artist,
+                    title: track.title,
+                    duration: track.duration,
                     size: 84,
                     borderRadius: BorderRadius.circular(12),
                     placeholderColor: colors.surface,
@@ -738,14 +742,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final history = ref.watch(searchHistoryProvider);
     // Circle covers for the artist cards come from whatever artwork the
     // user's own tracks carry; names from favorites first, then history.
+    // Collaborating artists are split so each performer gets their own card.
     final artistArt = <String, String>{};
+    final artistTracks = <String, MediaTrack>{};
     for (final track in [
       ...ref.watch(favoritesProvider),
       ...ref.watch(historyProvider),
     ]) {
-      final name = track.artist.trim();
-      if (name.isEmpty) continue;
-      artistArt.putIfAbsent(name, () => track.artworkUrl);
+      final names = ArtworkService.splitArtists(track.artist);
+      if (names.isEmpty) continue;
+      final display = ArtworkService.instance.displayUrl(
+        track.artworkUrl,
+        artist: track.artist,
+        title: track.title,
+      );
+      for (final name in names) {
+        if (name.isEmpty) continue;
+        artistTracks.putIfAbsent(name, () => track);
+        if (display != null) {
+          artistArt.putIfAbsent(name, () => display);
+        }
+      }
+    }
+    for (final entry in artistTracks.entries) {
+      artistArt.putIfAbsent(entry.key, () => entry.value.artworkUrl);
     }
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
@@ -843,6 +863,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 14),
               itemBuilder: (context, index) {
                 final name = artistArt.keys.elementAt(index);
+                final artistTrack = artistTracks[name];
                 return GestureDetector(
                   onTap: () => openArtistScreen(context, widget.theme, name),
                   child: SizedBox(
@@ -851,6 +872,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       children: [
                         TrackArtwork(
                           url: artistArt[name] ?? '',
+                          artist: name,
+                          title: artistTrack?.title,
+                          duration: artistTrack?.duration,
                           size: 68,
                           borderRadius: BorderRadius.circular(34),
                           placeholderColor: colors.surface,

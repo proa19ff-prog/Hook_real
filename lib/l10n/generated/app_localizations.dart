@@ -2791,6 +2791,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolver server did not answer'**
   String get cookieStatusUnreachable;
+
+  /// No description provided for @errorAccountSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.'**
+  String get errorAccountSetup;
+
+  /// No description provided for @errorRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a minute and try again.'**
+  String get errorRateLimited;
 }
 
 class _AppLocalizationsDelegate

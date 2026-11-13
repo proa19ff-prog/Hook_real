@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "已上传 {cookies} 个 Cookie — 18+ 曲目已启用",
   "cookieUploadRejected": "服务器拒绝了该文件：{reason}",
   "cookieUploadApology": "该导出不是已登录会话，18+ 曲目仍然无法播放。请用已完成年龄验证的账号登录 YouTube 后重新导出。",
-  "cookieStatusUnreachable": "服务器没有响应"
+  "cookieStatusUnreachable": "服务器没有响应",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

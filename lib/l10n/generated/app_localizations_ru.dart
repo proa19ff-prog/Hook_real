@@ -1520,4 +1520,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cookieStatusUnreachable => 'Сервер не ответил';
+
+  @override
+  String get errorAccountSetup =>
+      'Аккаунты не включены на сервере. В Supabase выключите Authentication → Sign In / Providers → Email → «Confirm email» и попробуйте снова.';
+
+  @override
+  String get errorRateLimited =>
+      'Слишком много попыток. Подождите минуту и повторите.';
 }

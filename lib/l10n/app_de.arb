@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} Cookies hochgeladen — Titel ab 18 sind freigeschaltet",
   "cookieUploadRejected": "Server hat die Datei abgelehnt: {reason}",
   "cookieUploadApology": "Der Export ist keine angemeldete Sitzung, daher laufen Titel ab 18 weiterhin nicht. Melde dich bei YouTube mit einem altersverifizierten Konto an und exportiere erneut.",
-  "cookieStatusUnreachable": "Der Resolver hat nicht geantwortet"
+  "cookieStatusUnreachable": "Der Resolver hat nicht geantwortet",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

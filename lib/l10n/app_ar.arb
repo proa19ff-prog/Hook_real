@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "تم تحميل {cookies} من ملفات الكوكيز — المقاطع +18 متاحة",
   "cookieUploadRejected": "رفض الخادم الملف: {reason}",
   "cookieUploadApology": "هذا التصدير ليس جلسة مسجَّلة، لذا لن تعمل المقاطع +18. سجّل الدخول إلى YouTube بحساب موثّق العمر ثم صدّر من جديد.",
-  "cookieStatusUnreachable": "لم يستجب الخادم"
+  "cookieStatusUnreachable": "لم يستجب الخادم",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

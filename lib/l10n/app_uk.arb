@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "Завантажено кук: {cookies} — треки 18+ доступні",
   "cookieUploadRejected": "Сервер відхилив файл: {reason}",
   "cookieUploadApology": "Цей експорт — не вхід в акаунт, тому треки 18+ все одно не заграють. Увійдіть у YouTube під акаунтом, що пройшов перевірку віку, і експортуйте ще раз.",
-  "cookieStatusUnreachable": "Сервер не відповів"
+  "cookieStatusUnreachable": "Сервер не відповів",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

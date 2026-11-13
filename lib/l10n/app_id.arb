@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} cookie diunggah — trek 18+ aktif",
   "cookieUploadRejected": "Server menolak berkas: {reason}",
   "cookieUploadApology": "Ekspor ini bukan sesi masuk, jadi trek 18+ tetap tidak akan diputar. Masuk ke YouTube dengan akun terverifikasi usia lalu ekspor ulang.",
-  "cookieStatusUnreachable": "Server tidak menjawab"
+  "cookieStatusUnreachable": "Server tidak menjawab",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

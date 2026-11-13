@@ -114,6 +114,9 @@ class MiniPlayer extends ConsumerWidget {
                       tag: 'current_artwork_${track.source.name}:${track.id}',
                       child: TrackArtwork(
                         url: track.artworkUrl,
+                        artist: track.artist,
+                        title: track.title,
+                        duration: track.duration,
                         size: 44,
                         borderRadius: HookRadius.xsAll,
                         placeholderColor: colors.background,

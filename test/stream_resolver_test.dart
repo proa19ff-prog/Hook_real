@@ -189,4 +189,20 @@ void main() {
       greaterThan(StreamResolver.scoreTrack(cover, 'sunflowee spider man')),
     );
   });
+
+  test('resolveStream returns remote streamUrl directly without network resolve', () async {
+    final track = MediaTrack(
+      id: 'rem-1',
+      title: 'Sweet & Bitter',
+      artist: 'Kush Kush',
+      duration: const Duration(seconds: 185),
+      artworkUrl: '',
+      source: TrackSource.remote,
+      streamUrl: 'https://example.com/audio.m4a',
+    );
+    final res = await resolver.resolveStream(track);
+    expect(res, isNotNull);
+    expect(res!.url, 'https://example.com/audio.m4a');
+    expect(res.source, TrackSource.remote);
+  });
 }

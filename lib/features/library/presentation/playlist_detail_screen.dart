@@ -74,6 +74,7 @@ class PlaylistDetailScreen extends ConsumerWidget {
                     Center(
                       child: PlaylistArtwork(
                         urls: tracks.map((track) => track.artworkUrl),
+                        tracks: tracks,
                         size: 190,
                         borderRadius: BorderRadius.circular(12),
                         placeholderColor: colors.surface,

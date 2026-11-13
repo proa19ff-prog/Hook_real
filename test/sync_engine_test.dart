@@ -202,5 +202,23 @@ void main() {
       expect(AccountService.validateNickname('.dotstart'), isNotNull);
       expect(AccountService.validateNickname('ok.name-1_'), isNull);
     });
+
+    test('sign-up refuses before spending a mail attempt', () async {
+      // A project with "Confirm email" ON cannot complete a nickname signup:
+      // the synthetic address would need a message it can never receive.
+      AccountService.autoconfirmForTesting = false;
+      addTearDown(() => AccountService.autoconfirmForTesting = null);
+
+      await expectLater(
+        AccountService.signUp(nickname: 'blocked_nick', password: 'secret123'),
+        throwsA(
+          isA<AccountException>().having(
+            (e) => e.kind,
+            'kind',
+            AccountErrorKind.needsEmailConfirmation,
+          ),
+        ),
+      );
+    });
   });
 }

@@ -734,6 +734,16 @@ class StreamResolver {
           ? null
           : ResolvedStream(url, source: track.source);
     }
+    if (track.source == TrackSource.remote) {
+      final url = track.streamUrl;
+      if (url != null && url.isNotEmpty) {
+        return ResolvedStream(
+          url,
+          source: track.source,
+          duration: track.duration,
+        );
+      }
+    }
     if (track.source == TrackSource.soundcloud) {
       final stream = await _scExtractor.resolveAudioStream(track.id);
       return stream == null || stream.url.isEmpty
@@ -754,6 +764,10 @@ class StreamResolver {
       // the server answers a cached track in about a millisecond, the direct
       // attempt wins whenever the carrier lets it through.
       if (source is YouTubeMusicSource && remote != null) {
+        if (RemoteResolverSource.isWarm(track.id)) {
+          final server = await remote.resolveTrack(track);
+          if (server != null && !server.isEmpty) return server;
+        }
         return _raceDirectAndServer(track, source, remote);
       }
       Object? directFailure;

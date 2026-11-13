@@ -1,9 +1,21 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'account_config.dart';
 
 /// Why the auth attempt failed, in UI-actionable terms.
-enum AccountErrorKind { nicknameTaken, invalidCredentials, weakPassword, needsEmailConfirmation, network, server, notConfigured }
+enum AccountErrorKind {
+  nicknameTaken,
+  invalidCredentials,
+  weakPassword,
+  needsEmailConfirmation,
+  rateLimited,
+  network,
+  server,
+  notConfigured,
+}
 
 class AccountException implements Exception {
   const AccountException(this.kind, this.message);
@@ -45,6 +57,43 @@ abstract final class AccountService {
 
   static bool get isConfigured => _configured;
 
+  /// Cached answer to "can a signup produce a session by itself?".
+  /// `null` = not asked yet / unreachable.
+  static bool? _autoconfirm;
+
+  /// Test seam: pretend the project's e-mail setting is known.
+  static set autoconfirmForTesting(bool? value) => _autoconfirm = value;
+
+  /// Whether the Supabase project auto-confirms sign-ups.
+  ///
+  /// Hook signs users up with a synthetic `<nickname>@hook.local` address and
+  /// never sends mail, so it needs the project's "Confirm email" switch OFF.
+  /// With it ON every signup tries to send a message to an address that
+  /// cannot receive one, which burns the mailer quota and returns a bare
+  /// `429 over_email_send_rate_limit` — the "registration just doesn't work"
+  /// symptom. `/auth/v1/settings` is public, so we can ask before trying.
+  static Future<bool?> emailAutoconfirmEnabled() async {
+    if (!_configured) return null;
+    if (_autoconfirm != null) return _autoconfirm;
+    try {
+      final response = await http
+          .get(
+            Uri.parse('${AccountConfig.supabaseUrl}/auth/v1/settings'),
+            headers: {'apikey': AccountConfig.supabaseAnonKey},
+          )
+          .timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return null;
+      final body = jsonDecode(response.body);
+      if (body is! Map) return null;
+      final value = body['mailer_autoconfirm'];
+      if (value is bool) _autoconfirm = value;
+      return _autoconfirm;
+    } catch (_) {
+      // Offline or blocked: let the signup attempt speak for itself.
+      return null;
+    }
+  }
+
   /// Current signed-in user id, or null.
   static String? get currentUserId =>
       _configured ? Supabase.instance.client.auth.currentUser?.id : null;
@@ -70,6 +119,18 @@ abstract final class AccountService {
     required String password,
   }) async {
     await _guard(() async {
+      // Ask first: with confirmation ON and no SMTP, Supabase tries to mail a
+      // synthetic address that cannot exist. The user then sees an opaque
+      // "email rate limit exceeded" instead of the actual misconfiguration.
+      if (await emailAutoconfirmEnabled() == false) {
+        throw const AccountException(
+          AccountErrorKind.needsEmailConfirmation,
+          'The Supabase project has "Confirm email" switched on. Hook signs '
+          'up with a synthetic <nickname>@hook.local address and never sends '
+          'mail, so sign-up can only work with confirmation OFF '
+          '(Dashboard -> Authentication -> Sign In / Providers -> Email).',
+        );
+      }
       final response = await Supabase.instance.client.auth.signUp(
         email: syntheticEmail(nickname),
         password: password,
@@ -118,7 +179,8 @@ abstract final class AccountService {
       rethrow;
     } catch (error) {
       final message = error.toString().toLowerCase();
-      final network = message.contains('socketexception') ||
+      final network =
+          message.contains('socketexception') ||
           message.contains('clientexception') ||
           message.contains('failed host lookup') ||
           message.contains('connection');
@@ -132,7 +194,8 @@ abstract final class AccountService {
   static AccountException _mapAuthException(AuthException error) {
     final code = error.code;
     final message = error.message.toLowerCase();
-    if (code == 'user_already_exists' || message.contains('already registered')) {
+    if (code == 'user_already_exists' ||
+        message.contains('already registered')) {
       return AccountException(AccountErrorKind.nicknameTaken, error.message);
     }
     if (code == 'invalid_credentials' ||
@@ -145,15 +208,33 @@ abstract final class AccountService {
     if (code == 'weak_password' || message.contains('password should be')) {
       return AccountException(AccountErrorKind.weakPassword, error.message);
     }
+    // With "Confirm email" ON, every signup burns one mail attempt against a
+    // synthetic address that cannot receive it. The API answers a bare
+    // `429 email rate limit exceeded`, which reads like a server fault but is
+    // really the project setting. Name it as the configuration problem.
+    if (code == 'over_email_send_rate_limit' ||
+        message.contains('email rate limit') ||
+        message.contains('email rate limit exceeded')) {
+      return AccountException(
+        AccountErrorKind.needsEmailConfirmation,
+        error.message,
+      );
+    }
+    if (code == 'email_address_invalid' ||
+        (message.contains('is invalid') && message.contains('email'))) {
+      return AccountException(
+        AccountErrorKind.needsEmailConfirmation,
+        error.message,
+      );
+    }
     if (message.contains('confirm')) {
       return AccountException(
         AccountErrorKind.needsEmailConfirmation,
         error.message,
       );
     }
-    if (code == 'over_request_rate_limit' ||
-        message.contains('rate limit')) {
-      return AccountException(AccountErrorKind.server, error.message);
+    if (code == 'over_request_rate_limit' || message.contains('rate limit')) {
+      return AccountException(AccountErrorKind.rateLimited, error.message);
     }
     return AccountException(AccountErrorKind.server, error.message);
   }

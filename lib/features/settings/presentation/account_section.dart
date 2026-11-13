@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/ui/hook_tokens.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -160,8 +161,9 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed:
-                _busy ? null : () => setState(() => _isSignUp = !_isSignUp),
+            onPressed: _busy
+                ? null
+                : () => setState(() => _isSignUp = !_isSignUp),
             child: Text(
               _isSignUp ? strings.haveAccountToggle : strings.noAccountToggle,
               style: TextStyle(fontSize: HookType.label, color: colors.primary),
@@ -182,8 +184,8 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
     final status = state.syncing
         ? strings.syncing
         : state.lastSyncAt == null
-            ? strings.neverSynced
-            : strings.syncedAt(_formatTime(state.lastSyncAt!));
+        ? strings.neverSynced
+        : strings.syncedAt(_formatTime(state.lastSyncAt!));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,9 +228,11 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
             Expanded(
               child: OutlinedButton.icon(
                 key: const ValueKey('account-sync-button'),
-                onPressed: state.syncing ? null : () {
-                  ref.read(accountProvider.notifier).syncNow();
-                },
+                onPressed: state.syncing
+                    ? null
+                    : () {
+                        ref.read(accountProvider.notifier).syncNow();
+                      },
                 icon: const Icon(HookIcons.sync, size: 18),
                 label: Text(strings.syncNow),
               ),
@@ -236,10 +240,11 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
             const SizedBox(width: 10),
             TextButton(
               key: const ValueKey('account-signout-button'),
-              onPressed:
-                  state.syncing ? null : () {
-                    ref.read(accountProvider.notifier).signOut();
-                  },
+              onPressed: state.syncing
+                  ? null
+                  : () {
+                      ref.read(accountProvider.notifier).signOut();
+                    },
               child: Text(strings.signOut),
             ),
           ],
@@ -259,9 +264,9 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
         final problem = AccountService.validateNickname(nickname);
         if (problem != null) {
           setState(() {});
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(strings.errorNicknameInvalid)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(strings.errorNicknameInvalid)));
           return;
         }
         await notifier.signUp(nickname, password);
@@ -281,10 +286,15 @@ class _AccountSectionState extends ConsumerState<AccountSection> {
         return strings.errorInvalidCredentials;
       case AccountErrorKind.weakPassword:
         return strings.errorWeakPassword;
+      case AccountErrorKind.needsEmailConfirmation:
+        // The most common real cause: the Supabase project still asks for
+        // e-mail confirmation, so a nickname signup can never complete.
+        return strings.errorAccountSetup;
+      case AccountErrorKind.rateLimited:
+        return strings.errorRateLimited;
       case AccountErrorKind.network:
         return strings.errorNetwork;
       case AccountErrorKind.server:
-      case AccountErrorKind.needsEmailConfirmation:
         return strings.errorServer;
       case AccountErrorKind.notConfigured:
       case null:

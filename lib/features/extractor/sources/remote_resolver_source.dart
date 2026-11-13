@@ -83,10 +83,36 @@ class RemoteResolverSource implements MusicSource {
   static String get debugActiveEndpoint =>
       defaultEndpoints[_activeIndex.clamp(0, defaultEndpoints.length - 1)];
 
+  /// Track IDs known to be pre-warmed or resident in the server's cache
+  /// (e.g. from /popular or /warm).
+  static final Set<String> _warmIds = <String>{};
+
+  /// True when [id] is known to be pre-warmed or popular on the server.
+  static bool isWarm(String id) {
+    final clean = id.trim();
+    return clean.isNotEmpty && _warmIds.contains(clean);
+  }
+
+  /// Marks [ids] as server-warm so resolve attempts skip direct YouTube.
+  static void markWarm(Iterable<String> ids) {
+    for (final id in ids) {
+      final clean = id.trim();
+      if (clean.isNotEmpty) {
+        _warmIds.add(clean);
+      }
+    }
+  }
+
+  @visibleForTesting
+  static void resetWarmIds() {
+    _warmIds.clear();
+  }
+
   @visibleForTesting
   static void resetRotation() {
     _activeIndex = 0;
     _cooldownUntil.clear();
+    _warmIds.clear();
   }
 
   static bool _cooling(String endpoint) {
@@ -101,7 +127,8 @@ class RemoteResolverSource implements MusicSource {
     _cooldownUntil[endpoint] = DateTime.utc(now.year, now.month, now.day + 1);
     if (defaultEndpoints.indexOf(endpoint) == _activeIndex) {
       for (var i = 1; i < defaultEndpoints.length; i++) {
-        final candidate = defaultEndpoints[(_activeIndex + i) % defaultEndpoints.length];
+        final candidate =
+            defaultEndpoints[(_activeIndex + i) % defaultEndpoints.length];
         if (!_cooling(candidate)) {
           _activeIndex = defaultEndpoints.indexOf(candidate);
           break;
@@ -134,7 +161,8 @@ class RemoteResolverSource implements MusicSource {
   static String get effectiveEndpoint {
     final stored = endpoint?.trim();
     if (stored != null) return stored;
-    final active = defaultEndpoints[_activeIndex.clamp(0, defaultEndpoints.length - 1)];
+    final active =
+        defaultEndpoints[_activeIndex.clamp(0, defaultEndpoints.length - 1)];
     if (!_cooling(active)) return active;
     for (final candidate in defaultEndpoints) {
       if (!_cooling(candidate)) return candidate;
@@ -182,6 +210,7 @@ class RemoteResolverSource implements MusicSource {
         .take(12)
         .toList(growable: false);
     if (wanted.isEmpty) return;
+    markWarm(wanted);
     try {
       await _getRotating('/warm', {'ids': wanted.join(',')}, _warmTimeout);
     } catch (_) {
@@ -193,19 +222,19 @@ class RemoteResolverSource implements MusicSource {
   /// its RAM cache. Empty on any failure — the home rail simply stays hidden.
   Future<List<MediaTrack>> popular({int limit = 12}) async {
     if (!enabled || limit <= 0) return const [];
-    final response = await _getRotating(
-      '/popular',
-      {'limit': '$limit'},
-      _searchTimeout,
-    );
+    final response = await _getRotating('/popular', {
+      'limit': '$limit',
+    }, _searchTimeout);
     if (response == null) return const [];
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! List) return const [];
-    return decoded
+    final tracks = decoded
         .whereType<Map<String, dynamic>>()
         .map(_trackFromJson)
         .whereType<MediaTrack>()
         .toList(growable: false);
+    markWarm(tracks.map((t) => t.id));
+    return tracks;
   }
 
   /// Rotates across the pool: 429 cools the endpoint until the next UTC
@@ -220,7 +249,24 @@ class RemoteResolverSource implements MusicSource {
     Object? lastError;
     for (final base in _candidates) {
       try {
-        final response = await _get(_buildFor(base, path, query), timeout);
+        var response = await _get(_buildFor(base, path, query), timeout);
+        // 503 + Retry-After means "capacity, not a dead track": every
+        // extraction slot on the server was busy. Rotating to another pool
+        // entry is useless (same box), but the track will play a moment
+        // later, so wait and ask the same endpoint again.
+        var retries = 0;
+        while (response.statusCode == 503 && retries < 2) {
+          final wait = _retryAfter(response.headers['retry-after']);
+          if (wait == null) break;
+          retries++;
+          PlaybackDiagnostics.record(
+            'remote.endpoint.busy',
+            source: source.name,
+            detail: 'retry $retries in ${wait.inMilliseconds}ms',
+          );
+          await Future<void>.delayed(wait);
+          response = await _get(_buildFor(base, path, query), timeout);
+        }
         if (response.statusCode == 429) {
           _markExhausted(base);
           PlaybackDiagnostics.record(
@@ -260,6 +306,14 @@ class RemoteResolverSource implements MusicSource {
     return null;
   }
 
+  /// How long the server asked us to wait, capped. Returns null when the
+  /// header is missing or unparsable, which means "don't retry".
+  static Duration? _retryAfter(String? header) {
+    final seconds = int.tryParse(header?.trim() ?? '');
+    if (seconds == null || seconds <= 0) return null;
+    return Duration(seconds: seconds.clamp(1, 5));
+  }
+
   static void _stickTo(String endpoint) {
     final index = defaultEndpoints.indexOf(endpoint);
     if (index >= 0) _activeIndex = index;
@@ -276,7 +330,9 @@ class RemoteResolverSource implements MusicSource {
       if (code != 'age_restricted' && code != 'cookies_stale') return null;
       return AgeRestrictedStreamException(
         code!,
-        detail: decoded['detail']?.toString() ?? decoded['cookie_state']?.toString(),
+        detail:
+            decoded['detail']?.toString() ??
+            decoded['cookie_state']?.toString(),
       );
     } catch (_) {
       return null;
@@ -307,11 +363,10 @@ class RemoteResolverSource implements MusicSource {
   @override
   Future<List<MediaTrack>> searchTracks(String query, {int limit = 20}) async {
     if (!enabled || query.trim().isEmpty || limit <= 0) return const [];
-    final response = await _getRotating(
-      '/search',
-      {'q': query.trim(), 'limit': '$limit'},
-      _searchTimeout,
-    );
+    final response = await _getRotating('/search', {
+      'q': query.trim(),
+      'limit': '$limit',
+    }, _searchTimeout);
     if (response == null) return const [];
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! List) return const [];
@@ -363,7 +418,10 @@ class RemoteResolverSource implements MusicSource {
         artist.isEmpty) {
       return null;
     }
-    final seconds = item['duration'] is num ? (item['duration'] as num).toInt() : null;
+    final seconds = item['duration'] is num
+        ? (item['duration'] as num).toInt()
+        : null;
+    final streamUrl = item['url']?.toString();
     return MediaTrack(
       id: id,
       title: title,
@@ -372,6 +430,7 @@ class RemoteResolverSource implements MusicSource {
       duration: seconds == null ? Duration.zero : Duration(seconds: seconds),
       artworkUrl: item['artwork']?.toString() ?? '',
       source: TrackSource.remote,
+      streamUrl: streamUrl != null && streamUrl.isNotEmpty ? streamUrl : null,
     );
   }
 
@@ -388,14 +447,17 @@ class RemoteResolverSource implements MusicSource {
       try {
         final uri = _buildFor(base, '/cookies/upload', const {});
         final override = fetchOverride;
-        final response = await (override != null
-                ? override(uri)
-                : _client.post(
-                    uri,
-                    headers: const {'Content-Type': 'text/plain; charset=utf-8'},
-                    body: utf8.encode(netscape),
-                  ))
-            .timeout(const Duration(seconds: 40));
+        final response =
+            await (override != null
+                    ? override(uri)
+                    : _client.post(
+                        uri,
+                        headers: const {
+                          'Content-Type': 'text/plain; charset=utf-8',
+                        },
+                        body: utf8.encode(netscape),
+                      ))
+                .timeout(const Duration(seconds: 40));
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
         if (decoded is! Map<String, dynamic>) {
           lastError = 'unexpected answer (HTTP ${response.statusCode})';
@@ -516,4 +578,3 @@ class CookieUploadResult {
   bool get isError => error != null && error!.isNotEmpty;
   bool get ready => !isError && signedIn && loggedIn;
 }
-

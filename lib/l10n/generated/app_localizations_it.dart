@@ -1524,4 +1524,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get cookieStatusUnreachable => 'Il server non ha risposto';
+
+  @override
+  String get errorAccountSetup =>
+      'Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.';
+
+  @override
+  String get errorRateLimited =>
+      'Too many attempts. Wait a minute and try again.';
 }

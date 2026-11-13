@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} cookies importés — les titres 18+ sont activés",
   "cookieUploadRejected": "Le serveur a refusé le fichier : {reason}",
   "cookieUploadApology": "Cet export n'est pas une session connectée : les titres 18+ ne fonctionneront toujours pas. Connectez-vous à YouTube avec un compte vérifié et exportez à nouveau.",
-  "cookieStatusUnreachable": "Le serveur n'a pas répondu"
+  "cookieStatusUnreachable": "Le serveur n'a pas répondu",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

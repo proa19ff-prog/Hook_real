@@ -202,6 +202,9 @@ class HomeScreen extends ConsumerWidget {
                                   children: [
                                     TrackArtwork(
                                       url: track.artworkUrl,
+                                      artist: track.artist,
+                                      title: track.title,
+                                      duration: track.duration,
                                       size: 144,
                                       borderRadius: HookRadius.mdAll,
                                       placeholderColor: colors.surface,
@@ -360,6 +363,9 @@ class _WaveField extends ConsumerWidget {
                   const SizedBox(width: HookSpace.md),
                   TrackArtwork(
                     url: effectiveSeed.artworkUrl,
+                    artist: effectiveSeed.artist,
+                    title: effectiveSeed.title,
+                    duration: effectiveSeed.duration,
                     size: 40,
                     borderRadius: HookRadius.smAll,
                     placeholderColor: colors.background,

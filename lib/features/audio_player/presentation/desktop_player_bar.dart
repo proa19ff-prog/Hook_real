@@ -9,6 +9,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../extractor/models/media_track.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/track_artwork.dart';
+import '../../search/presentation/artist_screen.dart';
 import '../data/audio_player_service.dart' show PlayerLoopMode;
 import 'fullscreen_player.dart';
 import 'player_state_provider.dart';
@@ -280,6 +281,9 @@ class _TrackBlock extends StatelessWidget {
                 tag: 'current_artwork_${track.source.name}:${track.id}',
                 child: TrackArtwork(
                   url: track.artworkUrl,
+                  artist: track.artist,
+                  title: track.title,
+                  duration: track.duration,
                   size: 48,
                   borderRadius: HookRadius.xsAll,
                   placeholderColor: colors.background,
@@ -303,17 +307,26 @@ class _TrackBlock extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: HookSpace.hair),
-                    Text(
-                      loading
-                          ? strings.loading
-                          : '${track.artist} · ${track.source.labelFor(strings)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textSecondary,
-                        fontSize: HookType.caption,
+                    if (loading)
+                      Text(
+                        strings.loading,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: HookType.caption,
+                        ),
+                      )
+                    else
+                      InteractiveArtistText(
+                        artist: track.artist,
+                        rest: track.source.labelFor(strings),
+                        theme: theme,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: HookType.caption,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

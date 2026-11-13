@@ -10,6 +10,7 @@ import '../../extractor/models/media_track.dart';
 import '../../library/presentation/library_provider.dart';
 import '../../lyrics/presentation/karaoke_lyrics_view.dart';
 import '../../lyrics/presentation/lyrics_mode_selector.dart';
+import '../../search/presentation/artist_screen.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../../theme_engine/domain/hook_theme.dart';
 import '../../theme_engine/presentation/dynamic_shader_background.dart';
@@ -382,10 +383,32 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                 tooltip: strings.moreActions,
                                 icon: Icon(HookIcons.moreVertical, color: text),
                                 onSelected: (value) {
+                                  if (value == 'artist' && track != null) {
+                                    showArtistPickerOrOpen(
+                                      context,
+                                      widget.theme,
+                                      track.artist,
+                                    );
+                                  }
                                   if (value == 'queue') _showQueueSheet();
                                   if (value == 'random') _playRandomPick();
                                 },
                                 itemBuilder: (menuContext) => [
+                                  if (track != null)
+                                    PopupMenuItem(
+                                      value: 'artist',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            HookIcons.social,
+                                            size: 18,
+                                            color: colors.textSecondary,
+                                          ),
+                                          const SizedBox(width: HookSpace.md),
+                                          Text(strings.goToArtist),
+                                        ],
+                                      ),
+                                    ),
                                   PopupMenuItem(
                                     value: 'queue',
                                     child: Row(
@@ -454,6 +477,9 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                               'current_artwork_${_trackKey(track)}',
                                           child: TrackArtwork(
                                             url: track.artworkUrl,
+                                            artist: track.artist,
+                                            title: track.title,
+                                            duration: track.duration,
                                             size: size,
                                             borderRadius: BorderRadius.circular(
                                               12,
@@ -495,15 +521,25 @@ class _FullscreenPlayerState extends ConsumerState<FullscreenPlayer> {
                                       ),
                                     ),
                                     const SizedBox(height: 6),
-                                    Text(
-                                      track?.artist ?? strings.findMusicStart,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: muted,
-                                        fontSize: HookType.body,
+                                    if (track != null)
+                                      InteractiveArtistText(
+                                        artist: track.artist,
+                                        theme: widget.theme,
+                                        style: TextStyle(
+                                          color: muted,
+                                          fontSize: HookType.body,
+                                        ),
+                                      )
+                                    else
+                                      Text(
+                                        strings.findMusicStart,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: muted,
+                                          fontSize: HookType.body,
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 ),
                               ),

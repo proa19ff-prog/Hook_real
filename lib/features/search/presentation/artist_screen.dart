@@ -1,7 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/ui/hook_haptics.dart';
 import '../../../core/ui/hook_tokens.dart';
 
+import '../../artwork/artwork_service.dart';
 import '../../audio_player/presentation/mini_player.dart';
 import '../../audio_player/presentation/player_state_provider.dart';
 import '../../audio_player/presentation/spotify_track_tile.dart';
@@ -20,6 +23,229 @@ void openArtistScreen(BuildContext context, HookTheme theme, String artistName) 
       builder: (_) => ArtistScreen(theme: theme, artistName: name),
     ),
   );
+}
+
+/// Opens the artist screen for [artistName]. If [artistName] contains
+/// multiple collaborators (e.g. "MadK1d и Villian"), presents a bottom sheet
+/// to pick the intended performer instead of combining them into one page.
+Future<void> showArtistPickerOrOpen(
+  BuildContext context,
+  HookTheme theme,
+  String artistName,
+) async {
+  final artists = ArtworkService.splitArtists(artistName);
+  if (artists.isEmpty) return;
+  if (artists.length == 1) {
+    openArtistScreen(context, theme, artists.first);
+    return;
+  }
+
+  final colors = theme.colors;
+  final strings = AppLocalizations.of(context);
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: colors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+    ),
+    builder: (sheetContext) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 34,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                strings.goToArtist,
+                style: TextStyle(
+                  color: colors.textPrimary,
+                  fontSize: HookType.heading,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            for (final name in artists)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: TrackArtwork(
+                  url: '',
+                  artist: name,
+                  title: '',
+                  size: 40,
+                  borderRadius: BorderRadius.circular(20),
+                  placeholderColor: colors.background,
+                  iconColor: colors.textSecondary,
+                ),
+                title: Text(
+                  name,
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: HookType.body,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                trailing: Icon(
+                  HookIcons.forward,
+                  size: 18,
+                  color: colors.textSecondary,
+                ),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  openArtistScreen(context, theme, name);
+                },
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Renders an artist credit line where each collaborator's name can be
+/// tapped individually to navigate to that artist's discography page.
+///
+/// If there are multiple artists (e.g. "MadK1d и Villian"), each performer
+/// gets their own tap gesture instead of merging them into one destination.
+class InteractiveArtistText extends StatefulWidget {
+  final String artist;
+  final String? rest;
+  final HookTheme theme;
+  final TextStyle style;
+  final int maxLines;
+  final TextOverflow overflow;
+  final void Function(String artistName)? onArtistTap;
+  final VoidCallback? onLongPress;
+
+  const InteractiveArtistText({
+    super.key,
+    required this.artist,
+    required this.theme,
+    required this.style,
+    this.rest,
+    this.maxLines = 1,
+    this.overflow = TextOverflow.ellipsis,
+    this.onArtistTap,
+    this.onLongPress,
+  });
+
+  @override
+  State<InteractiveArtistText> createState() => _InteractiveArtistTextState();
+}
+
+class _InteractiveArtistTextState extends State<InteractiveArtistText> {
+  final List<TapGestureRecognizer> _recognizers = <TapGestureRecognizer>[];
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
+
+  void _clearRecognizers() {
+    for (final recognizer in _recognizers) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _clearRecognizers();
+    final text = widget.artist.trim();
+    if (text.isEmpty) {
+      return Text(
+        widget.rest ?? '',
+        maxLines: widget.maxLines,
+        overflow: widget.overflow,
+        style: widget.style,
+      );
+    }
+
+    final delimiterPattern = RegExp(
+      r'(\s*(?:[,;&/]|(?:\s+(?:feat\.?|ft\.?|and|with|vs\.?|versus|x|и)(?=\s|$)))\s*)',
+      caseSensitive: false,
+    );
+
+    final spans = <InlineSpan>[];
+    final matches = delimiterPattern.allMatches(text).toList();
+    var lastIndex = 0;
+
+    void addArtistSpan(String name) {
+      final cleanName = name
+          .replaceAll(RegExp(r'[\(\[].*?[\)\]]'), '')
+          .replaceAll(RegExp(r'\s*-\s*topic$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'vevo$', caseSensitive: false), '')
+          .trim();
+      if (cleanName.isEmpty) {
+        spans.add(TextSpan(text: name));
+        return;
+      }
+      final recognizer = TapGestureRecognizer()
+        ..onTap = () {
+          HookHaptics.tap();
+          if (widget.onArtistTap != null) {
+            widget.onArtistTap!(cleanName);
+          } else {
+            openArtistScreen(context, widget.theme, cleanName);
+          }
+        };
+      _recognizers.add(recognizer);
+      spans.add(
+        TextSpan(
+          text: name,
+          recognizer: recognizer,
+        ),
+      );
+    }
+
+    for (final match in matches) {
+      if (match.start > lastIndex) {
+        addArtistSpan(text.substring(lastIndex, match.start));
+      }
+      spans.add(TextSpan(text: match.group(0)));
+      lastIndex = match.end;
+    }
+
+    if (lastIndex < text.length) {
+      addArtistSpan(text.substring(lastIndex));
+    }
+
+    final rest = widget.rest?.trim();
+    if (rest != null && rest.isNotEmpty) {
+      spans.add(TextSpan(text: ' • $rest'));
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: widget.onLongPress ??
+          () {
+            final list = ArtworkService.splitArtists(widget.artist);
+            if (list.length > 1) {
+              showArtistPickerOrOpen(context, widget.theme, widget.artist);
+            }
+          },
+      child: Text.rich(
+        TextSpan(children: spans),
+        maxLines: widget.maxLines,
+        overflow: widget.overflow,
+        style: widget.style,
+      ),
+    );
+  }
 }
 
 /// All findable recordings by one artist: structured catalog discography
@@ -74,12 +300,13 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
     final colors = widget.theme.colors;
     final strings = AppLocalizations.of(context);
     final tracks = _tracks;
-    final artwork = tracks == null
-        ? ''
-        : tracks.map((t) => t.artworkUrl).firstWhere(
-              (url) => url.isNotEmpty,
-              orElse: () => '',
-            );
+    final leadTrack = tracks == null || tracks.isEmpty
+        ? null
+        : tracks.firstWhere(
+            (t) => ArtworkService.isUsable(t.artworkUrl),
+            orElse: () => tracks.first,
+          );
+    final artwork = leadTrack?.artworkUrl ?? '';
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -125,6 +352,9 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                     Center(
                       child: TrackArtwork(
                         url: artwork,
+                        artist: leadTrack?.artist ?? widget.artistName,
+                        title: leadTrack?.title,
+                        duration: leadTrack?.duration,
                         size: 160,
                         borderRadius: BorderRadius.circular(80),
                         placeholderColor: colors.surface,

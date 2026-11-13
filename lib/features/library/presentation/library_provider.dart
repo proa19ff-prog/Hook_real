@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../extractor/models/media_track.dart';
+import '../../artwork/artwork_service.dart';
+import '../../theme_engine/presentation/track_artwork.dart';
 import '../../extractor/spotify/spotify_catalog_service.dart';
 import '../../import/music_import_service.dart';
 
@@ -121,30 +124,33 @@ class PlaylistsNotifier
   }
 
   /// Imported playlists store no artwork at all, so their cards render as
-  /// bare placeholders. Resolves covers for the first tracks from the
-  /// catalog (search by "artist title") and persists them once per playlist
-  /// name; everything else keeps working offline as before. When the catalog
-  /// is unreachable, [artworkFallback] searches other sources instead — a
-  /// candidate cover counts only when the duration lines up.
+  /// bare placeholders. Covers are resolved with [ArtworkService] first (a
+  /// Deezer/iTunes album cover, then cached), then with the catalog and, when
+  /// that is unreachable, [artworkFallback] — a candidate cover from there
+  /// counts only when the duration lines up.
+  ///
+  /// A YouTube video frame counts as missing artwork: it is not a cover and
+  /// looks wrong in a playlist grid, so it gets replaced like an empty url.
   Future<void> backfillArtwork({
     SpotifyCatalogService? catalog,
     Future<List<MediaTrack>> Function(String query)? artworkFallback,
     int perPlaylist = 12,
   }) async {
     if (_artworkBackfill != null) return _artworkBackfill;
+    await ArtworkService.instance.hydrate();
     final targets = <MapEntry<String, List<int>>>[];
     for (final entry in state.entries) {
       if (_backfilledNames.contains(entry.key)) continue;
       final missing = <int>[];
       for (var i = 0; i < entry.value.length && missing.length < perPlaylist; i++) {
-        if (entry.value[i].artworkUrl.trim().isEmpty) missing.add(i);
+        final url = entry.value[i].artworkUrl.trim();
+        if (!ArtworkService.isUsable(TrackArtwork.getHighResUrl(url))) {
+          missing.add(i);
+        }
       }
       if (missing.isNotEmpty) targets.add(MapEntry(entry.key, missing));
     }
-    if (targets.isEmpty || (catalog == null && artworkFallback == null)) {
-      for (final target in targets) {
-        _backfilledNames.add(target.key);
-      }
+    if (targets.isEmpty) {
       return;
     }
     final future = _runArtworkBackfill(targets, catalog, artworkFallback);
@@ -170,16 +176,38 @@ class PlaylistsNotifier
           final track = tracks[index];
           final query = '${track.artist} ${track.title}'.trim();
           var artwork = '';
+          // Album cover first: the resolver returns real square art and keeps
+          // it in the shared cache, so the player and notification reuse it.
           try {
-            final hits = catalog == null
-                ? const <MediaTrack>[]
-                : await catalog
-                    .searchTracks(query, limit: 1)
-                    .timeout(const Duration(seconds: 8));
-            if (hits.isNotEmpty) artwork = hits.first.artworkUrl;
+            final resolved = await ArtworkService.instance
+                .resolve(
+                  artist: track.artist,
+                  title: track.title,
+                  duration: track.duration,
+                )
+                .timeout(const Duration(seconds: 12));
+            if (resolved != null) {
+              artwork = resolved;
+            }
           } catch (_) {
             failures++;
-            // Catalog unreachable or a stubborn query — try other sources.
+            // Fall through to the catalog.
+          }
+          if (artwork.isEmpty) {
+            try {
+              final hits = catalog == null
+                  ? const <MediaTrack>[]
+                  : await catalog
+                        .searchTracks(query, limit: 1)
+                        .timeout(const Duration(seconds: 8));
+              if (hits.isNotEmpty &&
+                  ArtworkService.isUsable(hits.first.artworkUrl)) {
+                artwork = hits.first.artworkUrl;
+              }
+            } catch (_) {
+              failures++;
+              // Catalog unreachable or a stubborn query — try other sources.
+            }
           }
           if (artwork.isEmpty && artworkFallback != null) {
             try {
@@ -187,7 +215,7 @@ class PlaylistsNotifier
                   .timeout(const Duration(seconds: 9));
               final expected = track.duration.inMilliseconds;
               for (final candidate in candidates) {
-                if (candidate.artworkUrl.trim().isEmpty) continue;
+                if (!ArtworkService.isUsable(candidate.artworkUrl)) continue;
                 final closeEnough = expected <= 0 ||
                     (candidate.duration.inMilliseconds - expected).abs() <=
                         8000;

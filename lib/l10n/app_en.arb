@@ -507,5 +507,7 @@
   "cookieUploadApology": "The export is not a signed-in session, so 18+ tracks still will not play. Sign in to YouTube on an age-verified account and export again.",
   "@cookieUploadApology": {"description": "Explains that an upload succeeded but the export was made while signed out."},
   "cookieStatusUnreachable": "Resolver server did not answer",
-  "@cookieStatusUnreachable": {"description": "Shown when the cookie check could not reach the resolver at all."}
+  "@cookieStatusUnreachable": {"description": "Shown when the cookie check could not reach the resolver at all."},
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

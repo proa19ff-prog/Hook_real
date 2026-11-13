@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} cookie caricati: i brani 18+ sono attivi",
   "cookieUploadRejected": "Il server ha rifiutato il file: {reason}",
   "cookieUploadApology": "Questo export non è una sessione con accesso: i brani 18+ non funzioneranno comunque. Accedi a YouTube con un account verificato ed esporta di nuovo.",
-  "cookieStatusUnreachable": "Il server non ha risposto"
+  "cookieStatusUnreachable": "Il server non ha risposto",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

@@ -13,6 +13,7 @@ import 'core/ui/hook_tokens.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/presentation/mini_player.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
+import 'features/artwork/artwork_service.dart';
 import 'features/home/presentation/home_screen.dart';
 import 'features/onboarding/onboarding_provider.dart';
 import 'features/onboarding/presentation/onboarding_screen.dart';
@@ -263,7 +264,11 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
           : PlaybackDock(theme: theme, navigation: _buildNavigationBar(theme)),
       body: DynamicShaderBackground(
         theme: theme,
-        artworkUrl: currentTrack?.artworkUrl,
+        artworkUrl: ArtworkService.instance.displayUrl(
+          currentTrack?.artworkUrl ?? '',
+          artist: currentTrack?.artist,
+          title: currentTrack?.title,
+        ),
         child: desktop
             ? Row(
                 children: [

@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} কুকি আপলোড হয়েছে — ১৮+ ট্র্যাক চালু",
   "cookieUploadRejected": "সার্ভার ফাইল প্রত্যাখ্যান করেছে: {reason}",
   "cookieUploadApology": "এই এক্সপোর্ট সাইন-ইন সেশন নয়, তাই ১৮+ ট্র্যাক চলবে না। বয়স-যাচাইকৃত অ্যাকাউন্টে YouTube-এ সাইন-ইন করে আবার এক্সপোর্ট করুন।",
-  "cookieStatusUnreachable": "সার্ভার সাড়া দেয়নি"
+  "cookieStatusUnreachable": "সার্ভার সাড়া দেয়নি",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

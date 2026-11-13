@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} cookies subidos: las pistas 18+ están activas",
   "cookieUploadRejected": "El servidor rechazó el archivo: {reason}",
   "cookieUploadApology": "Esta exportación no es una sesión iniciada, así que las pistas 18+ seguirán sin sonar. Inicia sesión en YouTube con una cuenta verificada y vuelve a exportar.",
-  "cookieStatusUnreachable": "El servidor no respondió"
+  "cookieStatusUnreachable": "El servidor no respondió",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

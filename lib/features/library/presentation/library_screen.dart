@@ -338,6 +338,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
               ),
               leading: PlaylistArtwork(
                 urls: tracks.map((track) => track.artworkUrl),
+                tracks: tracks,
                 size: 50,
                 borderRadius: BorderRadius.circular(10),
                 placeholderColor: colors.surface,
@@ -828,6 +829,9 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
           leading: TrackArtwork(
             url: track.artworkUrl,
+            artist: track.artist,
+            title: track.title,
+            duration: track.duration,
             size: 44,
             borderRadius: BorderRadius.circular(8),
             placeholderColor: colors.surface,

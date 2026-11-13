@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "Wgrano {cookies} ciasteczek — utwory 18+ są dostępne",
   "cookieUploadRejected": "Serwer odrzucił plik: {reason}",
   "cookieUploadApology": "Ten eksport nie jest zalogowaną sesją, więc utwory 18+ nadal nie zagrają. Zaloguj się do YouTube na zweryfikowanym koncie i wyeksportuj ponownie.",
-  "cookieStatusUnreachable": "Serwer nie odpowiedział"
+  "cookieStatusUnreachable": "Serwer nie odpowiedział",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

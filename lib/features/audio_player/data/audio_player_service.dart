@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import '../../../core/diagnostics/playback_diagnostics.dart';
 import '../../../core/storage/audio_cache_manager.dart';
 import '../../../core/storage/local_storage_service.dart';
+import '../../artwork/artwork_service.dart';
 import '../../extractor/models/media_track.dart';
 import '../../extractor/models/resolved_stream.dart';
 import '../../extractor/sources/remote_resolver_source.dart';
@@ -175,17 +176,25 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
   Stream<AudioPlaybackError?> get errorStream => _errorController.stream;
   Stream<MediaTrack?> get currentTrackStream => _trackController.stream;
 
-  audio_service.MediaItem _toMediaItem(MediaTrack track) =>
-      audio_service.MediaItem(
-        id: '${track.source.name}:${track.id}',
-        album: track.album ?? track.artist,
-        title: track.title,
-        artist: track.artist,
-        artUri: track.artworkUrl.isNotEmpty
-            ? Uri.tryParse(TrackArtwork.getHighResUrl(track.artworkUrl))
-            : null,
-        duration: track.duration,
-      );
+  audio_service.MediaItem _toMediaItem(MediaTrack track) {
+    // Prefer a real cover: the server hands out YouTube video frames for
+    // remote tracks, which look wrong in the notification and on the lock
+    // screen. A resolved cover wins; otherwise a frame is simply omitted.
+    final resolved = ArtworkService.instance.displayUrl(
+      track.artworkUrl,
+      artist: track.artist,
+      title: track.title,
+    );
+    final artUrl = resolved == null ? '' : TrackArtwork.getHighResUrl(resolved);
+    return audio_service.MediaItem(
+      id: '${track.source.name}:${track.id}',
+      album: track.album ?? track.artist,
+      title: track.title,
+      artist: track.artist,
+      artUri: artUrl.isNotEmpty ? Uri.tryParse(artUrl) : null,
+      duration: track.duration,
+    );
+  }
 
   bool _isFavorite(MediaTrack track) =>
       _storageService?.getFavorites().any(
@@ -253,6 +262,35 @@ class AudioPlayerService extends audio_service.BaseAudioHandler
     mediaItem.add(track == null ? null : _toMediaItem(track));
     _broadcastPlaybackState();
     if (!_trackController.isClosed) _trackController.add(track);
+    if (track != null) _refreshArtwork(track);
+  }
+
+  /// Fills in a real cover for the notification and the now-playing screen
+  /// when the stored artwork is missing or is a YouTube video frame.
+  void _refreshArtwork(MediaTrack track) {
+    final current = ArtworkService.instance.displayUrl(
+      track.artworkUrl,
+      artist: track.artist,
+      title: track.title,
+    );
+    if (current != null) {
+      return;
+    }
+    ArtworkService.instance
+        .resolve(
+          artist: track.artist,
+          title: track.title,
+          duration: track.duration,
+        )
+        .then((url) {
+          if (url == null ||
+              _currentTrack?.id != track.id ||
+              _currentTrack?.source != track.source) {
+            return;
+          }
+          mediaItem.add(_toMediaItem(track));
+        })
+        .catchError((_) {});
   }
 
   String _cacheKey(MediaTrack track) => '${track.source.name}_${track.id}';

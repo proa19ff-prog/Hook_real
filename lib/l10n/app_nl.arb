@@ -630,5 +630,7 @@
   "cookieUploadAccepted": "{cookies} cookies geüpload — nummers van 18+ zijn vrij",
   "cookieUploadRejected": "Server weigerde het bestand: {reason}",
   "cookieUploadApology": "Deze export is geen aangemelde sessie, dus nummers van 18+ spelen nog steeds niet. Meld je aan bij YouTube met een geverifieerd account en exporteer opnieuw.",
-  "cookieStatusUnreachable": "De server antwoordde niet"
+  "cookieStatusUnreachable": "De server antwoordde niet",
+  "errorAccountSetup": "Accounts are not enabled on the server. In Supabase, turn off Authentication → Sign In / Providers → Email → «Confirm email», then try again.",
+  "errorRateLimited": "Too many attempts. Wait a minute and try again."
 }

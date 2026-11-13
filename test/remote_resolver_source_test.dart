@@ -8,9 +8,11 @@ import 'package:hook/features/extractor/sources/remote_resolver_source.dart';
 void main() {
   late HttpServer server;
   late RemoteResolverSource source;
+  var busyHits = 0;
 
   setUp(() async {
     source = RemoteResolverSource();
+    busyHits = 0;
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     server.listen((request) async {
       final response = request.response
@@ -30,6 +32,21 @@ void main() {
             'not-a-map',
           ]),
         );
+      } else if (request.uri.path == '/popular') {
+        response.write(
+          jsonEncode([
+            {
+              'id': 'pop-1',
+              'title': 'Sweet & Bitter',
+              'artist': 'Kush Kush',
+              'duration': 185,
+              'plays': 4200,
+              'url': 'http://127.0.0.1:${server.port}/stream?id=pop-1',
+            },
+          ]),
+        );
+      } else if (request.uri.path == '/warm') {
+        response.write(jsonEncode({'queued': 1}));
       } else if (request.uri.path == '/resolve' &&
           request.uri.queryParameters['id'] == 'srv-1') {
         response.write(
@@ -57,6 +74,26 @@ void main() {
           request.uri.queryParameters['id'] == 'blocked') {
         response.statusCode = 403;
         response.write('<html>forbidden</html>');
+      } else if (request.uri.path == '/resolve' &&
+          request.uri.queryParameters['id'] == 'busy-once') {
+        // Capacity, not a dead track: the app must retry, not give up.
+        if (busyHits++ == 0) {
+          response.statusCode = 503;
+          response.headers.set('Retry-After', '1');
+          response.write(jsonEncode({'error': 'busy'}));
+        } else {
+          response.write(
+            jsonEncode({
+              'url': 'http://127.0.0.1:${server.port}/stream/busy-once',
+              'ext': 'm4a',
+            }),
+          );
+        }
+      } else if (request.uri.path == '/resolve' &&
+          request.uri.queryParameters['id'] == 'busy-always') {
+        response.statusCode = 503;
+        response.headers.set('Retry-After', '1');
+        response.write(jsonEncode({'error': 'busy'}));
       } else if (request.uri.path == '/cookies/upload') {
         final body = await utf8.decoder.bind(request).join();
         if (body.contains('BAD')) {
@@ -199,6 +236,23 @@ void main() {
     expect(stream, isNull);
   });
 
+  test('a busy server is retried instead of treated as a dead track', () async {
+    // 503 + Retry-After is capacity, not failure: the same track plays a
+    // moment later, so the app must ask again rather than give up.
+    final stream = await source.resolveTrack(
+      _track(id: 'busy-once', source: TrackSource.remote),
+    );
+    expect(stream, isNotNull);
+    expect(busyHits, greaterThan(1));
+  });
+
+  test('a permanently busy server eventually reports no stream', () async {
+    final stream = await source.resolveTrack(
+      _track(id: 'busy-always', source: TrackSource.remote),
+    );
+    expect(stream, isNull);
+  });
+
   test('a signed-in export reports 18+ as unlocked', () async {
     final result = await source.uploadCookies('SID\tsomething\nLOGIN_INFO\tx\n');
     expect(result.isError, isFalse);
@@ -226,6 +280,24 @@ void main() {
     expect(health, isNotNull);
     expect(health!.ageRestrictedReady, isTrue);
     expect(health.needsSignIn, isFalse);
+  });
+
+  test('popular maps server tracks, marks warm IDs, and captures streamUrl', () async {
+    expect(RemoteResolverSource.isWarm('pop-1'), isFalse);
+    final popular = await source.popular();
+    expect(popular, hasLength(1));
+    final track = popular.first;
+    expect(track.id, 'pop-1');
+    expect(track.title, 'Sweet & Bitter');
+    expect(track.artist, 'Kush Kush');
+    expect(track.streamUrl, 'http://127.0.0.1:${server.port}/stream?id=pop-1');
+    expect(RemoteResolverSource.isWarm('pop-1'), isTrue);
+  });
+
+  test('warm marks requested track IDs as warm', () async {
+    expect(RemoteResolverSource.isWarm('w-1'), isFalse);
+    await source.warm(['w-1']);
+    expect(RemoteResolverSource.isWarm('w-1'), isTrue);
   });
 }
 

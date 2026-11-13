@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -103,6 +102,9 @@ class SpotifyTrackTile extends ConsumerWidget {
                   children: [
                     TrackArtwork(
                       url: track.artworkUrl,
+                      artist: track.artist,
+                      title: track.title,
+                      duration: track.duration,
                       size: 52,
                       borderRadius: BorderRadius.circular(4),
                       placeholderColor: colors.surface,
@@ -149,8 +151,9 @@ class SpotifyTrackTile extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    _ArtistSubtitle(
+                    InteractiveArtistText(
                       artist: track.artist,
+                      theme: theme,
                       rest: [
                         if (showSource)
                           track.source.labelFor(strings)
@@ -162,12 +165,9 @@ class SpotifyTrackTile extends ConsumerWidget {
                         fontSize: HookType.bodySmall,
                         height: 1.15,
                       ),
-                      onTap: onFindArtist ??
-                          () => openArtistScreen(
-                                context,
-                                theme,
-                                track.artist,
-                              ),
+                      onArtistTap: onFindArtist != null
+                          ? (_) => onFindArtist!()
+                          : null,
                     ),
                   ],
                 ),
@@ -286,6 +286,9 @@ Future<void> showSpotifyTrackActions(
                   children: [
                     TrackArtwork(
                       url: track.artworkUrl,
+                      artist: track.artist,
+                      title: track.title,
+                      duration: track.duration,
                       size: 54,
                       borderRadius: BorderRadius.circular(4),
                       placeholderColor: colors.background,
@@ -406,7 +409,11 @@ Future<void> showSpotifyTrackActions(
                   onTap: () {
                     Navigator.of(sheetContext).pop();
                     (onFindArtist ??
-                            () => openArtistScreen(context, theme, track.artist))
+                            () => showArtistPickerOrOpen(
+                                  context,
+                                  theme,
+                                  track.artist,
+                                ))
                         .call();
                   },
                 ),
@@ -681,61 +688,3 @@ class _TrackAction extends StatelessWidget {
   }
 }
 
-/// "Artist • album" subtitle where the performer's name opens their page.
-class _ArtistSubtitle extends StatefulWidget {
-  final String artist;
-  final String rest;
-  final TextStyle style;
-  final VoidCallback onTap;
-
-  const _ArtistSubtitle({
-    required this.artist,
-    required this.rest,
-    required this.style,
-    required this.onTap,
-  });
-
-  @override
-  State<_ArtistSubtitle> createState() => _ArtistSubtitleState();
-}
-
-class _ArtistSubtitleState extends State<_ArtistSubtitle> {
-  final TapGestureRecognizer _recognizer = TapGestureRecognizer();
-
-  @override
-  void initState() {
-    super.initState();
-    _recognizer.onTap = widget.onTap;
-  }
-
-  @override
-  void didUpdateWidget(_ArtistSubtitle oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _recognizer.onTap = widget.onTap;
-  }
-
-  @override
-  void dispose() {
-    _recognizer.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: widget.artist,
-            recognizer: widget.artist.isEmpty ? null : _recognizer,
-          ),
-          if (widget.rest.isNotEmpty)
-            TextSpan(text: ' • ${widget.rest}'),
-        ],
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: widget.style,
-    );
-  }
-}

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
@@ -18,6 +19,7 @@ import 'features/account/account_service.dart';
 import 'features/audio_player/data/audio_player_service.dart';
 import 'features/audio_player/data/windows_smtc_bridge.dart';
 import 'features/audio_player/presentation/player_state_provider.dart';
+import 'features/artwork/artwork_service.dart';
 import 'features/extractor/stream_resolver.dart';
 import 'features/extractor/sources/remote_resolver_source.dart';
 import 'features/extractor/sources/youtube_proxy.dart';
@@ -34,7 +36,13 @@ Future<void> main() async {
 
   await AccountService.ensureInitialized();
   final storageService = await LocalStorageService.create();
+  // Restore the cover cache before the first frame so saved playlists and the
+  // library render real artwork immediately instead of empty tiles.
+  await ArtworkService.instance.hydrate();
   RemoteResolverSource.endpoint = storageService.getRemoteResolverUrl();
+  if (RemoteResolverSource.enabled) {
+    unawaited(RemoteResolverSource().popular(limit: 20));
+  }
   if (Platform.isWindows) {
     await windowManager.ensureInitialized();
     await windowManager.waitUntilReadyToShow(
